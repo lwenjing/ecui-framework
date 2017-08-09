@@ -194,33 +194,6 @@ _eFill       - 用于控制中部宽度的单元格
             /**
              * @override
              */
-            $mousemove: function (event) {
-                var pos = dom.getPosition(this.getMain()),
-                    x = event.pageX - pos.left;
-                dom.getParent(this._uLockedHead.getMain()).style.zIndex = x <= this.$$paddingLeft || x >= this.getWidth() - this.$$paddingRight ? 1 : -1;
-            },
-
-            /**
-             * @override
-             */
-            $resize: function () {
-                var o = this.getMain().style;
-                o.paddingLeft = o.paddingRight = '';
-                this.$$paddingLeft = this.$$paddingRight = 0;
-                ui.Table.prototype.$resize.call(this);
-            },
-
-            /**
-             * @override
-             */
-            $scroll: function () {
-                ui.Table.prototype.$scroll.call(this);
-                dom.getParent(dom.getParent(this._uHead.getBody())).style.left = (this.$$paddingLeft - dom.getParent(dom.getParent(this.getBody())).scrollLeft) + 'px';
-            },
-
-            /**
-             * @override
-             */
             $initStructure: function (width, height) {
                 var o = dom.getParent(dom.getParent(this.getBody())).style,
                     i = 0,
@@ -254,6 +227,33 @@ _eFill       - 用于控制中部宽度的单元格
                     o._eFill.style.height = style + 'px';
                     o.getCell(this._nLeft).$setSize(0, style);
                 }
+            },
+
+            /**
+             * @override
+             */
+            $mousemove: function (event) {
+                var pos = dom.getPosition(this.getMain()),
+                    x = event.pageX - pos.left;
+                dom.getParent(this._uLockedHead.getMain()).style.zIndex = x <= this.$$paddingLeft || x >= this.getWidth() - this.$$paddingRight ? 1 : -1;
+            },
+
+            /**
+             * @override
+             */
+            $resize: function () {
+                var o = this.getMain().style;
+                o.paddingLeft = o.paddingRight = '';
+                this.$$paddingLeft = this.$$paddingRight = 0;
+                ui.Table.prototype.$resize.call(this);
+            },
+
+            /**
+             * @override
+             */
+            $scroll: function () {
+                ui.Table.prototype.$scroll.call(this);
+                dom.getParent(dom.getParent(this._uHead.getBody())).style.left = (this.$$paddingLeft - dom.getParent(dom.getParent(this.getBody())).scrollLeft) + 'px';
             },
 
             /**

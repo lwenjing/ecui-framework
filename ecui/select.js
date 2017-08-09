@@ -253,6 +253,15 @@ _uOptions     - 下拉选择框
             },
 
             /**
+             * @override
+             */
+            $initStructure: function (width, height) {
+                ui.InputControl.prototype.$initStructure.call(this, width, height);
+                // 设置文本区域
+                this._uText.$setSize(this.getBodyWidth(), this.getBodyHeight());
+            },
+
+            /**
              * 接管对上下键与回车/ESC键的处理。
              * @protected
              *
@@ -358,15 +367,6 @@ _uOptions     - 下拉选择框
                     setSelected.call(this);
                 }
                 ui.InputControl.prototype.$remove.call(this, item);
-            },
-
-            /**
-             * @override
-             */
-            $initStructure: function (width, height) {
-                ui.InputControl.prototype.$initStructure.call(this, width, height);
-                // 设置文本区域
-                this._uText.$setSize(this.getBodyWidth(), this.getBodyHeight());
             },
 
             /**

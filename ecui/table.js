@@ -572,14 +572,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             /**
              * @override
              */
-            $scroll: function () {
-                ui.Control.prototype.$scroll.call(this);
-                dom.getParent(dom.getParent(this._uHead.getBody())).style.left = -dom.getParent(dom.getParent(this.getBody())).scrollLeft + 'px';
-            },
-
-            /**
-             * @override
-             */
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
@@ -589,6 +581,14 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 body.style.height = (height - this.$$paddingTop) + 'px';
 
                 this._uHead.$setSize(width - (body.offsetHeight === body.scrollHeight ? 0 : core.getScrollNarrow()), this.$$paddingTop);
+            },
+
+            /**
+             * @override
+             */
+            $scroll: function () {
+                ui.Control.prototype.$scroll.call(this);
+                dom.getParent(dom.getParent(this._uHead.getBody())).style.left = -dom.getParent(dom.getParent(this.getBody())).scrollLeft + 'px';
             },
 
             /**
