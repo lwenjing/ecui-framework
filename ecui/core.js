@@ -1781,9 +1781,11 @@
         resume: function () {
             pauseCount--;
             if (!pauseCount) {
-                dom.ready(function () {
-                    core.init();
-                });
+                if (document.body) {
+                    dom.ready(function () {
+                        core.init();
+                    });
+                }
             } else if (pauseCount < 0) {
                 pauseCount = 0;
             }
