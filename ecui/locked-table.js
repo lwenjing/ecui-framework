@@ -221,7 +221,7 @@ _eFill       - 用于控制中部宽度的单元格
             /**
              * @override
              */
-            $setSize: function (width, height) {
+            $initStructure: function (width, height) {
                 var o = dom.getParent(dom.getParent(this.getBody())).style,
                     i = 0,
                     lockedHead = this._uLockedHead,
@@ -232,7 +232,7 @@ _eFill       - 用于控制中部宽度的单元格
                 dom.getParent(this.getBody()).style.width = (util.toNumber(dom.getParent(this.getBody()).style.width) - this.$$paddingLeft - this.$$paddingRight) + 'px';
                 dom.getParent(this._uHead.getBody()).style.width = (util.toNumber(dom.getParent(this._uHead.getBody()).style.width) - this.$$paddingLeft - this.$$paddingRight) + 'px';
 
-                ui.Table.prototype.$setSize.call(this, width, height);
+                ui.Table.prototype.$initStructure.call(this, width, height);
 
                 o = this._uHead.getWidth() + this.$$paddingLeft + this.$$paddingRight;
                 lockedHead.$setSize(0, this.$$paddingTop);

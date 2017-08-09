@@ -239,7 +239,9 @@ _uOptions     - 下拉选择框
             $cache: function (style, cacheSize) {
                 ui.InputControl.prototype.$cache.call(this, style, cacheSize);
                 this._uText.cache(false, true);
-                this._uOptions.cache(false, true);
+                if (dom.getParent(this._uOptions.getOuter())) {
+                    this._uOptions.cache(false, true);
+                }
             },
 
             /**
@@ -361,8 +363,8 @@ _uOptions     - 下拉选择框
             /**
              * @override
              */
-            $setSize: function (width, height) {
-                ui.InputControl.prototype.$setSize.call(this, width, height);
+            $initStructure: function (width, height) {
+                ui.InputControl.prototype.$initStructure.call(this, width, height);
                 // 设置文本区域
                 this._uText.$setSize(this.getBodyWidth(), this.getBodyHeight());
             },

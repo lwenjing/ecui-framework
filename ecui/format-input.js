@@ -94,6 +94,17 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
+             * @override
+             */
+            $initStructure: function (width, height) {
+                ui.InputControl.prototype.$initStructure.call(this, width, height);
+                if (this._ePlaceHolder) {
+                    this._ePlaceHolder.style.width = this.getBodyWidth() - this.$$placeholder[1] - this.$$placeholder[3] + 'px';
+                    this._ePlaceHolder.style.height = this.getBodyHeight() - this.$$placeholder[0] - this.$$placeholder[2] + 'px';
+                }
+            },
+
+            /**
              * 控件内容改变事件的默认处理。
              * @protected
              */
@@ -111,17 +122,6 @@ _ePlaceHolder - 为空时的提示信息标签
                 ui.InputControl.prototype.$ready.call(this);
                 if (this._ePlaceHolder) {
                     this.alterClass(this.getValue() ? '-empty' : '+empty');
-                }
-            },
-
-            /**
-             * @override
-             */
-            $setSize: function (width, height) {
-                ui.InputControl.prototype.$setSize.call(this, width, height);
-                if (this._ePlaceHolder) {
-                    this._ePlaceHolder.style.width = this.getBodyWidth() - this.$$placeholder[1] - this.$$placeholder[3] + 'px';
-                    this._ePlaceHolder.style.height = this.getBodyHeight() - this.$$placeholder[0] - this.$$placeholder[2] + 'px';
                 }
             },
 

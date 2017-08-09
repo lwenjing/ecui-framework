@@ -1753,7 +1753,7 @@
                 item.cache(true, true);
             });
             list.forEach(function (item) {
-                item.$setSizeByCache(item.getWidth(), item.getHeight());
+                item.initStructure();
             });
 
             if (ieVersion < 8) {

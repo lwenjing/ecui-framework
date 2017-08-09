@@ -351,6 +351,15 @@ $$padding           - 内填充宽度缓存
             },
 
             /**
+             * 初始化控件的结构。
+             * @protected
+             *
+             * @param {number} width 控件的宽度
+             * @param {number} height 控件的高度
+             */
+            $initStructure: util.blank,
+
+            /**
              * 控件强制拦截点击的默认处理。
              * @protected
              *
@@ -484,19 +493,6 @@ $$padding           - 内填充宽度缓存
             },
 
             /**
-             * 使用缓存参数设置控件的大小。
-             * @protected
-             *
-             * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-             * @param {number} height 高度，如果不需要设置则省略此参数
-             */
-            $setSizeByCache: function (width, height) {
-                if (this._bResizable) {
-                    this.$setSize(width, height);
-                }
-            },
-
-            /**
              * 显示控件。
              * $show 方法直接显示控件，不检查控件之前的状态，因此不会导致浏览器的刷新操作。
              * @protected
@@ -505,7 +501,7 @@ $$padding           - 内填充宽度缓存
                 dom.removeClass(this.getOuter(), 'ui-hide');
                 if (!this._bCached) {
                     this.cache();
-                    this.$setSizeByCache(this.getWidth(), this.getHeight());
+                    this.initStructure();
                 }
             },
 
@@ -916,7 +912,7 @@ $$padding           - 内填充宽度缓存
                         this.$hide();
                         el.style.display = '';
                     } else {
-                        this.$setSizeByCache(this.getWidth(), this.getHeight());
+                        this.initStructure();
                     }
 
                     if (waitReadyList === null) {
@@ -944,6 +940,14 @@ $$padding           - 内填充宽度缓存
                     }
                     this._bReady = true;
                 }
+            },
+
+            /**
+             * 初始化控件的结构。
+             * @public
+             */
+            initStructure: function () {
+                this.$initStructure(this.getWidth(), this.getHeight());
             },
 
             /**
@@ -1065,7 +1069,7 @@ $$padding           - 内填充宽度缓存
              */
             repaint: function () {
                 this.cache(true, true);
-                this.$setSizeByCache(this.getWidth(), this.getHeight());
+                this.initStructure();
             },
 
             /**

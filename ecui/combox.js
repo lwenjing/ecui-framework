@@ -48,21 +48,17 @@ Combox - 定义可输入下拉框行为的基本操作。
             /**
              * @override
              */
-            $input: function () {
-                ui.Select.prototype.$input.call(this);
-                this.setValue(this.getValue());
+            $initStructure: function (width, height) {
+                ui.Select.prototype.$initStructure.call(this, width, height);
+                this.getInput().style.width = this.$getSection('Text').getWidth() + 'px';
             },
 
             /**
-             * 设置控件的大小。
-             * @protected
-             *
-             * @param {number} width 宽度，如果不需要设置则将参数设置为等价于逻辑非的值
-             * @param {number} height 高度，如果不需要设置则省略此参数
+             * @override
              */
-            $setSize: function (width, height) {
-                ui.Select.prototype.$setSize.call(this, width, height);
-                this.getInput().style.width = this.$getSection('Text').getWidth() + 'px';
+            $input: function () {
+                ui.Select.prototype.$input.call(this);
+                this.setValue(this.getValue());
             },
 
             /**

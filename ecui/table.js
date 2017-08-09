@@ -580,15 +580,15 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             /**
              * @override
              */
-            $setSize: function (width, height) {
-                var main = this.getMain(),
-                    body = dom.getParent(dom.getParent(this.getBody()));
+            $initStructure: function (width, height) {
+                ui.Control.prototype.$initStructure.call(this, width, height);
+
+                var body = dom.getParent(dom.getParent(this.getBody()));
 
                 body.style.paddingTop = this.$$paddingTop + 'px';
-                body.style.height = (util.toNumber(main.style.height) - this.$$paddingTop) + 'px';
+                body.style.height = (height - this.$$paddingTop) + 'px';
 
-                ui.Control.prototype.$setSize.call(this, width, height);
-                this._uHead.$setSize(util.toNumber(main.style.width) - (body.offsetHeight === body.scrollHeight ? 0 : core.getScrollNarrow()), this.$$paddingTop);
+                this._uHead.$setSize(width - (body.offsetHeight === body.scrollHeight ? 0 : core.getScrollNarrow()), this.$$paddingTop);
             },
 
             /**

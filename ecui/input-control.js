@@ -312,6 +312,16 @@ _eInput        - INPUT对象
             },
 
             /**
+             * @override
+             */
+            $initStructure: function (width, height) {
+                ui.Control.prototype.$initStructure.call(this, width, height);
+
+                this._eInput.style.width = this.getBodyWidth() + 'px';
+                this._eInput.style.height = this.getBodyHeight() + 'px';
+            },
+
+            /**
              * 输入框内容改变事件的默认处理。
              * @protected
              */
@@ -350,16 +360,6 @@ _eInput        - INPUT对象
                         parent.getControl = util.blank;
                     }
                 }
-            },
-
-            /**
-             * @override
-             */
-            $setSize: function (width, height) {
-                ui.Control.prototype.$setSize.call(this, width, height);
-
-                this._eInput.style.width = this.getBodyWidth() + 'px';
-                this._eInput.style.height = this.getBodyHeight() + 'px';
             },
 
             /**
