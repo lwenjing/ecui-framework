@@ -490,6 +490,8 @@ $$padding           - 内填充宽度缓存
                     this._eMain.style.height = o + 'px';
                     this.$$height = height;
                 }
+
+                this.initStructure();
             },
 
             /**
