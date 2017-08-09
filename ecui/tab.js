@@ -65,7 +65,6 @@ _eContainer      - 容器 DOM 元素
             this.$setBody(titleEl);
             this.$initItems();
         },
-        ui.Items,
         {
             /**
              * 初始化选项卡控件的选项部件。
@@ -202,7 +201,7 @@ _eContainer      - 容器 DOM 元素
                     this.setSelected(index === list.length - 1 ? index - 1 : index + 1);
                 }
 
-                (ui.Items.$remove || ui.Control.prototype.$remove).call(this, child);
+                ui.Control.prototype.$remove.call(this, child);
             },
 
             /**
@@ -243,6 +242,7 @@ _eContainer      - 容器 DOM 元素
                     this._cSelected = item;
                 }
             }
-        }
+        },
+        ui.Items
     );
 }());

@@ -112,8 +112,6 @@ _uOptions     - 下拉选择框
 
             this._cSelected = null;
         },
-        ui.Items,
-        ui.Popup,
         {
             /**
              * 初始化下拉框控件的选项部件。
@@ -188,6 +186,17 @@ _uOptions     - 下拉选择框
                 ui.Control,
                 'ui-select-options',
                 {
+                    /**
+                     * @override
+                     */
+                    $dispose: function () {
+                        dom.remove(this.getOuter());
+                        ui.Control.prototype.$dispose.call(this);
+                    },
+
+                    /**
+                     * @override
+                     */
                     $show: function () {
                         ui.Control.prototype.$show.call(this);
                         var parent = this.getParent();
@@ -228,18 +237,9 @@ _uOptions     - 下拉选择框
              * @override
              */
             $cache: function (style, cacheSize) {
-                (dom.getParent(this._uOptions.getOuter()) ? (ui.Popup.$cache || ui.Items.$cache || ui.InputControl.prototype.$cache) : ui.InputControl.prototype.$cache).call(this, style, cacheSize);
+                ui.InputControl.prototype.$cache.call(this, style, cacheSize);
                 this._uText.cache(false, true);
                 this._uOptions.cache(false, true);
-            },
-
-            /**
-             * @override
-             */
-            $dispose: function () {
-                dom.remove(this._uOptions.getOuter());
-                this._uOptions.$dispose();
-                (ui.Popup.$dispose || ui.Items.$dispose || ui.InputControl.prototype.$dispose).call(this);
             },
 
             /**
@@ -355,7 +355,7 @@ _uOptions     - 下拉选择框
                 if (item === this._cSelected) {
                     setSelected.call(this);
                 }
-                (ui.Popup.$remove || ui.Items.$remove || ui.InputControl.prototype.$remove).call(this, item);
+                ui.InputControl.prototype.$remove.call(this, item);
             },
 
             /**
@@ -422,6 +422,8 @@ _uOptions     - 下拉选择框
                     setSelected.call(this);
                 }
             }
-        }
+        },
+        ui.Popup,
+        ui.Items
     );
 }());

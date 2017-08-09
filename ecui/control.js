@@ -134,7 +134,9 @@ $$padding           - 内填充宽度缓存
              * @param {ecui.ui.Event} event 事件对象
              */
             $activate: function () {
-                this.alterClass('+active');
+                if (ieVersion < 9) {
+                    this.alterClass('+active');
+                }
             },
 
             /**
@@ -195,7 +197,9 @@ $$padding           - 内填充宽度缓存
              * @param {ecui.ui.Event} event 事件对象
              */
             $deactivate: function () {
-                this.alterClass('-active');
+                if (ieVersion < 9) {
+                    this.alterClass('-active');
+                }
             },
 
             /**
@@ -362,7 +366,9 @@ $$padding           - 内填充宽度缓存
              * @param {ecui.ui.Event} event 事件对象
              */
             $mouseout: function () {
-                this.alterClass('-hover');
+                if (ieVersion < 9) {
+                    this.alterClass('-hover');
+                }
             },
 
             /**
@@ -373,7 +379,9 @@ $$padding           - 内填充宽度缓存
              * @param {ecui.ui.Event} event 事件对象
              */
             $mouseover: function () {
-                this.alterClass('+hover');
+                if (ieVersion < 9) {
+                    this.alterClass('+hover');
+                }
             },
 
             /**

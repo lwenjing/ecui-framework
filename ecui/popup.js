@@ -2,8 +2,8 @@
 Popup - 定义弹出层相关的基本操作。
 弹出操作集合，提供了基本的点击显示/关闭操作，通过将 ecui.ui.Popup 对象下的方法复制到类的 prototype 属性下继承接口，最终对象要正常使用需要通过 setPopup 方法设置自己关联的弹出层。
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
@@ -43,6 +43,12 @@ Popup - 定义弹出层相关的基本操作。
          * @override
          */
         $dispose: function () {
+            var popup = namedMap[this.getUID()],
+                el = popup.getOuter();
+            if (el) {
+                popup.hide();
+                dom.removeChild(el);
+            }
             delete namedMap[this.getUID()];
             this.$Popup.$dispose.call(this);
         },
@@ -94,6 +100,4 @@ Popup - 定义弹出层相关的基本操作。
             popup.setPosition(pos.left, popupTop + popupHeight <= util.getView().bottom ? popupTop : pos.top - popupHeight);
         }
     };
-//{if 0}//
 }());
-//{/if}//

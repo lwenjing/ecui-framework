@@ -35,7 +35,6 @@
 //{/if}//
 
 //{include file="ecui/adapter.js"}//
-//{include file="ecui/tools.js"}//
 //{include file="ecui/core.js"}//
 //{include file="ecui/control.js"}//
 

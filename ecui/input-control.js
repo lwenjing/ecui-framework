@@ -24,111 +24,113 @@ _eInput        - INPUT对象
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
-    var events = {
-        /**
-         * 输入框失去焦点事件处理函数。
-         * @private
-         */
-        blur: function (event) {
-            var control = core.wrapEvent(event).target.getControl();
-            // INPUT失去焦点，但控件未失去焦点，不需要触发blur
-            if (core.getFocused() === control) {
-                control.blur();
-            }
-        },
-
-        /**
-         * 输入法输入结束事件处理函数。
-         * @private
-         */
-        compositionend: function (event) {
-            event = core.wrapEvent(event);
-            var control = event.target.getControl();
-            core.triggerEvent(control, 'input', event);
-            util.timer(
-                function () {
-                    control._nIME--;
-                },
-                0
-            );
-        },
-
-        /**
-         * 输入法输入开始事件处理函数。
-         * @private
-         */
-        compositionstart: function (event) {
-            core.wrapEvent(event).target.getControl()._nIME++;
-        },
-
-        /**
-         * 拖拽内容到输入框时处理函数。
-         * 为了增加可控性，阻止该行为。[todo] firefox下无法阻止，后续升级
-         * @private
-         *
-         * @param {Event} event 事件对象
-         */
-        dragover: function (event) {
-            core.wrapEvent(event).exit();
-        },
-
-        /**
-         * 拖拽内容到输入框时处理函数。
-         * 为了增加可控性，阻止该行为。[todo] firefox下无法阻止，后续升级
-         * @private
-         *
-         * @param {Event} event 事件对象
-         */
-        drop: function (event) {
-            core.wrapEvent(event).exit();
-        },
-
-        /**
-         * 输入框获得焦点事件处理函数。
-         * @private
-         */
-        focus: function (event) {
-            var el = core.wrapEvent(event).target,
-                control = el.getControl();
-            if (control.isDisabled()) {
-                dom.removeEventListener(el, 'blur', events.blur);
-                try {
-                    el.blur();
-                } catch (ignore) {
+    var timer = util.blank,
+        events = {
+            /**
+             * 输入框失去焦点事件处理函数。
+             * @private
+             */
+            blur: function (event) {
+                var control = core.wrapEvent(event).target.getControl();
+                // INPUT失去焦点，但控件未失去焦点，不需要触发blur
+                if (core.getFocused() === control) {
+                    control.blur();
                 }
-                dom.addEventListener(el, 'blur', events.blur);
-            } else {
-                control.focus();
-            }
-        },
+            },
 
-        /**
-         * 输入框输入内容事件处理函数。
-         * @private
-         */
-        input: function (event) {
-            event = core.wrapEvent(event);
-            var control = event.target.getControl();
-            if (!control._nIME) {
+            /**
+             * 输入法输入结束事件处理函数。
+             * @private
+             */
+            compositionend: function (event) {
+                event = core.wrapEvent(event);
+                var control = event.target.getControl();
                 core.triggerEvent(control, 'input', event);
-            }
-        },
+                timer = util.timer(
+                    function () {
+                        control._bIME = false;
+                    },
+                    0
+                );
+            },
 
-        /**
-         * 输入框输入内容事件处理函数，兼容IE6-8。
-         * @private
-         *
-         * @param {Event} event 事件对象
-         */
-        propertychange: function (event) {
-            if (ieVersion < 9) {
-                if (event.propertyName === 'value' && core.wrapEvent(event).target.type !== 'hidden') {
-                    event = core.wrapEvent(event);
-                    core.triggerEvent(event.target.getControl(), 'input', event);
+            /**
+             * 输入法输入开始事件处理函数。
+             * @private
+             */
+            compositionstart: function (event) {
+                timer();
+                core.wrapEvent(event).target.getControl()._bIME = true;
+            },
+
+            /**
+             * 拖拽内容到输入框时处理函数。
+             * 为了增加可控性，阻止该行为。[todo] firefox下无法阻止，后续升级
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            dragover: function (event) {
+                core.wrapEvent(event).exit();
+            },
+
+            /**
+             * 拖拽内容到输入框时处理函数。
+             * 为了增加可控性，阻止该行为。[todo] firefox下无法阻止，后续升级
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            drop: function (event) {
+                core.wrapEvent(event).exit();
+            },
+
+            /**
+             * 输入框获得焦点事件处理函数。
+             * @private
+             */
+            focus: function (event) {
+                var el = core.wrapEvent(event).target,
+                    control = el.getControl();
+                if (control.isDisabled()) {
+                    dom.removeEventListener(el, 'blur', events.blur);
+                    try {
+                        el.blur();
+                    } catch (ignore) {
+                    }
+                    dom.addEventListener(el, 'blur', events.blur);
+                } else {
+                    control.focus();
+                }
+            },
+
+            /**
+             * 输入框输入内容事件处理函数。
+             * @private
+             */
+            input: function (event) {
+                event = core.wrapEvent(event);
+                var control = event.target.getControl();
+                if (!control._bIME) {
+                    core.triggerEvent(control, 'input', event);
+                }
+            },
+
+            /**
+             * 输入框输入内容事件处理函数，兼容IE6-8。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            propertychange: function (event) {
+                if (ieVersion < 9) {
+                    if (event.propertyName === 'value' && core.wrapEvent(event).target.type !== 'hidden') {
+                        event = core.wrapEvent(event);
+                        core.triggerEvent(event.target.getControl(), 'input', event);
+                    }
                 }
             }
-        }
-    };
+        };
 
     /**
      * 表单提交事件处理。
@@ -226,7 +228,6 @@ _eInput        - INPUT对象
 
             this._bHidden = options.hidden;
             this._eInput = inputEl;
-            this._nIME = 0;
             bindEvent.call(this);
         },
         {

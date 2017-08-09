@@ -36,7 +36,6 @@ _eInput - 选项对应的input，form提交时使用
             this._sName = options.name || '';
             this.$initItems();
         },
-        ui.Items,
         {
             /**
              * 初始化多选框控件的选项部件。
@@ -165,7 +164,8 @@ _eInput - 选项对应的input，form提交时使用
                 }
                 this._sName = name;
             }
-        }
+        },
+        ui.Items
     );
 //{if 0}//
 }());
