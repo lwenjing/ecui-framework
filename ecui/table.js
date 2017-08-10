@@ -171,9 +171,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
             // 初始化表格区域
             o = dom.create(options.classes.join('-head '));
-            o.innerHTML = '<div style="white-space:nowrap;position:absolute"><table cellspacing="0"><tbody></tbody></table></div>';
-            o.lastChild.lastChild.className = table.className;
-            o.lastChild.lastChild.style.cssText = table.style.cssText;
+            o.innerHTML = '<div style="white-space:nowrap;position:absolute"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>';
             el.appendChild(o);
 
             ui.Control.constructor.call(this, el, options);
@@ -575,12 +573,26 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
-                var body = dom.getParent(dom.getParent(this.getBody()));
+                dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild.firstChild);
 
+                var body = dom.getParent(dom.getParent(this.getBody()));
                 body.style.paddingTop = this.$$paddingTop + 'px';
                 body.style.height = (height - this.$$paddingTop) + 'px';
 
                 this._uHead.$setSize(width - (body.offsetHeight === body.scrollHeight ? 0 : core.getScrollNarrow()), this.$$paddingTop);
+            },
+
+            /**
+             * @override
+             */
+            $resize: function () {
+                ui.Control.prototype.$resize.call(this);
+
+                dom.insertBefore(this._uHead.getBody(), this._uHead.getBody());
+
+                var body = dom.getParent(dom.getParent(this.getBody()));
+                body.style.paddingTop = '';
+                body.style.height = '';
             },
 
             /**
@@ -650,7 +662,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
                 col.cache();
                 col.$setSize(options.width);
-                col.$setStyles('width', el.style.width, options.width);
+                //col.$setStyles('width', el.style.width, options.width);
                 col._oOptions = util.extend({}, options);
 
                 return col;
@@ -804,10 +816,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             /**
              * @override
              */
-            init: function () {
-                dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild.firstChild);
-
-                ui.Control.prototype.init.call(this);
+            init: function (options) {
+                ui.Control.prototype.init.call(this, options);
 
                 for (var i = 0, o; o = this._aHCells[i++]; ) {
                     o.$setSize(o.getWidth());

@@ -18,6 +18,7 @@
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
 
         flgFixedOffset,           // 在计算相对位置时，是否需要修正边框样式的影响
+        flgFixedSize,             // 在计算盒子模型时，是否需要修正宽高
         scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
         initRecursion = 0,        // init 操作的递归次数
@@ -684,6 +685,7 @@
             // 检测Element宽度与高度的计算方式
             var o = document.body.lastChild;
             flgFixedOffset = o.lastChild.offsetTop;
+            flgFixedSize = o.offsetWidth !== 80;
             scrollNarrow = o.offsetWidth - o.clientWidth - 2;
             dom.remove(o);
 
@@ -1545,6 +1547,14 @@
         intercept: function (control) {
             interceptEnv.target = control;
             setEnv(interceptEnv);
+        },
+
+        /**
+         * 默认的盒子模型是否为ContentBox状态
+         * @public
+         */
+        isContentBox: function () {
+            return flgFixedSize;
         },
 
         /**

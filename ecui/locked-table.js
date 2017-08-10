@@ -298,8 +298,8 @@ _eFill       - 用于控制中部宽度的单元格
             /**
              * @override
              */
-            init: function () {
-                ui.Table.prototype.init.call(this);
+            init: function (options) {
+                ui.Table.prototype.init.call(this, options);
                 for (var i = 0, o; o = this._aHeadRows[i++]; ) {
                     splitRow(o);
                 }

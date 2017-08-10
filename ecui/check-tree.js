@@ -87,9 +87,9 @@ _uCheckbox - 复选框控件
             /**
              * @override
              */
-            init: function () {
-                ui.TreeView.prototype.init.call(this);
-                this._uCheckbox.init();
+            init: function (options) {
+                ui.TreeView.prototype.init.call(this, options);
+                this._uCheckbox.init(options);
             },
 
             /**

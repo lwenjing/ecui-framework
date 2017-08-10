@@ -184,8 +184,8 @@ $$padding           - 内填充宽度缓存
                 }
 
                 if (cacheSize !== false) {
-                    this.$$width = this._eMain.offsetWidth || util.toNumber(style.width) + (isStrict ? this.$getBasicWidth() : 0);
-                    this.$$height = this._eMain.offsetHeight || util.toNumber(style.height) + (isStrict ? this.$getBasicHeight() : 0);
+                    this.$$width = this._eMain.offsetWidth || util.toNumber(style.width) + (core.isContentBox() ? this.$getBasicWidth() : 0);
+                    this.$$height = this._eMain.offsetHeight || util.toNumber(style.height) + (core.isContentBox() ? this.$getBasicHeight() : 0);
                 }
             },
 
@@ -430,7 +430,7 @@ $$padding           - 内填充宽度缓存
                     if (style.width === 'auto' && style.display === 'block') {
                         this._eMain.style.width = '100%';
                         if (event.type !== 'repaint') {
-                            this._eMain.style.width = this._eMain.offsetWidth - (isStrict ? this.$getBasicWidth() * 2 : 0) + 'px';
+                            this._eMain.style.width = this._eMain.offsetWidth - (core.isContentBox() ? this.$getBasicWidth() * 2 : 0) + 'px';
                         } else {
                             event.repaint = true;
                         }
@@ -477,7 +477,7 @@ $$padding           - 内填充宽度缓存
              */
             $setSize: function (width, height) {
                 var o = this._eMain.tagName,
-                    fixedSize = isStrict && o !== 'BUTTON' && o !== 'INPUT';
+                    fixedSize = core.isContentBox() && o !== 'BUTTON' && o !== 'INPUT';
 
                 // 防止负宽度IE下出错
                 if (width && (o = width - (fixedSize ? this.$getBasicWidth() : 0)) > 0) {

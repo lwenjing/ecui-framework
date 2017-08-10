@@ -198,10 +198,10 @@ _uClose     - 关闭按钮
             /**
              * @override
              */
-            init: function () {
-                ui.Control.prototype.init.call(this);
-                this._uTitle.init();
-                this._uClose.init();
+            init: function (options) {
+                ui.Control.prototype.init.call(this, options);
+                this._uTitle.init(options);
+                this._uClose.init(options);
             },
 
             /**

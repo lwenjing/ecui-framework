@@ -336,10 +336,10 @@ _aChildren     - 子控件集合
             /**
              * @override
              */
-            init: function () {
-                ui.Control.prototype.init.call(this);
+            init: function (options) {
+                ui.Control.prototype.init.call(this, options);
                 for (var i = 0, o; o = this._aChildren[i++]; ) {
-                    o.init();
+                    o.init(options);
                 }
             },
 
