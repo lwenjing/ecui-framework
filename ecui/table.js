@@ -27,15 +27,12 @@ Table - 定义由行列构成的表格的基本操作。
 </div>
 
 属性
+_bHeadFloat  - 表头飘浮
 _aHCells     - 表格头单元格控件对象
 _aRows       - 表格数据行对象
 _uHead       - 表头区域
 
-表头列属性
-$$pos        - 列的坐标
-
 行属性
-$$pos        - 行的坐标
 _aElements   - 行的列Element对象，如果当前列需要向左合并为null，需要向上合并为false
 */
 (function () {
@@ -133,6 +130,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             } else {
                 table = el.getElementsByTagName('TABLE')[0];
             }
+
+            this._bHeadFloat = !!options.headFloat;
 
             el.appendChild(body = dom.create(options.classes.join('-body ')));
             body.appendChild(table);
@@ -595,7 +594,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             $scroll: function () {
                 ui.Control.prototype.$scroll.call(this);
-                dom.getParent(dom.getParent(this._uHead.getBody())).style.left = -dom.getParent(dom.getParent(this.getBody())).scrollLeft + 'px';
+                var layout = dom.getParent(dom.getParent(this._uHead.getBody()));
+                if (this._bHeadFloat) {
+                    dom.getParent(layout).style.top = Math.max(0, util.getView().top - dom.getPosition(this.getMain()).top) + 'px';
+                }
+                layout.style.left = -dom.getParent(dom.getParent(this.getBody())).scrollLeft + 'px';
             },
 
             /**
