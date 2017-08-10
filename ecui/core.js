@@ -1421,10 +1421,7 @@
          * @return {Function} 新控件的构造函数
          */
         inherits: function (superClass, type, subClass) {
-            var agent = function (options) {
-                    return core.create(agent, options);
-                },
-                client = agent.constructor = 'function' === typeof subClass ? function (el, options) {
+            var agent = 'function' === typeof subClass ? function (el, options) {
                     var classes = [].concat(this.constructor.TYPES);
                     if (options.primary && options.primary !== this.constructor.TYPES[0]) {
                         classes.splice(0, 0, options.primary);
@@ -1433,7 +1430,7 @@
                     options.classes = classes;
                     subClass.call(this, el, options);
                 } : function (el, options) {
-                    superClass.constructor.call(this, el, options);
+                    superClass.prototype.constructor.call(this, el, options);
                 };
 
             if (superClass) {
@@ -1449,9 +1446,7 @@
                 agent.TYPES = [];
             }
             agent.CLASS = agent.TYPES.length ? ' ' + agent.TYPES.join(' ') : '';
-
-            util.inherits(client, agent);
-            client.prototype.constructor = agent;
+            agent.constructor = agent;
 
             Array.prototype.slice.call(arguments, 'function' === typeof subClass ? 3 : 2).forEach(function (item) {
                 if (item['']) {

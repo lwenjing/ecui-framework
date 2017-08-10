@@ -109,6 +109,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
     /**
      * 初始化表格控件。
+     * options 对象支持的属性如下：
+     * head-float     表头允许飘浮，默认不允许
      * @public
      *
      * @param {Object} options 初始化选项
@@ -173,7 +175,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             o.innerHTML = '<div style="white-space:nowrap;position:absolute"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>';
             el.appendChild(o);
 
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.prototype.constructor.call(this, el, options);
 
             // 初始化表格区域
             this.$setBody(body);
