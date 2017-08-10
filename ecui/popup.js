@@ -47,7 +47,7 @@ Popup - 定义弹出层相关的基本操作。
                 el = popup.getOuter();
             if (el) {
                 popup.hide();
-                dom.removeChild(el);
+                dom.remove(el);
             }
             delete namedMap[this.getUID()];
             this.$Popup.$dispose.call(this);
