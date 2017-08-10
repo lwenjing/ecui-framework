@@ -85,6 +85,7 @@ _uOptions     - 下拉选择框
 
                 // 移除select标签
                 el = dom.insertBefore(dom.create(el.className), el);
+                el.style.cssText = o.style.cssText;
                 dom.remove(o);
 
                 // 转化select标签
@@ -368,6 +369,15 @@ _uOptions     - 下拉选择框
                     setSelected.call(this);
                 }
                 ui.InputControl.prototype.$remove.call(this, item);
+            },
+
+            /**
+             * @override
+             */
+            $resize: function () {
+                ui.InputControl.prototype.$resize.call(this);
+                // 设置文本区域
+                this._uText.$resize();
             },
 
             /**

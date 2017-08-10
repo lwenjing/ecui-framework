@@ -41,7 +41,6 @@ $$padding           - 内填充宽度缓存
         ui = core.ui,
         util = core.util,
 
-        isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
@@ -114,13 +113,10 @@ $$padding           - 内填充宽度缓存
             this._bCapturable = options.capturable !== false;
             this._bUserSelect = options.userSelect !== false;
             this._bFocusable = options.focusable !== false;
-            if (options.resizable) {
-                this._bResizable = true;
-                this._sWidth = el.style.width;
-                this._sHeight = el.style.height;
-            } else {
-                this._bResizable = false;
-            }
+            this._bResizable = !!options.resizable;
+
+            this._sWidth = el.style.width;
+            this._sHeight = el.style.height;
 
             this._aStatus = ['', ' '];
             this._sSubType = '';

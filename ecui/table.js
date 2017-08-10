@@ -292,7 +292,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                      * @param {string} value 样式的值
                      * @param {number} widthRevise 改变样式后表格宽度的变化，如果省略表示没有变化
                      */
-                    $setStyles: function (name, value, widthRevise) {
+                    $setStyles: function (name, value) {
                         var i = 0,
                             table = this.getParent(),
                             rows = table._aHeadRows.concat(table._aRows),
@@ -303,9 +303,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                             j;
 
                         body.style[name] = value;
-                        if (widthRevise) {
-                            o.width = dom.first(table.getBody()).style.width = util.toNumber(o.width) + widthRevise + 'px';
-                        }
 
                         for (; o = rows[i++]; ) {
                             // 以下使用 body 表示列元素列表
@@ -314,7 +311,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                             if (o) {
                                 o.style[name] = value;
                             }
-                            if (widthRevise && o !== false) {
+                            if (o !== false) {
                                 for (j = index; !(o = body[j]); j--) {}
 
                                 var width = -cols[j].getMinimumWidth(),
@@ -373,10 +370,9 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                      * @override
                      */
                     setSize: function (width) {
-                        var oldWidth = this.getWidth();
                         // 首先对列表头控件设置宽度，否则在计算合并单元格时宽度可能错误
                         this.$setSize(width);
-                        this.$setStyles('width', width - this.$getBasicWidth() + 'px', width - oldWidth);
+                        this.$setStyles('width', width - this.$getBasicWidth() + 'px');
                     }
                 }
             ),
@@ -533,6 +529,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $cache: function (style, cacheSize) {
                 ui.Control.prototype.$cache.call(this, style, cacheSize);
                 this._uHead.cache(false, true);
+
+                this.$$tableWidth = dom.getParent(this.getBody()).style.width;
                 this.$$paddingTop = this._uHead.getBody().offsetHeight;
 
                 for (var i = 0; style = this._aRows[i++]; ) {
@@ -573,9 +571,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
-                dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild.firstChild);
-
-                var body = dom.getParent(dom.getParent(this.getBody()));
+                var tblBody = dom.getParent(this.getBody()),
+                    tblHead = this._uHead.getMain().lastChild.lastChild,
+                    body = dom.getParent(tblBody);
+                tblBody.style.width = tblHead.style.width = 'auto';
+                dom.insertBefore(this._uHead.getBody(), tblHead.firstChild);
                 body.style.paddingTop = this.$$paddingTop + 'px';
                 body.style.height = (height - this.$$paddingTop) + 'px';
 
@@ -588,11 +588,15 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $resize: function () {
                 ui.Control.prototype.$resize.call(this);
 
-                dom.insertBefore(this._uHead.getBody(), this._uHead.getBody());
-
-                var body = dom.getParent(dom.getParent(this.getBody()));
+                var tblBody = dom.getParent(this.getBody()),
+                    tblHead = this._uHead.getMain().lastChild.lastChild,
+                    body = dom.getParent(tblBody);
+                dom.insertBefore(this._uHead.getBody(), this.getBody());
+                tblBody.style.width = tblHead.style.width = this.$$tableWidth;
                 body.style.paddingTop = '';
                 body.style.height = '';
+
+                this._uHead.$resize();
             },
 
             /**
@@ -661,8 +665,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 }
 
                 col.cache();
-                col.$setSize(options.width);
-                //col.$setStyles('width', el.style.width, options.width);
+                col.setSize(options.width);
                 col._oOptions = util.extend({}, options);
 
                 return col;

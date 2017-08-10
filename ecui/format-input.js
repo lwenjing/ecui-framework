@@ -99,6 +99,8 @@ _ePlaceHolder - 为空时的提示信息标签
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
                 if (this._ePlaceHolder) {
+                    this._sPlaceHolderWidth = this._ePlaceHolder.style.width;
+                    this._sPlaceHolderHeight = this._ePlaceHolder.style.height;
                     this._ePlaceHolder.style.width = this.getBodyWidth() - this.$$placeholder[1] - this.$$placeholder[3] + 'px';
                     this._ePlaceHolder.style.height = this.getBodyHeight() - this.$$placeholder[0] - this.$$placeholder[2] + 'px';
                 }
@@ -122,6 +124,17 @@ _ePlaceHolder - 为空时的提示信息标签
                 ui.InputControl.prototype.$ready.call(this);
                 if (this._ePlaceHolder) {
                     this.alterClass(this.getValue() ? '-empty' : '+empty');
+                }
+            },
+
+            /**
+             * @override
+             */
+            $resize: function () {
+                ui.InputControl.prototype.$resize.call(this);
+                if (this._ePlaceHolder) {
+                    this._ePlaceHolder.style.width = this._sPlaceHolderWidth;
+                    this._ePlaceHolder.style.height = this._sPlaceHolderHeight;
                 }
             },
 

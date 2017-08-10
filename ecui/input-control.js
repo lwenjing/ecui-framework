@@ -316,7 +316,8 @@ _eInput        - INPUT对象
              */
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
-
+                this._sInputWidth = this._eInput.style.width;
+                this._sInputHeight = this._eInput.style.height;
                 this._eInput.style.width = this.getBodyWidth() + 'px';
                 this._eInput.style.height = this.getBodyHeight() + 'px';
             },
@@ -346,6 +347,15 @@ _eInput        - INPUT对象
              */
             $reset: function () {
                 this.$ready();
+            },
+
+            /**
+             * @override
+             */
+            $resize: function () {
+                ui.Control.prototype.$resize.call(this);
+                this._eInput.style.width = this._sInputWidth;
+                this._eInput.style.height = this._sInputHeight;
             },
 
             /**
