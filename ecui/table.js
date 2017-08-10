@@ -280,7 +280,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                      * @override
                      */
                     $hide: function () {
-                        this.$setStyles('display', 'none', -this.getWidth());
+                        this.$setStyles('display', 'none');
                     },
 
                     /**
@@ -293,18 +293,15 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                      * @param {number} widthRevise 改变样式后表格宽度的变化，如果省略表示没有变化
                      */
                     $setStyles: function (name, value) {
-                        var i = 0,
-                            table = this.getParent(),
+                        var table = this.getParent(),
                             rows = table._aHeadRows.concat(table._aRows),
-                            body = this.getBody(),
+                            body = this.getMain(),
                             cols = table._aHCells,
-                            index = cols.indexOf(this),
-                            o = dom.getParent(dom.getParent(dom.getParent(body))).style,
-                            j;
+                            index = cols.indexOf(this);
 
                         body.style[name] = value;
 
-                        for (; o = rows[i++]; ) {
+                        for (var i = 0, o; o = rows[i++]; ) {
                             // 以下使用 body 表示列元素列表
                             body = o._aElements;
                             o = body[index];
@@ -312,7 +309,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                                 o.style[name] = value;
                             }
                             if (o !== false) {
-                                for (j = index; !(o = body[j]); j--) {}
+                                for (var j = index; !(o = body[j]); j--) {}
 
                                 var width = -cols[j].getMinimumWidth(),
                                     colspan = 0;
@@ -339,7 +336,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                      * @override
                      */
                     $show: function () {
-                        this.$setStyles('display', '', this.getWidth());
+                        this.$setStyles('display', '');
                     },
 
                     /**
@@ -372,7 +369,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                     setSize: function (width) {
                         // 首先对列表头控件设置宽度，否则在计算合并单元格时宽度可能错误
                         this.$setSize(width);
-                        this.$setStyles('width', width - this.$getBasicWidth() + 'px');
+                        this.$setStyles('width', (width - this.$getBasicWidth()) + 'px');
                     }
                 }
             ),
@@ -410,15 +407,12 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                      * @override
                      */
                     $hide: function () {
-                        var i = 0,
-                            table = this.getParent(),
+                        var table = this.getParent(),
                             index = table._aRows.indexOf(this),
                             nextRow = table._aRows[index + 1],
-                            j,
-                            cell,
-                            o;
+                            cell;
 
-                        for (; table._aHCells[i]; i++) {
+                        for (var i = 0, o; table._aHCells[i]; i++) {
                             o = this._aElements[i];
                             if (o === false) {
                                 o = table.$getElement(index - 1, i);
@@ -430,7 +424,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                             } else if (o && (j = +dom.getAttribute(o, 'rowSpan')) > 1) {
                                 // 如果单元格包含rowSpan属性，需要将属性添加到其它行去
                                 o.setAttribute('rowSpan', j - 1);
-                                for (j = i + 1;; ) {
+                                for (var j = i + 1;; ) {
                                     cell = nextRow._aElements[j++];
                                     if (cell || cell === undefined) {
                                         break;
@@ -450,15 +444,12 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                      * @override
                      */
                     $show: function () {
-                        var i = 0,
-                            table = this.getParent(),
+                        var table = this.getParent(),
                             index = table._aRows.indexOf(this),
                             nextRow = table._aRows[index + 1],
-                            j,
-                            cell,
-                            o;
+                            cell;
 
-                        for (; table._aHCells[i]; i++) {
+                        for (var i = 0, o; table._aHCells[i]; i++) {
                             o = this._aElements[i];
                             if (o === false) {
                                 o = table.$getElement(index - 1, i);
@@ -470,7 +461,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                             } else if (o && nextRow && nextRow._aElements[i] === false) {
                                 // 如果单元格包含rowSpan属性，需要从其它行恢复
                                 o.setAttribute('rowSpan', +dom.getAttribute(o, 'rowSpan') + 1);
-                                for (j = i + 1;; ) {
+                                for (var j = i + 1;; ) {
                                     cell = this._aElements[j++];
                                     if (cell || cell === undefined) {
                                         break;
@@ -530,7 +521,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 ui.Control.prototype.$cache.call(this, style, cacheSize);
                 this._uHead.cache(false, true);
 
-                this.$$tableWidth = dom.getParent(this.getBody()).style.width;
                 this.$$paddingTop = this._uHead.getBody().offsetHeight;
 
                 for (var i = 0; style = this._aRows[i++]; ) {
@@ -574,6 +564,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 var tblBody = dom.getParent(this.getBody()),
                     tblHead = this._uHead.getMain().lastChild.lastChild,
                     body = dom.getParent(tblBody);
+                this._sTableWidth = tblBody.style.width;
                 tblBody.style.width = tblHead.style.width = 'auto';
                 dom.insertBefore(this._uHead.getBody(), tblHead.firstChild);
                 body.style.paddingTop = this.$$paddingTop + 'px';
@@ -591,8 +582,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 var tblBody = dom.getParent(this.getBody()),
                     tblHead = this._uHead.getMain().lastChild.lastChild,
                     body = dom.getParent(tblBody);
+                tblBody.style.width = tblHead.style.width = this._sTableWidth;
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
-                tblBody.style.width = tblHead.style.width = this.$$tableWidth;
                 body.style.paddingTop = '';
                 body.style.height = '';
 
@@ -620,19 +611,17 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              * @return {ecui.ui.Table.HCell} 表头单元格控件
              */
             addColumn: function (options, index) {
-                var i = 0,
-                    headRowCount = this._aHeadRows.length,
+                var headRowCount = this._aHeadRows.length,
                     rows = this._aHeadRows.concat(this._aRows),
                     primary = options.primary || '',
                     el = dom.create(primary + this._sHCellClass, 'TH'),
                     col = core.$fastCreate(this.HCell, el, this),
-                    row,
-                    o;
+                    row;
 
                 el.innerHTML = options.title || '';
 
                 primary += this._sCellClass;
-                for (; row = rows[i]; i++) {
+                for (var i = 0, o; row = rows[i]; i++) {
                     o = row._aElements[index];
                     if (o !== null) {
                         // 没有出现跨列的插入列操作
@@ -680,8 +669,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              * @return {ecui.ui.Table.Row} 行控件
              */
             addRow: function (data, index) {
-                var i = 0,
-                    j = 1,
+                var j = 1,
                     body = this.getBody(),
                     el = dom.create(),
                     html = ['<table><tbody><tr class="' + this._sRowClass + '">'],
@@ -693,7 +681,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                     index = this._aRows.length;
                 }
 
-                for (; col = this._aHCells[i]; ) {
+                for (var i = 0; col = this._aHCells[i]; ) {
                     if ((row && row._aElements[i] === false) || data[i] === false) {
                         rowCols[i++] = false;
                     } else {
