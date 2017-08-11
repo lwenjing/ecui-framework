@@ -12,7 +12,7 @@
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
 //{/if}//
-    var isMobile = /(Android|iPhone)/i.test(navigator.userAgent),
+    var isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isMobileScroll,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
@@ -51,6 +51,12 @@
         currEnv = {               // 当前操作的环境
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
+            /**
+             * 按压开始事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
             touchstart: function (event) {
                 if (!core.isTouch()) {
                     isMobileScroll = false;
@@ -62,12 +68,24 @@
                 }
             },
 
+            /**
+             * 按压移动事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
             touchmove: function (event) {
                 if (!ieVersion) {
                     currEnv.mousemove(event);
                 }
             },
 
+            /**
+             * 按压结束事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
             touchend: function (event) {
                 touchCount--;
                 if (isMobileScroll) {
@@ -89,103 +107,14 @@
                 }
             },
 
+            /**
+             * 按压取消事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
             touchcancel: function (event) {
                 currEnv.touchend(event);
-            },
-
-            selectstart: function (event) {
-                // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现
-                event = core.wrapEvent(event);
-                onselectstart(core.findControl(event.target), event);
-            },
-
-            /**
-             * 键盘事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            keydown: function (event) {
-                event = core.wrapEvent(event);
-                keyCode = event.which;
-                bubble(focusedControl, 'keydown', event);
-            },
-
-            /**
-             * 键盘事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            keypress: function (event) {
-                event = core.wrapEvent(event);
-                bubble(focusedControl, 'keypress', event);
-            },
-
-            /**
-             * 键盘事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            keyup: function (event) {
-                event = core.wrapEvent(event);
-                bubble(focusedControl, 'keyup', event);
-                if (keyCode === event.which) {
-                    // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
-                    keyCode = 0;
-                }
-            },
-
-            /**
-             * 滚轮事件处理(firefox)。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            DOMMouseScroll: function (event) {
-                onmousewheel(event, event.detail);
-            },
-
-            /**
-             * 滚轮事件处理(other)。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            mousewheel: function (event) {
-                onmousewheel(event, event.wheelDelta / -40);
-            },
-
-            /**
-             * 双击事件与选中内容开始事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            dblclick: function (event) {
-                if (ieVersion) {
-                    // IE下双击事件不依次产生 mousedown 与 mouseup 事件，需要模拟
-                    currEnv.mousedown(event);
-                    currEnv.mouseup(event);
-                }
-            },
-
-            // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
-            click: function (event) {
-                event = core.wrapEvent(event);
-
-                var control = core.findControl(event.target);
-
-                if (control && control.isDisabled()) {
-                    // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
-                    event.preventDefault();
-                }
-            },
-
-            // dragend 实质上也是mouseup的行为
-            dragend: function (event) {
-                currEnv.mouseup(event);
             },
 
             // 鼠标左键按下需要改变框架中拥有焦点的控件
@@ -287,7 +216,7 @@
                     commonParent;
 
                 if (activedControl !== undefined) {
-                    // 如果为 null 表示之前没有触发 mousedown 事件就触发了 mouseup，
+                    // 如果为 undefined 表示之前没有触发 mousedown 事件就触发了 mouseup，
                     // 这种情况出现在鼠标在浏览器外按下了 down 然后回浏览器区域 up，
                     // 或者是 ie 系列浏览器在触发 dblclick 之前会触发一次单独的 mouseup，
                     // dblclick 在 ie 下的事件触发顺序是 mousedown/mouseup/click/mouseup/dblclick
@@ -312,6 +241,111 @@
                     // 将 activeControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
                 }
+            },
+
+            // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
+            click: function (event) {
+                if (activedControl !== undefined) {
+                    // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
+                    activedControl = undefined;
+                }
+
+                event = core.wrapEvent(event);
+
+                var control = core.findControl(event.target);
+                if (control && control.isDisabled()) {
+                    // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
+                    event.preventDefault();
+                }
+            },
+
+            /**
+             * 双击事件与选中内容开始事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            dblclick: function (event) {
+                if (ieVersion) {
+                    // IE下双击事件不依次产生 mousedown 与 mouseup 事件，需要模拟
+                    currEnv.mousedown(event);
+                    currEnv.mouseup(event);
+                }
+            },
+
+            /**
+             * IE下选择开始事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            selectstart: function (event) {
+                // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现
+                event = core.wrapEvent(event);
+                onselectstart(core.findControl(event.target), event);
+            },
+
+            // dragend 实质上也是mouseup的行为
+            dragend: function (event) {
+                currEnv.mouseup(event);
+            },
+
+            /**
+             * 键盘事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            keydown: function (event) {
+                event = core.wrapEvent(event);
+                keyCode = event.which;
+                bubble(focusedControl, 'keydown', event);
+            },
+
+            /**
+             * 键盘事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            keypress: function (event) {
+                event = core.wrapEvent(event);
+                bubble(focusedControl, 'keypress', event);
+            },
+
+            /**
+             * 键盘事件处理。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            keyup: function (event) {
+                event = core.wrapEvent(event);
+                bubble(focusedControl, 'keyup', event);
+                if (keyCode === event.which) {
+                    // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
+                    keyCode = 0;
+                }
+            },
+
+            /**
+             * 滚轮事件处理(firefox)。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            DOMMouseScroll: function (event) {
+                onmousewheel(event, event.detail);
+            },
+
+            /**
+             * 滚轮事件处理(other)。
+             * @private
+             *
+             * @param {Event} event 事件对象
+             */
+            mousewheel: function (event) {
+                onmousewheel(event, event.wheelDelta / -40);
             }
         },
 

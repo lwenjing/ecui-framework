@@ -590,11 +590,9 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             $scroll: function () {
                 ui.Control.prototype.$scroll.call(this);
-                var layout = dom.getParent(dom.getParent(this._uHead.getBody()));
                 if (this._bHeadFloat) {
-                    dom.getParent(layout).style.top = Math.max(0, util.getView().top - dom.getPosition(this.getMain()).top) + 'px';
+                    dom.getParent(dom.getParent(dom.getParent(this._uHead.getBody()))).style.top = Math.max(0, util.getView().top - dom.getPosition(this.getMain()).top) + 'px';
                 }
-                layout.style.left = -dom.getParent(dom.getParent(this.getBody())).scrollLeft + 'px';
             },
 
             /**
