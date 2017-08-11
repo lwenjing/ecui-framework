@@ -1,11 +1,11 @@
 /*
-FormatInput - 定义格式化输入数据的基本操作。
-格式化输入框控件，继承自输入框控件，对输入的数据内容格式进行限制。
+Text - 定义文本输入数据的基本操作。
+文本输入框控件，继承自输入框控件，允许对输入的数据内容格式进行限制。
 
-输入框控件直接HTML初始化的例子:
-<input ui="type:format-input" name="test" />
+文本输入框控件直接HTML初始化的例子:
+<input ui="type:text" name="test" />
 或:
-<div ui="type:format-input;name:test;value:test">
+<div ui="type:text;name:test;value:test">
     <!-- 如果ec中不指定name,value，也可以在input中指定 -->
     <input name="test" value="test" />
 </div>
@@ -40,9 +40,9 @@ _ePlaceHolder - 为空时的提示信息标签
      *
      * @param {Object} options 初始化选项
      */
-    ui.FormatInput = core.inherits(
+    ui.Text = core.inherits(
         ui.InputControl,
-        '',
+        'ui-text',
         function (el, options) {
             ui.InputControl.constructor.call(this, el, options);
 
@@ -98,9 +98,10 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
+                var input = this.getInput();
+                input.style.width = this.getBodyWidth() + 'px';
+                input.style.height = this.getBodyHeight() + 'px';
                 if (this._ePlaceHolder) {
-                    this._sPlaceHolderWidth = this._ePlaceHolder.style.width;
-                    this._sPlaceHolderHeight = this._ePlaceHolder.style.height;
                     this._ePlaceHolder.style.width = this.getBodyWidth() - this.$$placeholder[1] - this.$$placeholder[3] + 'px';
                     this._ePlaceHolder.style.height = this.getBodyHeight() - this.$$placeholder[0] - this.$$placeholder[2] + 'px';
                 }
@@ -124,17 +125,6 @@ _ePlaceHolder - 为空时的提示信息标签
                 ui.InputControl.prototype.$ready.call(this);
                 if (this._ePlaceHolder) {
                     this.alterClass(this.getValue() ? '-empty' : '+empty');
-                }
-            },
-
-            /**
-             * @override
-             */
-            $resize: function () {
-                ui.InputControl.prototype.$resize.call(this);
-                if (this._ePlaceHolder) {
-                    this._ePlaceHolder.style.width = this._sPlaceHolderWidth;
-                    this._ePlaceHolder.style.height = this._sPlaceHolderHeight;
                 }
             },
 

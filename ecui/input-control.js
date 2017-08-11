@@ -1,5 +1,5 @@
 /*
-InputControl - 定义输入数据的基本操作。
+InputControl - 定义输入数据的基本操作，不建议直接控件化。
 输入控件，继承自基础控件，实现了对原生 InputElement 的功能扩展，包括光标的控制、输入事件的实时响应(每次改变均触发事件)，以及 IE 下不能动态改变输入框的表单项名称的模拟处理。
 
 输入控件直接HTML初始化的例子:
@@ -200,13 +200,15 @@ _eInput        - INPUT对象
      */
     ui.InputControl = core.inherits(
         ui.Control,
-        'ui-input',
+        '',
         function (el, options) {
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 // 根据表单项初始化
                 var inputEl = el;
                 el = dom.insertBefore(dom.create(el.className), el);
+                el.style.cssText = inputEl.style.cssText;
                 inputEl.className = '';
+                inputEl.style.cssText = '';
                 el.appendChild(inputEl);
             } else {
                 inputEl = el.getElementsByTagName('INPUT')[0] || el.getElementsByTagName('TEXTAREA')[0];
@@ -312,17 +314,6 @@ _eInput        - INPUT对象
             },
 
             /**
-             * @override
-             */
-            $initStructure: function (width, height) {
-                ui.Control.prototype.$initStructure.call(this, width, height);
-                this._sInputWidth = this._eInput.style.width;
-                this._sInputHeight = this._eInput.style.height;
-                this._eInput.style.width = this.getBodyWidth() + 'px';
-                this._eInput.style.height = this.getBodyHeight() + 'px';
-            },
-
-            /**
              * 输入框内容改变事件的默认处理。
              * @protected
              */
@@ -347,15 +338,6 @@ _eInput        - INPUT对象
              */
             $reset: function () {
                 this.$ready();
-            },
-
-            /**
-             * @override
-             */
-            $resize: function () {
-                ui.Control.prototype.$resize.call(this);
-                this._eInput.style.width = this._sInputWidth;
-                this._eInput.style.height = this._sInputHeight;
             },
 
             /**

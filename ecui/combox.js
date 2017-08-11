@@ -23,6 +23,9 @@ Combox - 定义可输入下拉框行为的基本操作。
     <div value="值">文本</div>
     ...
 </div>
+
+属性
+_sInputWidth   - INPUT对象初始宽度
 */
 (function () {
 //{if 0}//

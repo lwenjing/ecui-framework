@@ -38,16 +38,17 @@
 .ui-item {
   overflow: hidden !important;
 }
-.ui-input {
+.ui-text {
   display: inline-block;
   *display: inline;
   *zoom: 1;
   overflow: hidden !important;
+  padding: 0 !important;
 }
-.ui-input input,
-.ui-input textarea {
+.ui-text input, .ui-text textarea {
   border: 0 !important;
   padding: 0 !important;
+  margin: 0 !important;
 }
 .ui-select .ui-select-text {
   overflow: hidden !important;
@@ -59,6 +60,9 @@
 }
 .ui-select-options .ui-select-item {
   display: block !important;
+}
+.ui-select, .ui-combox {
+  overflow: hidden !important;
 }
 .ui-dialog .ui-dialog-close {
   position: absolute !important;

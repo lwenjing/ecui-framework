@@ -1701,7 +1701,7 @@
          */
         repaint: function () {
             function filter(control) {
-                if (control.isShow() && control.isResizable()) {
+                if (control.isShow()) {
                     list.push(control);
                 }
             }

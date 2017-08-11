@@ -372,15 +372,6 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * @override
-             */
-            $resize: function () {
-                ui.InputControl.prototype.$resize.call(this);
-                // 设置文本区域
-                this._uText.$resize();
-            },
-
-            /**
              * 获取被选中的选项控件。
              * @public
              *
