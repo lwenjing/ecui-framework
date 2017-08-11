@@ -18,7 +18,6 @@ _uCheckbox - 复选框控件
 */
 //{if 0}//
 (function () {
-
     var core = ecui,
         dom = core.dom,
         ui = core.ui;

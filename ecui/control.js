@@ -945,7 +945,7 @@ $$padding           - 内填充宽度缓存
              * @public
              */
             initStructure: function () {
-                this.$initStructure(this.getWidth(), this.getHeight());
+                this.$initStructure(this.getBodyWidth(), this.getBodyHeight());
             },
 
             /**
@@ -1075,10 +1075,8 @@ $$padding           - 内填充宽度缓存
              * resize 方法重新计算并设置控件的大小，浏览器可视化区域发生变化时，可能需要改变控件大小，框架会自动调用控件的 resize 方法。
              */
             resize: function () {
-                if (this._bResizable) {
-                    this.$resize();
-                    this.repaint();
-                }
+                this.$resize();
+                this.repaint();
             },
 
             /**

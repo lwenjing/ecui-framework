@@ -99,11 +99,11 @@ _ePlaceHolder - 为空时的提示信息标签
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
                 var input = this.getInput();
-                input.style.width = this.getBodyWidth() + 'px';
-                input.style.height = this.getBodyHeight() + 'px';
+                input.style.width = width + 'px';
+                input.style.height = height + 'px';
                 if (this._ePlaceHolder) {
-                    this._ePlaceHolder.style.width = this.getBodyWidth() - this.$$placeholder[1] - this.$$placeholder[3] + 'px';
-                    this._ePlaceHolder.style.height = this.getBodyHeight() - this.$$placeholder[0] - this.$$placeholder[2] + 'px';
+                    this._ePlaceHolder.style.width = width - this.$$placeholder[1] - this.$$placeholder[3] + 'px';
+                    this._ePlaceHolder.style.height = height - this.$$placeholder[0] - this.$$placeholder[2] + 'px';
                 }
             },
 

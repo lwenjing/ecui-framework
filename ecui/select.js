@@ -260,7 +260,7 @@ _uOptions     - 下拉选择框
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
                 // 设置文本区域
-                this._uText.$setSize(this.getBodyWidth(), this.getBodyHeight());
+                this._uText.$setSize(width, height);
             },
 
             /**

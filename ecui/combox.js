@@ -27,8 +27,8 @@ Combox - 定义可输入下拉框行为的基本操作。
 属性
 _sInputWidth   - INPUT对象初始宽度
 */
-(function () {
 //{if 0}//
+(function () {
     var core = ecui,
         ui = core.ui,
         util = core.util;
@@ -53,7 +53,7 @@ _sInputWidth   - INPUT对象初始宽度
              */
             $initStructure: function (width, height) {
                 ui.Select.prototype.$initStructure.call(this, width, height);
-                this.getInput().style.width = this.$getSection('Text').getWidth() + 'px';
+                this.getInput().style.width = width + 'px';
             },
 
             /**
@@ -73,4 +73,6 @@ _sInputWidth   - INPUT对象初始宽度
             }
         }
     );
+//{if 0}//
 }());
+//{/if}//

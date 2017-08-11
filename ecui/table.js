@@ -3,6 +3,7 @@ Table - 定义由行列构成的表格的基本操作。
 表格控件，继承自截面控件，对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。
 
 表格控件直接HTML初始化的例子:
+<!-- 如果需要滚动条，请设置div的width样式到合适的值，并且在div外部再包一个div显示滚动条 -->
 <div ui="type:table">
   <table>
     <!-- 表头区域 -->
@@ -172,7 +173,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
             // 初始化表格区域
             o = dom.create(options.classes.join('-head '));
-            o.innerHTML = '<div style="white-space:nowrap;position:absolute"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>';
+            o.innerHTML = '<table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table>';
             el.appendChild(o);
 
             ui.Control.prototype.constructor.call(this, el, options);
@@ -562,12 +563,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
-                var tblBody = dom.getParent(this.getBody()),
-                    tblHead = this._uHead.getMain().lastChild.lastChild,
-                    body = dom.getParent(tblBody);
-                this._sTableWidth = tblBody.style.width;
-                tblBody.style.width = tblHead.style.width = 'auto';
-                dom.insertBefore(this._uHead.getBody(), tblHead.firstChild);
+                var body = dom.getParent(dom.getParent(this.getBody()));
+                dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.firstChild);
                 body.style.paddingTop = this.$$paddingTop + 'px';
                 body.style.height = (height - this.$$paddingTop) + 'px';
 
@@ -580,10 +577,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $resize: function () {
                 ui.Control.prototype.$resize.call(this);
 
-                var tblBody = dom.getParent(this.getBody()),
-                    tblHead = this._uHead.getMain().lastChild.lastChild,
-                    body = dom.getParent(tblBody);
-                tblBody.style.width = tblHead.style.width = this._sTableWidth;
+                var body = dom.getParent(dom.getParent(this.getBody()));
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
                 body.style.paddingTop = '';
                 body.style.height = '';
@@ -813,8 +807,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              * @override
              */
             init: function (options) {
-                ui.Control.prototype.init.call(this, options);
-
                 for (var i = 0, o; o = this._aHCells[i++]; ) {
                     o.$setSize(o.getWidth());
                 }
@@ -824,6 +816,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 for (i = 0; o = this._aRows[i++]; ) {
                     initRow(o);
                 }
+
+                ui.Control.prototype.init.call(this, options);
             },
 
             /**
