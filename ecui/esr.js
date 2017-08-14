@@ -274,27 +274,6 @@
         });
     }
 
-    /**
-     * 设置数据。
-     * @private
-     *
-     * @param {ecui.ui.Control} control 控件对象
-     * @param {Object} value 需要设置的值
-     */
-    function setData(control, value) {
-        if (control.onbeforeset) {
-            control.onbeforeset(value);
-        }
-        if (control.setData) {
-            control.setData(value);
-        } else {
-            control.setContent(value);
-        }
-        if (control.onafterset) {
-            control.onafterset(value);
-        }
-    }
-
     core.esr = {
         DEFAULT_PAGE: 'index',
         DEFAULT_MAIN: 'main',
@@ -523,7 +502,7 @@
             context[name] = value;
             if (autoRender[name]) {
                 autoRender[name].forEach(function (item) {
-                    setData(item, value);
+                    item[1].call(item[0], value);
                 });
             }
         },
@@ -704,31 +683,33 @@
      */
     ext.esr = function (control, value) {
         var values = value.split('@');
-        if (autoRender[values[0]]) {
-            autoRender[values[0]].push(control);
-        } else {
-            autoRender[values[0]] = [control];
-        }
 
         if (values.length === 3) {
             values[1] = values[2];
         }
         if (values[1] === '$') {
-            var renderer = new Function('$', 'this.setContent(' + dom.getText(control.getBody()) + ')');
-            control.setData = function (value) {
+            var renderer = new Function('$', 'this.setContent(' + dom.getText(control.getBody()) + ')'),
+                setData;
+            setData = function (value) {
                 renderer.call(this, values[2] ? context : value);
             };
         } else {
             renderer = values[1] === '!' ? etpl.compile(control.getContent()) : etpl.getRenderer(values[1]);
-            control.setData = function (value) {
+            setData = function (value) {
                 core.dispose(this.getBody(), true);
                 this.setContent(renderer(values[2] ? context : value));
                 core.init(this.getBody());
             };
         }
 
+        if (autoRender[values[0]]) {
+            autoRender[values[0]].push([control, setData]);
+        } else {
+            autoRender[values[0]] = [[control, setData]];
+        }
+
         if (context[values[0]] !== undefined) {
-            setData(control, context[values[0]]);
+            setData.call(control, context[values[0]]);
         } else {
             control.setContent('');
         }
