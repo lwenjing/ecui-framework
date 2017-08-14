@@ -93,6 +93,7 @@
             touchend: function (event) {
                 touchCount--;
                 if (isMobileScroll) {
+                    // 产生了滚屏操作，不响应ECUI事件
                     bubble(activedControl, 'deactivate');
                     activedControl = undefined;
                 }
@@ -772,7 +773,7 @@
      * @return {boolean} 是否为允许的双击时间间隔
      */
     function isDblClick() {
-        return lastClick.time > Date.now() - 200;
+        return lastClick.time > Date.now() - 300;
     }
 
     /**
