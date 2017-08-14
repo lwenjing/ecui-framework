@@ -4,13 +4,13 @@
     document.write('<script type="text/javascript" src="adapter.js"></script>');
     document.write('<script type="text/javascript" src="core.js"></script>');
     document.write('<script type="text/javascript" src="control.js"></script>');
+    document.write('<script type="text/javascript" src="input-control.js"></script>');
 
     document.write('<script type="text/javascript" src="items.js"></script>');
     document.write('<script type="text/javascript" src="popup.js"></script>');
     document.write('<script type="text/javascript" src="label.js"></script>');
 
     document.write('<script type="text/javascript" src="button.js"></script>');
-    document.write('<script type="text/javascript" src="input-control.js"></script>');
     document.write('<script type="text/javascript" src="format-input.js"></script>');
     document.write('<script type="text/javascript" src="checkbox.js"></script>');
     document.write('<script type="text/javascript" src="radio.js"></script>');
@@ -26,7 +26,6 @@
     document.write('<script type="text/javascript" src="table.js"></script>');
 
     document.write('<script type="text/javascript" src="check-tree.js"></script>');
-    document.write('<script type="text/javascript" src="locked-table.js"></script>');
 
     document.write('<script type="text/javascript" src="retina.js"></script>');
     document.write('<script type="text/javascript" src="messagebox.js"></script>');
@@ -38,13 +37,13 @@
 //{include file="adapter.js"}//
 //{include file="core.js"}//
 //{include file="control.js"}//
+//{include file="input-control.js"}//
 
 //{include file="items.js"}//
 //{include file="popup.js"}//
 //{include file="label.js"}//
 
 //{include file="button.js"}//
-//{include file="input-control.js"}//
 //{include file="format-input.js"}//
 //{include file="checkbox.js"}//
 //{include file="radio.js"}//
@@ -60,7 +59,6 @@
 //{include file="table.js"}//
 
 //{include file="check-tree.js"}//
-//{include file="locked-table.js"}//
 
 //{include file="retina.js"}//
 //{include file="messagebox.js"}//

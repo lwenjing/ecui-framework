@@ -58,9 +58,13 @@
              * @param {Event} event 事件对象
              */
             touchstart: function (event) {
-                if (!core.isTouch()) {
-                    isMobileScroll = false;
+                if (core.isTouch()) {
+                    // 屏弊多指操作的ECUI事件响应
+                    activedControl = undefined;
+                    return;
                 }
+
+                isMobileScroll = false;
                 touchCount++;
 
                 if (!ieVersion) {
