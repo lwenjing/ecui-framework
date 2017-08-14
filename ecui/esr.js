@@ -710,21 +710,27 @@
             autoRender[values[0]] = [control];
         }
 
-        if (values.length >= 3) {
-            control.setData = new Function('$', 'this.setContent(' + dom.getText(control.getBody()) + ')');
-            control.setContent('');
-        } else if (values[1]) {
-            control.getBody().appendChild(dom.create());
-            control.$setBody(control.getBody().lastChild);
-            control.setData = function () {
-                core.dispose(this.getBody());
-                this.getBody().innerHTML = etpl.render(values[1], context);
+        if (values.length === 3) {
+            values[1] = values[2];
+        }
+        if (values[1] === '$') {
+            var renderer = new Function('$', 'this.setContent(' + dom.getText(control.getBody()) + ')');
+            control.setData = function (value) {
+                renderer.call(this, values[2] ? context : value);
+            };
+        } else {
+            renderer = values[1] === '!' ? etpl.compile(control.getContent()) : etpl.getRenderer(values[1]);
+            control.setData = function (value) {
+                core.dispose(this.getBody(), true);
+                this.setContent(renderer(values[2] ? context : value));
                 core.init(this.getBody());
             };
         }
 
         if (context[values[0]] !== undefined) {
             setData(control, context[values[0]]);
+        } else {
+            control.setContent('');
         }
         core.addEventListener(control, 'dispose', function () {
             util.remove(autoRender[values[0]], this);
