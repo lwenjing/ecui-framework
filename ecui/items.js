@@ -177,14 +177,14 @@ Item/Items - 定义选项操作相关的基本操作。
          * @public
          *
          * @param {string|Element|ecui.ui.Item|Array} item 控件的 html 内容/控件对应的主元素对象/选项控件/选项控件组
-         * @param {Object} 子控件初始化选项
+         * @param {Object|Array} 子控件初始化选项，如果 item 是数组，options 也必须是数组一一对应
          * @return {ecui.ui.Item} 子选项控件
          */
         append: function (item, options) {
             if (item instanceof Array) {
                 this.preventAlterItems();
-                item.forEach(function (item) {
-                    this.add(item, null, options);
+                item.forEach(function (item, index) {
+                    this.add(item, null, options[index]);
                 }, this);
                 this.premitAlterItems();
                 this.alterItems();
