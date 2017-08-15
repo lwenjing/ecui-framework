@@ -53,7 +53,7 @@
         if (route.children) {
             var children = 'string' === typeof route.children ? [route.children] : route.children;
             children.forEach(function (item) {
-                core.esr.callRoute(replace(item), true);
+                esr.callRoute(replace(item), true);
             });
         }
     }
@@ -68,7 +68,7 @@
     function callRoute(name, options) {
 
         function checkURLChange() {
-            var loc = core.esr.getLocation();
+            var loc = esr.getLocation();
             if (currLocation !== loc) {
                 currLocation = loc;
                 pauseStatus = false;
@@ -109,16 +109,16 @@
                 }
 
                 if (!route.model) {
-                    core.esr.render(name, route);
+                    esr.render(name, route);
                 } else if ('function' === typeof route.model) {
                     if (route.model(context, function () {
-                            core.esr.render(name, route);
+                            esr.render(name, route);
                         }) !== false) {
-                        core.esr.render(name, route);
+                        esr.render(name, route);
                     }
                 } else {
-                    core.esr.request.call(route, route.model, function () {
-                        core.esr.render(name, route);
+                    esr.request.call(route, route.model, function () {
+                        esr.render(name, route);
                     }, route.onrequesterror);
                 }
             }
@@ -128,7 +128,7 @@
                 name + '/' + name + '.js',
                 function () {
                     pauseStatus = false;
-                    if (core.esr.getRoute(name)) {
+                    if (esr.getRoute(name)) {
                         callRoute(name, options);
                     //} else {
                     //    低版本IE失败
@@ -151,7 +151,7 @@
      * @param {Object} route 路由对象
      */
     function getRouteMains(route) {
-        var el = document.getElementById(route.main || core.esr.DEFAULT_MAIN);
+        var el = document.getElementById(route.main || esr.DEFAULT_MAIN);
 
         if (el) {
             var items = el.route ? [el] : [];
@@ -173,7 +173,7 @@
      * @private
      */
     function listener() {
-        core.esr.redirect(core.esr.getLocation());
+        esr.redirect(esr.getLocation());
     }
 
     /**
@@ -234,7 +234,7 @@
             route.onbeforerender(context);
         }
 
-        var el = document.getElementById(route.main || core.esr.DEFAULT_MAIN);
+        var el = document.getElementById(route.main || esr.DEFAULT_MAIN);
         el.style.visibility = 'hidden';
 
         for (var i = 0, items = getRouteMains(route), item; item = items[i++]; ) {
@@ -274,7 +274,7 @@
         });
     }
 
-    core.esr = {
+    var esr = core.esr = {
         DEFAULT_PAGE: 'index',
         DEFAULT_MAIN: 'main',
 
@@ -348,7 +348,7 @@
                 }
             }
             list.sort().splice(0, 0, rewrite);
-            core.esr.setLocation(list.join('~'));
+            esr.setLocation(list.join('~'));
 
             if (name) {
                 if (!addIEHistory(currLocation)) {
@@ -412,7 +412,7 @@
         go: function (loc) {
             checkLeave = false;
             if (loc) {
-                core.esr.redirect(loc);
+                esr.redirect(loc);
             } else {
                 history.go(1);
             }
@@ -437,16 +437,16 @@
                 }
 
                 if (!loc) {
-                    loc = core.esr.DEFAULT_PAGE;
+                    loc = esr.DEFAULT_PAGE;
                 }
 
                 // 与当前location相同时不进行route
                 if (currLocation !== loc) {
-                    core.esr.setLocation(loc);
+                    esr.setLocation(loc);
                     // ie下使用中间iframe作为中转控制
                     // 其他浏览器直接调用控制器方法
                     if (!addIEHistory(loc)) {
-                        core.esr.callRoute(loc);
+                        esr.callRoute(loc);
                     }
                 }
             }
@@ -533,7 +533,7 @@
             // 存储当前信息
             // opera下，相同的hash重复写入会在历史堆栈中重复记录
             // 所以需要ESR_GET_LOCATION来判断
-            if (core.esr.getLocation() !== loc) {
+            if (esr.getLocation() !== loc) {
                 location.hash = loc;
             }
             currLocation = loc;
@@ -551,8 +551,8 @@
             }
 
             dom.ready(function () {
-                if (core.esr.onready) {
-                    callRoute(core.esr.onready());
+                if (esr.onready) {
+                    callRoute(esr.onready());
                 } else {
                     init();
                 }
@@ -584,10 +584,10 @@
                 }
             });
 
-            core.esr.loadClass = function (filename) {
+            esr.loadClass = function (filename) {
                 document.write('<script type="text/javascript" src="' + name + '/class.' + filename + '.js"></script>');
             };
-            core.esr.loadRoute = function (filename) {
+            esr.loadRoute = function (filename) {
                 document.write('<script type="text/javascript" src="' + name + '/route.' + filename + '.js"></script>');
                 document.write('<link rel="stylesheet/less" type="text/css" href="' + name + '/route.' + filename + '.css" />');
                 core.pause();
@@ -633,11 +633,11 @@
                         }
                         if (data !== undefined) {
                             if (varName) {
-                                core.esr.setData(varName, data.data);
+                                esr.setData(varName, data.data);
                             } else {
                                 for (var key in data) {
                                     if (data.hasOwnProperty(key)) {
-                                        core.esr.setData(key, data.data[key]);
+                                        esr.setData(key, data.data[key]);
                                     }
                                 }
                             }
@@ -702,7 +702,6 @@
         if (values[1] === '$') {
             var setData = dom.getText(control.getBody()).trim(),
                 renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
-            console.log(setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
             setData = function (value) {
                 renderer.call(this, values[2] ? context : value);
             };
@@ -715,7 +714,7 @@
             };
         }
 
-        core.esr.addDataListener(values[0], control, setData);
+        esr.addDataListener(values[0], control, setData);
 
         if (context[name] !== undefined) {
             setData.call(control, context[name]);
