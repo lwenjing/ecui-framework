@@ -118,7 +118,6 @@ _uClose     - 关闭按钮
              */
             $cache: function (style, cacheSize) {
                 ui.Control.prototype.$cache.call(this, style, cacheSize);
-
                 this._uClose.cache(true, true);
                 this._uTitle.cache(true, true);
             },

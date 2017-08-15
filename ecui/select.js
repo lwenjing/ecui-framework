@@ -190,14 +190,6 @@ _uOptions     - 下拉选择框
                     /**
                      * @override
                      */
-                    $dispose: function () {
-                        dom.remove(this.getOuter());
-                        ui.Control.prototype.$dispose.call(this);
-                    },
-
-                    /**
-                     * @override
-                     */
                     $show: function () {
                         ui.Control.prototype.$show.call(this);
                         var parent = this.getParent();

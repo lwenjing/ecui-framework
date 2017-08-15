@@ -96,6 +96,14 @@ _ePlaceHolder - 为空时的提示信息标签
             /**
              * @override
              */
+            $dispose: function () {
+                this._ePlaceHolder = null;
+                ui.InputControl.prototype.$dispose.call(this);
+            },
+
+            /**
+             * @override
+             */
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
                 var input = this.getInput();
