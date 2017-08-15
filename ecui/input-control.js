@@ -226,7 +226,7 @@ _eInput        - INPUT对象
                 inputEl.defaultChecked = inputEl.checked = true;
             }
 
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
 
             this._bHidden = options.hidden;
             this._eInput = inputEl;

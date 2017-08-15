@@ -45,7 +45,7 @@ _sInputWidth   - INPUT对象初始宽度
         '*ui-combox',
         function (el, options) {
             util.setDefault(options, 'hidden', false);
-            ui.Select.constructor.call(this, el, options);
+            ui.Select.call(this, el, options);
         },
         {
             /**

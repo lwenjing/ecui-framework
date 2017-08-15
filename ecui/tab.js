@@ -56,7 +56,7 @@ _eContainer      - 容器 DOM 元素
         ui.Control,
         'ui-tab',
         function (el, options) {
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
 
             var titleEl = dom.create(options.classes.join('-title '));
             dom.childMoves(el, titleEl);
@@ -86,7 +86,7 @@ _eContainer      - 容器 DOM 元素
                         containerEl.className = '';
                     }
 
-                    ui.Item.constructor.call(this, el, options);
+                    ui.Item.call(this, el, options);
 
                     if (containerEl) {
                         if (options.parent) {

@@ -36,7 +36,7 @@ Button - 定义按钮的基本操作。
         function (el, options) {
             util.setDefault(options, 'userSelect', false);
 
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
         },
         {
             /**

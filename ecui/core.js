@@ -960,11 +960,11 @@
          * primary    {string} 控件的基本样式(参见 getMainClass 方法)，如果忽略此参数将使用主元素的 className 属性
          * @protected
          *
-         * @param {Function} type 控件的构造函数
+         * @param {Function} Type 控件的构造函数
          * @param {Object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
-        $create: function (type, options) {
+        $create: function (Type, options) {
             options = options || {};
 
             var parent = options.parent,
@@ -980,8 +980,8 @@
                     return el.getControl();
                 }
 
-                if (type.CLASS || primary) {
-                    el.className = className = el.className + ' ' + primary + type.CLASS;
+                if (Type.CLASS || primary) {
+                    el.className = className = el.className + ' ' + primary + Type.CLASS;
                 } else {
                     className = el.className;
                 }
@@ -991,38 +991,38 @@
                 options.primary = RegExp.$1;
             } else {
                 // 没有传入主元素，需要自动生成，此种情况比较少见，不推荐使用
-                el = options.main = dom.create(primary + type.CLASS);
+                el = options.main = dom.create(primary + Type.CLASS);
                 if (!primary) {
-                    options.primary = type.TYPES[0];
+                    options.primary = Type.TYPES[0];
                 }
             }
 
             // 生成控件
-            type = new type.constructor(el, options);
+            Type = new Type(el, options);
 
             if (parent) {
                 if (parent instanceof ui.Control) {
-                    type.setParent(parent);
+                    Type.setParent(parent);
                 } else {
-                    type.appendTo(parent);
+                    Type.appendTo(parent);
                 }
             } else {
-                type.$setParent(core.findControl(dom.getParent(type.getOuter())));
+                Type.$setParent(core.findControl(dom.getParent(Type.getOuter())));
             }
 
-            oncreate(type, options);
-            independentControls.push(type);
+            oncreate(Type, options);
+            independentControls.push(Type);
 
             // 处理所有的委托操作，参见delegate
             if (el = delegateControls[options.id]) {
                 delete delegateControls[options.id];
                 el.forEach(function (item) {
-                    item.args[0] = type;
+                    item.args[0] = Type;
                     item.func.apply(item.caller, item.args);
                 });
             }
 
-            return type;
+            return Type;
         },
 
         /**
@@ -1030,13 +1030,13 @@
          * $fastCreate 方法仅供控件生成自己的部件使用，生成的控件不在控件列表中注册，不自动刷新也不能通过 query 方法查询(参见 $create 方法)。$fastCreate 方法通过分解 Element 对象的 className 属性得到样式信息，其中第一个样式为类型样式，第二个样式为基本样式。
          * @protected
          *
-         * @param {Function} type 控件的构造函数
+         * @param {Function} Type 控件的构造函数
          * @param {HTMLElement} el 控件对应的 Element 对象
          * @param {ecui.ui.Control} parent 控件的父控件
          * @param {Object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
-        $fastCreate: function (type, el, parent, options) {
+        $fastCreate: function (Type, el, parent, options) {
             options = options || {};
 
             options.uid = 'ecui-' + (++uniqueIndex);
@@ -1046,12 +1046,12 @@
                 }
             }
 
-            type = new type.constructor(el, options);
-            type.$setParent(parent);
+            Type = new Type(el, options);
+            Type.$setParent(parent);
 
-            oncreate(type, options);
+            oncreate(Type, options);
 
-            return type;
+            return Type;
         },
 
         /**
@@ -1472,7 +1472,7 @@
                     options.classes = classes;
                     subClass.call(this, el, options);
                 } : function (el, options) {
-                    superClass.prototype.constructor.call(this, el, options);
+                    superClass.call(this, el, options);
                 };
 
             if (superClass) {
@@ -1488,7 +1488,6 @@
                 agent.TYPES = [];
             }
             agent.CLASS = agent.TYPES.length ? ' ' + agent.TYPES.join(' ') : '';
-            agent.constructor = agent;
 
             Array.prototype.slice.call(arguments, 'function' === typeof subClass ? 3 : 2).forEach(function (item) {
                 if (item['']) {

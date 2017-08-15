@@ -75,7 +75,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         ui.Control,
         'ui-monthview',
         function (el, options) {
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
 
             el.innerHTML = util.stringFormat(
                 '<table><thead>{1}</thead><tbody>{0}{0}{0}{0}{0}{0}</tbody></table>',

@@ -26,7 +26,7 @@ _eMask - 完成的进度比例内容区域
         ui.Control,
         'ui-progress',
         function (el, options) {
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
 
             var text = el.innerHTML;
             el.innerHTML = '<div class="' + options.classes.join('-text ') + '">' + text + '</div><div class="' + options.classes.join('-mask ') + '">' + text + '</div>';
