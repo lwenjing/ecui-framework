@@ -247,11 +247,16 @@ Item/Items - 定义选项操作相关的基本操作。
         /**
          * 移除所有子选项控件。
          * @public
+         *
+         * @param {boolean} dispose 选项控件是否在移除过程中自动释放
          */
-        removeAll: function () {
+        removeAll: function (dispose) {
             this.preventAlterItems();
-            this.getItems().reverse().forEach(function (item) {
+            this.getItems().forEach(function (item) {
                 this.remove(item);
+                if (dispose) {
+                    item.dispose();
+                }
             }, this);
             this.premitAlterItems();
             this.alterItems();
