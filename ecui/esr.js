@@ -278,6 +278,18 @@
         DEFAULT_PAGE: 'index',
         DEFAULT_MAIN: 'main',
 
+        addDataListener: function (name, control, func) {
+            if (autoRender[name]) {
+                autoRender[name].push([control, func]);
+            } else {
+                autoRender[name] = [[control, func]];
+            }
+
+            core.addEventListener(control, 'dispose', function () {
+                util.remove(autoRender[name], this);
+            });
+        },
+
         /**
          * 添加路由信息。
          * @public
@@ -702,19 +714,12 @@
             };
         }
 
-        if (autoRender[values[0]]) {
-            autoRender[values[0]].push([control, setData]);
-        } else {
-            autoRender[values[0]] = [[control, setData]];
-        }
+        core.esr.addDataListener(values[0], control, setData);
 
-        if (context[values[0]] !== undefined) {
-            setData.call(control, context[values[0]]);
+        if (context[name] !== undefined) {
+            setData.call(control, context[name]);
         } else {
             control.setContent('');
         }
-        core.addEventListener(control, 'dispose', function () {
-            util.remove(autoRender[values[0]], this);
-        });
     };
 }());
