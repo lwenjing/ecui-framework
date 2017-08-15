@@ -700,8 +700,9 @@
             values[1] = values[2];
         }
         if (values[1] === '$') {
-            var renderer = new Function('$', 'this.setContent(' + dom.getText(control.getBody()) + ')'),
-                setData;
+            var setData = dom.getText(control.getBody()).trim(),
+                renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
+            console.log(setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
             setData = function (value) {
                 renderer.call(this, values[2] ? context : value);
             };
