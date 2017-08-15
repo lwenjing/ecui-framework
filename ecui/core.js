@@ -1207,7 +1207,7 @@
             }
 
             // 需要删除的控件先放入一个集合中等待遍历结束后再删除，否则控件链将产生变化
-            [].concat(allControls).filter(function (item, index) {
+            allControls.slice().filter(function (item, index) {
                 if (type ? control.contain(item) : !!item.getOuter() && dom.contain(control, item.getOuter())) {
                     if (!onlyChild || (type ? control !== item : control !== item.getOuter())) {
                         util.remove(independentControls, item);
@@ -1464,7 +1464,7 @@
          */
         inherits: function (superClass, type, subClass) {
             var agent = 'function' === typeof subClass ? function (el, options) {
-                    var classes = [].concat(this.constructor.TYPES);
+                    var classes = this.constructor.TYPES.slice();
                     if (options.primary && options.primary !== this.constructor.TYPES[0]) {
                         classes.splice(0, 0, options.primary);
                     }

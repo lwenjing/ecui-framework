@@ -381,14 +381,6 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * @override
-             */
-            init: function (options) {
-                ui.InputControl.prototype.init.call(this, options);
-                this._uText.init();
-            },
-
-            /**
              * 设置下拉框允许显示的选项数量。
              * 如果实际选项数量小于这个数量，没有影响，否则将出现垂直滚动条，通过滚动条控制其它选项的显示。
              * @public

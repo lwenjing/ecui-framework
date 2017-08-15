@@ -176,12 +176,21 @@ Item/Items - 定义选项操作相关的基本操作。
          * append 方法是 add 方法去掉第二个 index 参数的版本。
          * @public
          *
-         * @param {string|Element|ecui.ui.Item} item 控件的 html 内容/控件对应的主元素对象/选项控件
+         * @param {string|Element|ecui.ui.Item|Array} item 控件的 html 内容/控件对应的主元素对象/选项控件/选项控件组
          * @param {Object} 子控件初始化选项
          * @return {ecui.ui.Item} 子选项控件
          */
         append: function (item, options) {
-            this.add(item, null, options);
+            if (item instanceof Array) {
+                this.preventAlterItems();
+                item.forEach(function (item) {
+                    this.add(item, null, options);
+                }, this);
+                this.premitAlterItems();
+                this.alterItems();
+            } else {
+                this.add(item, null, options);
+            }
         },
 
         /**
@@ -233,6 +242,19 @@ Item/Items - 定义选项操作相关的基本操作。
                 item.setParent();
             }
             return item || null;
+        },
+
+        /**
+         * 移除所有子选项控件。
+         * @public
+         */
+        removeAll: function () {
+            this.preventAlterItems();
+            this.getItems().reverse().forEach(function (item) {
+                this.remove(item);
+            }, this);
+            this.premitAlterItems();
+            this.alterItems();
         },
 
         /**
