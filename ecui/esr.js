@@ -501,9 +501,14 @@
         setData: function (name, value) {
             context[name] = value;
             if (autoRender[name]) {
-                autoRender[name].forEach(function (item) {
-                    item[1].call(item[0], value);
-                });
+                util.timer(
+                    function () {
+                        autoRender[name].forEach(function (item) {
+                            item[1].call(item[0], value);
+                        });
+                    },
+                    0
+                );
             }
         },
 
