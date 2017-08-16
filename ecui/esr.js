@@ -13,10 +13,12 @@
 //{/if}//
     var routes = {},
         autoRender = {},
+        renderList = [],
         context = {},
         currLocation = '',
         checkLeave = true,
         pauseStatus,
+        timer = util.blank,
         cssload = {};
 
     /**
@@ -56,6 +58,19 @@
                 esr.callRoute(replace(item), true);
             });
         }
+    }
+
+    /**
+     * 数据刷新定时器。
+     * @private
+     */
+    function renderTimer() {
+        renderList.forEach(function (name) {
+            autoRender[name].forEach(function (item) {
+                item[1].call(item[0], context[name]);
+            });
+        });
+        renderList = [];
     }
 
     /**
@@ -501,14 +516,9 @@
         setData: function (name, value) {
             context[name] = value;
             if (autoRender[name]) {
-                util.timer(
-                    function () {
-                        autoRender[name].forEach(function (item) {
-                            item[1].call(item[0], value);
-                        });
-                    },
-                    0
-                );
+                timer();
+                timer = util.timer(renderTimer, 0);
+                renderList.push(name);
             }
         },
 
