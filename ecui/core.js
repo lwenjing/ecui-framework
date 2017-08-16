@@ -1498,9 +1498,7 @@
                     for (var key in item) {
                         if (item.hasOwnProperty(key)) {
                             if (key) {
-                                if (agent.prototype.hasOwnProperty(key)) {
-                                    agent.prototype[item['']][key] = agent.prototype[key];
-                                }
+                                agent.prototype[item['']][key] = agent.prototype[key] || util.blank;
                                 agent.prototype[key] = item[key];
                             }
                         }
@@ -1524,7 +1522,6 @@
             if (!initEnvironment() && el) {
                 var list = dom.getAttribute(el, ecuiName) ? [el] : [],
                     controls = [],
-                    names,
                     options;
 
                 if (!initRecursion) {
