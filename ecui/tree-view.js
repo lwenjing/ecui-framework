@@ -118,14 +118,17 @@ _aChildren     - 子控件集合
             $click: function (event) {
                 ui.Control.prototype.$click.call(this, event);
 
-                if (event.getControl() === this && this._eChildren) {
-                    if (this.isCollapsed()) {
-                        this.expand();
-                        core.triggerEvent(this, 'expand');
-                    } else {
-                        this.collapse();
-                        core.triggerEvent(this, 'collapse');
+                if (event.getControl() === this) {
+                    if (this._eChildren) {
+                        if (this.isCollapsed()) {
+                            this.expand();
+                            core.triggerEvent(this, 'expand');
+                        } else {
+                            this.collapse();
+                            core.triggerEvent(this, 'collapse');
+                        }
                     }
+                    core.triggerEvent(this, 'nodeclick', event);
                 }
             },
 
@@ -188,6 +191,23 @@ _aChildren     - 子控件集合
             },
 
             /**
+             * 节点点击事件的默认处理。
+             * @protected
+             *
+             * @param {ecui.ui.Event} event 事件对象
+             */
+            $nodeclick: function () {
+                var root = this.getRoot();
+                if (root._cSelected !== this) {
+                    if (root._cSelected) {
+                        root._cSelected.alterClass('-selected');
+                    }
+                    this.alterClass('+selected');
+                    root._cSelected = this;
+                }
+            },
+
+            /**
              * 节点移出事件的默认处理。
              * 鼠标移出节点区域时，控件解除悬停状态，移除状态样式 -nodehover。与 mouseout 不同的是， nodeout 没有与父结点关联。
              * @protected
@@ -217,6 +237,12 @@ _aChildren     - 子控件集合
                 var oldParent = this.getParent();
 
                 if (oldParent) {
+                    var root = this.getRoot();
+                    if (this.contain(root._cSelected)) {
+                        root._cSelected.alterClass('-selected');
+                        root._cSelected = null;
+                    }
+
                     util.remove(oldParent._aChildren, this);
                     flush.call(oldParent);
                 }
