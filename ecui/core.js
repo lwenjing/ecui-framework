@@ -1542,19 +1542,9 @@
                 list.forEach(function (item) {
                     if (options = core.getOptions(item)) {
                         options.main = item;
-                        if (options.type) {
-                            names = options.type.split('.');
-                            if (names.length > 1) {
-                                item = ui[names[0]] || window[names[0]];
-                                for (var i = 1; i < names.length; i++) {
-                                    item = item[names[i]];
-                                }
-                            } else {
-                                item = ui[util.toCamelCase(names[0].charAt(0).toUpperCase() + options.type.slice(1))];
-                            }
-                        } else {
-                            item = ui.Control;
-                        }
+                        item = options.type ?
+                                options.type.indexOf('.') < 0 ? ui[util.toCamelCase(options.type.charAt(0).toUpperCase() + options.type.slice(1))] : util.parseNamespace(options.type) :
+                                ui.Control;
                         controls.push({object: core.$create(item, options), options: options});
                     }
                 });

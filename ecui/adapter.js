@@ -888,6 +888,20 @@ var ecui;
             },
 
             /**
+             * 解析命名空间并取出值。
+             * @public
+             *
+             * @param {string} name 命名空间的名称
+             * @return {Object} 命名空间对应的值
+             */
+            parseNamespace: function (name) {
+                for (var i = 0, value = window, list = name.split('.'); name = list[i++]; ) {
+                    value = value[name];
+                }
+                return value;
+            },
+
+            /**
              * 从数组中移除对象。
              * @public
              *

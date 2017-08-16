@@ -278,18 +278,6 @@
         DEFAULT_PAGE: 'index',
         DEFAULT_MAIN: 'main',
 
-        addDataListener: function (name, control, func) {
-            if (autoRender[name]) {
-                autoRender[name].push([control, func]);
-            } else {
-                autoRender[name] = [[control, func]];
-            }
-
-            core.addEventListener(control, 'dispose', function () {
-                util.remove(autoRender[name], this);
-            });
-        },
-
         /**
          * 添加路由信息。
          * @public
@@ -694,32 +682,41 @@
      * @param {string} value 插件的参数
      */
     ext.esr = function (control, value) {
-        var values = value.split('@');
+        if (value = /^(\w+)(\*?@)(#\w*|[\w\.]*\(\))$/.exec(value)) {
+            if (value[3].charAt(0) !== '#') {
+                if (value[3].length === 2) {
+                    var setData = control.getContent().trim(),
+                        renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
+                } else {
+                    renderer = util.parseNamespace(value[3].slice(0, -2));
+                }
+                setData = function (data) {
+                    renderer.call(this, value[2].length > 1 ? context : data);
+                };
+            } else {
+                renderer = value[3].length < 2 ? etpl.compile(control.getContent()) : etpl.getRenderer(value[3].slice(1));
+                setData = function (data) {
+                    core.dispose(this.getBody(), true);
+                    this.setContent(renderer(value[2].length > 1 ? context : data));
+                    core.init(this.getBody());
+                };
+            }
 
-        if (values.length === 3) {
-            values[1] = values[2];
-        }
-        if (values[1] === '$') {
-            var setData = dom.getText(control.getBody()).trim(),
-                renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
-            setData = function (value) {
-                renderer.call(this, values[2] ? context : value);
-            };
-        } else {
-            renderer = values[1] === '!' ? etpl.compile(control.getContent()) : etpl.getRenderer(values[1]);
-            setData = function (value) {
-                core.dispose(this.getBody(), true);
-                this.setContent(renderer(values[2] ? context : value));
-                core.init(this.getBody());
-            };
-        }
+            if (autoRender[value[1]]) {
+                autoRender[value[1]].push([control, setData]);
+            } else {
+                autoRender[value[1]] = [[control, setData]];
+            }
 
-        esr.addDataListener(values[0], control, setData);
+            core.addEventListener(control, 'dispose', function () {
+                util.remove(autoRender[value[1]], this);
+            });
 
-        if (context[name] !== undefined) {
-            setData.call(control, context[name]);
-        } else {
-            control.setContent('');
+            if (context[value[1]] !== undefined) {
+                setData.call(control, context[value[1]]);
+            } else {
+                control.setContent('');
+            }
         }
     };
 }());
