@@ -37,38 +37,6 @@ Button - 定义按钮的基本操作。
             util.setDefault(options, 'userSelect', false);
 
             ui.Control.call(this, el, options);
-        },
-        {
-            /**
-             * 按钮控件获得激活时需要阻止事件的冒泡。
-             * @override
-             */
-            $activate: function (event) {
-                ui.Control.prototype.$activate.call(this, event);
-                event.stopPropagation();
-            },
-
-            /**
-             * 如果控件处于激活状态，移除状态样式 -active，移除状态样式不失去激活状态。
-             * @override
-             */
-            $mouseout: function (event) {
-                ui.Control.prototype.$mouseout.call(this, event);
-                if (this.isActived()) {
-                    this.alterClass('-active');
-                }
-            },
-
-            /**
-             * 如果控件处于激活状态，添加状态样式 -active。
-             * @override
-             */
-            $mouseover: function (event) {
-                ui.Control.prototype.$mouseover.call(this, event);
-                if (this.isActived()) {
-                    this.alterClass('+active');
-                }
-            }
         }
     );
 //{if 0}//
