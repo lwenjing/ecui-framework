@@ -625,7 +625,34 @@
             //onerror = onerror || onsuccess;
 
             function request(url, varName) {
-                io.ajax(replace(url), {
+                var method = url.split(' '),
+                    data;
+
+                if (method[0] === 'JSON') {
+                    url = method[1].split('?');
+                    data = {};
+                    method = url[1].split('&');
+                    method.forEach(function (item) {
+                        item = item.split('=');
+                        for (var i = 0, scope = data, list = item[0].split('.'); i < list.length - 1; i++) {
+                            scope = scope[list[i]] = scope[list[i]] || {};
+                        }
+                        scope[list[i]] = replace(item[1]);
+                    });
+                    method = 'POST';
+                    url = url[0];
+                    data = JSON.stringify(data);
+                } else if (method[0] === 'POST') {
+                    url = replace(method[1]);
+                    method = 'POST';
+                } else {
+                    url = replace(method[method.length === 1 ? 0 : 1]);
+                    method = 'GET';
+                }
+
+                io.ajax(url, {
+                    method: method,
+                    data: data,
                     onsuccess: function (data) {
                         count--;
                         try {

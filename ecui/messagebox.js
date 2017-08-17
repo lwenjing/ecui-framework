@@ -45,7 +45,7 @@ MessageBox - 消息框功能。
 
         if (!instance.isShow()) {
             for (; buttonTexts.length > buttonInstances.length; ) {
-                buttonInstances.push(core.create(ui.Button, {element: dom.create('', 'SPAN'), parent: elButton}));
+                buttonInstances.push(core.create(ui.Button, {element: dom.create(), parent: elButton}));
             }
 
             elContent.innerHTML = text;
