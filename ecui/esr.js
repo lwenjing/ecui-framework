@@ -48,10 +48,9 @@
      * 自动加载子路由。
      * @private
      *
-     * @param {string} name 路由名
      * @param {Object} route 路由对象
      */
-    function autoChildRoute(name, route) {
+    function autoChildRoute(route) {
         if (route.children) {
             var children = 'string' === typeof route.children ? [route.children] : route.children;
             children.forEach(function (item) {
@@ -272,7 +271,7 @@
         if (name === route) {
             init();
         } else {
-            autoChildRoute(name, route);
+            autoChildRoute(route);
         }
     }
 
@@ -485,8 +484,10 @@
                 if (route.onafterrender) {
                     route.onafterrender(context);
                 }
-                autoChildRoute(name, route);
-            } else if (etpl.getRenderer(route.view || name)) {
+                autoChildRoute(route);
+            } else if (!route.view) {
+                autoChildRoute(route);
+            } else if (etpl.getRenderer(route.view)) {
                 render(name, route);
             } else {
                 pauseStatus = true;
@@ -570,24 +571,7 @@
          * @param {string} name 模块名
          */
         loadModule: function (name) {
-            document.write('<script type="text/javascript" src="' + name + '/' + name + '.js" module="' + name + '"></script>');
-        },
-
-        /**
-         * 动态加载模块名，用于测试。
-         * @public
-         */
-        loadModuleName: function () {
-            var elements = document.getElementsByTagName('SCRIPT'),
-                name;
-
-            Array.prototype.some.call(elements, function (item) {
-                if (name = item.getAttribute('module')) {
-                    item.removeAttribute('module');
-                    return true;
-                }
-            });
-
+            document.write('<script type="text/javascript" src="' + name + '/' + name + '.js"></script>');
             esr.loadClass = function (filename) {
                 document.write('<script type="text/javascript" src="' + name + '/class.' + filename + '.js"></script>');
             };
@@ -602,8 +586,6 @@
                     }
                 });
             };
-
-            elements = null;
         },
 //{/if}//
         /**
