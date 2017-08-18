@@ -477,7 +477,6 @@
                 });
             }
 
-            var moduleName = name.split('.')[0];
             if ('function' === typeof route.view) {
                 if (route.onbeforerender) {
                     route.onbeforerender(context);
@@ -491,6 +490,7 @@
                 render(name, route);
             } else {
                 pauseStatus = true;
+                var moduleName = name.split('.')[0];
                 if (cssload[moduleName]) {
                     loadTPL();
                 } else {
