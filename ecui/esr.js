@@ -138,8 +138,9 @@
             }
         } else {
             pauseStatus = true;
+            var moduleName = name.split('.')[0];
             io.loadScript(
-                name + '/' + name + '.js',
+                moduleName + '/' + moduleName + '.js',
                 function () {
                     pauseStatus = false;
                     if (esr.getRoute(name)) {
@@ -464,7 +465,7 @@
          */
         render: function (name, route) {
             function loadTPL() {
-                io.ajax(name + '/' + name + '.html', {
+                io.ajax(moduleName + '/' + moduleName + '.html', {
                     onsuccess: function (data) {
                         pauseStatus = false;
                         etpl.compile(data);
@@ -476,6 +477,7 @@
                 });
             }
 
+            var moduleName = name.split('.')[0];
             if ('function' === typeof route.view) {
                 if (route.onbeforerender) {
                     route.onbeforerender(context);
@@ -485,19 +487,17 @@
                     route.onafterrender(context);
                 }
                 autoChildRoute(route);
-            } else if (!route.view) {
-                autoChildRoute(route);
-            } else if (etpl.getRenderer(route.view)) {
+            } else if (etpl.getRenderer(route.view || name)) {
                 render(name, route);
             } else {
                 pauseStatus = true;
-                if (cssload[name]) {
+                if (cssload[moduleName]) {
                     loadTPL();
                 } else {
-                    io.ajax(name + '/' + name + '.css', {
+                    io.ajax(moduleName + '/' + moduleName + '.css', {
                         onsuccess: function (data) {
                             dom.createStyleSheet(data);
-                            cssload[name] = true;
+                            cssload[moduleName] = true;
                             loadTPL();
                         },
                         onerror: function () {
@@ -563,31 +563,7 @@
                 }
             });
         },
-//{if 0}//
-        /**
-         * 动态加载模块，用于测试。
-         * @public
-         *
-         * @param {string} name 模块名
-         */
-        loadModule: function (name) {
-            document.write('<script type="text/javascript" src="' + name + '/' + name + '.js"></script>');
-            esr.loadClass = function (filename) {
-                document.write('<script type="text/javascript" src="' + name + '/class.' + filename + '.js"></script>');
-            };
-            esr.loadRoute = function (filename) {
-                document.write('<script type="text/javascript" src="' + name + '/route.' + filename + '.js"></script>');
-                document.write('<link rel="stylesheet/less" type="text/css" href="' + name + '/route.' + filename + '.css" />');
-                core.pause();
-                io.ajax(name + '/route.' + filename + '.html', {
-                    onsuccess: function (data) {
-                        core.resume();
-                        etpl.compile(data);
-                    }
-                });
-            };
-        },
-//{/if}//
+
         /**
          * 请求数据。
          * @public
@@ -744,4 +720,36 @@
             }
         }
     };
+//{if 0}//
+    /**
+     * 动态加载模块，用于测试。
+     * @public
+     *
+     * @param {string} name 模块名
+     */
+    var moduleName;
+
+    esr.loadModule = function (name) {
+        document.write('<script type="text/javascript">ecui.esr.setModuleName("' + name + '")</script>');
+        document.write('<script type="text/javascript" src="' + name + '/' + name + '.js"></script>');
+    };
+
+    esr.setModuleName = function (name) {
+        moduleName = name;
+    };
+    esr.loadClass = function (filename) {
+        document.write('<script type="text/javascript" src="' + moduleName + '/class.' + filename + '.js"></script>');
+    };
+    esr.loadRoute = function (filename) {
+        document.write('<script type="text/javascript" src="' + moduleName + '/route.' + filename + '.js"></script>');
+        document.write('<link rel="stylesheet/less" type="text/css" href="' + moduleName + '/route.' + filename + '.css" />');
+        core.pause();
+        io.ajax(moduleName + '/route.' + filename + '.html', {
+            onsuccess: function (data) {
+                core.resume();
+                etpl.compile(data);
+            }
+        });
+    };
+//{/if}//
 }());
