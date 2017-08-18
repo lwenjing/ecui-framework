@@ -584,12 +584,15 @@
             //onerror = onerror || onsuccess;
 
             function request(url, varName) {
-                var method = url.split(' '),
-                    data;
+                var method = url.split(' ');
 
                 if (method[0] === 'JSON') {
+                    var headers = {
+                            'Content-Type': 'application/json;charset=UTF-8'
+                        },
+                        data = {};
+
                     url = method[1].split('?');
-                    data = {};
                     method = url[1].split('&');
                     method.forEach(function (item) {
                         item = item.split('=');
@@ -611,6 +614,7 @@
 
                 io.ajax(url, {
                     method: method,
+                    headers: headers,
                     data: data,
                     onsuccess: function (data) {
                         count--;
