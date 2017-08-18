@@ -549,7 +549,7 @@ var ecui;
                     // 在open之后再进行http请求头设定
                     // FIXME 是否需要添加; charset=UTF-8呢
                     if (method === 'POST') {
-//                        xhr.setRequestHeader('Content-Type', headers['Content-Type'] || 'application/x-www-form-urlencoded');
+                        xhr.setRequestHeader('Content-Type', headers['Content-Type'] || 'application/x-www-form-urlencoded');
                         delete headers['Content-Type'];
                     }
 

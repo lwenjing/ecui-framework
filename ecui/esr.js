@@ -588,7 +588,7 @@
 
                 if (method[0] === 'JSON') {
                     var headers = {
-//                            'Content-Type': 'application/json;charset=UTF-8'
+                            'Content-Type': 'application/json;charset=UTF-8'
                         },
                         data = {};
 
