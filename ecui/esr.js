@@ -285,7 +285,8 @@
     function replace(rule) {
         return rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
             name = name.split('|');
-            return context[name[0]] === undefined ? (name[1] || '') : context[name[0]];
+            var value = util.parseNamespace(name[0], context);
+            return value === undefined ? (name[1] || '') : value;
         });
     }
 

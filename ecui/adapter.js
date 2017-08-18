@@ -892,13 +892,18 @@ var ecui;
              * @public
              *
              * @param {string} name 命名空间的名称
-             * @return {Object} 命名空间对应的值
+             * @param {Object} namespace 开始的namespace，默认从window开始
+             * @return {Object} 命名空间对应的值，如果不存在返回undefined
              */
-            parseNamespace: function (name) {
-                for (var i = 0, value = window, list = name.split('.'); name = list[i++]; ) {
-                    value = value[name];
+            parseNamespace: function (name, namespace) {
+                namespace = namespace || window;
+                for (var i = 0, list = name.split('.'); name = list[i++]; ) {
+                    namespace = namespace[name];
+                    if (namespace === undefined || namespace === null) {
+                        return undefined;
+                    }
                 }
-                return value;
+                return namespace;
             },
 
             /**
