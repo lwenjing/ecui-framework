@@ -651,6 +651,8 @@
                     method = 'GET';
                 }
 
+                console.log(method, url, data);
+
                 io.ajax(url, {
                     method: method,
                     data: data,
