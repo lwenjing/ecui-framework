@@ -854,7 +854,7 @@ var ecui;
                             fn.call(options.$, percent, options);
                             if (percent === 1) {
                                 if (options.callback) {
-                                    options.callback();
+                                    options.callback.call(options.$, options);
                                 }
                                 fn = options = transition = null;
                             }
@@ -872,7 +872,7 @@ var ecui;
                         if (flag) {
                             fn.call(options.$, 1, options);
                             if (options.callback) {
-                                options.callback();
+                                options.callback.call(options.$, options);
                             }
                         }
                     }
