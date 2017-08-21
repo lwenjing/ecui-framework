@@ -821,14 +821,21 @@ var ecui;
                     var result = [];
                     fn.split(';').forEach(function (item) {
                         var list = item.split('->'),
-                            values = new Function('$', 'return [' + list.join(',') + ']').call(options.$, options);
+                            o = list[1].split('@'),
+                            values;
+
+                        list[1] = o[0];
+                        values = new Function('$', 'return [' + (o[1] || list[0]) + ',' + list[1] + ']').call(options.$, options);
                         if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
                             var currValue = RegExp['$&'];
                             if (currValue !== values[1]) {
-                                result.push(list[0] + '=' + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + list[1] + '-(' + currValue + '))*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : ''));
+                                o = list[0].indexOf('#');
+                                values = (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + list[1] + '-(' + currValue + '))*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
+                                result.push(o >= 0 ? list[0].slice(0, o) + values + list[0].slice(o + 1) : list[0] + '=' + values);
                             }
                         }
                     });
+                    console.log(result);
                     if (!result.length) {
                         return;
                     }
