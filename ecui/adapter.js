@@ -833,11 +833,19 @@ var ecui;
                                 parseInt(list[1].slice(5), 16)
                             ];
                             if (value.charAt(0) === '#') {
-                                value = [
-                                    parseInt(value.slice(1, 3), 16),
-                                    parseInt(value.slice(3, 5), 16),
-                                    parseInt(value.slice(5), 16)
-                                ];
+                                if (value.length === 4) {
+                                    value = [
+                                        parseInt(value.charAt(1) + value.charAt(1), 16),
+                                        parseInt(value.charAt(2) + value.charAt(2), 16),
+                                        parseInt(value.charAt(3) + value.charAt(3), 16),
+                                    ];
+                                } else {
+                                    value = [
+                                        parseInt(value.slice(1, 3), 16),
+                                        parseInt(value.slice(3, 5), 16),
+                                        parseInt(value.slice(5), 16)
+                                    ];
+                                }
                             } else {
                                 value = value.split(/(\(|\s*,\s*|\))/);
                                 value = [+value[2], +value[4], +value[6]];
