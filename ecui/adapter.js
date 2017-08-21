@@ -835,7 +835,6 @@ var ecui;
                             }
                         }
                     });
-                    console.log(result);
                     if (!result.length) {
                         return;
                     }
