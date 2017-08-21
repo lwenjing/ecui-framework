@@ -821,20 +821,44 @@ var ecui;
                     var result = [];
                     fn.split(';').forEach(function (item) {
                         var list = item.split('->'),
-                            o = list[1].split('@'),
-                            values;
+                            exp = list[1].split('@'),
+                            value;
 
-                        list[1] = o[0];
-                        values = new Function('$', 'return [' + (o[1] || list[0]) + ',' + list[1] + ']').call(options.$, options);
-                        if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
-                            var currValue = RegExp['$&'];
-                            if (currValue !== values[1]) {
-                                o = list[0].indexOf('#');
-                                values = (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + list[1] + '-(' + currValue + '))*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
-                                result.push(o >= 0 ? list[0].slice(0, o) + values + list[0].slice(o + 1) : list[0] + '=' + values);
+                        list[1] = exp[0];
+                        value = new Function('$', 'return ' + (exp[1] || list[0])).call(options.$, options);
+                        if (list[1].charAt(0) === '#') {
+                            exp = [
+                                parseInt(list[1].slice(1, 3), 16),
+                                parseInt(list[1].slice(3, 5), 16),
+                                parseInt(list[1].slice(5), 16)
+                            ];
+                            if (value.charAt(0) === '#') {
+                                value = [
+                                    parseInt(value.slice(1, 3), 16),
+                                    parseInt(value.slice(3, 5), 16),
+                                    parseInt(value.slice(5), 16)
+                                ];
+                            } else {
+                                value = value.split(/(\(|\s*,\s*|\))/);
+                                value = [+value[2], +value[4], +value[6]];
                             }
+                            if (value[0] === exp[0] && value[1] === exp[1] && value[2] === exp[2]) {
+                                return;
+                            }
+                            exp = '"rgb("+Math.floor(' + value[0] + '+(' + exp[0] + '-(' + value[0] + '))*p)+","+Math.floor(' + value[1] + '+(' + exp[1] + '-(' + value[1] + '))*p)+","+Math.floor(' + value[2] + '+(' + exp[2] + '-(' + value[2] + '))*p)+")"';
+                        } else if (/-?[0-9]+(\.[0-9]+)?/.test(value)) {
+                            var currValue = RegExp['$&'];
+                            if (currValue === list[1]) {
+                                return;
+                            }
+                            exp = (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + list[1] + '-(' + currValue + '))*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
+                        } else {
+                            return;
                         }
+                        value = list[0].indexOf('#');
+                        result.push(value >= 0 ? list[0].slice(0, value) + exp + list[0].slice(value + 1) : list[0] + '=' + exp);
                     });
+                    console.log(result);
                     if (!result.length) {
                         return;
                     }
