@@ -1082,7 +1082,7 @@ var ecui;
             },
 
             set: function (el, value) {
-                el.style.filter = el.style.filter.replace(/alpha\([^\)]*\)/gi, '') + (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') + '(opacity=' + value * 100 + ')';
+                el.style.filter = el.style.filter.replace(/alpha\([^\)]*\)/gi, '') + (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') + '(opacity=' + value * 100 + ')' : '');
             }
         } : undefined,
 
