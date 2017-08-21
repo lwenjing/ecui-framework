@@ -810,7 +810,7 @@ var ecui;
              * 渐变处理。
              * @public
              *
-             * @param {Function|string} fn 处理渐变的函数或函数体
+             * @param {Function|string} fn 处理渐变的函数或函数体，fn支持字符串方式描述的渐变函数，简单的可以是this.style.left->100px，复杂的可以是ecui.dom.setStyle(this,"opacity",#)->0@ecui.dom.getStyle(this,"opacity")，其中#表示数据填充到这里，@符号表示第一次读取数据的方式
              * @param {number} duration 渐变的总时长
              * @param {Object} options 渐变的参数，一般用于描述渐变的信息
              * @param {Function} transition 时间线函数
@@ -853,6 +853,9 @@ var ecui;
                             }
                             fn.call(options.$, percent, options);
                             if (percent === 1) {
+                                if (options.callback) {
+                                    options.callback();
+                                }
                                 fn = options = transition = null;
                             }
                         },
@@ -868,6 +871,9 @@ var ecui;
                         stop();
                         if (flag) {
                             fn.call(options.$, 1, options);
+                            if (options.callback) {
+                                options.callback();
+                            }
                         }
                     }
                     fn = options = transition = null;
