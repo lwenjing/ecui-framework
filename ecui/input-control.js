@@ -200,7 +200,7 @@ _eInput        - INPUT对象
      */
     ui.InputControl = core.inherits(
         ui.Control,
-        '',
+        'ui-input',
         function (el, options) {
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 // 根据表单项初始化

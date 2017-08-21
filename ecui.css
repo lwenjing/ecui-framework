@@ -38,14 +38,14 @@
 .ui-item {
   overflow: hidden !important;
 }
-.ui-text {
+.ui-input {
   display: inline-block;
   *display: inline;
   *zoom: 1;
   overflow: hidden !important;
   padding: 0 !important;
 }
-.ui-text input, .ui-text textarea {
+.ui-input input, .ui-input textarea {
   border: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
