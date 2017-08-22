@@ -238,6 +238,12 @@ _uOptions     - 下拉选择框
             },
 
             /**
+             * 选项改变事件默认处理。
+             * @protected
+             */
+            $change: util.blank,
+
+            /**
              * 弹出层初始化。
              * @protected
              */
