@@ -800,7 +800,7 @@ var ecui;
              *
              * @param {Function|string} fn 处理渐变的函数或函数体，fn支持字符串方式描述的渐变函数，简单的可以是this.style.left->100px，复杂的可以是ecui.dom.setStyle(this,"opacity",@ecui.dom.getStyle(this,"opacity")->0)，其中#表示数据填充到这里，@符号表示第一次读取数据的方式
              * @param {number} duration 渐变的总时长
-             * @param {Object} options 渐变的参数，一般用于描述渐变的信息，options.$对应各个函数中的this指针对象
+             * @param {Object} options 渐变的参数，一般用于描述渐变的信息，options.$对应各个函数中的this指针对象，callback在渐变处理完成时被调用
              * @param {Function} transition 时间线函数
              * @return {Function} 停止渐变或直接执行渐变到最后
              */
@@ -821,6 +821,9 @@ var ecui;
 
                         list[1] = __ECUI__Colors[exp[0]] || exp[0];
                         value = list[0].split('.style.');
+                        if (__ECUI__StyleFixer[value[1]]) {
+                            list[0] = 'ecui.dom.setStyle(' + value[0] + ',"' + value[1] + '",#)';
+                        }
                         value = new Function('$', 'return ' + (exp[1] || (value[1] ? ('ecui.dom.getStyle(' + value[0] + ',"' + value[1] + '")') : list[0]))).call(options.$, options);
                         if (list[1].charAt(0) === '#') {
                             exp = [
