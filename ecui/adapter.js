@@ -701,101 +701,8 @@ var ecui;
         },
         ui: {},
         util: {
-            /*
-             * 空函数。
-             * blank 方法不应该被执行，也不进行任何处理，它用于提供给不需要执行操作的事件方法进行赋值，与 blank 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 cancel。
-             * @public
-             */
-            blank: new Function(),
-
             /**
-             * 对目标字符串进行 html 编码。
-             * encodeHTML 方法对四个字符进行编码，分别是 &<>"
-             * @public
-             *
-             * @param {string} source 目标字符串
-             * @return {string} 结果字符串
-             */
-            encodeHTML: function (source) {
-                return source.replace(
-                    /[&<>"']/g,
-                    function (c) {
-                        return '&#' + c.charCodeAt(0) + ';';
-                    }
-                );
-            },
-
-            /**
-             * 对目标字符串进行 html 解码。
-             * @public
-             *
-             * @param {string} source 目标字符串
-             * @return {string} 结果字符串
-             */
-            decodeHTML: (function () {
-                return function (source) {
-                    //处理转义的中文和实体字符
-                    return source.replace(/&(quot|lt|gt|amp|#([\d]+));/g, function (match, $1, $2) {
-                        return __ECUI__EscapeCharacter[$1] || String.fromCharCode(+$2);
-                    });
-                };
-            }()),
-
-            /**
-             * 对象属性复制。
-             * @public
-             *
-             * @param {Object} target 目标对象
-             * @param {Object} source 源对象
-             * @return {Object} 目标对象
-             */
-            extend: function (target, source) {
-                for (var key in source) {
-                    if (source.hasOwnProperty(key)) {
-                        target[key] = source[key];
-                    }
-                }
-                return target;
-            },
-
-            /**
-             * 获取浏览器可视区域的相关信息。
-             * getView 方法将返回浏览器可视区域的信息。属性如下：
-             * top        {number} 可视区域最小X轴坐标
-             * right      {number} 可视区域最大Y轴坐标
-             * bottom     {number} 可视区域最大X轴坐标
-             * left       {number} 可视区域最小Y轴坐标
-             * width      {number} 可视区域的宽度
-             * height     {number} 可视区域的高度
-             * pageWidth  {number} 页面的宽度
-             * pageHeight {number} 页面的高度
-             * @public
-             *
-             * @return {Object} 浏览器可视区域信息
-             */
-            getView: function () {
-                var body = document.body,
-                    html = dom.getParent(body),
-                    client = isStrict ? html : body,
-                    scrollTop = html.scrollTop + body.scrollTop,
-                    scrollLeft = html.scrollLeft + body.scrollLeft,
-                    clientWidth = client.clientWidth,
-                    clientHeight = client.clientHeight;
-
-                return {
-                    top: scrollTop,
-                    right: scrollLeft + clientWidth,
-                    bottom: scrollTop + clientHeight,
-                    left: scrollLeft,
-                    width: clientWidth,
-                    height: clientHeight,
-                    pageWidth: Math.max(html.scrollWidth, body.scrollWidth, clientWidth),
-                    pageHeight: Math.max(html.scrollHeight, body.scrollHeight, clientHeight)
-                };
-            },
-
-            /**
-             * 渐变处理。
+             * 动画效果处理。
              * @public
              *
              * @param {Function|string} fn 处理渐变的函数或函数体，fn支持字符串方式描述的渐变函数，简单的可以是this.style.left->100px，复杂的可以是ecui.dom.setStyle(this,"opacity",@ecui.dom.getStyle(this,"opacity")->0)，其中#表示数据填充到这里，@符号表示第一次读取数据的方式
@@ -804,7 +711,7 @@ var ecui;
              * @param {Function} transition 时间线函数
              * @return {Function} 停止渐变或直接执行渐变到最后
              */
-            grade: function (fn, duration, options, transition) {
+            animate: function (fn, duration, options, transition) {
                 if ('string' === typeof fn) {
                     var result = [];
                     fn.split(';').forEach(function (item) {
@@ -908,6 +815,99 @@ var ecui;
                         }
                     }
                     fn = options = transition = null;
+                };
+            },
+
+            /*
+             * 空函数。
+             * blank 方法不应该被执行，也不进行任何处理，它用于提供给不需要执行操作的事件方法进行赋值，与 blank 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 cancel。
+             * @public
+             */
+            blank: new Function(),
+
+            /**
+             * 对目标字符串进行 html 编码。
+             * encodeHTML 方法对四个字符进行编码，分别是 &<>"
+             * @public
+             *
+             * @param {string} source 目标字符串
+             * @return {string} 结果字符串
+             */
+            encodeHTML: function (source) {
+                return source.replace(
+                    /[&<>"']/g,
+                    function (c) {
+                        return '&#' + c.charCodeAt(0) + ';';
+                    }
+                );
+            },
+
+            /**
+             * 对目标字符串进行 html 解码。
+             * @public
+             *
+             * @param {string} source 目标字符串
+             * @return {string} 结果字符串
+             */
+            decodeHTML: (function () {
+                return function (source) {
+                    //处理转义的中文和实体字符
+                    return source.replace(/&(quot|lt|gt|amp|#([\d]+));/g, function (match, $1, $2) {
+                        return __ECUI__EscapeCharacter[$1] || String.fromCharCode(+$2);
+                    });
+                };
+            }()),
+
+            /**
+             * 对象属性复制。
+             * @public
+             *
+             * @param {Object} target 目标对象
+             * @param {Object} source 源对象
+             * @return {Object} 目标对象
+             */
+            extend: function (target, source) {
+                for (var key in source) {
+                    if (source.hasOwnProperty(key)) {
+                        target[key] = source[key];
+                    }
+                }
+                return target;
+            },
+
+            /**
+             * 获取浏览器可视区域的相关信息。
+             * getView 方法将返回浏览器可视区域的信息。属性如下：
+             * top        {number} 可视区域最小X轴坐标
+             * right      {number} 可视区域最大Y轴坐标
+             * bottom     {number} 可视区域最大X轴坐标
+             * left       {number} 可视区域最小Y轴坐标
+             * width      {number} 可视区域的宽度
+             * height     {number} 可视区域的高度
+             * pageWidth  {number} 页面的宽度
+             * pageHeight {number} 页面的高度
+             * @public
+             *
+             * @return {Object} 浏览器可视区域信息
+             */
+            getView: function () {
+                var body = document.body,
+                    html = dom.getParent(body),
+                    client = isStrict ? html : body,
+                    scrollTop = html.scrollTop + body.scrollTop,
+                    scrollLeft = html.scrollLeft + body.scrollLeft,
+                    clientWidth = client.clientWidth,
+                    clientHeight = client.clientHeight;
+
+                return {
+                    top: scrollTop,
+                    right: scrollLeft + clientWidth,
+                    bottom: scrollTop + clientHeight,
+                    left: scrollLeft,
+                    width: clientWidth,
+                    height: clientHeight,
+                    pageWidth: Math.max(html.scrollWidth, body.scrollWidth, clientWidth),
+                    pageHeight: Math.max(html.scrollHeight, body.scrollHeight, clientHeight)
                 };
             },
 
