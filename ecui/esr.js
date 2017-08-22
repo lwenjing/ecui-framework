@@ -590,23 +590,30 @@
                     var headers = {
                             'Content-Type': 'application/json;charset=UTF-8'
                         },
-                        data = {};
+                        data;
 
                     url = method[1].split('?');
-                    method = url[1].split('&');
-                    method.forEach(function (item) {
-                        item = item.split('=');
-                        for (var i = 0, scope = data, list = item[0].split('.'); i < list.length - 1; i++) {
-                            scope = scope[list[i]] = scope[list[i]] || {};
-                        }
-                        scope[list[i]] = replace(item[1]);
-                    });
+                    if (url[1].indexOf('=') >= 0) {
+                        data = {};
+                        method = url[1].split('&');
+                        method.forEach(function (item) {
+                            item = item.split('=');
+                            for (var i = 0, scope = data, list = item[0].split('.'); i < list.length - 1; i++) {
+                                scope = scope[list[i]] = scope[list[i]] || {};
+                            }
+                            scope[list[i]] = replace(item[1]);
+                        });
+                    } else {
+                        data = replace(url[1]);
+                    }
                     method = 'POST';
                     url = url[0];
                     data = JSON.stringify(data);
                 } else if (method[0] === 'POST') {
-                    url = replace(method[1]);
+                    url = method[1].split('?');
                     method = 'POST';
+                    data = replace(url[1]);
+                    url = url[0];
                 } else {
                     url = replace(method[method.length === 1 ? 0 : 1]);
                     method = 'GET';
