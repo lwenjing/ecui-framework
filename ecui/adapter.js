@@ -707,115 +707,153 @@ var ecui;
              *
              * @param {Function|string} fn 处理渐变的函数或函数体，fn支持字符串方式描述的渐变函数，简单的可以是this.style.left->100px，复杂的可以是ecui.dom.setStyle(this,"opacity",@ecui.dom.getStyle(this,"opacity")->0)，其中#表示数据填充到这里，@符号表示第一次读取数据的方式
              * @param {number} duration 渐变的总时长
-             * @param {Object} options 渐变的参数，一般用于描述渐变的信息，options.$对应各个函数中的this指针对象，callback在渐变处理完成时被调用
-             * @param {Function} transition 时间线函数
+             * @param {Object} options 对象支持的属性如下：
+             * $          各个函数的this指针对象
+             * callback   动画效果结束后的回调函数
+             * transition 时间线函数
              * @return {Function} 停止渐变或直接执行渐变到最后
              */
-            animate: function (fn, duration, options, transition) {
-                if ('string' === typeof fn) {
-                    var result = [];
-                    fn.split(';').forEach(function (item) {
-                        var list = item.split('->'),
-                            exp = list[0].split('@'),
-                            value;
+            animate: function (fn, duration, options) {
+                function callback() {
+                    nextList.splice(0, 1)[0].call(options.$, options);
+                }
 
-                        if (exp[1]) {
-                            list[0] = exp[0] + '#' + list[1].replace(/^\w+/, '');
-                            exp[0] = RegExp['$&'];
-                        } else {
-                            exp = list[1].split('@');
-                        }
+                function compile(fn) {
+                    if ('string' === typeof fn) {
+                        var result = [];
+                        lastFnStr = lastFnStr || [];
 
-                        list[1] = __ECUI__Colors[exp[0]] || exp[0];
-                        value = list[0].split('.style.');
-                        if (__ECUI__StyleFixer[value[1]]) {
-                            list[0] = 'ecui.dom.setStyle(' + value[0] + ',"' + value[1] + '",#)';
-                        }
-                        value = new Function('$', 'return ' + (exp[1] || (value[1] ? ('ecui.dom.getStyle(' + value[0] + ',"' + value[1] + '")') : list[0]))).call(options.$, options);
-                        if (list[1].charAt(0) === '#') {
-                            exp = [
-                                parseInt(list[1].slice(1, 3), 16),
-                                parseInt(list[1].slice(3, 5), 16),
-                                parseInt(list[1].slice(5), 16)
-                            ];
-                            value = __ECUI__Colors[value] || value;
-                            if (value.charAt(0) === '#') {
-                                if (value.length === 4) {
-                                    value = [
-                                        parseInt(value.charAt(1) + value.charAt(1), 16),
-                                        parseInt(value.charAt(2) + value.charAt(2), 16),
-                                        parseInt(value.charAt(3) + value.charAt(3), 16),
-                                    ];
-                                } else {
-                                    value = [
-                                        parseInt(value.slice(1, 3), 16),
-                                        parseInt(value.slice(3, 5), 16),
-                                        parseInt(value.slice(5), 16)
-                                    ];
-                                }
+                        fn.split(';').forEach(function (item, index) {
+                            if (item.indexOf('->') === 0) {
+                                item = lastFnStr[index].replace(/\->\w+/, '->' + item.slice(2));
                             } else {
-                                value = value.split(/(\(|\s*,\s*|\))/);
-                                value = [+value[2], +value[4], +value[6]];
+                                lastFnStr[index] = item;
                             }
-                            if (value[0] === exp[0] && value[1] === exp[1] && value[2] === exp[2]) {
+
+                            var list = item.split('->'),
+                                exp = list[0].split('@'),
+                                value;
+
+                            if (exp[1]) {
+                                list[0] = exp[0] + '#' + list[1].replace(/^\w+/, '');
+                                exp[0] = RegExp['$&'];
+                            } else {
+                                exp = list[1].split('@');
+                            }
+
+                            list[1] = __ECUI__Colors[exp[0]] || exp[0];
+                            value = list[0].split('.style.');
+                            if (__ECUI__StyleFixer[value[1]]) {
+                                list[0] = 'ecui.dom.setStyle(' + value[0] + ',"' + value[1] + '",#)';
+                            }
+                            value = new Function('$', 'return ' + (exp[1] || (value[1] ? ('ecui.dom.getStyle(' + value[0] + ',"' + value[1] + '")') : list[0]))).call(options.$, options);
+                            if (list[1].charAt(0) === '#') {
+                                exp = [
+                                    parseInt(list[1].slice(1, 3), 16),
+                                    parseInt(list[1].slice(3, 5), 16),
+                                    parseInt(list[1].slice(5), 16)
+                                ];
+                                value = __ECUI__Colors[value] || value;
+                                if (value.charAt(0) === '#') {
+                                    if (value.length === 4) {
+                                        value = [
+                                            parseInt(value.charAt(1) + value.charAt(1), 16),
+                                            parseInt(value.charAt(2) + value.charAt(2), 16),
+                                            parseInt(value.charAt(3) + value.charAt(3), 16),
+                                        ];
+                                    } else {
+                                        value = [
+                                            parseInt(value.slice(1, 3), 16),
+                                            parseInt(value.slice(3, 5), 16),
+                                            parseInt(value.slice(5), 16)
+                                        ];
+                                    }
+                                } else {
+                                    value = value.split(/(\(|\s*,\s*|\))/);
+                                    value = [+value[2], +value[4], +value[6]];
+                                }
+                                if (value[0] === exp[0] && value[1] === exp[1] && value[2] === exp[2]) {
+                                    return;
+                                }
+                                exp = '"rgb("+Math.floor(' + value[0] + '+(' + exp[0] + '-(' + value[0] + '))*p)+","+Math.floor(' + value[1] + '+(' + exp[1] + '-(' + value[1] + '))*p)+","+Math.floor(' + value[2] + '+(' + exp[2] + '-(' + value[2] + '))*p)+")"';
+                            } else if (/-?[0-9]+(\.[0-9]+)?/.test(value)) {
+                                var currValue = RegExp['$&'];
+                                if (currValue === list[1]) {
+                                    return;
+                                }
+                                exp = (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + list[1] + '-(' + currValue + '))*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
+                            } else {
                                 return;
                             }
-                            exp = '"rgb("+Math.floor(' + value[0] + '+(' + exp[0] + '-(' + value[0] + '))*p)+","+Math.floor(' + value[1] + '+(' + exp[1] + '-(' + value[1] + '))*p)+","+Math.floor(' + value[2] + '+(' + exp[2] + '-(' + value[2] + '))*p)+")"';
-                        } else if (/-?[0-9]+(\.[0-9]+)?/.test(value)) {
-                            var currValue = RegExp['$&'];
-                            if (currValue === list[1]) {
-                                return;
-                            }
-                            exp = (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + list[1] + '-(' + currValue + '))*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
-                        } else {
+                            value = list[0].indexOf('#');
+                            result.push(value >= 0 ? list[0].slice(0, value) + exp + list[0].slice(value + 1) : list[0] + '=' + exp);
+                        });
+
+                        if (!result.length) {
                             return;
                         }
-                        value = list[0].indexOf('#');
-                        result.push(value >= 0 ? list[0].slice(0, value) + exp + list[0].slice(value + 1) : list[0] + '=' + exp);
-                    });
-
-                    if (!result.length) {
-                        return;
+                        fn = new Function('p', '$', result.join(';'));
+                    } else {
+                        lastFnStr = undefined;
                     }
-                    fn = new Function('p', '$', result.join(';'));
+                    return fn;
                 }
+
+                fn = compile(fn);
 
                 var startTime = Date.now(),
                     stop = util.timer(
                         function () {
                             var currTime = Date.now() - startTime,
-                                percent = transition(currTime / duration);
+                                percent;
                             if (currTime >= duration) {
                                 percent = 1;
-                                stop();
+                            } else {
+                                percent = transition(currTime / duration);
                             }
                             fn.call(options.$, percent, options);
                             if (percent === 1) {
-                                if (options.callback) {
-                                    options.callback.call(options.$, options);
+                                callback();
+                                if (!nextList.length) {
+                                    stop();
+                                    fn = options = transition = null;
                                 }
-                                fn = options = transition = null;
                             }
                         },
                         -20
-                    );
-
-                transition = transition || function (percent) {
-                    return 1 - Math.pow(1 - percent, 2);
-                };
-
-                return function (flag) {
-                    if (fn) {
-                        stop();
-                        if (flag) {
-                            fn.call(options.$, 1, options);
-                            if (options.callback) {
-                                options.callback.call(options.$, options);
+                    ),
+                    nextList = [options.callback || util.blank],
+                    transition =
+                        options.transition ||
+                        function (percent) {
+                            return 1 - Math.pow(1 - percent, 2);
+                        },
+                    ret = {
+                        stop: function (flag) {
+                            if (fn) {
+                                stop();
+                                if (flag) {
+                                    while (nextList.length) {
+                                        fn.call(options.$, 1, options);
+                                        callback();
+                                    }
+                                }
                             }
+                            fn = options = transition = null;
+                        },
+
+                        add: function (nextFn, nextDuration) {
+                            nextList.splice(nextList.length - 1, 0, function () {
+                                fn = compile(nextFn);
+                                startTime += duration;
+                                duration = nextDuration;
+                            });
+                            return ret;
                         }
-                    }
-                    fn = options = transition = null;
-                };
+                    },
+                    lastFnStr;
+
+                return ret;
             },
 
             /*
