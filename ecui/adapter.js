@@ -247,7 +247,7 @@ var ecui;
              * @return {CssStyle|Object} CssStyle 对象或样式值
              */
             getStyle: function (el, name) {
-                var fixer = __ECUI__styleFixer[name],
+                var fixer = __ECUI__StyleFixer[name],
                     style = el.currentStyle || (ieVersion ? el.style : getComputedStyle(el, null));
 
                 return name ? fixer && fixer.get ? fixer.get(el, style) : style[fixer || name] : style;
@@ -315,12 +315,7 @@ var ecui;
              * @param {string} html 要插入的 html 代码
              */
             insertHTML: firefoxVersion ? function (el, position, html) {
-                var name = {
-                        AFTERBEGIN: 'selectNodeContents',
-                        BEFOREEND: 'selectNodeContents',
-                        BEFOREBEGIN: 'setStartBefore',
-                        AFTEREND: 'setEndAfter'
-                    }[position.toUpperCase()],
+                var name = __ECUI__HTMLPosition[position.toUpperCase()],
                     range = document.createRange();
 
                 range[name](el);
@@ -480,7 +475,7 @@ var ecui;
              * @param {string} value 样式值
              */
             setStyle: function (el, name, value) {
-                var fixer = __ECUI__styleFixer[name];
+                var fixer = __ECUI__StyleFixer[name];
                 if (fixer && fixer.set) {
                     fixer.set(el, value);
                 } else {
@@ -738,17 +733,10 @@ var ecui;
              * @return {string} 结果字符串
              */
             decodeHTML: (function () {
-                var codeTable = {
-                    quot: '"',
-                    lt: '<',
-                    gt: '>',
-                    amp: '&'
-                };
-
                 return function (source) {
                     //处理转义的中文和实体字符
                     return source.replace(/&(quot|lt|gt|amp|#([\d]+));/g, function (match, $1, $2) {
-                        return codeTable[$1] || String.fromCharCode(+$2);
+                        return __ECUI__EscapeCharacter[$1] || String.fromCharCode(+$2);
                     });
                 };
             }()),
@@ -810,9 +798,9 @@ var ecui;
              * 渐变处理。
              * @public
              *
-             * @param {Function|string} fn 处理渐变的函数或函数体，fn支持字符串方式描述的渐变函数，简单的可以是this.style.left->100px，复杂的可以是ecui.dom.setStyle(this,"opacity",#)->0@ecui.dom.getStyle(this,"opacity")，其中#表示数据填充到这里，@符号表示第一次读取数据的方式
+             * @param {Function|string} fn 处理渐变的函数或函数体，fn支持字符串方式描述的渐变函数，简单的可以是this.style.left->100px，复杂的可以是ecui.dom.setStyle(this,"opacity",@ecui.dom.getStyle(this,"opacity")->0)，其中#表示数据填充到这里，@符号表示第一次读取数据的方式
              * @param {number} duration 渐变的总时长
-             * @param {Object} options 渐变的参数，一般用于描述渐变的信息
+             * @param {Object} options 渐变的参数，一般用于描述渐变的信息，options.$对应各个函数中的this指针对象
              * @param {Function} transition 时间线函数
              * @return {Function} 停止渐变或直接执行渐变到最后
              */
@@ -821,17 +809,26 @@ var ecui;
                     var result = [];
                     fn.split(';').forEach(function (item) {
                         var list = item.split('->'),
-                            exp = list[1].split('@'),
+                            exp = list[0].split('@'),
                             value;
 
-                        list[1] = exp[0];
-                        value = new Function('$', 'return ' + (exp[1] || list[0])).call(options.$, options);
+                        if (exp[1]) {
+                            list[0] = exp[0] + '#' + list[1].replace(/^\w+/, '');
+                            exp[0] = RegExp['$&'];
+                        } else {
+                            exp = list[1].split('@');
+                        }
+
+                        list[1] = __ECUI__Colors[exp[0]] || exp[0];
+                        value = list[0].split('.style.');
+                        value = new Function('$', 'return ' + (exp[1] || (value[1] ? ('ecui.dom.getStyle(' + value[0] + ',"' + value[1] + '")') : list[0]))).call(options.$, options);
                         if (list[1].charAt(0) === '#') {
                             exp = [
                                 parseInt(list[1].slice(1, 3), 16),
                                 parseInt(list[1].slice(3, 5), 16),
                                 parseInt(list[1].slice(5), 16)
                             ];
+                            value = __ECUI__Colors[value] || value;
                             if (value.charAt(0) === '#') {
                                 if (value.length === 4) {
                                     value = [
@@ -866,7 +863,7 @@ var ecui;
                         value = list[0].indexOf('#');
                         result.push(value >= 0 ? list[0].slice(0, value) + exp + list[0].slice(value + 1) : list[0] + '=' + exp);
                     });
-                    console.log(result);
+
                     if (!result.length) {
                         return;
                     }
@@ -1089,36 +1086,74 @@ var ecui;
     //{if 1}//var eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];//{/if}//
 
     // 读写特殊的 css 属性操作
-    var __ECUI__styleFixer = {
-        display: ieVersion < 8 ? {
-            get: function (el, style) {
-                return style.display === 'inline' && style.zoom === '1' ? 'inline-block' : style.display;
-            },
+    var __ECUI__StyleFixer =
+        {
+            display: ieVersion < 8 ? {
+                get: function (el, style) {
+                    return style.display === 'inline' && style.zoom === '1' ? 'inline-block' : style.display;
+                },
 
-            set: function (el, value) {
-                if (value === 'inline-block') {
-                    value = 'inline';
-                    el.style.zoom = 1;
+                set: function (el, value) {
+                    if (value === 'inline-block') {
+                        value = 'inline';
+                        el.style.zoom = 1;
+                    }
+                    el.style.display = value;
                 }
-                el.style.display = value;
-            }
-        } : undefined,
+            } : undefined,
 
-        opacity: ieVersion < 9 ? {
-            get: function (el, style) {
-                if (/\(opacity=(\d+)/.test(style.filter)) {
-                    return String(+RegExp.$1 / 100);
+            opacity: ieVersion < 9 ? {
+                get: function (el, style) {
+                    if (/\(opacity=(\d+)/.test(style.filter)) {
+                        return String(+RegExp.$1 / 100);
+                    }
+                    return '1';
+                },
+
+                set: function (el, value) {
+                    el.style.filter = el.style.filter.replace(/alpha\([^\)]*\)/gi, '') + (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') + '(opacity=' + value * 100 + ')' : '');
                 }
-                return '1';
-            },
+            } : undefined,
 
-            set: function (el, value) {
-                el.style.filter = el.style.filter.replace(/alpha\([^\)]*\)/gi, '') + (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') + '(opacity=' + value * 100 + ')' : '');
-            }
-        } : undefined,
+            'float': ieVersion ? 'styleFloat' : 'cssFloat'
+        },
 
-        'float': ieVersion ? 'styleFloat' : 'cssFloat'
-    };
+        __ECUI__HTMLPosition =
+        {
+            AFTERBEGIN: 'selectNodeContents',
+            BEFOREEND: 'selectNodeContents',
+            BEFOREBEGIN: 'setStartBefore',
+            AFTEREND: 'setEndAfter'
+        },
+
+        __ECUI__EscapeCharacter =
+        {
+            quot: '"',
+            lt: '<',
+            gt: '>',
+            amp: '&'
+        },
+
+        __ECUI__Colors =
+        {
+            aqua: '#00FFFF',
+            black: '#000000',
+            blue: '#0000FF',
+            fuchsia: '#FF00FF',
+            gray: '#808080',
+            green: '#008000',
+            lime: '#00FF00',
+            maroon: '#800000',
+            navy: '#000080',
+            olive: '#808000',
+            orange: '#FFA500',
+            purple: '#800080',
+            red: '#FF0000',
+            silver: '#C0C0C0',
+            teal: '#008080',
+            white: '#FFFFFF',
+            yellow: '#FFFF00'
+        };
 
     /**
      * 返回指定id的 DOM 对象。
