@@ -452,6 +452,10 @@
                     if (!addIEHistory(loc)) {
                         esr.callRoute(loc);
                     }
+
+                    if (esr.onhashchange) {
+                        esr.onhashchange();
+                    }
                 }
             }
         },
