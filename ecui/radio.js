@@ -43,7 +43,7 @@ _bDefault  - 默认的选中状态
      */
     ui.Radio = core.inherits(
         ui.InputControl,
-        '*ui-radio',
+        'ui-radio',
         function (el, options) {
             util.setDefault(options, 'hidden', true);
             util.setDefault(options, 'inputType', 'radio');

@@ -71,7 +71,7 @@ _uOptions     - 下拉选择框
      */
     ui.Select = core.inherits(
         ui.InputControl,
-        '*ui-select',
+        'ui-select',
         function (el, options) {
             var optionsEl = dom.create(options.classes.join('-options ') + 'ui-hide');
 

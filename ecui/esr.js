@@ -590,17 +590,27 @@
             function request(url, varName) {
                 var method = url.split(' ');
 
-                if (method[0] === 'JSON') {
+                if (method[0] === 'JSON' || method[0] === 'FORM') {
                     var headers = {
                             'Content-Type': 'application/json;charset=UTF-8'
                         },
                         data;
 
                     url = method[1].split('?');
-                    if (url[1].indexOf('=') >= 0) {
+                    if (method[0] === 'FORM') {
                         data = {};
-                        method = url[1].split('&');
-                        method.forEach(function (item) {
+                        Array.prototype.slice.call(document.forms[url[1]].elements).forEach(function (item) {
+                            if (item.type === 'radio' && !item.checked) {
+                                return;
+                            }
+                            for (var i = 0, scope = data, list = item.name.split('.'); i < list.length - 1; i++) {
+                                scope = scope[list[i]] = scope[list[i]] || {};
+                            }
+                            scope[list[i]] = item.value;
+                        });
+                    } else if (url[1].indexOf('=') >= 0) {
+                        data = {};
+                        url[1].split('&').forEach(function (item) {
                             item = item.split('=');
                             for (var i = 0, scope = data, list = item[0].split('.'); i < list.length - 1; i++) {
                                 scope = scope[list[i]] = scope[list[i]] || {};

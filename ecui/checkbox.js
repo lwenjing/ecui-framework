@@ -76,7 +76,7 @@ _aDependents     - 所有的从属复选框
      */
     ui.Checkbox = core.inherits(
         ui.InputControl,
-        '*ui-checkbox',
+        'ui-checkbox',
         function (el, options) {
             util.setDefault(options, 'hidden', true);
             util.setDefault(options, 'inputType', 'checkbox');
