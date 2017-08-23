@@ -31,6 +31,9 @@
         pauseCount = 0,           // 暂停的次数
         mouseX,                   // 当前鼠标光标的X轴坐标
         mouseY,                   // 当前鼠标光标的Y轴坐标
+        lastMoveTime,             // 上次移动的时间
+        speedX,                   // 当前鼠标X轴速度参数
+        speedY,                   // 当前鼠标Y轴速度参数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
         lastClick,                // 上一次产生点击事件的信息
 
@@ -1241,7 +1244,8 @@
          * @param {Object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
-            if (event._oNative.type === 'mousedown' || event._oNative.type === 'touchstart') {
+            if (activedControl !== undefined) {
+                // 判断鼠标没有mouseup
                 var el = control.getOuter(),
                     parent = el.offsetParent,
                     style = dom.getStyle(parent),
@@ -1927,6 +1931,16 @@
 
             if (event.type === 'mousemove') {
                 lastClick = null;
+                if (currEnv.type === 'drag') {
+                    lastMoveTime = 1000 / (Date.now() - lastMoveTime);
+                    speedX = (event.pageX - mouseX) * lastMoveTime;
+                    speedY = (event.pageY - mouseY) * lastMoveTime;
+//{if 0}
+                    lastMoveTime = speedX;
+                    lastMoveTime = speedY;
+//{if 1}
+                    lastMoveTime = Date.now();
+                }
             }
 
             event = new ECUIEvent(event.type, event);

@@ -2,6 +2,7 @@
 (function () {
 //{if 0}//
     document.write('<script type="text/javascript" src="adapter.js"></script>');
+    document.write('<script type="text/javascript" src="effect.js"></script>');
     document.write('<script type="text/javascript" src="core.js"></script>');
     document.write('<script type="text/javascript" src="control.js"></script>');
     document.write('<script type="text/javascript" src="input-control.js"></script>');
