@@ -701,167 +701,241 @@ var ecui;
         },
         ui: {},
         util: {
-            /**
-             * 动画效果处理。
-             * @public
-             *
-             * @param {Function|string} fn 处理渐变的函数或函数体，fn支持字符串方式描述的渐变函数，简单的可以是this.style.left->100px，复杂的可以是ecui.dom.setStyle(this,"opacity",@ecui.dom.getStyle(this,"opacity")->0)，其中#表示数据填充到这里，@符号表示第一次读取数据的方式
-             * @param {number} duration 渐变的总时长
-             * @param {Object} options 对象支持的属性如下：
-             * $          各个函数的this指针对象
-             * callback   动画效果结束后的回调函数
-             * transition 时间线函数
-             * @return {Function} 停止渐变或直接执行渐变到最后
-             */
-            animate: function (fn, duration, options) {
-                function callback() {
-                    nextList.splice(0, 1)[0].call(options.$, options);
-                }
-
-                function compile(fn) {
-                    if ('string' === typeof fn) {
-                        var result = [];
-                        lastFnStr = lastFnStr || [];
-
-                        fn.split(';').forEach(function (item, index) {
-                            if (item.indexOf('->') === 0) {
-                                item = lastFnStr[index].replace(/\->\w+/, '->' + item.slice(2));
-                            } else {
-                                lastFnStr[index] = item;
-                            }
-
-                            var list = item.split('->'),
-                                exp = list[0].split('@'),
-                                value;
-
-                            if (exp[1]) {
-                                list[0] = exp[0] + '#' + list[1].replace(/^\w+/, '');
-                                exp[0] = RegExp['$&'];
-                            } else {
-                                exp = list[1].split('@');
-                            }
-
-                            list[1] = __ECUI__Colors[exp[0]] || exp[0];
-                            value = list[0].split('.style.');
-                            if (__ECUI__StyleFixer[value[1]]) {
-                                list[0] = 'ecui.dom.setStyle(' + value[0] + ',"' + value[1] + '",#)';
-                            }
-                            value = new Function('$', 'return ' + (exp[1] || (value[1] ? ('ecui.dom.getStyle(' + value[0] + ',"' + value[1] + '")') : list[0]))).call(options.$, options);
-                            if (list[1].charAt(0) === '#') {
-                                exp = [
-                                    parseInt(list[1].slice(1, 3), 16),
-                                    parseInt(list[1].slice(3, 5), 16),
-                                    parseInt(list[1].slice(5), 16)
-                                ];
-                                value = __ECUI__Colors[value] || value;
-                                if (value.charAt(0) === '#') {
-                                    if (value.length === 4) {
-                                        value = [
-                                            parseInt(value.charAt(1) + value.charAt(1), 16),
-                                            parseInt(value.charAt(2) + value.charAt(2), 16),
-                                            parseInt(value.charAt(3) + value.charAt(3), 16),
-                                        ];
-                                    } else {
-                                        value = [
-                                            parseInt(value.slice(1, 3), 16),
-                                            parseInt(value.slice(3, 5), 16),
-                                            parseInt(value.slice(5), 16)
-                                        ];
-                                    }
-                                } else {
-                                    value = value.split(/(\(|\s*,\s*|\))/);
-                                    value = [+value[2], +value[4], +value[6]];
-                                }
-                                if (value[0] === exp[0] && value[1] === exp[1] && value[2] === exp[2]) {
-                                    return;
-                                }
-                                exp = '"rgb("+Math.floor(' + value[0] + '+(' + exp[0] + '-(' + value[0] + '))*p)+","+Math.floor(' + value[1] + '+(' + exp[1] + '-(' + value[1] + '))*p)+","+Math.floor(' + value[2] + '+(' + exp[2] + '-(' + value[2] + '))*p)+")"';
-                            } else if (/-?[0-9]+(\.[0-9]+)?/.test(value)) {
-                                var currValue = RegExp['$&'];
-                                if (currValue === list[1]) {
-                                    return;
-                                }
-                                exp = (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + list[1] + '-(' + currValue + '))*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : '');
-                            } else {
-                                return;
-                            }
-                            value = list[0].indexOf('#');
-                            result.push(value >= 0 ? list[0].slice(0, value) + exp + list[0].slice(value + 1) : list[0] + '=' + exp);
-                        });
-
-                        if (!result.length) {
-                            return;
-                        }
-                        fn = new Function('p', '$', result.join(';'));
-                    } else {
-                        lastFnStr = undefined;
-                    }
-                    return fn;
-                }
-
-                fn = compile(fn);
-
-                var startTime = Date.now(),
-                    stop = util.timer(
-                        function () {
-                            var currTime = Date.now() - startTime,
-                                percent;
-                            if (currTime >= duration) {
-                                percent = 1;
-                            } else {
-                                percent = transition(currTime / duration);
-                            }
-                            fn.call(options.$, percent, options);
-                            if (percent === 1) {
-                                callback();
-                                if (!nextList.length) {
-                                    stop();
-                                    fn = options = transition = null;
-                                }
-                            }
-                        },
-                        -20
-                    ),
-                    nextList = [options.callback || util.blank],
-                    transition =
-                        options.transition ||
-                        function (percent) {
-                            return 1 - Math.pow(1 - percent, 2);
-                        },
-                    ret = {
-                        stop: function (flag) {
-                            if (fn) {
-                                stop();
-                                if (flag) {
-                                    while (nextList.length) {
-                                        fn.call(options.$, 1, options);
-                                        callback();
-                                    }
-                                }
-                            }
-                            fn = options = transition = null;
-                        },
-
-                        add: function (nextFn, nextDuration) {
-                            nextList.splice(nextList.length - 1, 0, function () {
-                                fn = compile(nextFn);
-                                startTime += duration;
-                                duration = nextDuration;
-                            });
-                            return ret;
-                        }
-                    },
-                    lastFnStr;
-
-                return ret;
-            },
-
             /*
              * 空函数。
              * blank 方法不应该被执行，也不进行任何处理，它用于提供给不需要执行操作的事件方法进行赋值，与 blank 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 cancel。
              * @public
              */
             blank: new Function(),
+
+            createKeyframes: function (source) {
+                function parse(exp, first) {
+                    return exp.replace(/@(\w+)/g, function ($, name) {
+                        return '"+' + (first ? 'ecui.dom.getStyle(e,"' + name + '")' : 'd.' + name + '[0]') + '+"';
+                    }).replace(/@\((.+)\)/g, function ($, exp) {
+                        return '"+(' + exp.replace(/([A-Za-z]+)/g, function ($, name) {
+                            return 'ecui.util.toNumber(' + (first ? 'ecui.dom.getStyle(e,"' + name + '")' : 'd.' + name + '[0]') + ')';
+                        }) + ')+"';
+                    });
+                }
+
+                var times = [],
+                    keyframes = [],
+                    initCodes = [],
+                    forwardCodes = [],
+                    reverseCodes = [],
+                    name;
+
+                source.replace(
+                    /(\d+%|from|to)\{([^}]+)\}/g,
+                    function (keyframe, selector, cssText) {
+                        if (selector === 'from') {
+                            selector = 0;
+                        } else if (selector === 'to') {
+                            selector = 1;
+                        } else {
+                            selector = +selector.slice(0, -1) / 100;
+                        }
+
+                        if (selector && !keyframes.length) {
+                            keyframes[0] = {};
+                            times.push(0);
+                        }
+
+                        keyframe = {};
+                        keyframes.push(keyframe);
+                        times.push(selector);
+
+                        cssText = cssText.split(';');
+                        for (var i = 0, item; item = cssText[i++]; ) {
+                            item = item.split(':');
+                            name = util.toCamelCase(item[0]);
+                            keyframe[name] = '"' + item[1] + '"';
+                            if (selector && !keyframes[0][name]) {
+                                keyframes[0][name] = '"@' + name + '"';
+                            }
+                        }
+                    }
+                );
+
+                initCodes.push('var d={};');
+                for (name in keyframes[0]) {
+                    if (keyframes[0].hasOwnProperty(name)) {
+                        initCodes.push('d.' + name + '=[' + parse(keyframes[0][name], true) + '];');
+                        for (var i = 1, keyframe; keyframe = keyframes[i]; i++) {
+                            if (keyframe[name]) {
+                                initCodes.push('d.' + name + '[' + i + ']=' + parse(keyframe[name]) + ';');
+                            }
+                        }
+                    }
+                }
+                initCodes.push('return d');
+
+                for (i = 1; keyframe = keyframes[i]; i++) {
+                    forwardCodes.push('else if(p<=' + times[i] + '){p=(p-' + times[i - 1] + ')/' + (times[i] - times[i - 1]) + ';');
+                    for (name in keyframe) {
+                        if (keyframe.hasOwnProperty(name)) {
+                            forwardCodes.push('$.style.' + name + '=f("' + name + '",' + i + ',p);');
+                        }
+                    }
+                    forwardCodes.push('}');
+                }
+
+                for (i = keyframes.length - 1; i--; ) {
+                    keyframe = keyframes[i];
+                    reverseCodes.push('else if(p<=' + (1 - times[i]) + '){p=(p-' + (1 - times[i + 1]) + ')/' + (times[i + 1] - times[i]) + ';');
+                    for (name in keyframe) {
+                        if (keyframe.hasOwnProperty(name)) {
+                            reverseCodes.push('$.style.' + name + '=f("' + name + '",' + i + ',p);');
+                        }
+                    }
+                    reverseCodes.push('}');
+                }
+
+                return {
+                    init: new Function('e', initCodes.join('')),
+                    forward: new Function('$', 'p', 'f', forwardCodes.join('').slice(5)),
+                    reverse: new Function('$', 'p', 'f', reverseCodes.join('').slice(5))
+                };
+            },
+
+            animate: function (el, keyframes, duration, timingFn, delay, count, alternate) {
+                function sampleCurveX(t) {
+                    return ((ax * t + bx) * t + cx) * t;
+                }
+
+                function sampleCurveY(t) {
+                    return ((ay * t + by) * t + cy) * t;
+                }
+
+                function sampleCurveDerivativeX(t) {
+                    return (3 * ax * t + 2 * bx) * t + cx;
+                }
+
+                function solveCurveX(x) {
+                    var epsilon = 0.00001;
+                    for (var i = 0, t2 = x; i < 8; i++) {
+                        var x2 = sampleCurveX(t2) - x;
+                        if (Math.abs(x2) < epsilon) {
+                            return t2;
+                        }
+                        var d2 = sampleCurveDerivativeX(t2);
+                        if (Math.abs(d2) < 1e-6) {
+                            break;
+                        }
+                        t2 -= x2 / d2;
+                    }
+
+                    var t0 = 0,
+                        t1 = 1;
+
+                    t2 = x;
+                    while (t0 < t1) {
+                        x2 = sampleCurveX(t2);
+                        if (Math.abs(x2 - x) < epsilon) {
+                            return t2;
+                        }
+                        if (x > x2) {
+                            t0 = t2;
+                        } else {
+                            t1 = t2;
+                        }
+                        t2 = (t1 - t0) * 0.5 + t0;
+                    }
+                }
+
+                function translateColor(value) {
+                    value = __ECUI__Colors[value] || value;
+                    if (value.charAt(0) === '#') {
+                        if (value.length === 4) {
+                            return [
+                                parseInt(value.charAt(1) + value.charAt(1), 16),
+                                parseInt(value.charAt(2) + value.charAt(2), 16),
+                                parseInt(value.charAt(3) + value.charAt(3), 16),
+                            ];
+                        }
+                        return [
+                            parseInt(value.slice(1, 3), 16),
+                            parseInt(value.slice(3, 5), 16),
+                            parseInt(value.slice(5), 16)
+                        ];
+                    }
+                    if (value.indexOf('rgb') === 0) {
+                        value = value.split(/(\(|\s*,\s*|\))/);
+                        return [+value[2], +value[4], +value[6]];
+                    }
+                }
+
+                var data = keyframes.init(el);
+                console.log(JSON.stringify(data));
+                for (var name in data) {
+                    if (data.hasOwnProperty(name)) {
+                        var value = translateColor(data[name][0]) || data[name][0];
+
+                        if ('string' === typeof value) {
+                            data['$' + name] = value.replace(/[0-9.]+/, '#');
+                            value = util.toNumber(value);
+                        }
+                        data[name][0] = value;
+
+                        for (var i = 1; i < data[name].length; i++) {
+                            value = data[name][i];
+                            data[name][i] = value !== undefined ? translateColor(value) || util.toNumber(value) : data[name][i - 1];
+                        }
+                    }
+                }
+                console.log(JSON.stringify(data));
+
+                timingFn = __ECUI__CubicBezier[timingFn || 'ease'] || timingFn;
+                count = count || 1;
+
+                var cx = 3 * timingFn[0],
+                    bx = 3 * (timingFn[2] - timingFn[0]) - cx,
+                    ax = 1 - cx - bx,
+                    cy = 3 * timingFn[1],
+                    by = 3 * (timingFn[3] - timingFn[1]) - cy,
+                    ay = 1 - cy - by;
+
+                var startTime = Date.now(),
+                    reverse,
+                    stop = util.timer(
+                        function () {
+                            var currTime = Date.now() - startTime - delay,
+                                percent;
+
+                            if (currTime >= 0) {
+                                if (currTime >= duration) {
+                                    percent = 1;
+                                } else {
+                                    percent = currTime / duration;
+                                    percent = sampleCurveY(solveCurveX(percent));
+                                }
+
+                                keyframes[reverse ? 'reverse' : 'forward'](el, percent, function (name, index, percent) {
+                                    var start = data[name][reverse ? index + 1 : index - 1],
+                                        end = data[name][index];
+                                    if ('number' === typeof start) {
+                                        return data['$' + name].replace('#', start + ((end - start) * percent));
+                                    }
+                                    return 'rgb(' + Math.floor(start[0] + ((end[0] - start[0]) * percent)) + ',' + Math.floor(start[1] + ((end[1] - start[1]) * percent)) + ',' + Math.floor(start[2] + ((end[2] - start[2]) * percent)) + ')';
+                                });
+
+                                if (currTime >= duration) {
+                                    if (--count) {
+                                        count = Math.max(-1, count);
+                                        if (alternate) {
+                                            reverse = !reverse;
+                                        }
+                                        startTime += duration;
+                                    } else {
+                                        stop();
+                                    }
+                                }
+                            }
+                        },
+                        -20
+                    );
+            },
 
             /**
              * 对目标字符串进行 html 编码。
@@ -1127,8 +1201,7 @@ var ecui;
     //{if 1}//var eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];//{/if}//
 
     // 读写特殊的 css 属性操作
-    var __ECUI__StyleFixer =
-        {
+    var __ECUI__StyleFixer = {
             display: ieVersion < 8 ? {
                 get: function (el, style) {
                     return style.display === 'inline' && style.zoom === '1' ? 'inline-block' : style.display;
@@ -1159,24 +1232,21 @@ var ecui;
             'float': ieVersion ? 'styleFloat' : 'cssFloat'
         },
 
-        __ECUI__HTMLPosition =
-        {
+        __ECUI__HTMLPosition = {
             AFTERBEGIN: 'selectNodeContents',
             BEFOREEND: 'selectNodeContents',
             BEFOREBEGIN: 'setStartBefore',
             AFTEREND: 'setEndAfter'
         },
 
-        __ECUI__EscapeCharacter =
-        {
+        __ECUI__EscapeCharacter = {
             quot: '"',
             lt: '<',
             gt: '>',
             amp: '&'
         },
 
-        __ECUI__Colors =
-        {
+        __ECUI__Colors = {
             aqua: '#00FFFF',
             black: '#000000',
             blue: '#0000FF',
@@ -1194,6 +1264,14 @@ var ecui;
             teal: '#008080',
             white: '#FFFFFF',
             yellow: '#FFFF00'
+        },
+
+        __ECUI__CubicBezier = {
+            linear: [0, 0, 1, 1],
+            ease: [0.25, 0.1, 0.25, 1],
+            'ease-in': [0.42, 0, 1, 1],
+            'ease-out': [0, 0, 0.58, 1],
+            'ease-in-out': [0.42, 0, 0.58, 1]
         };
 
     /**
