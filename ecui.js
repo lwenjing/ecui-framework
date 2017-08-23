@@ -1,6 +1,7 @@
 //{if 1}//var ecui;//{/if}//
 (function () {
     document.write('<script type="text/javascript" src="ecui/adapter.js"></script>');
+    document.write('<script type="text/javascript" src="ecui/effect.js"></script>');
     document.write('<script type="text/javascript" src="ecui/core.js"></script>');
     document.write('<script type="text/javascript" src="ecui/control.js"></script>');
     document.write('<script type="text/javascript" src="ecui/input-control.js"></script>');
