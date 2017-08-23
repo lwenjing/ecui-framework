@@ -763,9 +763,7 @@ var ecui;
                     if (keyframes[0].hasOwnProperty(name)) {
                         initCodes.push('d.' + name + '=[' + parse(keyframes[0][name], true) + '];');
                         for (var i = 1, keyframe; keyframe = keyframes[i]; i++) {
-                            if (keyframe[name]) {
-                                initCodes.push('d.' + name + '[' + i + ']=' + parse(keyframe[name]) + ';');
-                            }
+                            initCodes.push('d.' + name + '[' + i + ']=' + (keyframe[name] ? parse(keyframe[name]) : 'undefined') + ';');
                         }
                     }
                 }
@@ -775,18 +773,26 @@ var ecui;
                     forwardCodes.push('else if(p<=' + times[i] + '){p=(p-' + times[i - 1] + ')/' + (times[i] - times[i - 1]) + ';');
                     for (name in keyframe) {
                         if (keyframe.hasOwnProperty(name)) {
-                            forwardCodes.push('$.style.' + name + '=f("' + name + '",' + i + ',p);');
+                            if (__ECUI__StyleFixer[name]) {
+                                forwardCodes.push('ecui.dom.setStyle($,"' + name + '",f("' + name + '",' + i + ',p));');
+                            } else {
+                                forwardCodes.push('$.style.' + name + '=f("' + name + '",' + i + ',p);');
+                            }
                         }
                     }
                     forwardCodes.push('}');
                 }
 
                 for (i = keyframes.length - 1; i--; ) {
-                    keyframe = keyframes[i];
                     reverseCodes.push('else if(p<=' + (1 - times[i]) + '){p=(p-' + (1 - times[i + 1]) + ')/' + (times[i + 1] - times[i]) + ';');
+                    keyframe = keyframes[Math.max(0, i - 1)];
                     for (name in keyframe) {
                         if (keyframe.hasOwnProperty(name)) {
-                            reverseCodes.push('$.style.' + name + '=f("' + name + '",' + i + ',p);');
+                            if (__ECUI__StyleFixer[name]) {
+                                reverseCodes.push('ecui.dom.setStyle($,"' + name + '",f("' + name + '",' + i + ',p));');
+                            } else {
+                                reverseCodes.push('$.style.' + name + '=f("' + name + '",' + i + ',p);');
+                            }
                         }
                     }
                     reverseCodes.push('}');
@@ -799,7 +805,7 @@ var ecui;
                 };
             },
 
-            animate: function (el, keyframes, duration, timingFn, delay, count, alternate) {
+            animate: function (el, keyframes, duration, timingFn, delay, count, alternate, callback) {
                 function sampleCurveX(t) {
                     return ((ax * t + bx) * t + cx) * t;
                 }
@@ -866,8 +872,16 @@ var ecui;
                     }
                 }
 
+                function calculate(name, index, percent) {
+                    var start = data[name][fn === keyframes.forward ? index - 1 : index + 1],
+                        end = data[name][index];
+                    if ('number' === typeof start) {
+                        return data['$' + name].replace('#', start + ((end - start) * percent));
+                    }
+                    return 'rgb(' + Math.round(start[0] + ((end[0] - start[0]) * percent)) + ',' + Math.round(start[1] + ((end[1] - start[1]) * percent)) + ',' + Math.round(start[2] + ((end[2] - start[2]) * percent)) + ')';
+                }
+
                 var data = keyframes.init(el);
-                console.log(JSON.stringify(data));
                 for (var name in data) {
                     if (data.hasOwnProperty(name)) {
                         var value = translateColor(data[name][0]) || data[name][0];
@@ -884,10 +898,11 @@ var ecui;
                         }
                     }
                 }
-                console.log(JSON.stringify(data));
 
                 timingFn = __ECUI__CubicBezier[timingFn || 'ease'] || timingFn;
+                delay = delay || 0;
                 count = count || 1;
+                callback = callback || util.blank;
 
                 var cx = 3 * timingFn[0],
                     bx = 3 * (timingFn[2] - timingFn[0]) - cx,
@@ -897,7 +912,7 @@ var ecui;
                     ay = 1 - cy - by;
 
                 var startTime = Date.now(),
-                    reverse,
+                    fn = keyframes.forward,
                     stop = util.timer(
                         function () {
                             var currTime = Date.now() - startTime - delay,
@@ -907,34 +922,39 @@ var ecui;
                                 if (currTime >= duration) {
                                     percent = 1;
                                 } else {
-                                    percent = currTime / duration;
-                                    percent = sampleCurveY(solveCurveX(percent));
+                                    percent = sampleCurveY(solveCurveX(currTime / duration));
                                 }
 
-                                keyframes[reverse ? 'reverse' : 'forward'](el, percent, function (name, index, percent) {
-                                    var start = data[name][reverse ? index + 1 : index - 1],
-                                        end = data[name][index];
-                                    if ('number' === typeof start) {
-                                        return data['$' + name].replace('#', start + ((end - start) * percent));
-                                    }
-                                    return 'rgb(' + Math.floor(start[0] + ((end[0] - start[0]) * percent)) + ',' + Math.floor(start[1] + ((end[1] - start[1]) * percent)) + ',' + Math.floor(start[2] + ((end[2] - start[2]) * percent)) + ')';
-                                });
+                                fn(el, percent, calculate);
 
                                 if (currTime >= duration) {
                                     if (--count) {
                                         count = Math.max(-1, count);
                                         if (alternate) {
-                                            reverse = !reverse;
+                                            fn = fn === keyframes.forward ? keyframes.reverse : keyframes.forward;
                                         }
                                         startTime += duration;
                                     } else {
                                         stop();
+                                        callback();
+                                        callback = null;
                                     }
                                 }
                             }
                         },
                         -20
                     );
+
+                return function () {
+                    if (callback) {
+                        stop();
+                        if (flag) {
+                            fn(el, 1, calculate);
+                            callback();
+                        }
+                        callback = null;
+                    }
+                };
             },
 
             /**
