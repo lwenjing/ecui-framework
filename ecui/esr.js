@@ -283,11 +283,14 @@
      * @param {string} rule 替换规则
      */
     function replace(rule) {
-        return rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
-            name = name.split('|');
-            var value = util.parseNamespace(name[0], context);
-            return value === undefined ? (name[1] || '') : value;
-        });
+        if (rule) {
+            return rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
+                name = name.split('|');
+                var value = util.parseNamespace(name[0], context);
+                return value === undefined ? (name[1] || '') : value;
+            });
+        }
+        return '';
     }
 
     var esr = core.esr = {
@@ -632,7 +635,7 @@
                     method = 'GET';
                 }
 
-                io.ajax(url, {
+                io.ajax(replace(url), {
                     method: method,
                     headers: headers,
                     data: data,
