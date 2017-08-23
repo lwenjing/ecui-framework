@@ -96,54 +96,31 @@
                 }
             }
 
-            function translateColor(value) {
-                value = __ECUI__Colors[value] || value;
-                if (value.charAt(0) === '#') {
-                    if (value.length === 4) {
-                        return [
-                            parseInt(value.charAt(1) + value.charAt(1), 16),
-                            parseInt(value.charAt(2) + value.charAt(2), 16),
-                            parseInt(value.charAt(3) + value.charAt(3), 16),
-                        ];
+            var data = keyframes.init(
+                    el,
+                    function (value) {
+                        value = __ECUI__Colors[value] || value;
+                        if (value.charAt(0) === '#') {
+                            if (value.length === 4) {
+                                return [
+                                    parseInt(value.charAt(1) + value.charAt(1), 16),
+                                    parseInt(value.charAt(2) + value.charAt(2), 16),
+                                    parseInt(value.charAt(3) + value.charAt(3), 16),
+                                ];
+                            }
+                            return [
+                                parseInt(value.slice(1, 3), 16),
+                                parseInt(value.slice(3, 5), 16),
+                                parseInt(value.slice(5), 16)
+                            ];
+                        }
+                        if (value.indexOf('rgb') === 0) {
+                            value = value.split(/(\(|\s*,\s*|\))/);
+                            return [+value[2], +value[4], +value[6]];
+                        }
+                        return +(/[0-9.]+/.exec(value))[0];
                     }
-                    return [
-                        parseInt(value.slice(1, 3), 16),
-                        parseInt(value.slice(3, 5), 16),
-                        parseInt(value.slice(5), 16)
-                    ];
-                }
-                if (value.indexOf('rgb') === 0) {
-                    value = value.split(/(\(|\s*,\s*|\))/);
-                    return [+value[2], +value[4], +value[6]];
-                }
-            }
-
-            function calculate(name, index, percent) {
-                var start = data[name][fn === keyframes.forward ? index - 1 : index + 1],
-                    end = data[name][index];
-                if ('number' === typeof start) {
-                    return data['$' + name].replace('#', start + ((end - start) * percent));
-                }
-                return 'rgb(' + Math.round(start[0] + ((end[0] - start[0]) * percent)) + ',' + Math.round(start[1] + ((end[1] - start[1]) * percent)) + ',' + Math.round(start[2] + ((end[2] - start[2]) * percent)) + ')';
-            }
-
-            var data = keyframes.init(el);
-            for (var name in data) {
-                if (data.hasOwnProperty(name)) {
-                    var value = translateColor(data[name][0]) || data[name][0];
-
-                    if ('string' === typeof value) {
-                        data['$' + name] = value.replace(/[0-9.]+/, '#');
-                        value = util.toNumber(value);
-                    }
-                    data[name][0] = value;
-
-                    for (var i = 1; i < data[name].length; i++) {
-                        value = data[name][i];
-                        data[name][i] = value !== undefined ? translateColor(value) || util.toNumber(value) : data[name][i - 1];
-                    }
-                }
-            }
+                );
 
             if ('function' !== typeof timingFn) {
                 timingFn = __ECUI__CubicBezier[timingFn || 'ease'] || timingFn;
@@ -177,7 +154,14 @@
                                 percent = timingFn(currTime / duration);
                             }
 
-                            fn(el, percent, calculate);
+                            fn(el, percent, function (name, index, percent) {
+                                var start = data[name][fn === keyframes.forward ? index - 1 : index + 1],
+                                    end = data[name][index];
+                                if ('number' === typeof start) {
+                                    return data['$' + name].replace('#', start + ((end - start) * percent));
+                                }
+                                return 'rgb(' + Math.round(start[0] + ((end[0] - start[0]) * percent)) + ',' + Math.round(start[1] + ((end[1] - start[1]) * percent)) + ',' + Math.round(start[2] + ((end[2] - start[2]) * percent)) + ')';
+                            });
 
                             if (currTime >= duration) {
                                 if (--count) {
@@ -262,12 +246,19 @@
                 }
             );
 
-            initCodes.push('var d={};');
+            initCodes.push('var d={},v;');
             for (name in keyframes[0]) {
                 if (keyframes[0].hasOwnProperty(name)) {
-                    initCodes.push('d.' + name + '=[' + parse(keyframes[0][name], true) + '];');
+                    initCodes.push('v=f(' + parse(keyframes[0][name], true) + ');');
+                    initCodes.push('d.$' + name + '=RegExp.leftContext+"#"+RegExp.rightContext;');
+                    initCodes.push('d.' + name + '=[v];');
                     for (var i = 1, keyframe; keyframe = keyframes[i]; i++) {
-                        initCodes.push('d.' + name + '[' + i + ']=' + (keyframe[name] ? parse(keyframe[name]) : 'undefined') + ';');
+                        if (keyframe[name]) {
+                            initCodes.push('v=' + parse(keyframe[name]) + ';');
+                            initCodes.push('d.' + name + '[' + i + ']=f(v);');
+                        } else {
+                            initCodes.push('d.' + name + '[' + i + ']=d.' + name + '[' + (i - 1) + ']' + ';');
+                        }
                     }
                 }
             }
@@ -303,7 +294,7 @@
             }
 
             return {
-                init: new Function('e', initCodes.join('')),
+                init: new Function('e', 'f', initCodes.join('')),
                 forward: new Function('$', 'p', 'f', forwardCodes.join('').slice(5)),
                 reverse: new Function('$', 'p', 'f', reverseCodes.join('').slice(5))
             };
