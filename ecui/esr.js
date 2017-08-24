@@ -603,7 +603,7 @@
                     if (method[0] === 'FORM') {
                         data = {};
                         Array.prototype.slice.call(document.forms[url[1]].elements).forEach(function (item) {
-                            if ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked) {
+                            if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                                 for (var i = 0, scope = data, list = item.name.split('.'); i < list.length - 1; i++) {
                                     scope = scope[list[i]] = scope[list[i]] || {};
                                 }
