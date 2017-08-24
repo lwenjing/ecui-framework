@@ -1455,6 +1455,14 @@
             return scrollNarrow;
         },
 
+        getXSpeed: function () {
+            return lastMoveTime + 1000 < Date.now() ? 0 : speedX;
+        },
+
+        getYSpeed: function () {
+            return lastMoveTime + 1000 < Date.now() ? 0 : speedY;
+        },
+
         /**
          * 控件继承。
          * 如果不指定类型样式，表示使用父控件的类型样式，如果指定的类型样式以 * 符号开头，表示移除父控件的类型样式并以之后的类型样式代替。生成的子类构造函数已经使用了 constructor/TYPES/CLASS 三个属性，TYPES 属性是控件的全部类型样式，CLASS 属性是控件的全部类型样式字符串。
@@ -1935,10 +1943,6 @@
                     lastMoveTime = 1000 / (Date.now() - lastMoveTime);
                     speedX = (event.pageX - mouseX) * lastMoveTime;
                     speedY = (event.pageY - mouseY) * lastMoveTime;
-//{if 0}
-                    lastMoveTime = speedX;
-                    lastMoveTime = speedY;
-//{if 1}
                     lastMoveTime = Date.now();
                 }
             }

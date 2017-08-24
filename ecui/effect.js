@@ -1,5 +1,5 @@
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
         util = core.util;
 
@@ -35,23 +35,19 @@
             'ease-in-out': [0.42, 0, 0.58, 1]
         };
 
-    core.effect = {
+    var effect = core.effect = {
 
         /**
-         * CSS3动画模拟。
+         * 三次贝塞尔曲线构造函数。
          * @public
          *
-         * @param {HTMLElement} el DOM 元素
-         * @param {Keyframes} keyframes keyframes对象，通过createKeyframes方法生成
-         * @param {number} duration 动画持续时间，单位ms
-         * @param {string|Array|Function} timingFn 时间函数，默认ease
-         * @param {number} delay 启动延迟，单位ms，默认无延迟
-         * @param {number} count 重复次数，默认一次
-         * @param {boolean} alternate 是否往返，默认否
-         * @param {Function} callback 回调函数
-         * @return {Function} 用于停止动画的函数
+         * @param {number} x1 第一个点的x轴坐标(0-1)
+         * @param {number} y1 第一个点的y轴坐标(0-1)
+         * @param {number} x2 第二个点的x轴坐标(0-1)
+         * @param {number} y2 第二个点的y轴坐标(0-1)
+         * @return {Function} 三次贝塞尔曲线函数
          */
-        animate: function (el, keyframes, duration, timingFn, delay, count, alternate, callback) {
+        FN_CubicBezier: function (x1, y1, x2, y2) {
             function sampleCurveX(t) {
                 return ((ax * t + bx) * t + cx) * t;
             }
@@ -96,6 +92,53 @@
                 }
             }
 
+            var cx = 3 * x1,
+                bx = 3 * (x2 - x1) - cx,
+                ax = 1 - cx - bx,
+                cy = 3 * y1,
+                by = 3 * (y2 - y1) - cy,
+                ay = 1 - cy - by;
+
+            return function (x) {
+                return sampleCurveY(solveCurveX(x));
+            };
+        },
+
+        /**
+         * 线性运动函数。
+         * @public
+         *
+         * @param {number} x x轴坐标(0-1)
+         */
+        FN_Linear: function (x) {
+            return x;
+        },
+
+        /**
+         * 匀减速运动函数。
+         * @public
+         *
+         * @param {number} x x轴坐标(0-1)
+         */
+        FN_UniformlyRetarded: function (x) {
+            return 1 - Math.pow(1 - x, 2);
+        },
+
+        /**
+         * CSS3动画模拟。
+         * @public
+         *
+         * @param {HTMLElement} el DOM 元素
+         * @param {Keyframes} keyframes keyframes对象，通过createKeyframes方法生成
+         * @param {number} duration 动画持续时间，单位ms
+         * @param {string|Array|Function} timingFn 时间函数，默认ease
+         * @param {number} delay 启动延迟，单位ms，默认无延迟
+         * @param {number} count 重复次数，默认一次
+         * @param {boolean} alternate 是否往返，默认否
+         * @param {Function} callback 回调函数
+         * @return {Function} 用于停止动画的函数
+         */
+        animate: function (el, keyframes, duration, timingFn, delay, count, alternate, callback) {
             var data = keyframes.init(
                     el,
                     function (value) {
@@ -123,18 +166,7 @@
                 );
 
             if ('function' !== typeof timingFn) {
-                timingFn = __ECUI__CubicBezier[timingFn || 'ease'] || timingFn;
-
-                var cx = 3 * timingFn[0],
-                    bx = 3 * (timingFn[2] - timingFn[0]) - cx,
-                    ax = 1 - cx - bx,
-                    cy = 3 * timingFn[1],
-                    by = 3 * (timingFn[3] - timingFn[1]) - cy,
-                    ay = 1 - cy - by;
-
-                timingFn = function (t) {
-                    return sampleCurveY(solveCurveX(t));
-                };
+                timingFn = effect.FN_CubicBezier.apply(null, __ECUI__CubicBezier[timingFn || 'ease'] || timingFn);
             }
             delay = delay || 0;
             count = count || 1;
@@ -144,14 +176,14 @@
                 fn = keyframes.forward,
                 stop = util.timer(
                     function () {
-                        var currTime = Date.now() - startTime - delay,
+                        var actualDuration = Date.now() - startTime - delay,
                             percent;
 
-                        if (currTime >= 0) {
-                            if (currTime >= duration) {
+                        if (actualDuration >= 0) {
+                            if (actualDuration >= duration) {
                                 percent = 1;
                             } else {
-                                percent = timingFn(currTime / duration);
+                                percent = timingFn(actualDuration / duration);
                             }
 
                             fn(el, percent, function (name, index, percent) {
@@ -163,7 +195,7 @@
                                 return 'rgb(' + Math.round(start[0] + ((end[0] - start[0]) * percent)) + ',' + Math.round(start[1] + ((end[1] - start[1]) * percent)) + ',' + Math.round(start[2] + ((end[2] - start[2]) * percent)) + ')';
                             });
 
-                            if (currTime >= duration) {
+                            if (actualDuration >= duration) {
                                 if (--count) {
                                     count = Math.max(-1, count);
                                     if (alternate) {
@@ -264,42 +296,37 @@
             }
             initCodes.push('return d');
 
-            for (i = 1; keyframe = keyframes[i]; i++) {
-                forwardCodes.push('else if(p<=' + times[i] + '){p=(p-' + times[i - 1] + ')/' + (times[i] - times[i - 1]) + ';');
+            for (i = 0; keyframe = keyframes[i]; i++) {
+                keyframes[i] = [];
                 for (name in keyframe) {
                     if (keyframe.hasOwnProperty(name)) {
                         if (__ECUI__StyleFixer[name]) {
-                            forwardCodes.push('ecui.dom.setStyle($,"' + name + '",f("' + name + '",' + i + ',p));');
+                            keyframes[i].push('ecui.dom.setStyle($,"' + name + '",f("' + name + '",i,p));');
                         } else {
-                            forwardCodes.push('$.style.' + name + '=f("' + name + '",' + i + ',p);');
+                            keyframes[i].push('$.style.' + name + '=f("' + name + '",i,p);');
                         }
                     }
                 }
+                keyframes[i] = keyframes[i].join('');
+            }
+
+            for (i = 1; keyframe = keyframes[i]; i++) {
+                forwardCodes.push('else if(p<=' + times[i] + '){i=' + i + ';p=(p-' + times[i - 1] + ')/' + (times[i] - times[i - 1]) + ';');
+                forwardCodes.push(keyframe);
                 forwardCodes.push('}');
             }
 
             for (i = keyframes.length - 1; i--; ) {
-                reverseCodes.push('else if(p<=' + (1 - times[i]) + '){p=(p-' + (1 - times[i + 1]) + ')/' + (times[i + 1] - times[i]) + ';');
-                keyframe = keyframes[Math.max(0, i - 1)];
-                for (name in keyframe) {
-                    if (keyframe.hasOwnProperty(name)) {
-                        if (__ECUI__StyleFixer[name]) {
-                            reverseCodes.push('ecui.dom.setStyle($,"' + name + '",f("' + name + '",' + i + ',p));');
-                        } else {
-                            reverseCodes.push('$.style.' + name + '=f("' + name + '",' + i + ',p);');
-                        }
-                    }
-                }
+                reverseCodes.push('else if(p<=' + (1 - times[i]) + '){i=' + i + ';p=(p-' + (1 - times[i + 1]) + ')/' + (times[i + 1] - times[i]) + ';');
+                reverseCodes.push(keyframes[Math.max(0, i - 1)]);
                 reverseCodes.push('}');
             }
 
             return {
                 init: new Function('e', 'f', initCodes.join('')),
-                forward: new Function('$', 'p', 'f', forwardCodes.join('').slice(5)),
-                reverse: new Function('$', 'p', 'f', reverseCodes.join('').slice(5))
+                forward: new Function('$', 'p', 'f', 'i', forwardCodes.join('').slice(5)),
+                reverse: new Function('$', 'p', 'f', 'i', reverseCodes.join('').slice(5))
             };
         }
     };
-//{if 0}//
 }());
-//{/if}//
