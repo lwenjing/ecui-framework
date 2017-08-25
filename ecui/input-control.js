@@ -174,15 +174,15 @@ _eInput        - INPUT对象
      * 为控件的 INPUT 节点绑定事件。
      * @private
      *
-     * @param {ecui.ui.Control} control 输入框控件
+     * @param {ecui.ui.InputControl} control 输入框控件
      */
-    function bindEvent(control) {
-        core.$bind(control._eInput, control);
-        if (!control._bHidden) {
+    function bindEvent() {
+        core.$bind(this._eInput, this);
+        if (!this._bHidden) {
             // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
             for (var name in events) {
                 if (events.hasOwnProperty(name)) {
-                    dom.addEventListener(control._eInput, name, events[name]);
+                    dom.addEventListener(this._eInput, name, events[name]);
                 }
             }
         }
@@ -232,7 +232,7 @@ _eInput        - INPUT对象
 
             this._bHidden = options.hidden;
             this._eInput = inputEl;
-            bindEvent(this);
+            bindEvent.call(this);
         },
         {
             /**
@@ -319,17 +319,6 @@ _eInput        - INPUT对象
             $input: util.blank,
 
             /**
-             * @override
-             */
-            $ready: function (options) {
-                ui.Control.prototype.$ready.call(this, options);
-                var parent = this.getParent();
-                if (parent instanceof ui.Label) {
-                    parent.setFor(this);
-                }
-            },
-
-            /**
              * 输入重置事件的默认处理。
              * @protected
              *
@@ -414,6 +403,17 @@ _eInput        - INPUT对象
             },
 
             /**
+             * @override
+             */
+            init: function (options) {
+                ui.Control.prototype.init.call(this, options);
+                var parent = this.getParent();
+                if (parent instanceof ui.Label) {
+                    parent.setFor(this);
+                }
+            },
+
+            /**
              * 设置控件的名称。
              * 输入控件可以在表单中被提交，setName 方法设置提交时用的表单项名称，表单项名称可以使用 getName 方法获取。
              * @public
@@ -424,7 +424,7 @@ _eInput        - INPUT对象
                 var el = dom.setInput(this._eInput, name || '');
                 if (this._eInput !== el) {
                     this._eInput = el;
-                    bindEvent(this);
+                    bindEvent.call(this);
                 }
             },
 

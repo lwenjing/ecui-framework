@@ -1,7 +1,6 @@
 //{if 1}//var ecui;//{/if}//
 (function () {
     document.write('<script type="text/javascript" src="ecui/adapter.js"></script>');
-    document.write('<script type="text/javascript" src="ecui/effect.js"></script>');
     document.write('<script type="text/javascript" src="ecui/core.js"></script>');
     document.write('<script type="text/javascript" src="ecui/control.js"></script>');
     document.write('<script type="text/javascript" src="ecui/input-control.js"></script>');
@@ -29,7 +28,12 @@
 
     document.write('<script type="text/javascript" src="ecui/retina.js"></script>');
     document.write('<script type="text/javascript" src="ecui/messagebox.js"></script>');
+
     document.write('<script type="text/javascript" src="ecui/decorate.js"></script>');
-    document.write('<script type="text/javascript" src="ecui/esr.js"></script>');
+    document.write('<script type="text/javascript" src="ecui/effect.js"></script>');
     document.write('<script type="text/javascript" src="ecui/etpl.js"></script>');
+    document.write('<script type="text/javascript" src="ecui/esr.js"></script>');
+//{if 0}//
+    document.write('<script type="text/javascript" src="debug.js"></script>');
+//{/if}//
 }());
