@@ -28,7 +28,7 @@
     ecui.ui.InputControl.prototype.$ready = function (options) {
         var name = ecui.esr.getLocation() + '_debug_' + this.getName();
 
-        if (localStorage[ecui.esr.getLocation() + '_debug_' + this.getName()]) {
+        if (localStorage[name]) {
             if (this instanceof ecui.ui.Radio) {
                 if (localStorage[name] === this.getValue()) {
                     this.setChecked(true);
