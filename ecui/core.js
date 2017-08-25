@@ -1185,6 +1185,9 @@
 
             var type = control instanceof ui.Control,
                 namedMap = {},
+                controls = type ? [control] : independentControls.filter(function (item) {
+                    return !!item.getOuter() && dom.contain(control, item.getOuter());
+                }),
                 o;
 
             if (type) {
@@ -1211,23 +1214,23 @@
 
             // 需要删除的控件先放入一个集合中等待遍历结束后再删除，否则控件链将产生变化
             allControls.slice().filter(function (item) {
-                if (type ? control.contain(item) : !!item.getOuter() && dom.contain(control, item.getOuter())) {
-                    if (!onlyChild || (type ? control !== item : control !== item.getOuter())) {
+                for (var i = 0; i < controls.length; i++) {
+                    if (controls[i].contain(item) && (!onlyChild || (type ? control !== item : control !== item.getOuter()))) {
                         util.remove(independentControls, item);
                         util.remove(allControls, item);
                         if (item = namedMap[item.getUID()]) {
                             delete namedControls[item];
                         }
+                        console.log(allControls.length);
                         return true;
                     }
                 }
             }).forEach(function (item) {
-                if (item.getMain()) {
-                    if (type) {
-                        core.triggerEvent(item, 'dispose');
-                    } else {
-                        item.dispose();
+                if (type) {
+                    if (item.ondispose) {
+                        item.ondispose();
                     }
+                    item.$dispose();
                 }
             });
         },
