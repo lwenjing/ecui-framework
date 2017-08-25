@@ -1185,9 +1185,7 @@
 
             var type = control instanceof ui.Control,
                 namedMap = {},
-                controls = type ? [control] : independentControls.filter(function (item) {
-                    return !!item.getOuter() && dom.contain(control, item.getOuter());
-                }),
+                controls,
                 o;
 
             if (type) {
@@ -1212,16 +1210,24 @@
                 }
             }
 
+            if (type) {
+                controls = [control];
+            } else {
+                controls = independentControls.filter(function (item) {
+                    return !!item.getOuter() && dom.contain(control, item.getOuter());
+                });
+                control = control.getControl && control.getControl();
+            }
+
             // 需要删除的控件先放入一个集合中等待遍历结束后再删除，否则控件链将产生变化
             allControls.slice().filter(function (item) {
                 for (var i = 0; i < controls.length; i++) {
-                    if (controls[i].contain(item) && (!onlyChild || (type ? control !== item : control !== item.getOuter()))) {
+                    if (controls[i].contain(item) && (!onlyChild || control !== item)) {
                         util.remove(independentControls, item);
                         util.remove(allControls, item);
                         if (item = namedMap[item.getUID()]) {
                             delete namedControls[item];
                         }
-                        console.log(allControls.length);
                         return true;
                     }
                 }
