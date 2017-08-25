@@ -1222,10 +1222,12 @@
                     }
                 }
             }).forEach(function (item) {
-                if (type) {
-                    core.triggerEvent(item, 'dispose');
-                } else {
-                    item.dispose();
+                if (item.getMain()) {
+                    if (type) {
+                        core.triggerEvent(item, 'dispose');
+                    } else {
+                        item.dispose();
+                    }
                 }
             });
         },
