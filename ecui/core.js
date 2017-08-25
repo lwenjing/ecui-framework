@@ -1506,18 +1506,11 @@
                     // 对接口的处理
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;
-                    agent.prototype[item['']] = new Clazz();
-                    for (var key in item) {
-                        if (item.hasOwnProperty(key)) {
-                            if (key) {
-                                agent.prototype[item['']][key] = agent.prototype[key] || util.blank;
-                                agent.prototype[key] = item[key];
-                            }
-                        }
-                    }
-                } else {
-                    util.extend(agent.prototype, item);
+                    var prototype = new Clazz();
+                    util.extend(prototype, agent.prototype);
+                    agent.prototype[item['']] = prototype;
                 }
+                util.extend(agent.prototype, item);
             });
 
             return agent;
