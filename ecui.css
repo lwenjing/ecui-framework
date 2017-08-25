@@ -45,7 +45,8 @@
   overflow: hidden !important;
   padding: 0 !important;
 }
-.ui-input input, .ui-input textarea {
+.ui-input input,
+.ui-input textarea {
   border: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -61,7 +62,8 @@
 .ui-select-options .ui-select-item {
   display: block !important;
 }
-.ui-select, .ui-combox {
+.ui-select,
+.ui-combox {
   overflow: hidden !important;
 }
 .ui-dialog .ui-dialog-close {
@@ -96,8 +98,8 @@
   position: absolute !important;
 }
 .ui-table {
-  overflow:hidden !important;
-  position:relative;
+  overflow: hidden !important;
+  position: relative;
 }
 .ui-table-head {
   position: absolute !important;
@@ -112,248 +114,422 @@
   visibility: hidden;
 }
 /**
- * 鍩虹鎸夐挳鏍峰紡
+ *     Dialog
  */
-.ui-button {
-  display: inline-block;
-  *display: inline;
-  *zoom: 1;
-  text-align: center;
-  padding: 5px;
-  cursor: pointer;
-  border-radius: 3px;
-  border: 1px solid #2c5a5a;
+.ui-dialog {
+  background: #fff;
+  border: none;
+  position: absolute;
+}
+.ui-dialog .ui-dialog-title {
+  padding-left: 15px;
+  background-color: #368CDA;
+  border: none;
+  font-weight: normal;
   color: #fff;
+  font-size: 16px;
+}
+.ui-dialog .ui-dialog-close {
+  width: 15px;
+  height: 15px;
+  background: url(images/close.png) no-repeat;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+}
+.ui-dialog .ui-dialog-close:hover,
+.ui-dialog .ui-dialog-close-hover {
+  background: url(images/close_hover.png) no-repeat;
 }
 /**
- *     checkbox
+ *     Button
  */
-.ui-checkbox {
-  width: 14px;
-  height: 14px;
-  overflow: hidden;
-  margin: 0 3px;
-  background: url("ecui.png") 0 0 no-repeat;
-  vertical-align: middle;
-  display: inline-block;
-  *display: inline;
-  *zoom: 1;
+/* 蓝色按钮 */
+.blue-btn {
+  background-color: #368cda;
+  border: 1px solid #368cda !important;
+  color: #fff ;
 }
-.ui-checkbox-hover {
-  background-position: -17px 0;
+.blue-btn:hover {
+  background-color: #429aeb;
+  border-color: #429aeb;
 }
-.ui-checkbox-checked {
-  background-position: -34px 0;
+.blue-btn-hover {
+  /*兼容IE9以下*/
+  background-color: #429aeb;
+  border-color: #429aeb;
 }
-.ui-checkbox-checked-hover {
-  background-position: -51px 0;
+.blue-btn:active {
+  background-color: #2e7bc2;
+  border-color: #2e7bc2;
 }
-.ui-checkbox-checked-disabled {
-  background-position: -85px 0;
+.blue-btn-active {
+  /*兼容IE9以下*/
+  background-color: #2e7bc2;
+  border-color: #2e7bc2;
 }
-.ui-checkbox-disabled {
-  background-position: -68px 0;
+.blue-btn-disabled,
+.blue-btn-disabled:hover {
+  /* 蓝色按钮失效 */
+  background-color: #eff2f7;
+  border-color: #eff2f7 !important;
+  color: #e0e6ed !important;
 }
-.ui-checkbox-part {
-  background-position: -102px 0;
+/* 白色按钮 */
+.white-btn {
+  background-color: #fff;
+  border: 1px solid #acbaca !important;
+  color: #4293dd !important;
 }
-.ui-checkbox-part-hover {
-  background-position: -51px 0;
+.white-btn:hover {
+  border-color: #368cda !important;
+}
+.white-btn-hover {
+  /*兼容IE9以下*/
+  border-color: #368cda !important;
+}
+.white-btn:active {
+  background-color: #2e7bc2;
+  color: #fff !important;
+}
+.white-btn-active {
+  /*兼容IE9以下*/
+  background-color: #2e7bc2;
+  color: #fff !important;
+}
+.white-btn-disabled,
+.white-btn-disabled:hover {
+  /* 白色按钮失效 */
+  background-color: #fff !important;
+  border-color: #eff2f7 !important;
+  color: #e0e6ed !important;
 }
 /**
- *     radio
+ *    Text控件
  */
-.ui-radio {
-  display: inline-block;
-  *display: inline;
-  *zoom: 1;
-  width: 12px;
-  height: 12px;
-  overflow: hidden;
-  margin: 0;
-  background: url("ecui.png") 0 -18px no-repeat;
-  vertical-align: middle;
+.ui-text {
+  border: 1px solid #acbaca;
+  color: #8492a6;
 }
-.ui-radio-hover {
-  background-position: -17px -18px;
+.ui-text:hover {
+  border-color: #8492a6;
 }
-.ui-radio-disabled {
-  background-position: -68px -18px;
+.ui-text-hover {
+  /*兼容IE9以下*/
+  border-color: #8492a6;
 }
-.ui-radio-checked {
-  background-position: -34px -18px;
+.ui-text-active {
+  /*兼容IE9以下*/
+  border-color: #8492a6;
 }
-.ui-radio-checked-hover {
-  background-position: -51px -18px;
+.ui-text-focus {
+  border-color: #368cda !important;
 }
-.ui-radio-checked-disabled {
-  background-position: -85px -18px;
+.ui-text-disabled,
+.ui-text-disabled:hover {
+  border-color: #e0e6ed;
+  background-color: #eff2f7;
+  color: #e0e6ed;
 }
 /**
  *     Select
  */
 .ui-select {
+  width: 110px;
+  height: 28px;
+  padding-right: 30px;
+  background: url(images/arrow.png) no-repeat 120px center;
+  vertical-align: middle;
+  font-size: 14px;
+  font-family: "宋体";
   display: inline-block;
-  *display: inline;
-  *zoom: 1;
-  height: 20px;
-  background: #FFF;
-  width: 100px;
-  border: 1px solid #bbb;
+  border: 1px solid #acbaca;
+  color: #8492a6;
 }
-.ui-select .ui-select-text {
-  padding-left: 4px;
-  line-height: 20px;
+.ui-select:hover {
+  border-color: #8492a6;
 }
 .ui-select-hover {
-  border-color: #888;
+  /*兼容IE9以下*/
+  border-color: #8492a6;
+}
+.ui-select:active {
+  border-color: #368cda;
+}
+.ui-select-active {
+  /*兼容IE9以下*/
+  border-color: #368cda;
+}
+.ui-select-focus {
+  border-color: #368cda;
+}
+.ui-select .ui-select-text {
+  padding: 0;
+  display: block;
+  border: none;
+  background-color: #fff;
+  cursor: pointer;
+}
+.ui-select-disabled,
+.ui-select-disabled:hover {
+  border-color: #e0e6ed;
+}
+.ui-select-disabled .ui-select-text,
+.ui-select-disabled .ui-select-text:hover,
+.ui-select-disabled .ui-select-text:active {
+  background-color: #eff2f7;
+  color: #e0e6ed;
 }
 .ui-select-options {
-  border: 1px solid #888;
+  border: 1px solid #d7d8d9;
+  font-size: 12px;
+  font-family: "宋体";
   background: #fff;
+  overflow-x: hidden;
 }
-.ui-select-options .ui-select-item {
-  padding-left: 4px;
-  cursor: default;
-  line-height: 20px;
+.ui-select-options .ui-item {
+  display: block;
+  text-indent: 10px;
+  line-height: 28px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+.ui-select-options .ui-select-item:hover,
+.ui-select-options .ui-select-item:focus,
 .ui-select-options .ui-select-item-hover,
 .ui-select-options .ui-select-item-focus {
-  background: #ddd;
-}
-/**
- *     TAB
- */
-.ui-tab {
-  border: 1px solid #d9dadb;
-}
-.ui-tab .ui-tab-item {
-  padding: 4px 10px;
-}
-.ui-tab .ui-tab-title {
-  height: 32px;
-  line-height: 32px;
-  background-color: #f0e4e4;
-}
-.ui-tab-title label {
-  color: #666;
-  padding: 6px 20px;
-  cursor: pointer;
-}
-.ui-tab-title .ui-tab-item-selected {
-  color: #333;
-  border-bottom: 0;
-}
-.ui-tab-item-container {
-  background: #fff;
-  padding: 10px;
-  color: #282828;
-  min-height: 100px;
-}
-.ui-tab-item-container .ui-tab {
-  border: 1px solid #ccc;
-}
-/**
- *     Dialog
- */
-.ui-dialog {
-  background: #fff;
-  position: absolute;
-  font-size: 12px;
-  z-index: 200;
-  border-radius: 4px;
-  border: 1px solid #fff;
-}
-.ui-dialog .ui-dialog-head {
-  background: #394459;
-  height: 28px;
+  background-color: #368cda;
   color: #fff;
-  font-weight: bold;
-}
-.ui-dialog .ui-dialog-title {
-  cursor: move;
-  padding: 10px 0 6px 12px;
-  line-height: 24px;
-  font-weight: bold;
-  display: block;
-  color: #656666;
-  font-size: 14px !important;
-}
-.ui-dialog .ui-dialog-body {
-  padding: 10px 8px;
-}
-.ui-dialog .ui-dialog-close {
   cursor: pointer;
-  right: 20px;
-  top: 10px;
-  background-image: url("ecui.png");
-  background-position: -86px -156px;
-  height: 10px;
-  width: 10px;
 }
 /**
- *     messagebox
+ *     Select
  */
-.ui-messagebox {
-    min-width:200px;
-    max-width:400px;
+.ui-text textarea {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  word-wrap: break-word;
+  border: 1px solid #ACBACA;
+}
+.ui-text textarea::placeholder {
+  color: #c0ccda;
+}
+/**
+ *     单日历控件
+ */
+.ui-singleCalendar .ui-singleCalendar:hover {
+  border-color: #8492a6;
+}
+.ui-singleCalendar-hover {
+  /*兼容IE9以下*/
+  border-color: #8492a6;
+}
+.ui-singleCalendar:active {
+  border-color: #368cda;
+}
+.ui-singleCalendar-active {
+  /*兼容IE9以下*/
+  border-color: #368cda;
+}
+.ui-singleCalendar-focus {
+  border-color: #368cda;
+}
+.ui-singleCalendar-disabled,
+.ui-singleCalendar-disabled:hover {
+  border-color: #e0e6ed;
+}
+/**
+ *     Radio
+ */
+.ui-radio {
+  width: 17px;
+  height: 17px;
+  background: url('images/radio-normal.png');
+}
+.ui-radio-checked {
+  background-image: url('images/radio-choice.png');
+}
+.ui-radio-disabled {
+  background-image: url('images/radio-disable.png');
+}
+.ui-radio-checked-disabled {
+  background-image: url('images/radio-dischoice.png');
+}
+/**
+ *     Checkbox
+ */
+.ui-checkbox {
+  width: 17px;
+  height: 17px;
+  background-image: url('images/checkbox-normal.png');
+  background-repeat: no-repeat;
+}
+.ui-checkbox-checked {
+  background-image: url('images/checkbox-choice.png');
+}
+.ui-checkbox-disabled {
+  background-image: url('images/checkbox-disable.png');
+}
+.no-return-checked-disabled {
+  background-image: url('images/checkbox-dischoice.png');
+}
+/**
+ *     日历控件
+ */
+.ui-singleCalendar {
+  width: 180px;
+  height: 30px;
   border: 1px solid #ccc;
 }
-.ui-messagebox .ui-dialog-title {
-  height: 18px;
+.ui-singleCalendar-options {
+  position: absolute;
 }
-.ui-messagebox .ui-messagebox-text {
-  padding: 10px;
+/**
+ *     分页控件
+ */
+.pagination {
+  -moz-user-select: none;
+  /*火狐-禁止文本选中*/
+  -webkit-user-select: none;
+  /*webkit浏览器*/
+  -ms-user-select: none;
+  /*IE10*/
+  -khtml-user-select: none;
+  /*早期浏览器*/
+  user-select: none;
+  height: 24px;
+  font-size: 14px;
 }
-.ui-messagebox .ui-messagebox-bottom {
-  border-top: 1px solid #ddd;
-  padding: 5px;
-  text-align: right;
-  vertical-align: bottom;
+.pagination div {
+  float: left;
 }
-.ui-messagebox .ui-messagebox-bottom .ui-button {
+.pagination .dynamic-page {
+  float: left;
+}
+.pagination .dynamic-page div {
+  float: left;
+}
+.pagination .dynamic-page .pagination-button:hover {
+  color: #38abff;
+}
+.pagination .pagination-button {
+  margin-right: 6px;
+  padding: 0 4px;
+  min-width: 16px;
+  height: 24px;
+  text-align: center;
+  line-height: 24px;
+  color: #495362;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.pagination .pagination-button-hover {
+  color: #38abff;
+}
+.pagination .pagination-button-active {
+  background: #368cda;
+  color: #fff !important;
+}
+.pagination .disabled {
+  color: #ccc;
+}
+/**
+ *     地区联动控件
+ */
+.ui-cityselect {
+  position: relative;
+}
+.ui-cityselect .ui-cityselect-pro,
+.ui-cityselect .ui-cityselect-city {
+  position: relative;
+  width: 150px;
+  height: 30px;
+  line-height: 30px;
+  background: #FFF;
+  vertical-align: middle;
+  font-size: 14px;
+  display: inline-block;
+  border: 1px solid #acbaca;
+  color: #8492a6;
+}
+.ui-cityselect .ui-cityselect-input {
+  display: none;
+}
+/**
+ *     日历控件
+ */
+.calendar-header {
+  width: 256px;
+  height: 45px;
   background: #fff;
-  color: #333;
-  text-shadow: none;
   border: 1px solid #ccc;
-}
-/** 
- *   ui-messagebox-info 
- */
-.ui-messagebox-info {
-  background: lightyellow;
-}
-.ui-messagebox-info .ui-form-title {
-  display: none;
-}
-.ui-messagebox-info .ui-messagebox-bottom {
-  display: none;
-}
-/**
- *     鏃ュ巻
- */
-.ui-monthview {
+  position: relative;
   text-align: center;
 }
-.ui-monthview table {
+.calendar-header .calendar-title {
+  display: block;
+  width: 130px;
+  height: 100%;
   margin: 0 auto;
-  font-size: 12px;
+  line-height: 45px;
+  font-size: 14px;
 }
-.ui-monthview .ui-monthview-title {
-  color: #4a4c4e;
-}
-.ui-monthview .ui-monthview-date {
-  color: #333;
+.calendar-header .prev-year,
+.calendar-header .prev-month,
+.calendar-header .next-month,
+.calendar-header .next-year {
   width: 24px;
   height: 24px;
+  font-size: 14px;
+  position: absolute;
+  top: 12px;
   cursor: pointer;
 }
-.ui-monthview .ui-monthview-date-selected {
-  color: #fff;
-  background-color: #29e;
-  border-radius: 20px;
+.calendar-header .prev-year {
+  left: 22px;
 }
-.ui-monthview .ui-monthview-extra {
-  color: #a4acb6;
-  cursor: auto;
+.calendar-header .prev-month {
+  left: 48px;
+}
+.calendar-header .next-month {
+  right: 48px;
+}
+.calendar-header .next-year {
+  right: 22px;
+}
+.calendar-view {
+  background: #fff;
+}
+.calendar-view table {
+  border: 1px solid #ccc !important;
+  border-top: 0 !important;
+  padding: 0 12px 7px 12px;
+  border-spacing: 8px;
+  border-collapse: separate;
+}
+.calendar-view table td {
+  width: 24px;
+  height: 24px;
+  border: none;
+  line-height: 24px;
+  text-align: center;
+  vertical-align: middle;
+  font: 12px "Microsoft YaHei";
+  cursor: pointer;
+  border-radius: 2px;
+}
+.calendar-view table .ui-monthview-date-hover {
+  background: #c0ccda;
+}
+.calendar-view table .ui-monthview-date:hover {
+  background: #c0ccda;
+}
+.calendar-view table .ui-monthview-date-selected {
+  background: #368cda !important;
+  color: #fff !important;
+}
+.calendar-view table .ui-monthview-date-disabled {
+  color: #dde3eb !important;
+  background: #fff !important;
 }

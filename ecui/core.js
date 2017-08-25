@@ -1210,21 +1210,22 @@
             }
 
             // 需要删除的控件先放入一个集合中等待遍历结束后再删除，否则控件链将产生变化
-            allControls.slice().filter(function (item, index) {
+            allControls.slice().filter(function (item) {
                 if (type ? control.contain(item) : !!item.getOuter() && dom.contain(control, item.getOuter())) {
                     if (!onlyChild || (type ? control !== item : control !== item.getOuter())) {
                         util.remove(independentControls, item);
+                        util.remove(allControls, item);
                         if (item = namedMap[item.getUID()]) {
                             delete namedControls[item];
                         }
-                        allControls.splice(index, 1);
                         return true;
                     }
                 }
             }).forEach(function (item) {
-                core.triggerEvent(item, 'dispose');
-                if (item.getMain()) {
-                    item.$dispose();
+                if (type) {
+                    core.triggerEvent(item, 'dispose');
+                } else {
+                    item.dispose();
                 }
             });
         },
