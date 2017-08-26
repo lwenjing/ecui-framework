@@ -272,6 +272,7 @@ _eInput        - INPUT对象
              * @override
              */
             $dispose: function () {
+                this._eInput.getControl = null;
                 this._eInput = null;
                 ui.Control.prototype.$dispose.call(this);
             },

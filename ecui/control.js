@@ -229,6 +229,7 @@ $$padding           - 内填充宽度缓存
                 } catch (ignore) {
                 }
                 core.removeControlListener(this);
+                this._eMain.getControl = null;
                 this._eMain = this._eBody = null;
                 // 取消 $ready 的操作，防止控件在 onload 结束前被 dispose，从而引发 $ready 访问的信息错误的问题
                 this.$ready = util.blank;
