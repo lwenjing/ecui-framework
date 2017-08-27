@@ -1001,6 +1001,7 @@
             }
 
             // 生成控件
+            options.classes = core.$getClasses(UIClass, options.primary);
             var control = new UIClass(el, options);
 
             if (parent) {
@@ -1049,12 +1050,29 @@
                 }
             }
 
+            options.classes = core.$getClasses(UIClass, options.primary);
             var control = new UIClass(el, options);
             control.$setParent(parent);
-
             oncreate(control, options);
 
             return control;
+        },
+
+        /**
+         * 获取控件的当前样式组。
+         * @private
+         *
+         * @param {Function} UIClass 控件类
+         * @param {string} current 控件的当前样式
+         * @return {Array} 样式数组
+         */
+        $getClasses: function (UIClass, current) {
+            var classes = UIClass.TYPES.slice();
+            if (current && current !== UIClass.TYPES[0]) {
+                classes.push(current);
+            }
+            classes.push('');
+            return classes;
         },
 
         /**
@@ -1475,15 +1493,7 @@
          * @return {Function} 新控件的构造函数
          */
         inherits: function (superClass, type, subClass) {
-            var agent = 'function' === typeof subClass ? function (el, options) {
-                    var classes = this.constructor.TYPES.slice();
-                    if (options.primary && options.primary !== this.constructor.TYPES[0]) {
-                        classes.splice(0, 0, options.primary);
-                    }
-                    classes.push('');
-                    options.classes = classes;
-                    subClass.call(this, el, options);
-                } : function (el, options) {
+            var agent = 'function' === typeof subClass ? subClass : function (el, options) {
                     superClass.call(this, el, options);
                 };
 

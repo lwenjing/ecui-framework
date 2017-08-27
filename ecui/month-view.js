@@ -157,7 +157,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                      */
                     $click: function (event) {
                         var parent = this.getParent();
-
                         core.triggerEvent(parent, 'titleclick', event, parent._aCells.indexOf(this));
                     },
 
@@ -284,7 +283,9 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     end = getDay(this._oEnd, dateYear, dateMonth, lastDayOfCurrMonth),
                     selected = getDay(this._oDate, dateYear, dateMonth, 0),
                     now = getDay(today, dateYear, dateMonth, 0),
-                    type = this.getType(),
+                    classes = core.$getClasses(this.constructor, this.getClass()),
+                    extraClass = classes.join('-extra '),
+                    todayClass = classes.join('-today '),
                     oldYear = this._nYear,
                     oldMonth = this._nMonth;
 
@@ -298,9 +299,9 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                         var el = item.getOuter();
                         if (month = day >= begin && day <= end) {
                             if (index === 35 || index === 42) {
-                                dom.removeClass(dom.getParent(el), type + '-extra');
+                                dom.removeClass(dom.getParent(el), extraClass);
                             }
-                            dom.removeClass(el, type + '-extra');
+                            dom.removeClass(el, extraClass);
                             // 恢复选择的日期
                             if (day === selected) {
                                 setSelected.call(this, item);
@@ -308,18 +309,18 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                             item.enable();
                         } else {
                             if (index === 35 || index === 42) {
-                                dom.addClass(dom.getParent(el), type + '-extra');
+                                dom.addClass(dom.getParent(el), extraClass);
                             }
-                            dom.addClass(el, type + '-extra');
+                            dom.addClass(el, extraClass);
                             if (this._bExtra) {
                                 item.disable();
                             }
                         }
 
                         if (day === now && now > 0) {
-                            dom.addClass(el, type + '-today');
+                            dom.addClass(el, todayClass);
                         } else {
-                            dom.removeClass(el, type + '-today');
+                            dom.removeClass(el, todayClass);
                         }
 
                         item.setContent(month ? day : day > lastDayOfCurrMonth ? day - lastDayOfCurrMonth : lastDayOfLastMonth + day);

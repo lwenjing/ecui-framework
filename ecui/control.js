@@ -507,13 +507,14 @@ $$padding           - 内填充宽度缓存
              */
             alterClass: function (className) {
                 if (this._sClass) {
+                    var classes = core.$getClasses(this.constructor, this._sClass);
                     if (className.charAt(0) === '+') {
                         className = '-' + className.slice(1) + ' ';
-                        dom.addClass(this._eMain, this.getTypes().concat([this._sClass, '']).join(className));
+                        dom.addClass(this._eMain, classes.join(className));
                         this._aStatus.push(className);
                     } else {
                         className += ' ';
-                        dom.removeClass(this._eMain, this.getTypes().concat([this._sClass, '']).join(className));
+                        dom.removeClass(this._eMain, classes.join(className));
                         util.remove(this._aStatus, className);
                     }
                 }
