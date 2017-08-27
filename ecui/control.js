@@ -161,16 +161,16 @@ $$padding           - 内填充宽度缓存
              */
             $cache: function (style, cacheSize) {
                 if (ieVersion < 8) {
-                    var o = style.borderWidth.split(' ');
-                    this.$$border = [util.toNumber(o[0])];
-                    this.$$border[1] = o[1] ? util.toNumber(o[1]) : this.$$border[0];
-                    this.$$border[2] = o[2] ? util.toNumber(o[2]) : this.$$border[0];
-                    this.$$border[3] = o[3] ? util.toNumber(o[3]) : this.$$border[1];
-                    o = style.padding.split(' ');
-                    this.$$padding = [util.toNumber(o[0])];
-                    this.$$padding[1] = o[1] ? util.toNumber(o[1]) : this.$$padding[0];
-                    this.$$padding[2] = o[2] ? util.toNumber(o[2]) : this.$$padding[0];
-                    this.$$padding[3] = o[3] ? util.toNumber(o[3]) : this.$$padding[1];
+                    var list = style.borderWidth.split(' ');
+                    this.$$border = [util.toNumber(list[0])];
+                    this.$$border[1] = list[1] ? util.toNumber(list[1]) : this.$$border[0];
+                    this.$$border[2] = list[2] ? util.toNumber(list[2]) : this.$$border[0];
+                    this.$$border[3] = list[3] ? util.toNumber(list[3]) : this.$$border[1];
+                    list = style.padding.split(' ');
+                    this.$$padding = [util.toNumber(list[0])];
+                    this.$$padding[1] = list[1] ? util.toNumber(list[1]) : this.$$padding[0];
+                    this.$$padding[2] = list[2] ? util.toNumber(list[2]) : this.$$padding[0];
+                    this.$$padding[3] = list[3] ? util.toNumber(list[3]) : this.$$padding[1];
                 } else {
                     this.$$border = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
                     this.$$padding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
@@ -467,18 +467,18 @@ $$padding           - 内填充宽度缓存
              * @param {number} height 高度，如果不需要设置则省略此参数
              */
             $setSize: function (width, height) {
-                var o = this._eMain.tagName,
-                    fixedSize = core.isContentBox() && o !== 'BUTTON' && o !== 'INPUT';
+                var fixedSize = core.isContentBox() && this._eMain.tagName !== 'BUTTON' && this._eMain.tagName !== 'INPUT',
+                    value;
 
                 // 防止负宽度IE下出错
-                if (width && (o = width - (fixedSize ? this.$getBasicWidth() : 0)) > 0) {
-                    this._eMain.style.width = o + 'px';
+                if (width && (value = width - (fixedSize ? this.$getBasicWidth() : 0)) > 0) {
+                    this._eMain.style.width = value + 'px';
                     this.$$width = width;
                 }
 
                 // 防止负高度IE下出错
-                if (height && (o = height - (fixedSize ? this.$getBasicHeight() : 0)) > 0) {
-                    this._eMain.style.height = o + 'px';
+                if (height && (value = height - (fixedSize ? this.$getBasicHeight() : 0)) > 0) {
+                    this._eMain.style.height = value + 'px';
                     this.$$height = height;
                 }
 
@@ -580,15 +580,15 @@ $$padding           - 内填充宽度缓存
              * @param {number} top y轴的坐标，如果不指定水平方向也居中
              */
             center: function (top) {
-                o = this.getOuter().offsetParent;
+                var parent = this.getOuter().offsetParent;
 
-                if (!o || o.tagName === 'BODY' || o.tagName === 'HTML') {
-                    var o = util.getView(),
-                        x = o.right + o.left,
-                        y = o.bottom + o.top;
+                if (!parent || parent.tagName === 'BODY' || parent.tagName === 'HTML') {
+                    var view = util.getView(),
+                        x = view.right + view.left,
+                        y = view.bottom + view.top;
                 } else {
-                    x = o.offsetWidth;
-                    y = o.offsetHeight;
+                    x = parent.offsetWidth;
+                    y = parent.offsetHeight;
                 }
                 this.setPosition(Math.max((x - this.getWidth()) / 2, 0), top !== undefined ? top : Math.max((y - this.getHeight()) / 2, 0));
             },

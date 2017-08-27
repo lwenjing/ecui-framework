@@ -501,11 +501,11 @@
          * @return {ecui.ui.Control} 控件对象
          */
         getControl: function () {
-            var o = core.findControl(this.target);
-            if (o && !o.isDisabled()) {
-                for (; o; o = o.getParent()) {
-                    if (o.isCapturable()) {
-                        return o;
+            var control = core.findControl(this.target);
+            if (control && !control.isDisabled()) {
+                for (; control; control = control.getParent()) {
+                    if (control.isCapturable()) {
+                        return control;
                     }
                 }
             }
@@ -593,9 +593,9 @@
      * @param {boolean} remove 如果为true表示需要移除data上的鼠标事件，否则是添加鼠标事件
      */
     function changeHandler(env, remove) {
-        for (var i = 0, func = remove ? dom.removeEventListener : dom.addEventListener, o; i < 5; ) {
-            if (env[o = eventNames[i++]]) {
-                func(document, o, env[o]);
+        for (var i = 0, func = remove ? dom.removeEventListener : dom.addEventListener, name; i < 5; ) {
+            if (env[name = eventNames[i++]]) {
+                func(document, name, env[name]);
             }
         }
     }
@@ -725,19 +725,19 @@
 
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
-            var o = document.body.lastChild;
-            flgFixedOffset = o.lastChild.offsetTop;
-            flgFixedSize = o.offsetWidth !== 80;
-            scrollNarrow = o.offsetWidth - o.clientWidth - 2;
-            dom.remove(o);
+            var el = document.body.lastChild;
+            flgFixedOffset = el.lastChild.offsetTop;
+            flgFixedSize = el.offsetWidth !== 80;
+            scrollNarrow = el.offsetWidth - el.clientWidth - 2;
+            dom.remove(el);
 
-            o = core.getOptions(document.body, 'data-ecui') || {};
+            var options = core.getOptions(document.body, 'data-ecui') || {};
 
-            ecuiName = o.name || ecuiName;
-            isGlobalId = o.globalId;
+            ecuiName = options.name || ecuiName;
+            isGlobalId = options.globalId;
 
-            if (o.load) {
-                o.load.split(',').forEach(function (item) {
+            if (options.load) {
+                options.load.split(',').forEach(function (item) {
                     try {
                         core[item].load();
                     } catch (ignore) {
@@ -833,12 +833,12 @@
         }
 
         if (options.ext) {
-            for (var o in options.ext) {
-                if (options.ext.hasOwnProperty(o)) {
-                    if (ext[o]) {
-                        ext[o](control, options.ext[o], options);
-                        if (o = control['$init' + o.charAt(0).toUpperCase() + util.toCamelCase(o.slice(1))]) {
-                            o.call(control, options);
+            for (var key in options.ext) {
+                if (options.ext.hasOwnProperty(key)) {
+                    if (ext[key]) {
+                        ext[key](control, options.ext[key], options);
+                        if (key = control['$init' + key.charAt(0).toUpperCase() + util.toCamelCase(key.slice(1))]) {
+                            key.call(control, options);
                         }
                     }
                 }
@@ -908,17 +908,17 @@
      * @param {Object} env 环境描述对象
      */
     function setEnv(env) {
-        var o = {};
+        var newEnv = {};
         changeHandler(currEnv, true);
 
-        util.extend(o, currEnv);
-        util.extend(o, env);
-        o.x = mouseX;
-        o.y = mouseY;
-        changeHandler(o);
+        util.extend(newEnv, currEnv);
+        util.extend(newEnv, env);
+        newEnv.x = mouseX;
+        newEnv.y = mouseY;
+        changeHandler(newEnv);
 
         envStack.push(currEnv);
-        currEnv = o;
+        currEnv = newEnv;
     }
 
     util.extend(core, {
@@ -943,14 +943,14 @@
          * @param {ecui.ui.Control} control ECUI 控件
          */
         $clearState: function (control) {
-            var o = control.getParent();
+            var parent = control.getParent();
 
             core.loseFocus(control);
             if (control.contain(activedControl)) {
-                bubble(activedControl, 'deactivate', null, activedControl = o);
+                bubble(activedControl, 'deactivate', null, activedControl = parent);
             }
             if (control.contain(hoveredControl)) {
-                bubble(hoveredControl, 'mouseout', null, hoveredControl = o);
+                bubble(hoveredControl, 'mouseout', null, hoveredControl = parent);
             }
         },
 
@@ -963,11 +963,11 @@
          * primary    {string} 控件的基本样式(参见 getMainClass 方法)，如果忽略此参数将使用主元素的 className 属性
          * @protected
          *
-         * @param {Function} Type 控件的构造函数
+         * @param {Function} UIClass 控件的构造函数
          * @param {Object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
-        $create: function (Type, options) {
+        $create: function (UIClass, options) {
             options = options || {};
 
             var parent = options.parent,
@@ -983,8 +983,8 @@
                     return el.getControl();
                 }
 
-                if (Type.CLASS || primary) {
-                    el.className = className = el.className + ' ' + primary + Type.CLASS;
+                if (UIClass.CLASS || primary) {
+                    el.className = className = el.className + ' ' + primary + UIClass.CLASS;
                 } else {
                     className = el.className;
                 }
@@ -994,38 +994,38 @@
                 options.primary = RegExp.$1;
             } else {
                 // 没有传入主元素，需要自动生成，此种情况比较少见，不推荐使用
-                el = options.main = dom.create(primary + Type.CLASS);
+                el = options.main = dom.create(primary + UIClass.CLASS);
                 if (!primary) {
-                    options.primary = Type.TYPES[0];
+                    options.primary = UIClass.TYPES[0];
                 }
             }
 
             // 生成控件
-            Type = new Type(el, options);
+            var control = new UIClass(el, options);
 
             if (parent) {
                 if (parent instanceof ui.Control) {
-                    Type.setParent(parent);
+                    control.setParent(parent);
                 } else {
-                    Type.appendTo(parent);
+                    control.appendTo(parent);
                 }
             } else {
-                Type.$setParent(core.findControl(dom.getParent(Type.getOuter())));
+                control.$setParent(core.findControl(dom.getParent(control.getOuter())));
             }
 
-            oncreate(Type, options);
-            independentControls.push(Type);
+            oncreate(control, options);
+            independentControls.push(control);
 
             // 处理所有的委托操作，参见delegate
             if (el = delegateControls[options.id]) {
                 delete delegateControls[options.id];
                 el.forEach(function (item) {
-                    item.args[0] = Type;
+                    item.args[0] = control;
                     item.func.apply(item.caller, item.args);
                 });
             }
 
-            return Type;
+            return control;
         },
 
         /**
@@ -1033,13 +1033,13 @@
          * $fastCreate 方法仅供控件生成自己的部件使用，生成的控件不在控件列表中注册，不自动刷新也不能通过 query 方法查询(参见 $create 方法)。$fastCreate 方法通过分解 Element 对象的 className 属性得到样式信息，其中第一个样式为类型样式，第二个样式为基本样式。
          * @protected
          *
-         * @param {Function} Type 控件的构造函数
+         * @param {Function} UIClass 控件的构造函数
          * @param {HTMLElement} el 控件对应的 Element 对象
          * @param {ecui.ui.Control} parent 控件的父控件
          * @param {Object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
-        $fastCreate: function (Type, el, parent, options) {
+        $fastCreate: function (UIClass, el, parent, options) {
             options = options || {};
 
             options.uid = 'ecui-' + (++uniqueIndex);
@@ -1049,12 +1049,12 @@
                 }
             }
 
-            Type = new Type(el, options);
-            Type.$setParent(parent);
+            var control = new UIClass(el, options);
+            control.$setParent(parent);
 
-            oncreate(Type, options);
+            oncreate(control, options);
 
-            return Type;
+            return control;
         },
 
         /**
@@ -1131,15 +1131,15 @@
          * primary   {string} 控件的基本样式(参见 getMainClass 方法)，如果忽略此参数将使用主元素的 className 属性
          * @public
          *
-         * @param {string|Function} type 控件的类型名或控件的构造函数
+         * @param {Function} UIClass 控件的构造函数
          * @param {Object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
-        create: function (type, options) {
-            type = core.$create('string' === typeof type ? ui[type] : type, options);
-            type.cache();
-            type.init(options);
-            return type;
+        create: function (UIClass, options) {
+            var control = core.$create(UIClass, options);
+            control.cache();
+            control.init(options);
+            return control;
         },
 
         /**
@@ -1183,36 +1183,36 @@
                 }
             }
 
-            var type = control instanceof ui.Control,
+            var isControl = control instanceof ui.Control,
                 namedMap = {},
-                o;
+                parent;
 
-            if (type) {
+            if (isControl) {
                 core.$clearState(control);
             } else {
-                o = core.findControl(dom.getParent(control));
+                parent = core.findControl(dom.getParent(control));
                 // 以下判断需要考虑control.getOuter()物理上不属于control但逻辑上属于的情况
                 if (focusedControl && contain(control, focusedControl)) {
-                    core.setFocused(o);
+                    core.setFocused(parent);
                 }
                 if (activedControl && contain(control, activedControl)) {
-                    bubble(activedControl, 'deactivate', null, activedControl = o);
+                    bubble(activedControl, 'deactivate', null, activedControl = parent);
                 }
                 if (hoveredControl && contain(control, hoveredControl)) {
-                    bubble(hoveredControl, 'mouseout', null, hoveredControl = o);
+                    bubble(hoveredControl, 'mouseout', null, hoveredControl = parent);
                 }
             }
 
-            for (o in namedControls) {
-                if (namedControls.hasOwnProperty(o)) {
-                    namedMap[namedControls[o].getUID()] = o;
+            for (var key in namedControls) {
+                if (namedControls.hasOwnProperty(key)) {
+                    namedMap[namedControls[key].getUID()] = key;
                 }
             }
 
             // 需要删除的控件先放入一个集合中等待遍历结束后再删除，否则控件链将产生变化
             allControls.slice().filter(function (item) {
-                if (type ? control.contain(item) : !!item.getOuter() && contain(control, item)) {
-                    if (!onlyChild || (type ? control !== item : control !== item.getOuter())) {
+                if (isControl ? control.contain(item) : !!item.getOuter() && contain(control, item)) {
+                    if (!onlyChild || (isControl ? control !== item : control !== item.getOuter())) {
                         util.remove(independentControls, item);
                         util.remove(allControls, item);
                         if (item = namedMap[item.getUID()]) {
@@ -1619,12 +1619,12 @@
          */
         mask: function (opacity, zIndex) {
             var el = document.body,
-                o = util.getView(),
+                view = util.getView(),
                 // 宽度向前扩展2屏，向后扩展2屏，是为了解决翻屏滚动的剧烈闪烁问题
                 // 不直接设置为整个页面的大小，是为了解决IE下过大的遮罩层不能半透明的问题
-                top = Math.max(o.top - o.height * 2, 0),
-                left = Math.max(o.left - o.width * 2, 0),
-                text = ';top:' + top + 'px;left:' + left + 'px;width:' + Math.min(o.width * 5, o.pageWidth - left) + 'px;height:' + Math.min(o.height * 5, o.pageHeight - top) + 'px;display:';
+                top = Math.max(view.top - view.height * 2, 0),
+                left = Math.max(view.left - view.width * 2, 0),
+                text = ';top:' + top + 'px;left:' + left + 'px;width:' + Math.min(view.width * 5, view.pageWidth - left) + 'px;height:' + Math.min(view.height * 5, view.pageHeight - top) + 'px;display:';
 
             if ('boolean' === typeof opacity) {
                 // 仅简单的显示或隐藏当前的屏蔽层，用于resize时的重绘
@@ -1650,7 +1650,7 @@
                      *
                      * @param {boolean} unload 是否在 unload 中触发函数
                      */
-                    o = function (unload) {
+                    function (unload) {
                         if (!unload) {
                             util.remove(maskElements, el);
                             util.timer(dom.remove, 1000, null, el);
@@ -1663,7 +1663,7 @@
                     }
                 );
 
-                return o;
+                return unmasks[unmasks.length - 1];
             }
         },
 

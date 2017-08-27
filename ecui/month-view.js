@@ -275,9 +275,9 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     dateYear = year || today.getFullYear(),
                     dateMonth = month ? month - 1 : today.getMonth(),
                     // 得到上个月的最后几天的信息，用于补齐当前月日历的上月信息位置
-                    o = new Date(dateYear, dateMonth, 0),
-                    day = 1 - o.getDay(),
-                    lastDayOfLastMonth = o.getDate(),
+                    date = new Date(dateYear, dateMonth, 0),
+                    day = 1 - date.getDay(),
+                    lastDayOfLastMonth = date.getDate(),
                     // 得到当前月的天数
                     lastDayOfCurrMonth = new Date(dateYear, dateMonth + 1, 0).getDate(),
                     begin = getDay(this._oBegin, dateYear, dateMonth, 1),

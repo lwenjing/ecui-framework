@@ -106,8 +106,8 @@ _aChildren     - 子控件集合
              */
             $cache: function (style, cacheSize) {
                 ui.Control.prototype.$cache.call(this, style, cacheSize);
-                for (var i = 0, o; o = this._aChildren[i++]; ) {
-                    o.cache(true, true);
+                for (var i = 0, item; item = this._aChildren[i++]; ) {
+                    item.cache(true, true);
                 }
             },
 
@@ -278,12 +278,12 @@ _aChildren     - 子控件集合
              */
             add: function (item, index, options) {
                 var list = this._aChildren,
-                    o;
+                    el;
 
                 if ('string' === typeof item) {
-                    o = dom.create('', 'LI');
-                    o.innerHTML = item;
-                    item = createChild(o, this, options);
+                    el = dom.create('', 'LI');
+                    el.innerHTML = item;
+                    item = createChild(el, this, options);
                 }
 
                 // 这里需要先 setParent，否则 getRoot 的值将不正确
@@ -294,17 +294,17 @@ _aChildren     - 子控件集合
                 item.setParent(this);
 
                 if (item.getParent()) {
-                    o = item.getOuter();
+                    el = item.getOuter();
                     util.remove(list, item);
                     if (list[index]) {
-                        dom.insertBefore(o, list[index].getOuter());
+                        dom.insertBefore(el, list[index].getOuter());
                         list.splice(index, 0, item);
                     } else {
-                        this._eChildren.appendChild(o);
+                        this._eChildren.appendChild(el);
                         list.push(item);
                     }
                     if (item._eChildren) {
-                        dom.insertAfter(item._eChildren, o);
+                        dom.insertAfter(item._eChildren, el);
                     }
                 }
 
@@ -355,8 +355,8 @@ _aChildren     - 子控件集合
              */
             getRoot: function () {
                 // 这里需要考虑Tree位于上一个Tree的节点内部
-                for (var o = this, parent; (parent = o.getParent()) instanceof ui.TreeView && parent._aChildren.indexOf(o) >= 0; o = parent) {}
-                return o;
+                for (var control = this, parent; (parent = control.getParent()) instanceof ui.TreeView && parent._aChildren.indexOf(control) >= 0; control = parent) {}
+                return control;
             },
 
             /**
@@ -364,8 +364,8 @@ _aChildren     - 子控件集合
              */
             init: function (options) {
                 ui.Control.prototype.init.call(this, options);
-                for (var i = 0, o; o = this._aChildren[i++]; ) {
-                    o.init(options);
+                for (var i = 0, item; item = this._aChildren[i++]; ) {
+                    item.init(options);
                 }
             },
 

@@ -49,9 +49,9 @@ Decorate - 装饰器插件。
      */
     decorates.Decorator = function (control, primary, list) {
         var id = control.getUID(),
-            o = (this._oInner = namedMap[id] || control).getOuter();
+            el = (this._oInner = namedMap[id] || control).getOuter();
 
-        dom.insertBefore(this._eMain = dom.create(this._sPrimary = primary), o).appendChild(o);
+        dom.insertBefore(this._eMain = dom.create(this._sPrimary = primary), el).appendChild(el);
         core.$bind(this._eMain, control);
         control.clearCache();
 
@@ -60,15 +60,15 @@ Decorate - 装饰器插件。
         if (!oldMethods[id]) {
             // 给控件的方法设置代理访问
             oldMethods[id] = {};
-            for (o in funcProxy) {
-                oldMethods[id][o] = control[o];
-                control[o] = funcProxy[o];
+            for (var key in funcProxy) {
+                oldMethods[id][key] = control[key];
+                control[key] = funcProxy[key];
             }
         }
 
         if (list) {
-            for (id = 0; o = list[id]; ) {
-                list[id++] = '<div class="' + primary + '-' + o + '" style="position:absolute;top:0px;left:0px"></div>';
+            for (var i = 0, item; item = list[i]; ) {
+                list[i++] = '<div class="' + primary + '-' + item + '" style="position:absolute;top:0px;left:0px"></div>';
             }
 
             dom.insertHTML(this._eMain, 'BEFOREEND', list.join(''));
@@ -83,24 +83,24 @@ Decorate - 装饰器插件。
      */
     decorates.Decorator.clear = function (control) {
         var id = control.getUID(),
-            o;
+            data;
 
         // 清除所有的代理函数
-        for (o in funcProxy) {
-            delete control[o];
+        for (var key in funcProxy) {
+            delete control[key];
 
             // 方法不在原型链上需要额外恢复
-            if (control[o] !== oldMethods[id][o]) {
-                control[o] = oldMethods[id][o];
+            if (control[key] !== oldMethods[id][key]) {
+                control[key] = oldMethods[id][key];
             }
         }
 
-        o = namedMap[id];
+        data = namedMap[id];
 
-        dom.insertBefore(control.getOuter(), o._eMain);
-        dom.remove(o._eMain);
-        for (; o !== control; o = o._oInner) {
-            o.$dispose();
+        dom.insertBefore(control.getOuter(), data._eMain);
+        dom.remove(data._eMain);
+        for (; data !== control; data = data._oInner) {
+            data.$dispose();
         }
         delete namedMap[id];
         delete oldMethods[id];
@@ -263,10 +263,10 @@ Decorate - 装饰器插件。
         function build(name, index) {
             funcProxy[name] = function () {
                 var id = this.getUID(),
-                    o = namedMap[id],
+                    data = namedMap[id],
                     args = arguments;
 
-                return args[index] ? oldMethods[id][name].apply(this, args) : o[name].apply(o, args);
+                return args[index] ? oldMethods[id][name].apply(this, args) : data[name].apply(data, args);
             };
         }
 
@@ -300,11 +300,11 @@ LRDecorator - 左右扩展装饰器，将区域分为"左-控件-右"三部分�
     util.inherits(decorates.LRDecorator, decorates.Decorator).$setSize = function (width, height) {
         decorates.Decorator.prototype.$setSize.call(this, width, height);
 
-        var o = this._eMain.lastChild,
+        var el = this._eMain.lastChild,
             text = ';top:' + this.$$padding[0] + 'px;height:' + this._oInner.getHeight(true) + 'px;width:';
 
-        o.style.cssText += text + this.$$padding[1] + 'px;left:' + (this.$$padding[3] + this._oInner.getWidth(true)) + 'px';
-        o.previousSibling.style.cssText += text + this.$$padding[3] + 'px';
+        el.style.cssText += text + this.$$padding[1] + 'px;left:' + (this.$$padding[3] + this._oInner.getWidth(true)) + 'px';
+        el.previousSibling.style.cssText += text + this.$$padding[3] + 'px';
     };
 
 /*
@@ -331,11 +331,11 @@ TBDecorator - 上下扩展装饰器，将区域分为"上-控件-下"三部分�
     util.inherits(decorates.TBDecorator, decorates.Decorator).$setSize = function (width, height) {
         decorates.Decorator.prototype.$setSize.call(this, width, height);
 
-        var o = this._eMain.lastChild,
+        var el = this._eMain.lastChild,
             text = ';left:' + this.$$padding[3] + 'px;width:' + this._oInner.getWidth(true) + 'px;height:';
 
-        o.style.cssText += text + this.$$padding[2] + 'px;top:' + (this.$$padding[0] + this._oInner.getHeight(true)) + 'px';
-        o.previousSibling.style.cssText += text + this.$$padding[0] + 'px';
+        el.style.cssText += text + this.$$padding[2] + 'px;top:' + (this.$$padding[0] + this._oInner.getHeight(true)) + 'px';
+        el.previousSibling.style.cssText += text + this.$$padding[0] + 'px';
     };
 
 /*
@@ -362,7 +362,7 @@ MagicDecorator - 九宫格扩展装饰器，将区域分为"左上-上-右上-�
     util.inherits(decorates.MagicDecorator, decorates.Decorator).$setSize = function (width, height) {
         decorates.Decorator.prototype.$setSize.call(this, width, height);
 
-        var o = this._eMain.lastChild,
+        var el = this._eMain.lastChild,
             i = 9,
             paddingTop = this.$$padding[0],
             paddingLeft = this.$$padding[3],
@@ -376,8 +376,8 @@ MagicDecorator - 九宫格扩展装饰器，将区域分为"左上-上-右上-�
 
         for (; i--; ) {
             if (i !== 4) {
-                o.style.cssText += ';top:' + topList[Math.floor(i / 3)] + 'px;left:' + leftList[i % 3] + 'px;width:' + widthList[i % 3] + 'px;height:' + heightList[Math.floor(i / 3)] + 'px';
-                o = o.previousSibling;
+                el.style.cssText += ';top:' + topList[Math.floor(i / 3)] + 'px;left:' + leftList[i % 3] + 'px;width:' + widthList[i % 3] + 'px;height:' + heightList[Math.floor(i / 3)] + 'px';
+                el = el.previousSibling;
             }
         }
     };

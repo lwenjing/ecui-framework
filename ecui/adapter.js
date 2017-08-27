@@ -188,7 +188,7 @@ var ecui;
                 if (ieVersion) {
                     if (!isStrict) {
                         // 在怪异模式下，IE 将 body 的边框也算在了偏移值中，需要先纠正
-                        style = dom.getStyle(body);
+                        var style = dom.getStyle(body);
                         if (isNaN(top = util.toNumber(style.borderTopWidth))) {
                             top = -2;
                         }
@@ -222,7 +222,7 @@ var ecui;
                     for (parent = dom.getParent(el); parent !== body; parent = dom.getParent(parent)) {
                         left -= parent.scrollLeft;
                         if (!operaVersion) {
-                            var style = dom.getStyle(parent);
+                            style = dom.getStyle(parent);
                             // 以下解决firefox下特殊的布局引发的双倍border边距偏移的问题，使用 html 作为临时变量
                             html = firefoxVersion && style.overflow !== 'visible' && childStyle.position === 'absolute' ? 2 : 1;
                             top += util.toNumber(style.borderTopWidth) * html - parent.scrollTop;

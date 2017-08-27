@@ -186,8 +186,8 @@ _uClose     - 关闭按钮
              * @override
              */
             hide: function () {
-                for (var i = dialogs.indexOf(this), o; o = dialogs[++i]; ) {
-                    if (o._bModal) {
+                for (var i = dialogs.indexOf(this), item; item = dialogs[++i]; ) {
+                    if (item._bModal) {
                         return false;
                     }
                 }

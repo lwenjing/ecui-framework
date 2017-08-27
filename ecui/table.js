@@ -80,13 +80,13 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
      * @param {ecui.ui.Table.Row} row 行控件
      */
     function initRow(row) {
-        for (var i = 0, list = row.getParent()._aHCells, el, o; o = list[i]; ) {
-            if ((el = row._aElements[i++]) && el !== o.getMain()) {
-                o = o.getWidth() - o.getMinimumWidth();
+        for (var i = 0, list = row.getParent()._aHCells, el, item; item = list[i]; ) {
+            if ((el = row._aElements[i++]) && el !== item.getMain()) {
+                var width = item.getWidth() - item.getMinimumWidth();
                 while (row._aElements[i] === null) {
-                    o += list[i++].getWidth();
+                    width += list[i++].getWidth();
                 }
-                el.style.width = o + 'px';
+                el.style.width = width + 'px';
             }
         }
     }

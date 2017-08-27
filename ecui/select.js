@@ -78,18 +78,18 @@ _uOptions     - 下拉选择框
             util.setDefault(options, 'hidden', true);
 
             if (el.tagName === 'SELECT') {
-                var o = el;
+                var selectEl = el;
 
                 options.name = el.name;
                 options.value = el.value;
 
                 // 移除select标签
                 el = dom.insertBefore(dom.create(el.className), el);
-                el.style.cssText = o.style.cssText;
-                dom.remove(o);
+                el.style.cssText = selectEl.style.cssText;
+                dom.remove(selectEl);
 
                 // 转化select标签
-                optionsEl.innerHTML = Array.prototype.map.call(o.options, function (item) {
+                optionsEl.innerHTML = Array.prototype.map.call(selectEl.options, function (item) {
                     return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + '">' + util.encodeHTML(item.text) + '</div>';
                 }).join('');
             } else {
@@ -133,10 +133,10 @@ _uOptions     - 下拉选择框
                      */
                     $click: function (event) {
                         ui.Item.prototype.$click.call(this, event);
-                        var select = this.getParent();
-                        select._uOptions.hide();
-                        setSelected.call(select, this);
-                        core.triggerEvent(select, 'change');
+                        var parent = this.getParent();
+                        parent._uOptions.hide();
+                        setSelected.call(parent, this);
+                        core.triggerEvent(parent, 'change');
                     },
 
                     /**

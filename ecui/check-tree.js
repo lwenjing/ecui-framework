@@ -41,12 +41,12 @@ _uCheckbox - 复选框控件
             el = this.getMain();
             this._uCheckbox = core.$fastCreate(ui.Checkbox, el.insertBefore(dom.create(options.classes.join('-checkbox ') + 'ui-checkbox'), el.firstChild), this, options);
 
-            for (var i = 0, list = this.getChildren(), o; o = list[i++]; ) {
+            for (var i = 0, list = this.getChildren(), item; item = list[i++]; ) {
                 if (options.subject) {
                     if (options.subject === true) {
-                        o._uCheckbox.setSubject(this._uCheckbox);
+                        item._uCheckbox.setSubject(this._uCheckbox);
                     } else {
-                        core.delegate(options.subject, o._uCheckbox, o._uCheckbox.setSubject);
+                        core.delegate(options.subject, item._uCheckbox, item._uCheckbox.setSubject);
                     }
                 }
             }
@@ -67,8 +67,8 @@ _uCheckbox - 复选框控件
              * @return {Array} 全部选中的树控件列表
              */
             getChecked: function () {
-                for (var i = 0, list = this.getChildren(), result = this.isChecked() ? [this] : [], o; o = list[i++]; ) {
-                    result = result.concat(o.getChecked());
+                for (var i = 0, list = this.getChildren(), result = this.isChecked() ? [this] : [], item; item = list[i++]; ) {
+                    result = result.concat(item.getChecked());
                 }
                 return result;
             },

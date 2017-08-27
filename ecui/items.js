@@ -119,24 +119,24 @@ Item/Items - 定义选项操作相关的基本操作。
          */
         add: function (item, index, options) {
             var list = namedMap[this.getUID()],
-                o;
+                el;
 
             this.preventAlterItems();
 
             if (!(item instanceof ui.Item)) {
                 // 根据是字符串还是Element对象选择不同的初始化方式
                 if ('string' === typeof item) {
-                    this.getBody().appendChild(o = dom.create());
-                    o.innerHTML = item;
-                    item = o;
+                    this.getBody().appendChild(el = dom.create());
+                    el.innerHTML = item;
+                    item = el;
                 }
 
-                o = this.Item || ui.Item;
-                item.className += ' ' + this.getType() + '-item' + o.CLASS;
+                var UIClass = this.Item || ui.Item;
+                item.className += ' ' + this.getType() + '-item' + UIClass.CLASS;
 
                 options = options || core.getOptions(item) || {};
                 options.parent = this;
-                item = core.$fastCreate(o, item, this, options);
+                item = core.$fastCreate(UIClass, item, this, options);
             }
 
             // 选项控件，直接添加
@@ -144,13 +144,13 @@ Item/Items - 定义选项操作相关的基本操作。
 
             // 改变选项控件的位置
             if (item.getParent()) {
-                o = item.getOuter();
+                el = item.getOuter();
                 util.remove(list, item);
                 if (list[index]) {
-                    dom.insertBefore(o, list[index].getOuter());
+                    dom.insertBefore(el, list[index].getOuter());
                     list.splice(index, 0, item);
                 } else {
-                    dom.getParent(o).appendChild(o);
+                    dom.getParent(el).appendChild(el);
                     list.push(item);
                 }
             }

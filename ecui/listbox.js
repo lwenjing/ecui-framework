@@ -131,9 +131,9 @@ _eInput - 选项对应的input，form提交时使用
              * @return {Array} 选项数组
              */
             getSelected: function () {
-                for (var i = 0, list = this.getItems(), o, result = []; o = list[i++]; ) {
-                    if (o.isSelected()) {
-                        result.push(o);
+                for (var i = 0, list = this.getItems(), item, result = []; item = list[i++]; ) {
+                    if (item.isSelected()) {
+                        result.push(item);
                     }
                 }
                 return result;
@@ -145,8 +145,8 @@ _eInput - 选项对应的input，form提交时使用
              * @public
              */
             selectAll: function () {
-                for (var i = 0, list = this.getItems(), o; o = list[i++]; ) {
-                    o.setSelected();
+                for (var i = 0, list = this.getItems(), item; item = list[i++]; ) {
+                    item.setSelected();
                 }
             },
 
@@ -158,9 +158,9 @@ _eInput - 选项对应的input，form提交时使用
              * @param {string} name 提交用的名称
              */
             setName: function (name) {
-                for (var i = 0, list = this.getItems(), o; o = list[i++]; ) {
+                for (var i = 0, list = this.getItems(), item; item = list[i++]; ) {
                     // 需要将下属所有的输入框名称全部改变
-                    o._eInput = dom.setInput(o._eInput, name);
+                    item._eInput = dom.setInput(item._eInput, name);
                 }
                 this._sName = name;
             }
