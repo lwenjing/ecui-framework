@@ -1067,7 +1067,7 @@
         $getClasses: function (UIClass, current) {
             var classes = UIClass.TYPES.slice();
             if (current && current !== UIClass.TYPES[0]) {
-                classes.splice(0, 0, current);
+                classes.push(current);
             }
             classes.push('');
             return classes;

@@ -52,6 +52,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             }
 
             if (cell) {
+            console.log(cell.getClass());
                 cell.alterClass('+selected');
             }
             this._cSelected = cell;
@@ -113,6 +114,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              */
             Date: core.inherits(
                 ui.Control,
+                'ui-month-view-date',
                 {
                     /**
                      * 点击时，根据单元格类型触发相应的事件。

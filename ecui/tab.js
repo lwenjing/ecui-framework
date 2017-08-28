@@ -80,6 +80,7 @@ _eContainer      - 容器 DOM 元素
              */
             Item: core.inherits(
                 ui.Item,
+                'ui-tab-item',
                 function (el, options) {
                     if (el.tagName !== 'H6') {
                         var containerEl = el;

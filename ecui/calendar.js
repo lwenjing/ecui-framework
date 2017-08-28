@@ -61,6 +61,7 @@ _eTitle        - 日历头部信息提示区
              */
             PrevYear: core.inherits(
                 ui.Button,
+                'ui-calendar-prev-year',
                 {
                     $click: function () {
                         this.getParent().move(-12);
@@ -74,6 +75,7 @@ _eTitle        - 日历头部信息提示区
              */
             NextYear: core.inherits(
                 ui.Button,
+                'ui-calendar-next-year',
                 {
                     $click: function () {
                         this.getParent().move(12);
@@ -87,6 +89,7 @@ _eTitle        - 日历头部信息提示区
              */
             PrevMonth: core.inherits(
                 ui.Button,
+                'ui-calendar-prev-month',
                 {
                     $click: function () {
                         this.getParent().move(-1);
@@ -100,6 +103,7 @@ _eTitle        - 日历头部信息提示区
              */
             NextMonth: core.inherits(
                 ui.Button,
+                'ui-calendar-next-month',
                 {
                     $click: function () {
                         this.getParent().move(1);
