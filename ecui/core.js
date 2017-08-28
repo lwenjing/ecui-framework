@@ -644,9 +644,9 @@
 
         if (index1 === index2) {
             if (ieVersion < 8) {
-                style1 = list1[i - 1].all;
-                index1 = Array.prototype.indexOf.call(style1, list1[i]);
-                index2 = Array.prototype.indexOf.call(style1, list2[i]);
+                var elements = list1[i - 1].all;
+                index1 = Array.prototype.indexOf.call(elements, list1[i]);
+                index2 = Array.prototype.indexOf.call(elements, list2[i]);
             } else {
                 if (list1[i].compareDocumentPosition(list2[i]) & 2) {
                     return 1;
@@ -1045,9 +1045,7 @@
 
             options.uid = 'ecui-' + (++uniqueIndex);
             if (!options.primary) {
-                if (/\s*([^\s]+)/.test(el.className)) {
-                    options.primary = RegExp.$1;
-                }
+                options.primary = UIClass.TYPES[0];
             }
 
             options.classes = core.$getClasses(UIClass, options.primary);
@@ -1069,7 +1067,7 @@
         $getClasses: function (UIClass, current) {
             var classes = UIClass.TYPES.slice();
             if (current && current !== UIClass.TYPES[0]) {
-                classes.push(current);
+                classes.splice(0, 0, current);
             }
             classes.push('');
             return classes;
@@ -1493,37 +1491,50 @@
          * @return {Function} 新控件的构造函数
          */
         inherits: function (superClass, type, subClass) {
-            var agent = 'function' === typeof subClass ? subClass : function (el, options) {
+            var index = 3,
+                argType = type,
+                argSubClass = subClass;
+
+            if ('string' !== typeof argType) {
+                argSubClass = argType;
+                index--;
+                argType = '';
+            }
+
+            if ('function' !== typeof argSubClass) {
+                argSubClass = function (el, options) {
                     superClass.call(this, el, options);
                 };
+                index--;
+            }
 
             if (superClass) {
-                util.inherits(agent, superClass);
+                util.inherits(argSubClass, superClass);
 
-                if (type && type.charAt(0) === '*') {
-                    (agent.TYPES = superClass.TYPES.slice())[0] = type.slice(1);
+                if (argType && argType.charAt(0) === '*') {
+                    (argSubClass.TYPES = superClass.TYPES.slice())[0] = argType.slice(1);
                 } else {
-                    agent.TYPES = (type ? [type] : []).concat(superClass.TYPES);
+                    argSubClass.TYPES = (argType ? [argType] : []).concat(superClass.TYPES);
                 }
             } else {
                 // ecui.ui.Control的特殊初始化设置
-                agent.TYPES = [];
+                argSubClass.TYPES = [];
             }
-            agent.CLASS = agent.TYPES.length ? ' ' + agent.TYPES.join(' ') : '';
+            argSubClass.CLASS = argSubClass.TYPES.length ? ' ' + argSubClass.TYPES.join(' ') : '';
 
-            Array.prototype.slice.call(arguments, 'function' === typeof subClass ? 3 : 2).forEach(function (item) {
+            Array.prototype.slice.call(arguments, index).forEach(function (item) {
                 if (item['']) {
                     // 对接口的处理
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;
                     var prototype = new Clazz();
-                    util.extend(prototype, agent.prototype);
-                    agent.prototype[item['']] = prototype;
+                    util.extend(prototype, argSubClass.prototype);
+                    argSubClass.prototype[item['']] = prototype;
                 }
-                util.extend(agent.prototype, item);
+                util.extend(argSubClass.prototype, item);
             });
 
-            return agent;
+            return argSubClass;
         },
 
         /**

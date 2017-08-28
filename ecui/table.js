@@ -250,7 +250,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             Cell: core.inherits(
                 ui.Control,
-                'ui-table-cell',
                 {
                     /**
                      * @override
@@ -276,7 +275,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             HCell: core.inherits(
                 ui.Control,
-                'ui-table-hcell',
                 {
                     /**
                      * @override
@@ -384,7 +382,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             Row: core.inherits(
                 ui.Control,
-                'ui-table-row',
                 {
                     /**
                      * @override

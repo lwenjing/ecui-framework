@@ -1,15 +1,12 @@
 /*
-calendar - 定制日历控件。
-定制日历视图控件，继承自基础控件，包含头部展示操作区域、日历展示区域。头部展示操作区域中的四个按钮包含年/月的切换功能，他们继承自button控件。
+calendar - 日历控件。
+日历控件，继承自日历视图控件，包含头部展示操作区域、日历展示区域。头部展示操作区域中的四个按钮包含年/月的切换功能，他们继承自button控件。
 
-日历视图控件直接HTML初始化的例子:
+日历控件直接HTML初始化的例子:
 <div ui="type:calendar;year:2009;month:11"></div>
 
 属性
 _eTitle        - 日历头部信息提示区
-
-子控件属性
-_uMonthView    - 继承自日历控件
 */
 //{if 0}//
 (function () {
@@ -18,6 +15,12 @@ _uMonthView    - 继承自日历控件
         ui = core.ui,
         util = core.util;
 //{/if}//
+    /**
+     * 初始化日历控件。
+     * @public
+     *
+     * @param {Object} options 初始化选项
+     */
     ui.Calendar = core.inherits(
         ui.MonthView,
         'ui-calendar',
@@ -58,7 +61,6 @@ _uMonthView    - 继承自日历控件
              */
             PrevYear: core.inherits(
                 ui.Button,
-                '',
                 {
                     $click: function () {
                         this.getParent().move(-12);
@@ -72,7 +74,6 @@ _uMonthView    - 继承自日历控件
              */
             NextYear: core.inherits(
                 ui.Button,
-                '',
                 {
                     $click: function () {
                         this.getParent().move(12);
@@ -86,7 +87,6 @@ _uMonthView    - 继承自日历控件
              */
             PrevMonth: core.inherits(
                 ui.Button,
-                '',
                 {
                     $click: function () {
                         this.getParent().move(-1);
@@ -100,7 +100,6 @@ _uMonthView    - 继承自日历控件
              */
             NextMonth: core.inherits(
                 ui.Button,
-                '',
                 {
                     $click: function () {
                         this.getParent().move(1);
@@ -113,11 +112,7 @@ _uMonthView    - 继承自日历控件
              */
             $change: function (event) {
                 ui.MonthView.prototype.$change.call(this, event);
-                this._eTitle.innerHTML = util.stringFormat(
-                    this.TITLEFORMAT,
-                    this.getYear(),
-                    this.getMonth()
-                );
+                this._eTitle.innerHTML = util.stringFormat(this.TITLEFORMAT, this.getYear(), this.getMonth());
             },
 
             /**

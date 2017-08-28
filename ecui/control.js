@@ -100,7 +100,6 @@ $$padding           - 内填充宽度缓存
      */
     ui.Control = core.inherits(
         null,
-        '',
         function (el, options) {
             core.$bind(el, this);
 

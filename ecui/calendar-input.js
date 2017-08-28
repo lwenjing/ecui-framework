@@ -1,15 +1,15 @@
 /*
-calendar - 定制日历控件。
-定制日历视图控件，继承自基础控件，包含头部展示操作区域、日历展示区域。头部展示操作区域中的四个按钮包含年/月的切换功能，他们继承自button控件。
+calendar - 日历输入框控件。
+日历输入框控件，继承自文本输入框控件，提供日期的选择输入功能。
 
 日历视图控件直接HTML初始化的例子:
-<div ui="type:singleCalendar;year:2009;month:11"></div>
+<div ui="type:calendar-input"></div>
 
 属性
 _eTitle        - 日历头部信息提示区
 
 子控件属性
-_uMonthView    - 继承自日历控件
+_uCalendar     - 日历控件
 */
 //{if 0}//
 (function () {
@@ -17,6 +17,12 @@ _uMonthView    - 继承自日历控件
         dom = core.dom,
         ui = core.ui;
 //{/if}//
+    /**
+     * 初始化日历输入框控件。
+     * @public
+     *
+     * @param {Object} options 初始化选项
+     */
     ui.CalendarInput = core.inherits(
         ui.Text,
         'ui-calendar-input',
@@ -37,7 +43,6 @@ _uMonthView    - 继承自日历控件
              */
             Calendar: core.inherits(
                 ui.Calendar,
-                '',
                 {
                     $dateclick: function (event, date) {
                         ui.Calendar.prototype.$dateclick.call(this, event, date);
@@ -47,20 +52,13 @@ _uMonthView    - 继承自日历控件
                 }
             ),
 
+            /**
+             * @override
+             */
             $click: function (event) {
                 ui.Text.prototype.$click.call(this, event);
                 var list = this.getValue().split('-');
                 this._uCalendar.setDate(list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]));
-            },
-
-            /**
-             * 初始化完成后，手动生成日历子控件区域及头部展示信息。
-             * @override
-             */
-            $ready: function (options) {
-                ui.Text.prototype.$ready.call(this, options);
-                // 获取_uCalendar的部件，并执行初始化方法
-                this._uCalendar.setView(options.year, options.month);
             }
         },
         ui.Popup

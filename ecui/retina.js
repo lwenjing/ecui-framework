@@ -25,7 +25,6 @@
      */
     ui.Retina = core.inherits(
         ui.Control,
-        '',
         function (el, options) {
             util.setDefault(options, 'capturable', false);
 

@@ -45,7 +45,6 @@ _eInput - 选项对应的input，form提交时使用
              */
             Item: core.inherits(
                 ui.Item,
-                'ui-listbox-item',
                 function (el, options) {
                     ui.Item.call(this, el, options);
                     el.appendChild(this._eInput = dom.setInput(null, options.parent._sName, 'hidden')).value = options.value === undefined ? dom.getText(el) : options.value;
