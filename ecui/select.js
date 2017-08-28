@@ -82,8 +82,8 @@ _uOptions     - 下拉选择框
             if (oldEl.tagName === 'SELECT') {
                 var optionsEl = dom.create(options.classes.join('-options ') + 'ui-hide');
 
-                options.name = el.name;
-                options.value = el.value;
+                options.name = oldEl.name;
+                options.value = oldEl.value;
 
                 // 转化select标签
                 optionsEl.innerHTML = Array.prototype.map.call(oldEl.options, function (item) {
@@ -102,7 +102,7 @@ _uOptions     - 下拉选择框
             ui.InputControl.call(this, el, options);
 
             this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
-            this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {resizable: true});
+            this._uOptions = core.$fastCreate(this.Options, optionsEl, this);
 
             this.$setBody(optionsEl);
             // 初始化下拉区域最多显示的选项数量
@@ -193,9 +193,7 @@ _uOptions     - 下拉选择框
                      */
                     $show: function () {
                         ui.Control.prototype.$show.call(this);
-                        var parent = this.getParent();
-                        flush.call(parent);
-                        parent.setPopupPosition();
+                        flush.call(this.getParent());
                     }
                 }
             ),
