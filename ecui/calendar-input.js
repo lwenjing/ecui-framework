@@ -27,7 +27,7 @@ _uCalendar     - 日历控件
         ui.Text,
         'ui-calendar-input',
         function (el, options) {
-            var popupEl = dom.create(options.classes.join('-popup ') + 'ui-hide');
+            var popupEl = dom.create(this.Calendar.CLASS + ' ui-hide');
 
             ui.InputControl.call(this, el, options);
 

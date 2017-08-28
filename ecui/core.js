@@ -1045,7 +1045,9 @@
 
             options.uid = 'ecui-' + (++uniqueIndex);
             if (!options.primary) {
-                options.primary = UIClass.TYPES[0];
+                if (/\s*([^\s]+)/.test(el.className)) {
+                    options.primary = RegExp.$1;
+                }
             }
 
             options.classes = core.$getClasses(UIClass, options.primary);

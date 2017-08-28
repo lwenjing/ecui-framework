@@ -114,7 +114,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              */
             Date: core.inherits(
                 ui.Control,
-                'ui-month-view-date',
                 {
                     /**
                      * 点击时，根据单元格类型触发相应的事件。
@@ -263,7 +262,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     end = getDay(this._oEnd, dateYear, dateMonth, lastDayOfCurrMonth),
                     selected = getDay(this._oDate, dateYear, dateMonth, 0),
                     now = getDay(today, dateYear, dateMonth, 0),
-                    classes = core.$getClasses(this.constructor, this.getClass()),
+                    classes = core.$getClasses(this.Date, this._aCells[7].getClass()),
                     extraClass = classes.join('-extra '),
                     todayClass = classes.join('-today '),
                     oldYear = this._nYear,
