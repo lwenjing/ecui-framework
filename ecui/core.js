@@ -1887,6 +1887,10 @@
                 event.type = name;
             }
 
+            if ((control['on' + name] && control['on' + name].apply(control, args) === false) || event.returnValue === false || (control['$' + name] && control['$' + name].apply(control, args) === false)) {
+                event.preventDefault();
+            }
+
             // 检查事件是否被监听
             if (listeners = eventListeners[uid + '#' + name]) {
                 listeners.forEach(function (item) {
@@ -1894,10 +1898,6 @@
                         item.apply(control, args);
                     }
                 });
-            }
-
-            if ((control['on' + name] && control['on' + name].apply(control, args) === false) || event.returnValue === false || (control['$' + name] && control['$' + name].apply(control, args) === false)) {
-                event.preventDefault();
             }
 
             delete eventStack[uid][name];
