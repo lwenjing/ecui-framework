@@ -9,6 +9,20 @@ Popup - 定义弹出层相关的基本操作。
         ui = core.ui,
         util = core.util;
 //{/if}//
+    /**
+     * 设置控件的弹出层显示的位置。
+     * @public
+     */
+    function setPopupPosition() {
+        var parent = this.getParent(),
+            pos = dom.getPosition(parent.getOuter()),
+            popupTop = pos.top + parent.getHeight(),
+            popupHeight = this.getHeight();
+
+        // 如果浏览器下部高度不够，将显示在控件的上部
+        this.setPosition(pos.left, popupTop + popupHeight <= util.getView().bottom ? popupTop : pos.top - popupHeight);
+    }
+
     var namedMap = {};
 
     ui.Popup = {
@@ -63,13 +77,11 @@ Popup - 定义弹出层相关的基本操作。
          * @override
          */
         $dispose: function () {
-            var popup = namedMap[this.getUID()],
-                el = popup.getOuter();
+            var el = namedMap[this.getUID()].getMain();
             if (el) {
-                popup.hide();
                 dom.remove(el);
             }
-            delete namedMap[this.getUID()];
+            this.setPopup();
             this.$Popup.$dispose.call(this);
         },
 
@@ -78,8 +90,10 @@ Popup - 定义弹出层相关的基本操作。
          */
         $repaint: function (event) {
             this.$Popup.$repaint.call(this, event);
-            if (namedMap[this.getUID()].isShow()) {
-                this.setPopupPosition();
+
+            var popup = namedMap[this.getUID()];
+            if (popup.isShow()) {
+                setPopupPosition.call(popup);
             }
         },
 
@@ -103,21 +117,15 @@ Popup - 定义弹出层相关的基本操作。
          * @param {ecui.ui.Control} control
          */
         setPopup: function (control) {
-            namedMap[this.getUID()] = control;
-        },
-
-        /**
-         * 设置控件的弹出层显示的位置。
-         * @public
-         */
-        setPopupPosition: function () {
-            var pos = dom.getPosition(this.getOuter()),
-                popup = namedMap[this.getUID()],
-                popupTop = pos.top + this.getHeight(),
-                popupHeight = popup.getHeight();
-
-            // 如果浏览器下部高度不够，将显示在控件的上部
-            popup.setPosition(pos.left, popupTop + popupHeight <= util.getView().bottom ? popupTop : pos.top - popupHeight);
+            var popup = namedMap[this.getUID()];
+            if (popup) {
+                core.removeEventListener(popup, 'show', setPopupPosition);
+                delete namedMap[this.getUID()];
+            }
+            if (control) {
+                core.addEventListener(control, 'show', setPopupPosition);
+                namedMap[this.getUID()] = control;
+            }
         }
     };
 }());
