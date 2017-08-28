@@ -90,7 +90,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             ui.Control.call(this, el, options);
 
             this._aCells = Array.prototype.map.call(el.getElementsByTagName('TD'), function (item, index) {
-                return core.$fastCreate(index < 7 ? this.Title : this.Date, item, this);
+                return core.$fastCreate(index < 7 ? ui.Control : this.Date, item, this);
             }, this);
 
             this.WEEKNAMES.forEach(function (item, index) {
@@ -142,40 +142,18 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             ),
 
             /**
-             * 初始化日历控件的单元格标题部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
-             */
-            Title: core.inherits(
-                ui.Control,
-                'ui-monthview-title',
-                {
-                    /**
-                     * 点击时，根据单元格类型触发相应的事件。
-                     * @override
-                     */
-                    $click: function (event) {
-                        var parent = this.getParent();
-                        core.triggerEvent(parent, 'titleclick', event, parent._aCells.indexOf(this));
-                    },
-
-                    /**
-                     * 获取单元格天的信息。
-                     * @public
-                     *
-                     * @return {number} 一个月中的第几天
-                     */
-                    getDay: function () {
-                        return this._nDay;
-                    }
-                }
-            ),
-
-            /**
              * @override
              */
             $change: util.blank,
+
+            /**
+             * 日期点击事件默认处理。
+             * @public
+             *
+             * @param {Event} event 点击事件
+             * @param {Date} date 日期对象
+             */
+            $dateclick: util.blank,
 
             /**
              * @override
@@ -244,7 +222,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              * @param {Date} date 日期
              */
             setDate: function (date) {
-                this._oDate = date ? new Date(date.getFullYear(), date.getMonth(), date.getDate()) : null;
+                this._oDate = date ? new Date(date.getTime()) : undefined;
+                date = date || new Date();
                 this.setView(date.getFullYear(), date.getMonth() + 1);
             },
 
