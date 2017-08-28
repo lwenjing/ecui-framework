@@ -14,6 +14,8 @@ Popup - 定义弹出层相关的基本操作。
      * @public
      */
     function setPopupPosition() {
+        this.cache(true);
+
         var parent = this.getParent(),
             pos = dom.getPosition(parent.getOuter()),
             popupTop = pos.top + parent.getHeight(),
@@ -44,7 +46,7 @@ Popup - 定义弹出层相关的基本操作。
             this.$Popup.$cache.call(this, style, cacheSize);
             var popup = namedMap[this.getUID()];
             if (dom.getParent(popup.getOuter())) {
-                popup.cache(false, true);
+                popup.cache(true, true);
             }
         },
 
@@ -62,7 +64,6 @@ Popup - 定义弹出层相关的基本操作。
                     if (!dom.getParent(el)) {
                         // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
                         document.body.appendChild(el);
-                        this.cache(false, true);
                         if (this.$initPopup) {
                             this.$initPopup();
                         }
