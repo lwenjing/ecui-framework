@@ -73,28 +73,29 @@ _uOptions     - 下拉选择框
         ui.InputControl,
         'ui-select',
         function (el, options) {
-            var optionsEl = dom.create(options.classes.join('-options ') + 'ui-hide');
-
             util.setDefault(options, 'hidden', true);
 
-            if (el.tagName === 'SELECT') {
-                var selectEl = el;
+            var oldEl = el;
+            el = dom.insertBefore(dom.create(el.className), el);
+            el.style.cssText = oldEl.style.cssText;
+
+            if (oldEl.tagName === 'SELECT') {
+                var optionsEl = dom.create(options.classes.join('-options ') + 'ui-hide');
 
                 options.name = el.name;
                 options.value = el.value;
 
-                // 移除select标签
-                el = dom.insertBefore(dom.create(el.className), el);
-                el.style.cssText = selectEl.style.cssText;
-                dom.remove(selectEl);
-
                 // 转化select标签
-                optionsEl.innerHTML = Array.prototype.map.call(selectEl.options, function (item) {
+                optionsEl.innerHTML = Array.prototype.map.call(oldEl.options, function (item) {
                     return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + '">' + util.encodeHTML(item.text) + '</div>';
                 }).join('');
             } else {
-                dom.childMoves(el, optionsEl);
+                optionsEl = oldEl;
+                optionsEl.className = options.classes.join('-options ') + 'ui-hide';
+                oldEl.style.cssText = '';
             }
+
+            dom.remove(oldEl);
 
             el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
 

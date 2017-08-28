@@ -75,8 +75,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         ui.Control,
         'ui-monthview',
         function (el, options) {
-            ui.Control.call(this, el, options);
-
             el.innerHTML = util.stringFormat(
                 '<table><thead>{1}</thead><tbody>{0}{0}{0}{0}{0}{0}</tbody></table>',
                 util.stringFormat(
@@ -88,6 +86,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     '<td class="' + options.classes.join('-title ') + '"></td>'
                 )
             );
+
+            ui.Control.call(this, el, options);
 
             this._aCells = Array.prototype.map.call(el.getElementsByTagName('TD'), function (item, index) {
                 return core.$fastCreate(index < 7 ? this.Title : this.Date, item, this);

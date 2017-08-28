@@ -56,11 +56,14 @@ _eContainer      - 容器 DOM 元素
         ui.Control,
         'ui-tab',
         function (el, options) {
-            ui.Control.call(this, el, options);
-
-            var titleEl = dom.create(options.classes.join('-title '));
-            dom.childMoves(el, titleEl);
+            var titleEl = el;
+            el = dom.insertBefore(dom.create(el.className), el);
+            titleEl.className = options.classes.join('-title ');
+            el.style.cssText = titleEl.style.cssText;
+            titleEl.style.cssText = '';
             el.appendChild(titleEl);
+
+            ui.Control.call(this, el, options);
 
             this.$setBody(titleEl);
             this.$initItems();

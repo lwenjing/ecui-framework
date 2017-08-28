@@ -41,23 +41,6 @@ var ecui;
             },
 
             /**
-             * 将指定的 Element 对象的内容移动到目标 Element 对象中。
-             * @public
-             *
-             * @param {HTMLElement} el 指定的 Element 对象
-             * @param {HTMLElement} target 目标 Element 对象
-             * @param {boolean} all 是否移动所有的 DOM 对象，默认仅移动 ElementNode 类型的对象
-             */
-            childMoves: function (el, target, all) {
-                for (el = el.firstChild; el; el = next) {
-                    var next = el.nextSibling;
-                    if (all || el.nodeType === 1) {
-                        target.appendChild(el);
-                    }
-                }
-            },
-
-            /**
              * 获取所有 parentNode 为指定 Element 的子 Element 集合。
              * @public
              *

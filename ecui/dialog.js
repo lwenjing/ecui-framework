@@ -49,24 +49,32 @@ _uClose     - 关闭按钮
         ui.Control,
         'ui-dialog',
         function (el, options) {
-            // 生成标题控件与内容区域控件对应的Element对象
-            var bodyEl = dom.create(options.classes.join('-body ')),
-                closeEl = dom.create(options.classes.join('-close ')),
+            var bodyEl = el,
                 titleEl = dom.first(el);
 
-            dom.childMoves(el, bodyEl, true);
-
-            el.appendChild(closeEl);
-            if (!titleEl || titleEl.tagName !== 'H6') {
-                titleEl = dom.create('', 'H6');
+            if (titleEl && titleEl.tagName !== 'H6') {
+                titleEl = undefined;
             }
-            titleEl.className += ' ' + options.classes.join('-title ');
-            el.appendChild(titleEl);
+
+            el = dom.insertBefore(dom.create(el.className), el);
+            el.style.cssText = bodyEl.style.cssText;
+            // 生成标题控件与内容区域控件对应的Element对象
+            el.innerHTML = '<div class="' + options.classes.join('-close ') + '"></div>' + (titleEl ? '' : '<h6 class="' + options.classes.join('-title ') + '"></h6>');
+
+            if (titleEl) {
+                titleEl.className += ' ' + options.classes.join('-title ');
+                el.appendChild(titleEl);
+            } else {
+                titleEl = el.lastChild;
+            }
+
+            bodyEl.className = options.classes.join('-body ');
+            bodyEl.style.cssText = '';
             el.appendChild(bodyEl);
 
             ui.Control.call(this, el, options);
 
-            this._uClose = core.$fastCreate(this.Close, closeEl, this);
+            this._uClose = core.$fastCreate(this.Close, el.firstChild, this);
             this._uTitle = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});
             this.$setBody(bodyEl);
         },

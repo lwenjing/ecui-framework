@@ -74,10 +74,9 @@ _aChildren     - 子控件集合
         function (el, options) {
             if (el.tagName === 'UL') {
                 var childrenEl = this._eChildren = el;
-                el = dom.first(el);
+                el = dom.insertBefore(dom.first(el), el);
                 el.className = childrenEl.className;
                 childrenEl.className = options.classes.join('-children ');
-                dom.insertBefore(el, childrenEl);
 
                 var list = dom.children(childrenEl);
 
