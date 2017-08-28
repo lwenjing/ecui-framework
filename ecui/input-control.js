@@ -33,7 +33,7 @@ _eInput        - INPUT对象
             blur: function (event) {
                 var control = core.wrapEvent(event).target.getControl();
                 // INPUT失去焦点，但控件未失去焦点，不需要触发blur
-                if (core.getFocused() === control) {
+                if (!control.contain(core.getFocused())) {
                     control.blur();
                 }
             },
