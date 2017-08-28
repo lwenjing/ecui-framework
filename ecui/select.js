@@ -219,15 +219,6 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * 下拉框控件失去激活时，如果鼠标在选项上，触发click事件。
-             * @override
-             */
-            $blur: function (event) {
-                ui.InputControl.prototype.$blur.call(this, event);
-                this._uOptions.hide();
-            },
-
-            /**
              * @override
              */
             $cache: function (style, cacheSize) {

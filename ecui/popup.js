@@ -15,6 +15,26 @@ Popup - 定义弹出层相关的基本操作。
         '': '$Popup',
 
         /**
+         * 下拉框控件失去激活时，隐藏弹层。
+         * @override
+         */
+        $blur: function (event) {
+            this.$Popup.$blur.call(this, event);
+            namedMap[this.getUID()].hide();
+        },
+
+        /**
+         * @override
+         */
+        $cache: function (style, cacheSize) {
+            this.$Popup.$cache.call(this, style, cacheSize);
+            var popup = namedMap[this.getUID()];
+            if (dom.getParent(popup.getOuter())) {
+                popup.cache(false, true);
+            }
+        },
+
+        /**
          * @override
          */
         $click: function (event) {
