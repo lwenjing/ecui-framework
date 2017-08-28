@@ -19,10 +19,11 @@ Popup - 定义弹出层相关的基本操作。
         var parent = this.getParent(),
             pos = dom.getPosition(parent.getOuter()),
             popupTop = pos.top + parent.getHeight(),
-            popupHeight = this.getHeight();
+            popupHeight = this.getHeight(),
+            view = util.getView();
 
         // 如果浏览器下部高度不够，将显示在控件的上部
-        this.setPosition(pos.left, popupTop + popupHeight <= util.getView().bottom ? popupTop : pos.top - popupHeight);
+        this.setPosition(pos.left, popupTop + popupHeight <= view.bottom ? popupTop : Math.max(pos.top - popupHeight, view.top));
     }
 
     var namedMap = {};
