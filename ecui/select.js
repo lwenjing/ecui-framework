@@ -80,7 +80,7 @@ _uOptions     - 下拉选择框
             el.style.cssText = oldEl.style.cssText;
 
             if (oldEl.tagName === 'SELECT') {
-                var optionsEl = dom.create(options.classes.join('-options ') + 'ui-hide');
+                var optionsEl = dom.create(options.classes.join('-options ') + 'ui-popup ui-hide');
 
                 options.name = oldEl.name;
                 options.value = oldEl.value;
