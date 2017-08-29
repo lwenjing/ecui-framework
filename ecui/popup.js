@@ -16,13 +16,8 @@ Popup - 定义弹出层相关的基本操作。
     function setPopupPosition() {
         this.cache(true);
 
-        var pos = dom.getPosition(owner.getOuter()),
-            popupTop = pos.top + owner.getHeight(),
-            popupHeight = this.getHeight(),
-            view = util.getView();
-
-        // 如果浏览器下部高度不够，将显示在控件的上部
-        this.setPosition(pos.left, popupTop + popupHeight <= view.bottom ? popupTop : Math.max(pos.top - popupHeight, view.top));
+        var pos = owner.getPopupPosition(this.getWidth(), this.getHeight());
+        this.setPosition(pos.left, pos.top);
     }
 
     var namedMap = {},
@@ -135,6 +130,28 @@ Popup - 定义弹出层相关的基本操作。
                     core.addEventListener(control, 'show', setPopupPosition);
                     namedMap[this.getUID()] = control;
                 }
+            },
+
+            /**
+             * 获取弹出层的位置。
+             * getPopupPosition 方法将返回弹出层的位置信息。属性如下：
+             * left {number} X轴坐标
+             * top  {number} Y轴坐标
+             * @public
+             *
+             * @param {number} width 弹出层的宽度
+             * @param {number} height 弹出层的高度
+             * @return {Object} 位置信息
+             */
+            getPopupPosition: function (width, height) {
+                var pos = dom.getPosition(this.getOuter()),
+                    popupTop = pos.top + this.getHeight(),
+                    view = util.getView();
+
+                // 如果浏览器下部高度不够，将显示在控件的上部
+                pos.top = popupTop + height <= view.bottom ? popupTop : Math.max(pos.top - height, view.top);
+
+                return pos;
             }
         }
     };
