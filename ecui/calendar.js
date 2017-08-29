@@ -66,7 +66,8 @@ _eTitle        - 日历头部信息提示区
                     this._nMove = options.move;
                 },
                 {
-                    $click: function () {
+                    $click: function (event) {
+                        ui.Button.prototype.$click.call(this, event);
                         this.getParent().move(this._nMove);
                     }
                 }
