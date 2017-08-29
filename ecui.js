@@ -28,6 +28,7 @@
     document.write('<script type="text/javascript" src="ecui/calendar.js"></script>');
     document.write('<script type="text/javascript" src="ecui/calendar-input.js"></script>');
     document.write('<script type="text/javascript" src="ecui/check-tree.js"></script>');
+    document.write('<script type="text/javascript" src="ecui/multilevel-select.js"></script>');
 
     document.write('<script type="text/javascript" src="ecui/messagebox.js"></script>');
 
