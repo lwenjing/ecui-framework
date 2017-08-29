@@ -16,9 +16,8 @@ Popup - 定义弹出层相关的基本操作。
     function setPopupPosition() {
         this.cache(true);
 
-        var parent = this.getParent(),
-            pos = dom.getPosition(parent.getOuter()),
-            popupTop = pos.top + parent.getHeight(),
+        var pos = dom.getPosition(owner.getOuter()),
+            popupTop = pos.top + owner.getHeight(),
             popupHeight = this.getHeight(),
             view = util.getView();
 
@@ -26,107 +25,116 @@ Popup - 定义弹出层相关的基本操作。
         this.setPosition(pos.left, popupTop + popupHeight <= view.bottom ? popupTop : Math.max(pos.top - popupHeight, view.top));
     }
 
-    var namedMap = {};
+    var namedMap = {},
+        owner;
 
     ui.Popup = {
-        '': '$Popup',
+        NAME: '$Popup',
 
-        /**
-         * 下拉框控件失去激活时，隐藏弹层。
-         * @override
-         */
-        $blur: function (event) {
-            this.$Popup.$blur.call(this, event);
-            namedMap[this.getUID()].hide();
+        getOwner: function () {
+            return owner;
         },
 
-        /**
-         * @override
-         */
-        $cache: function (style, cacheSize) {
-            this.$Popup.$cache.call(this, style, cacheSize);
-            var popup = namedMap[this.getUID()];
-            if (dom.getParent(popup.getOuter())) {
-                popup.cache(true, true);
-            }
-        },
+        Methods: {
+            /**
+             * 下拉框控件失去激活时，隐藏弹层。
+             * @override
+             */
+            $blur: function (event) {
+                this.$Popup.$blur.call(this, event);
+                namedMap[this.getUID()].hide();
+            },
 
-        /**
-         * @override
-         */
-        $click: function (event) {
-            this.$Popup.$click.call(this, event);
-            var popup = namedMap[this.getUID()];
-            if (event.getControl() === this) {
-                if (popup.isShow()) {
-                    popup.hide();
-                } else {
-                    var el = popup.getOuter();
-                    if (!dom.getParent(el)) {
-                        // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
-                        document.body.appendChild(el);
-                        if (this.$initPopup) {
-                            this.$initPopup();
-                        }
-                    }
-
-                    popup.show();
+            /**
+             * @override
+             */
+            $cache: function (style, cacheSize) {
+                this.$Popup.$cache.call(this, style, cacheSize);
+                var popup = namedMap[this.getUID()];
+                if (dom.getParent(popup.getOuter())) {
+                    popup.cache(true, true);
                 }
-            }
-        },
+            },
 
-        /**
-         * @override
-         */
-        $dispose: function () {
-            var el = namedMap[this.getUID()].getMain();
-            if (el) {
-                dom.remove(el);
-            }
-            this.setPopup();
-            this.$Popup.$dispose.call(this);
-        },
+            /**
+             * @override
+             */
+            $click: function (event) {
+                this.$Popup.$click.call(this, event);
+                var popup = namedMap[this.getUID()];
+                if (event.getControl() === this) {
+                    owner = this;
 
-        /**
-         * @override
-         */
-        $repaint: function (event) {
-            this.$Popup.$repaint.call(this, event);
+                    if (popup.isShow()) {
+                        popup.hide();
+                    } else {
+                        var el = popup.getOuter();
+                        if (!dom.getParent(el)) {
+                            // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
+                            document.body.appendChild(el);
+                            if (this.$initPopup) {
+                                this.$initPopup();
+                            }
+                        }
 
-            var popup = namedMap[this.getUID()];
-            if (popup.isShow()) {
-                setPopupPosition.call(popup);
-            }
-        },
+                        popup.show();
+                    }
+                }
+            },
 
-        /**
-         * @override
-         */
-        $scroll: function (event) {
-            this.$Popup.$scroll.call(this, event);
+            /**
+             * @override
+             */
+            $dispose: function () {
+                var el = namedMap[this.getUID()].getMain();
+                if (el) {
+                    dom.remove(el);
+                }
+                this.setPopup();
+                this.$Popup.$dispose.call(this);
+            },
 
-            var popup = namedMap[this.getUID()];
-            if (event.getNative().type === 'mousedown' && !dom.contain(popup.getOuter(), event.target)) {
-                // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
-                popup.hide();
-            }
-        },
+            /**
+             * @override
+             */
+            $repaint: function (event) {
+                this.$Popup.$repaint.call(this, event);
 
-        /**
-         * 设置控件的弹出层。
-         * @public
-         *
-         * @param {ecui.ui.Control} control
-         */
-        setPopup: function (control) {
-            var popup = namedMap[this.getUID()];
-            if (popup) {
-                core.removeEventListener(popup, 'show', setPopupPosition);
-                delete namedMap[this.getUID()];
-            }
-            if (control) {
-                core.addEventListener(control, 'show', setPopupPosition);
-                namedMap[this.getUID()] = control;
+                var popup = namedMap[this.getUID()];
+                if (popup.isShow()) {
+                    setPopupPosition.call(popup);
+                }
+            },
+
+            /**
+             * @override
+             */
+            $scroll: function (event) {
+                this.$Popup.$scroll.call(this, event);
+
+                var popup = namedMap[this.getUID()];
+                if (event.getNative().type === 'mousedown' && !dom.contain(popup.getOuter(), event.target)) {
+                    // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
+                    popup.hide();
+                }
+            },
+
+            /**
+             * 设置控件的弹出层。
+             * @public
+             *
+             * @param {ecui.ui.Control} control
+             */
+            setPopup: function (control) {
+                var popup = namedMap[this.getUID()];
+                if (popup) {
+                    core.removeEventListener(popup, 'show', setPopupPosition);
+                    delete namedMap[this.getUID()];
+                }
+                if (control) {
+                    core.addEventListener(control, 'show', setPopupPosition);
+                    namedMap[this.getUID()] = control;
+                }
             }
         }
     };

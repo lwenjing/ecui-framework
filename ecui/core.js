@@ -1525,13 +1525,14 @@
             argSubClass.CLASS = argSubClass.TYPES.length ? ' ' + argSubClass.TYPES.join(' ') + ' ' : ' ';
 
             Array.prototype.slice.call(arguments, index).forEach(function (item) {
-                if (item['']) {
+                if (item.NAME) {
                     // 对接口的处理
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;
                     var prototype = new Clazz();
                     util.extend(prototype, argSubClass.prototype);
-                    argSubClass.prototype[item['']] = prototype;
+                    argSubClass.prototype[item.NAME] = prototype;
+                    item = item.Methods;
                 }
                 util.extend(argSubClass.prototype, item);
             });
