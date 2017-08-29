@@ -132,7 +132,7 @@ Item/Items - 定义选项操作相关的基本操作。
                 }
 
                 var UIClass = this.Item || ui.Item;
-                item.className += ' ' + this.getType() + '-item' + UIClass.CLASS;
+                item.className += UIClass.CLASS;
 
                 options = options || core.getOptions(item) || {};
                 options.parent = this;

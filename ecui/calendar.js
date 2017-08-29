@@ -44,10 +44,10 @@ _eTitle        - 日历头部信息提示区
             var headers = dom.children(el.firstChild);
             // 定义头部展示区
             this._eTitle = headers[0];
-            core.$fastCreate(this.PrevYear, headers[1], this);
-            core.$fastCreate(this.PrevMonth, headers[2], this);
-            core.$fastCreate(this.NextMonth, headers[3], this);
-            core.$fastCreate(this.NextYear, headers[4], this);
+            core.$fastCreate(this.Button, headers[1], this, {move: -12});
+            core.$fastCreate(this.Button, headers[2], this, {move: -1});
+            core.$fastCreate(this.Button, headers[3], this, {move: 1});
+            core.$fastCreate(this.Button, headers[4], this, {move: 12});
         },
         {
             /**
@@ -56,53 +56,18 @@ _eTitle        - 日历头部信息提示区
             TITLEFORMAT: '{0}年{1}月',
 
             /**
-             * 控件头部展示区域“上一年按钮”部件。
+             * 控件的前进后退控制部件。
              * @public
              */
-            PrevYear: core.inherits(
+            Button: core.inherits(
                 ui.Button,
+                function (el, options) {
+                    ui.Button.call(this, el, options);
+                    this._nMove = options.move;
+                },
                 {
                     $click: function () {
-                        this.getParent().move(-12);
-                    }
-                }
-            ),
-
-            /**
-             * 控件头部展示区域“下一年按钮”部件。
-             * @public
-             */
-            NextYear: core.inherits(
-                ui.Button,
-                {
-                    $click: function () {
-                        this.getParent().move(12);
-                    }
-                }
-            ),
-
-            /**
-             * 控件头部展示区域“上一月按钮”部件。
-             * @public
-             */
-            PrevMonth: core.inherits(
-                ui.Button,
-                {
-                    $click: function () {
-                        this.getParent().move(-1);
-                    }
-                }
-            ),
-
-            /**
-             * 控件头部展示区域“下一月按钮”部件。
-             * @public
-             */
-            NextMonth: core.inherits(
-                ui.Button,
-                {
-                    $click: function () {
-                        this.getParent().move(1);
+                        this.getParent().move(this._nMove);
                     }
                 }
             ),

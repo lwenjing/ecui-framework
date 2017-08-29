@@ -27,7 +27,7 @@ _uCalendar     - 日历控件
         ui.Text,
         'ui-calendar-input',
         function (el, options) {
-            var popupEl = dom.create(this.Calendar.CLASS + ' ui-hide');
+            var popupEl = dom.create(this.Calendar.CLASS + 'ui-hide');
 
             ui.InputControl.call(this, el, options);
 
@@ -44,22 +44,25 @@ _uCalendar     - 日历控件
             Calendar: core.inherits(
                 ui.Calendar,
                 {
+                    /**
+                     * @override
+                     */
                     $dateclick: function (event, date) {
                         ui.Calendar.prototype.$dateclick.call(this, event, date);
                         this.hide();
                         this.getParent().setValue(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
+                    },
+
+                    /**
+                     * @override
+                     */
+                    $show: function (event) {
+                        ui.Calendar.prototype.$show.call(this, event);
+                        var list = this.getParent().getValue().split('-');
+                        this.setDate(list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]));
                     }
                 }
-            ),
-
-            /**
-             * @override
-             */
-            $click: function (event) {
-                ui.Text.prototype.$click.call(this, event);
-                var list = this.getValue().split('-');
-                this._uCalendar.setDate(list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]));
-            }
+            )
         },
         ui.Popup
     );

@@ -107,6 +107,7 @@ _uClose     - 关闭按钮
              */
             Title: core.inherits(
                 ui.Control,
+                'ui-dialog-title',
                 {
                     /**
                      * 标题栏激活时触发拖动，如果当前窗体未得到焦点则得到焦点。

@@ -1522,7 +1522,7 @@
                 // ecui.ui.Control的特殊初始化设置
                 argSubClass.TYPES = [];
             }
-            argSubClass.CLASS = argSubClass.TYPES.length ? ' ' + argSubClass.TYPES.join(' ') : '';
+            argSubClass.CLASS = argSubClass.TYPES.length ? ' ' + argSubClass.TYPES.join(' ') + ' ' : ' ';
 
             Array.prototype.slice.call(arguments, index).forEach(function (item) {
                 if (item['']) {

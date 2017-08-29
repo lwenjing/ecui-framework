@@ -123,6 +123,7 @@ _uOptions     - 下拉选择框
              */
             Item: core.inherits(
                 ui.Item,
+                'ui-select-item',
                 function (el, options) {
                     ui.Item.call(this, el, options);
                     this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
