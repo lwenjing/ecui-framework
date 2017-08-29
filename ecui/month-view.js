@@ -66,7 +66,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
      * begin   开始日期，小于这个日期的日历单元格会被disabled
      * end     结束日期，大于这个日期的日历单元格会被disabled
      * date    初始选中的日期，默认是今日
-     * extra   扩展的日期是否响应事件，默认为disable，如果需要响应事件设置成enable
+     * extra   扩展的日期是否响应事件，默认为enable，如果需要响应事件设置成disable
      * @public
      *
      * @param {Object} options 初始化选项
@@ -97,7 +97,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 this._aCells[index].setContent(item);
             }, this);
 
-            this._bExtra = options.extra !== 'enable';
+            this._bExtra = options.extra === 'disable';
             this._oBegin = new Date(options.begin);
             this._oEnd = new Date(options.end);
             this._oDate = options.date ? new Date(options.date) : new Date();
