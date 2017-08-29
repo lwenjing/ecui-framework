@@ -26,7 +26,7 @@ _uCalendar     - 日历控件
                 $dateclick: function (event, date) {
                     ui.Calendar.prototype.$dateclick.call(this, event, date);
                     this.hide();
-                    ui.Popup.getOwner().setValue(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
+                    this.getParent().setValue(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
                 },
 
                 /**
@@ -34,7 +34,8 @@ _uCalendar     - 日历控件
                  */
                 $show: function (event) {
                     ui.Calendar.prototype.$show.call(this, event);
-                    var list = ui.Popup.getOwner().getValue().split('-');
+                    this.$setParent(ui.Popup.getOwner());
+                    var list = this.getParent().getValue().split('-');
                     this.setDate(list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]));
                 }
             }
