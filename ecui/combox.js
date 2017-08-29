@@ -44,10 +44,21 @@ _sInputWidth   - INPUT对象初始宽度
         ui.Select,
         '*ui-combox',
         function (el, options) {
-            util.setDefault(options, 'hidden', false);
+            util.setDefault(options, 'inputType', 'text');
             ui.Select.call(this, el, options);
         },
         {
+            /**
+             * 初始化可输入下拉框控件的选项部件。
+             * @public
+             *
+             * @param {Object} options 初始化选项
+             */
+            Item: core.inherits(
+                ui.Select.prototype.Item,
+                '*ui-combox-item'
+            ),
+
             /**
              * @override
              */

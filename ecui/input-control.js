@@ -221,8 +221,13 @@ _eInput        - INPUT对象
                 }
             }
 
-            if (options.hidden) {
+            if (inputEl.type === 'hidden') {
+                this._bHidden = true;
+            } else if (options.hidden) {
                 dom.addClass(inputEl, 'ui-hide');
+                this._bHidden = true;
+            } else {
+                this._bHidden = false;
             }
             if (options.checked) {
                 inputEl.defaultChecked = inputEl.checked = true;
@@ -230,7 +235,6 @@ _eInput        - INPUT对象
 
             ui.Control.call(this, el, options);
 
-            this._bHidden = options.hidden;
             this._eInput = inputEl;
             bindEvent.call(this);
         },
