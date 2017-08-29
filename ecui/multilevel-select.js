@@ -59,12 +59,21 @@ _aSelect - 全部的下拉框控件列表
                     $change: function (event) {
                         ui.Select.prototype.$change.call(this, event);
 
-                        var selected = this.getSelected();
+                        var selected = this.getSelected(),
+                            selects = this.getParent()._aSelect,
+                            index = selects.indexOf(this);
+
                         if (selected._aChildren) {
-                            var selects = this.getParent()._aSelect;
-                            selects[selects.indexOf(this) + 1].append(selected._aChildren.map(function (item) {
+                            index++;
+                            selects[index].removeAll(true);
+                            selects[index].append(selected._aChildren.map(function (item) {
                                 return item.code;
                             }), selected._aChildren);
+                        }
+
+                        // 清除后续多级联动项
+                        for (index++; index < selects.length; index++) {
+                            selects[index].removeAll(true);
                         }
                     }
                 }
