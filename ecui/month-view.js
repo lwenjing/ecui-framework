@@ -261,9 +261,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     end = getDay(this._oEnd, dateYear, dateMonth, lastDayOfCurrMonth),
                     selected = getDay(this._oDate, dateYear, dateMonth, 0),
                     now = getDay(today, dateYear, dateMonth, 0),
-                    classes = core.$getClasses(this.Date, this._aCells[7].getClass()),
-                    extraClass = classes.join('-extra '),
-                    todayClass = classes.join('-today '),
                     oldYear = this._nYear,
                     oldMonth = this._nMonth;
 
@@ -277,9 +274,9 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                         var el = item.getOuter();
                         if (month = day >= begin && day <= end) {
                             if (index === 35 || index === 42) {
-                                dom.removeClass(dom.getParent(el), extraClass);
+                                dom.removeClass(dom.getParent(el), 'ui-extra');
                             }
-                            dom.removeClass(el, extraClass);
+                            dom.removeClass(el, 'ui-extra');
                             // 恢复选择的日期
                             if (day === selected) {
                                 setSelected.call(this, item);
@@ -287,18 +284,18 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                             item.enable();
                         } else {
                             if (index === 35 || index === 42) {
-                                dom.addClass(dom.getParent(el), extraClass);
+                                dom.addClass(dom.getParent(el), 'ui-extra');
                             }
-                            dom.addClass(el, extraClass);
+                            dom.addClass(el, 'ui-extra');
                             if (this._bExtra) {
                                 item.disable();
                             }
                         }
 
                         if (day === now && now > 0) {
-                            dom.addClass(el, todayClass);
+                            dom.addClass(el, 'ui-today');
                         } else {
-                            dom.removeClass(el, todayClass);
+                            dom.removeClass(el, 'ui-today');
                         }
 
                         item.setContent(month ? day : day > lastDayOfCurrMonth ? day - lastDayOfCurrMonth : lastDayOfLastMonth + day);
