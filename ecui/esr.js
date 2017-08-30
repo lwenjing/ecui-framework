@@ -286,7 +286,7 @@
         if (rule) {
             return rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
                 name = name.split('|');
-                var value = util.parseNamespace(name[0], context);
+                var value = util.parseValue(name[0], context);
                 return value === undefined ? (name[1] || '') : value;
             });
         }
@@ -716,7 +716,7 @@
                     var setData = control.getContent().trim(),
                         renderer = new Function('$', setData.charAt(0) === '=' ? 'this.setContent(' + setData.slice(1) + ')' : setData);
                 } else {
-                    renderer = util.parseNamespace(value[3].slice(0, -2));
+                    renderer = util.parseValue(value[3].slice(0, -2));
                 }
                 setData = function (data) {
                     renderer.call(this, value[2].length > 1 ? context : data);

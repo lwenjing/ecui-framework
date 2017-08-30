@@ -798,14 +798,14 @@ var ecui;
             },
 
             /**
-             * 解析命名空间并取出值。
+             * 从指定的命名空间中取出值。
              * @public
              *
-             * @param {string} name 命名空间的名称
-             * @param {Object} namespace 开始的namespace，默认从window开始
-             * @return {Object} 命名空间对应的值，如果不存在返回undefined
+             * @param {string} name 描述值的字符串
+             * @param {Object} namespace 初始的命名空间，默认从window开始
+             * @return {Object} 命名空间中指定的值，如果不存在返回undefined
              */
-            parseNamespace: function (name, namespace) {
+            parseValue: function (name, namespace) {
                 namespace = namespace || window;
                 for (var i = 0, list = name.split('.'); name = list[i++]; ) {
                     namespace = namespace[name];

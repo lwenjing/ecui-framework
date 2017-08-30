@@ -1571,7 +1571,7 @@
                         item = options.type ?
                                 options.type.indexOf('.') < 0 ?
                                         ui[util.toCamelCase(options.type.charAt(0).toUpperCase() + options.type.slice(1))] :
-                                        util.parseNamespace(options.type, ui) || util.parseNamespace(options.type) :
+                                        util.parseValue(options.type, ui) || util.parseValue(options.type) :
                                 ui.Control;
                         controls.push({object: core.$create(item, options), options: options});
                     }
