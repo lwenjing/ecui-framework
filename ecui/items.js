@@ -185,7 +185,7 @@ Item/Items - 定义选项操作相关的基本操作。
                 if (item instanceof Array) {
                     this.preventAlterItems();
                     item.forEach(function (item, index) {
-                        this.add(item, null, options[index]);
+                        this.add(item, null, options ? options[index] : null);
                     }, this);
                     this.premitAlterItems();
                     this.alterItems();

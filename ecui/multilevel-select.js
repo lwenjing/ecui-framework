@@ -61,19 +61,25 @@ _aSelect - 全部的下拉框控件列表
 
                         var selected = this.getSelected(),
                             selects = this.getParent()._aSelect,
-                            index = selects.indexOf(this);
+                            index = selects.indexOf(this),
+                            item;
 
                         if (selected._aChildren) {
-                            index++;
-                            selects[index].removeAll(true);
-                            selects[index].append(selected._aChildren.map(function (item) {
-                                return item.code;
-                            }), selected._aChildren);
+                            item = selects[++index];
+                            item.removeAll();
+                            if (selected._aChildren[0] instanceof ui.Item) {
+                                item.append(selected._aChildren);
+                            } else {
+                                item.append(selected._aChildren.map(function (item) {
+                                    return item.code;
+                                }), selected._aChildren);
+                                selected._aChildren = item.getItems();
+                            }
                         }
 
                         // 清除后续多级联动项
-                        for (index++; index < selects.length; index++) {
-                            selects[index].removeAll(true);
+                        for (; item = selects[++index]; ) {
+                            item.removeAll();
                         }
                     }
                 }
@@ -97,7 +103,9 @@ _aSelect - 全部的下拉框控件列表
              * @param {Object} data 多级联动数据，是一个数组，每一项都包含code,value属性，children属性可以不包含，如果包含，结构与data相同
              */
             setData: function (data) {
-                this._aSelect[0].removeAll(true);
+                for (var i = 0, item; item = this._aSelect[i++]; ) {
+                    item.removeAll(true);
+                }
                 this._aSelect[0].append(data.map(function (item) {
                     return item.code;
                 }), data);
