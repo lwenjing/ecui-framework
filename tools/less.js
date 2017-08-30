@@ -69,7 +69,7 @@ module.exports = function(window, options) {
 // shim Promise if required
 require('promise/polyfill.js');
 
-var options = window.less || {};
+var options = window.less || {onReady: true};
 require("./add-default-options")(window, options);
 
 var less = module.exports = require("./index")(window, options);
