@@ -474,7 +474,8 @@ FileManager.prototype.loadFile = function loadFile(filename, currentDirectory, o
         // Use remote copy (re-parse)
         callback(null, { contents: data, filename: href, webInfo: { lastModified: lastModified }});
     }, function doXHRError(status, url) {
-        callback({ type: 'File', message: "'" + url + "' wasn't found (" + status + ")", href: href });
+        callback(null, { contents: '', filename: href, webInfo: { lastModified: new Date() }});
+        //callback({ type: 'File', message: "'" + url + "' wasn't found (" + status + ")", href: href });
     });
 };
 

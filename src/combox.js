@@ -42,7 +42,7 @@ _sInputWidth   - INPUT对象初始宽度
      */
     ui.Combox = core.inherits(
         ui.Select,
-        '*ui-combox',
+        'ui-combox',
         function (el, options) {
             util.setDefault(options, 'inputType', 'text');
             ui.Select.call(this, el, options);
@@ -56,7 +56,7 @@ _sInputWidth   - INPUT对象初始宽度
              */
             Item: core.inherits(
                 ui.Select.prototype.Item,
-                '*ui-combox-item'
+                'ui-combox-item'
             ),
 
             /**

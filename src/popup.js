@@ -58,11 +58,13 @@ Popup - 定义弹出层相关的基本操作。
                 this.$Popup.$click.call(this, event);
                 var popup = namedMap[this.getUID()];
                 if (event.getControl() === this) {
-                    owner = this;
-
                     if (popup.isShow()) {
+                        owner = null;
+
                         popup.hide();
                     } else {
+                        owner = this;
+
                         var el = popup.getOuter();
                         if (!dom.getParent(el)) {
                             // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
