@@ -6,27 +6,27 @@
 @import (less) "css/popup.css";
 
 @import (less) "css/button.css";
-@import (less) "css/dialog.less";
-@import (less) "css/label.less";
+@import (less) "css/dialog.css";
+@import (less) "css/label.css";
 @import (less) "css/month-view.css";
-@import (less) "css/progress.less";
-@import (less) "css/retina.less";
-@import (less) "css/tab.less";
-@import (less) "css/table.less";
-@import (less) "css/tree-view.less";
+@import (less) "css/progress.css";
+@import (less) "css/retina.css";
+@import (less) "css/tab.css";
+@import (less) "css/table.css";
+@import (less) "css/tree-view.css";
 
 @import (less) "css/text.css";
 @import (less) "css/checkbox.css";
 @import (less) "css/radio.css";
-@import (less) "css/select.less";
-@import (less) "css/combox.less";
-@import (less) "css/listbox.less";
+@import (less) "css/select.css";
+@import (less) "css/combox.css";
+@import (less) "css/listbox.css";
 
 @import (less) "css/calendar.css";
-@import (less) "css/calendar-input.less";
-@import (less) "css/check-tree.less";
-@import (less) "css/multilevel-select.less";
+@import (less) "css/calendar-input.css";
+@import (less) "css/check-tree.css";
+@import (less) "css/multilevel-select.css";
 
-@import (less) "css/messagebox.less";
+@import (less) "css/messagebox.css";
 
 @import (less) "css/esr.css";
