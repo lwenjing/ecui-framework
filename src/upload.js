@@ -31,7 +31,6 @@ Upload - 文件上传控件。
             this._uProgress = core.$fastCreate(ui.Progress, dom.create(ui.Progress.CLASS));
 
             this._uProgress.setParent(this);
-            this._uProgress.setRate(0);
 
             var control = this;
 
@@ -44,10 +43,11 @@ Upload - 文件上传控件。
                     data.append(this.name, file);
 
                     ecui.io.ajax(control._sUrl, {
-                        method: 'post',
+                        method: 'POST',
                         data: data,
                         onupload: function (event) {
-                            control._uProgress.setRate(event.loaded / event.total, Math.round(event.loaded * 100 / event.total) + '%');
+                            control._uProgress.setMax(event.total);
+                            control._uProgress.setValue(event.loaded);
                         },
                         onsuccess: function (data) {
                             console.log(data);

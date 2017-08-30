@@ -6,8 +6,11 @@ Progress - 定义进度显示的基本操作。
 <div ui="type:progress;rate:0.5"></div>
 
 属性
-_eText - 内容区域
-_eMask - 完成的进度比例内容区域
+_eText   - 内容区域
+_eMask   - 完成的进度比例内容区域
+_sFormat - 文本显示的格式
+_nValue  - 进度值
+_nMax    - 进度最大值
 */
 //{if 0}//
 (function () {
@@ -16,10 +19,10 @@ _eMask - 完成的进度比例内容区域
 //{/if}//
     function flush() {
         var rate = this._nValue / this._nMax;
-        if (this._sText) {
-            var text = this._sText.replace(/[*$#]/g, function (ch) {
+        if (this._sFormat) {
+            var text = this._sFormat.replace(/[*$#]/g, function (ch) {
                     return ch === '*' ? this._nMax : ch === '$' ? this._nValue : Math.round(rate * 100);
-                });
+                }.bind(this));
             this._eText.innerHTML = this._eMask.innerHTML = text;
         }
         this._eMask.style.clip = 'rect(0px,' + (rate * this.getWidth()) + 'px,' + this.getHeight() + 'px,0px)';
@@ -39,12 +42,11 @@ _eMask - 完成的进度比例内容区域
         function (el, options) {
             ui.Control.call(this, el, options);
 
-            this._sText = el.innerHTML.trim();
             el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div><div class="' + options.classes.join('-mask ') + '"></div>';
-
             this._eText = el.firstChild;
             this._eMask = el.lastChild;
 
+            this._sFormat = options.format;
             this._nMax = options.max || 100;
             this._nValue = options.value || 0;
 
@@ -60,14 +62,32 @@ _eMask - 完成的进度比例内容区域
             },
 
             /**
+             * 设置进度条的最大值。
+             * @public
+             *
+             * @param {number} max 进度条的最大值
+             */
+            setMax: function (max) {
+                max = Math.max(1, max);
+                if (this._nMax !== max) {
+                    this._nMax = max;
+                    this._nValue = Math.min(this._nValue, this._nMax);
+                    flush.call(this);
+                }
+            },
+
+            /**
              * 设置进度条的数值。
              * @public
              *
              * @param {number} value 进度条的数值
              */
             setValue: function (value) {
-                this._nValue = Math.max(Math.max(0, value), this._nMax);
-                flush.call(this);
+                value = Math.max(Math.max(0, value), this._nMax);
+                if (this._nValue !== value) {
+                    this._nValue = value;
+                    flush.call(this);
+                }
             }
         }
     );
