@@ -48,7 +48,7 @@ _eMask - 完成的进度比例内容区域
              */
             $ready: function (options) {
                 ui.Control.prototype.$ready.call(this, options);
-                this.setRate(options.rate);
+                this.setRate(options.rate || 0);
             },
 
             /**
