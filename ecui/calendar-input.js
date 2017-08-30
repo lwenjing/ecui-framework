@@ -32,6 +32,14 @@ _uCalendar     - 日历控件
                 /**
                  * @override
                  */
+                $hide: function (event) {
+                    ui.Calendar.prototype.$hide.call(this, event);
+                    this.$setParent();
+                },
+
+                /**
+                 * @override
+                 */
                 $show: function (event) {
                     ui.Calendar.prototype.$show.call(this, event);
                     this.$setParent(ui.Popup.getOwner());
