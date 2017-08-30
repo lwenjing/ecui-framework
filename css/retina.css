@@ -1,11 +1,8 @@
-/**
- *     retina
- */
 .ui-retina {
     overflow: hidden !important;
     position: relative !important;
     background: none !important;
-}
-.ui-retina img {
-    position: absolute !important;
+	img {
+    	position: absolute !important;
+    }
 }
