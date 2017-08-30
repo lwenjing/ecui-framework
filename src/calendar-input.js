@@ -25,8 +25,8 @@ _uCalendar     - 日历控件
                  */
                 $dateclick: function (event, date) {
                     ui.Calendar.prototype.$dateclick.call(this, event, date);
-                    this.hide();
                     this.getParent().setValue(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
+                    this.hide();
                 },
 
                 /**
