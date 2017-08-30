@@ -477,6 +477,7 @@ var ecui;
              * headers   {Object}   要设置的http request header
              * timeout   {number}   超时时间
              * nocache   {boolean}  是否需要缓存，默认为false(缓存)
+             * onupload  {Function} 如果xhr支持upload.onprogress，上传过程中触发
              * onsuccess {Function} 请求成功时触发
              * onerror   {Function} 请求发生错误时触发
              * @public
@@ -508,6 +509,10 @@ var ecui;
                         xhr = new XMLHttpRequest();
                     }
 
+                    if (options.onupload && xhr.upload) {
+                        xhr.upload.onprogress = options.onupload;
+                    }
+
                     if (method === 'GET') {
                         if (data) {
                             url += (url.indexOf('?') >= 0 ? '&' : '?') + data;
@@ -536,6 +541,7 @@ var ecui;
                                 xhr.onreadystatechange = util.blank;
                                 xhr.abort();
                                 onerror();
+                                xhr = null;
                             },
                             options.timeout
                         );
@@ -587,9 +593,7 @@ var ecui;
                         util.timer(
                             function () {
                                 xhr.onreadystatechange = util.blank;
-                                if (async) {
-                                    xhr = null;
-                                }
+                                xhr = null;
                             },
                             0
                         );
