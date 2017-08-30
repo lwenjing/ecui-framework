@@ -69,12 +69,12 @@ module.exports = function(window, options) {
 // shim Promise if required
 require('promise/polyfill.js');
 
-var options = window.less || {onReady: true};
+var options = window.less || {};
 require("./add-default-options")(window, options);
 
 var less = module.exports = require("./index")(window, options);
 
-if (options.onReady) {
+ecui.dom.ready(function () {
     if (/!watch/.test(window.location.hash)) {
         less.watch();
     }
@@ -84,7 +84,7 @@ if (options.onReady) {
             return less.refresh(less.env === 'development');
         }
     );
-}
+});
 },{"./add-default-options":1,"./index":7,"promise/polyfill.js":undefined}],3:[function(require,module,exports){
 var utils = require("./utils");
 module.exports = {
