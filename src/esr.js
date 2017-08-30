@@ -607,7 +607,14 @@
                                 for (var i = 0, scope = data, list = item.name.split('.'); i < list.length - 1; i++) {
                                     scope = scope[list[i]] = scope[list[i]] || {};
                                 }
-                                scope[list[i]] = item.value;
+                                if (scope.hasOwnProperty(list[i])) {
+                                    if (!(scope[list[i]] instanceof Array)) {
+                                        scope[list[i]] = [scope[list[i]]];
+                                    }
+                                    scope[list[i]].push(item.value);
+                                } else {
+                                    scope[list[i]] = item.value;
+                                }
                             }
                         });
                     } else if (url[1].indexOf('=') >= 0) {
