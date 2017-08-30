@@ -37,6 +37,7 @@
     document.write('<script type="text/javascript" src="src/etpl.js"></script>');
     document.write('<script type="text/javascript" src="src/esr.js"></script>');
 //{if 0}//
-    document.write('<script type="text/javascript" src="debug.js"></script>');
+    document.write('<script type="text/javascript" src="tools/debug.js"></script>');
+    document.write('<script type="text/javascript" src="tools/less.js"></script>');
 //{/if}//
 }());
