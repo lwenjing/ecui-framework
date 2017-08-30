@@ -14,6 +14,17 @@ _eMask - 完成的进度比例内容区域
     var core = ecui,
         ui = core.ui;
 //{/if}//
+    function flush() {
+        var rate = this._nValue / this._nMax;
+        if (this._sText) {
+            var text = this._sText.replace(/[*$#]/g, function (ch) {
+                    return ch === '*' ? this._nMax : ch === '$' ? this._nValue : Math.round(rate * 100);
+                });
+            this._eText.innerHTML = this._eMask.innerHTML = text;
+        }
+        this._eMask.style.clip = 'rect(0px,' + (rate * this.getWidth()) + 'px,' + this.getHeight() + 'px,0px)';
+    }
+
     /**
      * 初始化进度条控件。
      * options 对象支持的属性如下：
@@ -26,13 +37,18 @@ _eMask - 完成的进度比例内容区域
         ui.Control,
         'ui-progress',
         function (el, options) {
-            var text = el.innerHTML;
-            el.innerHTML = '<div class="' + options.classes.join('-text ') + '">' + text + '</div><div class="' + options.classes.join('-mask ') + '">' + text + '</div>';
-
             ui.Control.call(this, el, options);
+
+            this._sText = el.innerHTML.trim();
+            el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div><div class="' + options.classes.join('-mask ') + '"></div>';
 
             this._eText = el.firstChild;
             this._eMask = el.lastChild;
+
+            this._nMax = options.max || 100;
+            this._nValue = options.value || 0;
+
+            flush.call(this);
         },
         {
             /**
@@ -44,26 +60,14 @@ _eMask - 完成的进度比例内容区域
             },
 
             /**
-             * @override
-             */
-            $ready: function (options) {
-                ui.Control.prototype.$ready.call(this, options);
-                this.setRate(options.rate || 0);
-            },
-
-            /**
-             * 设置进度的比例以及需要显示的文本。
+             * 设置进度条的数值。
              * @public
              *
-             * @param {number} rate 进度比例，在0-1之间
-             * @param {string} text 显示的文本，如果省略将显示成 xx%
+             * @param {number} value 进度条的数值
              */
-            setRate: function (rate, text) {
-                rate = Math.min(Math.max(0, rate), 1);
-                if (text !== undefined) {
-                    this._eText.innerHTML = this._eMask.innerHTML = text || Math.round(rate * 100) + '%';
-                }
-                this._eMask.style.clip = 'rect(0px,' + (rate * this.getWidth()) + 'px,' + this.getHeight() + 'px,0px)';
+            setValue: function (value) {
+                this._nValue = Math.max(Math.max(0, value), this._nMax);
+                flush.call(this);
             }
         }
     );
