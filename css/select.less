@@ -1,0 +1,89 @@
+/**
+ *     Select
+ */
+
+.ui-select {
+        width: 110px;
+        height: 28px;
+        padding-right: 30px;
+        background: url(images/arrow.png) no-repeat 120px center;
+        vertical-align: middle;
+        font-size: 14px;
+        font-family: "宋体";
+        display: inline-block;
+        border: 1px solid #acbaca;
+        color: #8492a6;
+}
+.ui-select:hover {
+        border-color: #8492a6
+}
+.ui-select-hover {/*兼容IE9以下*/
+        border-color: #8492a6
+}
+.ui-select:active {
+        border-color: #368cda
+}
+.ui-select-active {/*兼容IE9以下*/
+        border-color: #368cda
+}
+.ui-select-focus {
+        border-color: #368cda
+}
+.ui-select .ui-select-text {
+        padding: 0;
+        display: block;
+        border: none;
+        background-color: #fff;
+        color: #495362;
+        font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
+        cursor: pointer;
+}
+.ui-select-disabled,
+.ui-select-disabled:hover {
+        border-color: #e0e6ed;
+}
+.ui-select-disabled .ui-select-text,
+.ui-select-disabled .ui-select-text:hover,
+.ui-select-disabled .ui-select-text:active
+ {
+        background-color: #eff2f7;
+        color: #e0e6ed
+}
+
+.ui-select-options {
+        border: 1px solid #d7d8d9 ;
+        font-size: 12px;
+        font-family: "宋体";
+        background: #fff;
+        overflow-x: hidden;
+}
+.ui-select-options .ui-item {
+        text-indent: 10px;
+        line-height: 28px;
+        overflow: hidden;
+        font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
+        text-overflow: ellipsis;
+}
+.ui-select-options .ui-select-item:hover,
+.ui-select-options .ui-select-item:focus,
+.ui-select-options .ui-select-item-hover,
+.ui-select-options .ui-select-item-focus {
+        background-color: #368cda;
+        color: #fff;
+        cursor: pointer;
+}
+
+.ui-select .ui-select-text {
+    overflow: hidden !important;
+}
+.ui-select-options {
+    position: absolute !important;
+    z-index: 65535 !important;
+    overflow: auto !important;
+}
+.ui-select-options .ui-select-item {
+    display: block !important;
+}
+.ui-select, .ui-combox {
+    overflow: hidden !important;
+}
