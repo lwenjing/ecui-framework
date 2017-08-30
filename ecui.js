@@ -17,6 +17,7 @@
     document.write('<script type="text/javascript" src="src/tab.js"></script>');
     document.write('<script type="text/javascript" src="src/table.js"></script>');
     document.write('<script type="text/javascript" src="src/tree-view.js"></script>');
+    document.write('<script type="text/javascript" src="src/upload.js"></script>');
 
     document.write('<script type="text/javascript" src="src/text.js"></script>');
     document.write('<script type="text/javascript" src="src/checkbox.js"></script>');

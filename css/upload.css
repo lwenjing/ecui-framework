@@ -1,0 +1,12 @@
+.ui-upload {
+	input {
+		display: none;
+	}
+	.ui-progress {
+		height: 15px;
+		.ui-progress-mask {
+			background: blue;
+			color: #fff;
+		}
+	}
+}
