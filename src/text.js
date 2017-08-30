@@ -65,7 +65,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 el = this.getInput();
                 options = dom.getAttribute(el, 'placeholder');
                 if (options) {
-                    this._ePlaceHolder = dom.create('ui-input-placeholder');
+                    this._ePlaceHolder = dom.create('ui-placeholder');
                     this._ePlaceHolder.innerHTML = options;
                     dom.insertBefore(this._ePlaceHolder, el);
                 }

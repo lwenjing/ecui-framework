@@ -1,3 +1,18 @@
+.ui-valid {
+    position: absolute !important;
+    overflow: scroll !important;
+    visibility: hidden !important;
+    top: -90px !important;
+    left: -90px !important;
+    width: 80px !important;
+    height: 80px !important;
+    border: 1px solid !important;
+	div {
+    	position: absolute !important;
+    	top: 0 !important;
+    	height: 90px !important;
+    }
+}
 .ui-mask {
     position: absolute !important;
     background-color: #000 !important;

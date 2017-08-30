@@ -15,9 +15,9 @@
 @import (less) "css/table.less";
 @import (less) "css/tree-view.less";
 
-@import (less) "css/text.less";
-@import (less) "css/checkbox.less";
-@import (less) "css/radio.less";
+@import (less) "css/text.css";
+@import (less) "css/checkbox.css";
+@import (less) "css/radio.css";
 @import (less) "css/select.less";
 @import (less) "css/combox.less";
 @import (less) "css/listbox.less";
