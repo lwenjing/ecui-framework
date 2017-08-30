@@ -38,6 +38,9 @@
     document.write('<script type="text/javascript" src="src/esr.js"></script>');
 //{if 0}//
     document.write('<script type="text/javascript" src="tools/debug.js"></script>');
+    if ((/(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined) < 9) {
+        document.write('<script type="text/javascript" src="_common/html5shiv.js_"></script>');
+    }
     document.write('<script type="text/javascript" src="tools/less.js"></script>');
 //{/if}//
 }());
