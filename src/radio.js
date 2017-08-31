@@ -145,9 +145,9 @@ _bDefault  - 默认的选中状态
                     });
                     return result;
                 }
-                return core.query({type: ui.Radio, custom: function (control) {
-                    return !control.getInput().form && control.getName() === inputEl.name;
-                }});
+                return core.query(function (item) {
+                    return item instanceof ui.Radio && !item.getInput().form && item.getName() === inputEl.name;
+                });
             },
 
             /**

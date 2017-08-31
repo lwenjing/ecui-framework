@@ -1703,22 +1703,14 @@
 
         /**
          * 查询满足条件的控件列表。
-         * query 方法允许按多种条件组合查询满足需要的控件，如果省略条件表示不进行限制。condition参数对象支持的属性如下：
-         * type   {Function} 控件的类型构造函数
-         * parent {ecui.ui.Control} 控件的父控件
-         * custom {Function} 自定义查询函数，传入的参数是控件对象，query 方法会将自己的 this 指针传入查询函数中
          * @public
          *
-         * @param {Object} condition 查询条件，如果省略将返回全部的控件
+         * @param {Function} fn 查询函数
+         * @param {Object} thisArg fn执行过程中的this对象
          * @return {Array} 控件列表
          */
-        query: function (condition) {
-            condition = condition || {};
-            return independentControls.filter(function (item) {
-                if ((!condition.type || (item instanceof condition.type)) && (condition.parent === undefined || condition.parent === item.getParent()) && (!condition.custom || condition.custom.call(this, item))) {
-                    return item;
-                }
-            });
+        query: function (fn, thisArg) {
+            return independentControls.filter(fn, thisArg);
         },
 
         /**
@@ -1759,10 +1751,8 @@
          * @public
          */
         repaint: function () {
-            function filter(control) {
-                if (control.isShow()) {
-                    list.push(control);
-                }
+            function filter(item) {
+                return item.getParent() === resizeList && item.isShow();
             }
 
             if (ieVersion) {
@@ -1791,7 +1781,7 @@
 
             // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
             for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
-                core.query({parent: resizeList}).forEach(filter);
+                Array.prototype.push.apply(list, core.query(filter));
             }
 
             resizeList = list.filter(function (item) {

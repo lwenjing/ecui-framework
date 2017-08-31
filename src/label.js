@@ -37,8 +37,11 @@ _cFor - 被转发的控件对象
             $click: function (event) {
                 ui.Control.prototype.$click.call(this, event);
 
-                if (this._cFor && !this._cFor.isDisabled() && !this._cFor.contain(event.getControl())) {
-                    core.triggerEvent(this._cFor, 'click', event);
+                var target = this._cFor || core.query(function (item) {
+                        return item instanceof ui.InputControl && this.contain(item);
+                    }, this)[0];
+                if (target && !target.isDisabled() && !target.contain(event.getControl())) {
+                    core.triggerEvent(target, 'click', event);
                 }
             },
 
