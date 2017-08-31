@@ -652,7 +652,7 @@
                             data = JSON.parse(data);
 
                             if (esr.onparsedata) {
-                                data = esr.onparsedata(data);
+                                data = esr.onparsedata(varUrl, data);
                             }
 
                             if ('number' === typeof data) {
