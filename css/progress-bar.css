@@ -1,0 +1,11 @@
+.ui-progress-bar {
+	.ui-progress-mask {
+		position: absolute !important;
+		left: 0 !important;
+		top: 0 !important;
+		border: 0 !important;
+		padding: 0 !important;
+		background: blue;
+		color: #fff;
+	}
+}
