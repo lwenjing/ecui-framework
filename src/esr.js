@@ -588,18 +588,18 @@
                 count = urls.length;
 
             onsuccess = onsuccess || util.blank;
-            //onerror = onerror || onsuccess;
+            onerror = onerror || esr.onrequesterror || util.blank;
 
-            function request(url, varName) {
-                var method = url.split(' ');
+            function request(varUrl, varName) {
+                var method = varUrl.split(' ');
 
                 if (method[0] === 'JSON' || method[0] === 'FORM') {
                     var headers = {
                             'Content-Type': 'application/json;charset=UTF-8'
                         },
+                        url = method[1].split('?'),
                         data;
 
-                    url = method[1].split('?');
                     if (method[0] === 'FORM') {
                         data = {};
                         Array.prototype.slice.call(document.forms[url[1]].elements).forEach(function (item) {
@@ -652,11 +652,11 @@
                             data = JSON.parse(data);
 
                             if (esr.onparsedata) {
-                                data = esr.onparsedata(data);
+                                data = esr.onparsedata(varUrl, data);
                             }
 
                             if ('number' === typeof data) {
-                                err.push({code: data, url: url});
+                                err.push({code: data, url: varUrl, name: varName});
                             } else {
                                 if (varName) {
                                     esr.setData(varName, data);
@@ -669,13 +669,13 @@
                                 }
                             }
                         } catch (e) {
-                            err.push({url: url});
+                            err.push({url: varUrl, name: varName});
                         }
 
                         if (!count) {
                             pauseStatus = false;
-                            if (err.length > 0 && onerror) {
-                                if (onerror(err) === false) {
+                            if (err.length > 0) {
+                                if (onerror(err, onsuccess, onerror) === false) {
                                     return;
                                 }
                             }
@@ -684,13 +684,11 @@
                     },
                     onerror: function () {
                         count--;
-                        err.push({url: url});
+                        err.push({url: varUrl, name: varName});
                         if (!count) {
                             pauseStatus = false;
-                            if (onerror) {
-                                if (onerror(err) === false) {
-                                    return;
-                                }
+                            if (onerror(err, onsuccess, onerror) === false) {
+                                return;
                             }
                             onsuccess();
                         }
