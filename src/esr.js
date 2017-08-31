@@ -654,16 +654,21 @@
                             data = undefined;
                             err.push(url);
                         }
+                        if (esr.onrequest) {
+                            data = esr.onparsedata(data);
+                        }
                         if (data !== undefined) {
                             if (varName) {
-                                esr.setData(varName, data.data);
+                                esr.setData(varName, data);
                             } else {
                                 for (var key in data) {
                                     if (data.hasOwnProperty(key)) {
-                                        esr.setData(key, data.data[key]);
+                                        esr.setData(key, data[key]);
                                     }
                                 }
                             }
+                        } else {
+                            err.push(url);
                         }
                         if (!count) {
                             pauseStatus = false;
