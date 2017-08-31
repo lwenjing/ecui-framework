@@ -669,7 +669,7 @@
                                 }
                             }
                         } catch (e) {
-                            err.push({code: -2, url: url});
+                            err.push({url: url});
                         }
 
                         if (!count) {
@@ -684,7 +684,7 @@
                     },
                     onerror: function () {
                         count--;
-                        err.push({code: -1, url: url});
+                        err.push({url: url});
                         if (!count) {
                             pauseStatus = false;
                             if (onerror) {

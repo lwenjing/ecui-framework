@@ -16,35 +16,29 @@ Upload - 文件上传控件。
         dom = core.dom,
         ui = core.ui;
 //{/if}//
-    function fileChangeHandler() {
+    function fileChange() {
         var reader = new FileReader(),
-            name = this._eFile.name,
             file = this._eFile.files[0],
             progress = core.query(function (item) {
                 return item instanceof ui.Progress && item.getParent() === this;
-            }, this)[0],
-            url = this._sUrl;
+            }, this)[0];
 
         reader.readAsDataURL(file);
         reader.onload = function () {
             var data = new FormData();
-            data.append(name, file);
+            data.append(this._eFile.name, file);
 
-            ecui.io.ajax(url, {
+            ecui.io.ajax(this._sUrl, {
                 method: 'POST',
                 data: data,
                 onupload: progress ? function (event) {
                     progress.setMax(event.total);
                     progress.setValue(event.loaded);
                 } : undefined,
-                onsuccess: function (data) {
-                    console.log(data);
-                },
-                onerror : function (code, msg) {
-                    window.alert(msg);
-                }
+                onsuccess: this.oncomplete,
+                onerror: this.onerror
             });
-        };
+        }.bind(this);
     }
 
     /**
@@ -70,7 +64,7 @@ Upload - 文件上传控件。
 
             init: function (options) {
                 ui.Control.prototype.init.call(this, options);
-                dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
+                dom.addEventListener(this._eFile, 'change', fileChange.bind(this));
             }
         }
     );
