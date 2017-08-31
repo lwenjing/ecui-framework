@@ -1706,10 +1706,11 @@
          * @public
          *
          * @param {Function} fn 查询函数
+         * @param {Object} thisArg fn执行过程中的this对象
          * @return {Array} 控件列表
          */
-        query: function (fn) {
-            return independentControls.filter(fn);
+        query: function (fn, thisArg) {
+            return independentControls.filter(fn, thisArg);
         },
 
         /**

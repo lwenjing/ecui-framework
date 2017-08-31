@@ -1,12 +1,16 @@
 .ui-progress {
-    position: relative !important;
     padding: 0 !important;
+    overflow: hidden !important;
+    position: relative;
 	.ui-progress-text,
 	.ui-progress-mask {
 	    position: absolute !important;
 	    top: 0 !important;
 	    left: 0 !important;
-	    width: 100% !important;
-	    height: 100% !important;
+	    text-align: center;
+	}
+	.ui-progress-mask {
+		background: blue;
+		color: #fff;
 	}
 }

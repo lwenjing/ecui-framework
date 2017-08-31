@@ -1,12 +1,11 @@
 .ui-upload {
-	input {
-		display: none;
-	}
+	text-align: center;
 	.ui-progress {
-		height: 15px;
-		.ui-progress-mask {
-			background: blue;
-			color: #fff;
-		}
+		display: inline-block;
+		top: 28px;
+		width: 80%;
+		height: 5px;
+		border: 1px solid black;
+		border-radius: 3px;
 	}
 }
