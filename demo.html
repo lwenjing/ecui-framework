@@ -6,9 +6,13 @@
     <script src="ecui.js"></script>
 </head>
 <body>
-    <label ui="type:upload;url:/file/upload/testUpload" style="display:block;width:50px;height:50px;border:1px solid black">
+    <label ui="type:upload;url:/file/upload/testUpload" style="display:block">
         <input type="file" name="file" style="display:none">
-        <div ui="type:progress"></div>
+        <div ui="type:progress-bar"></div>
+    </label>
+    <label ui="type:upload;url:/file/upload/testUpload" style="display:block">
+        <input type="file" name="file" style="display:none">
+        <svg ui="type:progress-circle"></svg>
     </label>
     <div>
         <div ui="type:button" class="blue-btn">蓝色按钮</div>
@@ -23,14 +27,6 @@
     <div>
         <div ui="type:month-view"></div>
     </div>
-    <div>
-        <div ui="type:progress;value:40">当前进度</div>
-    </div>
-    <div ui="type:radio;name:abc"></div>
-    <div ui="type:label">
-        测试Label的功能 <div ui="type:radio;name:abc"></div>
-    </div>
-    <div ui="type:radio;name:abc"></div>
 <!--<div ui="type:multilevel-select;id:test">
 <select></select>
 <select></select>
