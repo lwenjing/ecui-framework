@@ -64,7 +64,10 @@ _nMax    - 进度最大值
             },
 
             /**
-             * @override
+             * 设置进度条的最大值。
+             * @public
+             *
+             * @param {number} max 进度条的最大值
              */
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);

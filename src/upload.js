@@ -10,8 +10,8 @@ Upload - 文件上传控件。
 
 属性
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui;
@@ -22,14 +22,15 @@ Upload - 文件上传控件。
             file = this._eFile.files[0],
             progress = core.query(function (item) {
                 return item instanceof ui.Progress && item.getParent() === this;
-            }, this)[0];
+            }, this)[0],
+            url = this._sUrl;
 
         reader.readAsDataURL(file);
         reader.onload = function () {
             var data = new FormData();
             data.append(name, file);
 
-            ecui.io.ajax(this._sUrl, {
+            ecui.io.ajax(url, {
                 method: 'POST',
                 data: data,
                 onupload: progress ? function (event) {
@@ -43,7 +44,7 @@ Upload - 文件上传控件。
                     window.alert(msg);
                 }
             });
-        }.bind(this);
+        };
     }
 
     /**
@@ -73,6 +74,4 @@ Upload - 文件上传控件。
             }
         }
     );
-//{if 0}//
 }());
-//{/if}//
