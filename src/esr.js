@@ -284,11 +284,19 @@
      */
     function replace(rule) {
         if (rule) {
-            return rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
+            var data;
+
+            rule = rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
                 name = name.split('|');
                 var value = util.parseValue(name[0], context);
+                if (match === rule) {
+                    data = value;
+                    return '';
+                }
                 return value === undefined ? (name[1] || '') : value;
             });
+
+            return data || rule;
         }
         return '';
     }
