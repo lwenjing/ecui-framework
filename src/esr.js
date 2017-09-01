@@ -589,32 +589,31 @@
          * @param {Function} onerror 至少一个请求失败时调用的函数，会传入一个参数Array说明是哪些url失败
          */
         request: function (urls, onsuccess, onerror) {
-            function setData(name, value) {
-                for (var i = 0, scope = data, list = name.split('.'); i < list.length - 1; i++) {
-                    scope = scope[list[i]] = scope[list[i]] || {};
-                }
-                if (scope.hasOwnProperty(list[i])) {
-                    if (!(scope[list[i]] instanceof Array)) {
-                        scope[list[i]] = [scope[list[i]]];
-                    }
-                    scope[list[i]].push(value);
-                } else {
-                    scope[list[i]] = value;
-                }
-            }
-
             if ('string' === typeof urls) {
                 urls = [urls];
             }
 
             var err = [],
-                count = urls.length,
-                data;
+                count = urls.length;
 
             onsuccess = onsuccess || util.blank;
             onerror = onerror || esr.onrequesterror || util.blank;
 
             function request(varUrl, varName) {
+                function setData(name, value) {
+                    for (var i = 0, scope = data, list = name.split('.'); i < list.length - 1; i++) {
+                        scope = scope[list[i]] = scope[list[i]] || {};
+                    }
+                    if (scope.hasOwnProperty(list[i])) {
+                        if (!(scope[list[i]] instanceof Array)) {
+                            scope[list[i]] = [scope[list[i]]];
+                        }
+                        scope[list[i]].push(value);
+                    } else {
+                        scope[list[i]] = value;
+                    }
+                }
+
                 var method = varUrl.split(' ');
 
                 if (method[0] === 'JSON' || method[0] === 'FORM') {
