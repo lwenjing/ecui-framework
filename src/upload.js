@@ -40,7 +40,7 @@ Upload - 文件上传控件。
                     progress.setMax(event.total);
                     progress.setValue(event.loaded);
                 } : undefined,
-                onsuccess: this.oncomplete,
+                onsuccess: this.onupload,
                 onerror: this.onerror
             });
         }.bind(this);
