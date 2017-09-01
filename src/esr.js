@@ -588,12 +588,27 @@
          * @param {Function} onerror 至少一个请求失败时调用的函数，会传入一个参数Array说明是哪些url失败
          */
         request: function (urls, onsuccess, onerror) {
+            function setData(name, value) {
+                for (var i = 0, scope = data, list = name.split('.'); i < list.length - 1; i++) {
+                    scope = scope[list[i]] = scope[list[i]] || {};
+                }
+                if (scope.hasOwnProperty(list[i])) {
+                    if (!(scope[list[i]] instanceof Array)) {
+                        scope[list[i]] = [scope[list[i]]];
+                    }
+                    scope[list[i]].push(value);
+                } else {
+                    scope[list[i]] = value;
+                }
+            }
+
             if ('string' === typeof urls) {
                 urls = [urls];
             }
 
             var err = [],
-                count = urls.length;
+                count = urls.length,
+                data;
 
             onsuccess = onsuccess || util.blank;
             onerror = onerror || esr.onrequesterror || util.blank;
@@ -606,54 +621,38 @@
                             'Content-Type': 'application/json;charset=UTF-8'
                         },
                         url = method[1].split('?'),
-                        data = {};
+                        data = {},
+                        valid = true;
 
-                    if (method[0] === 'FORM') {
-                        var form = document.forms[url[1]],
-                            valid = true;
+                    url[1].split('&').forEach(function (item) {
+                        item = item.split('=');
+                        if (item.length > 1) {
+                            setData(item[0], replace(item[1]));
+                        } else if (method[0] === 'FORM') {
+                            Array.prototype.slice.call(document.forms[item[0]].elements).forEach(function (item) {
+                                if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
+                                    if (item.getControl) {
+                                        if (!core.triggerEvent(item.getControl(), 'submit', core.createEvent('submit'))) {
+                                            valid = false;
+                                        }
+                                    }
+                                    setData(item.name, item.getControl ? item.getControl().getValue() : item.value);
+                                }
+                            });
 
-                        Array.prototype.slice.call(form.elements).forEach(function (item) {
-                            if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
-                                if (item.getControl) {
-                                    if (!core.triggerEvent(item.getControl(), 'submit', core.createEvent('submit'))) {
-                                        valid = false;
-                                    }
-                                }
-                                for (var i = 0, scope = data, list = item.name.split('.'); i < list.length - 1; i++) {
-                                    scope = scope[list[i]] = scope[list[i]] || {};
-                                }
-                                var value = item.getControl ? item.getControl().getValue() : item.value;
-                                if (scope.hasOwnProperty(list[i])) {
-                                    if (!(scope[list[i]] instanceof Array)) {
-                                        scope[list[i]] = [scope[list[i]]];
-                                    }
-                                    scope[list[i]].push(value);
+                            if (!valid) {
+                                if (count === 1) {
+                                    onerror();
                                 } else {
-                                    scope[list[i]] = value;
+                                    count--;
+                                    err.push({url: varUrl, name: varName});
                                 }
+                                return;
                             }
-                        });
-
-                        if (!valid) {
-                            if (count === 1) {
-                                onerror();
-                            } else {
-                                count--;
-                                err.push({url: varUrl, name: varName});
-                            }
-                            return;
+                        } else {
+                            util.extend(data, replace(url[1]));
                         }
-                    } else if (url[1].indexOf('=') >= 0) {
-                        url[1].split('&').forEach(function (item) {
-                            item = item.split('=');
-                            for (var i = 0, scope = data, list = item[0].split('.'); i < list.length - 1; i++) {
-                                scope = scope[list[i]] = scope[list[i]] || {};
-                            }
-                            scope[list[i]] = replace(item[1]);
-                        });
-                    } else {
-                        data = replace(url[1]);
-                    }
+                    });
                     method = 'POST';
                     url = url[0];
                     data = JSON.stringify(data);
