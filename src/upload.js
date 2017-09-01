@@ -1,11 +1,16 @@
 /*
 Upload - 文件上传控件。
-文件上传控件，继承自基础控件。
+文件上传控件，继承自基础控件，内部必须包含<input type="file">的标签，可以包含或不包含进度控件，如果包含就会自动设置进度控件参数。
 
 标签控件直接HTML初始化的例子:
 <label ui="type:upload">
     <input type="file" name="file">
-    <div ui="type:progress"></div>
+    <div ui="type:progress-bar"></div>
+</label>
+或
+<label ui="type:upload">
+    <input type="file" name="file">
+    <svg ui="type:progress-circle"></svg>
 </label>
 
 属性
