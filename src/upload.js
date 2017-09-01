@@ -10,7 +10,7 @@ Upload - 文件上传控件。
 或
 <label ui="type:upload">
     <input type="file" name="file">
-    <svg ui="type:progress-circle"></svg>
+    <div ui="type:progress-circle"></div>
 </label>
 
 属性
