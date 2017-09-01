@@ -67,12 +67,8 @@ _aSelect - 全部的下拉框控件列表
                         if (selected._aChildren) {
                             item = selects[++index];
                             item.removeAll();
-                            if (selected._aChildren[0] instanceof ui.Item) {
-                                item.append(selected._aChildren);
-                            } else {
-                                item.append(selected._aChildren.map(function (item) {
-                                    return item.code;
-                                }), selected._aChildren);
+                            item.add(selected._aChildren);
+                            if (!(selected._aChildren[0] instanceof ui.Item)) {
                                 selected._aChildren = item.getItems();
                             }
                         }
@@ -106,9 +102,7 @@ _aSelect - 全部的下拉框控件列表
                 for (var i = 0, item; item = this._aSelect[i++]; ) {
                     item.removeAll(true);
                 }
-                this._aSelect[0].append(data.map(function (item) {
-                    return item.code;
-                }), data);
+                this._aSelect[0].add(data);
             }
         }
     );

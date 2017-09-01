@@ -45,6 +45,9 @@ Item/Items - 定义选项操作相关的基本操作。
         NAME: '$Items',
 
         Methods: {
+            // 选项控件的文本在 options 中的名称
+            TEXTNAME: '',
+
             /**
              * 选项组只允许添加选项控件，添加成功后会自动调用 alterItems 方法。
              * @override
@@ -130,11 +133,12 @@ Item/Items - 定义选项操作相关的基本操作。
                             var options = core.getOptions(item) || {};
                         } else {
                             if ('string' === typeof item) {
-                                item = {'': item};
+                                item = {};
+                                item[this.TEXTNAME] = item;
                             }
                             options = item;
                             this.getBody().appendChild(item = dom.create());
-                            item.innerHTML = options[''];
+                            item.innerHTML = options[this.TEXTNAME];
                         }
 
                         item.className += UIClass.CLASS;
