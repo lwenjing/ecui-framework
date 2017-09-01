@@ -78,9 +78,9 @@ $$padding           - 内填充宽度缓存
             } else {
                 dom.remove(el);
             }
-            // 当 DOM 树位置发生改变时，$setParent必须被执行
-            this.$setParent(parent);
         }
+
+        this.$setParent(parent);
     }
 
     /**
