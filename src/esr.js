@@ -606,7 +606,7 @@
 
                         Array.prototype.slice.call(form.elements).forEach(function (item) {
                             if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
-                                if (!core.triggerEvent(item, 'submit', new core.ECUIEvent())) {
+                                if (!core.triggerEvent(item, 'submit', core.createEvent('submit'))) {
                                     valid = false;
                                 }
                                 for (var i = 0, scope = data, list = item.name.split('.'); i < list.length - 1; i++) {
