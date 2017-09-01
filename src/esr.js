@@ -289,11 +289,12 @@
             rule = rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
                 name = name.split('|');
                 var value = util.parseValue(name[0], context);
+                value = value === undefined ? (name[1] || '') : value;
                 if (match === rule) {
                     data = value;
                     return '';
                 }
-                return value === undefined ? (name[1] || '') : value;
+                return value;
             });
 
             return data || rule;
