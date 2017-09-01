@@ -603,6 +603,9 @@
                 function setData(name, value) {
                     for (var i = 0, scope = data, list = name.split('.'); i < list.length - 1; i++) {
                         scope = scope[list[i]] = scope[list[i]] || {};
+                        if (scope instanceof Array) {
+                            scope = scope[scope.length - 1];
+                        }
                     }
                     if (scope.hasOwnProperty(list[i])) {
                         if (!(scope[list[i]] instanceof Array)) {
