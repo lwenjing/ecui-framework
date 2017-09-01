@@ -4,6 +4,7 @@
         dom = core.dom,
         ext = core.ext,
         io = core.io,
+        ui = core.ui,
         util = core.util,
 
         JAVASCRIPT = 'javascript',
@@ -306,6 +307,19 @@
         DEFAULT_PAGE: 'index',
         DEFAULT_MAIN: 'main',
 
+        CreateObject: core.inherits(
+            ui.Control,
+            function (el, options) {
+                ui.Control.call(this, el, options);
+                dom.addClass(el, 'ui-hide');
+            },
+            {
+                getValue: function () {
+                    return {};
+                }
+            }
+        ),
+
         /**
          * 添加路由信息。
          * @public
@@ -600,6 +614,13 @@
             onerror = onerror || esr.onrequesterror || util.blank;
 
             function request(varUrl, varName) {
+                // 对于FORM表单的对象列表提交，可以通过产生一个特殊的ECUI控件来完成，例如：
+                // <form>
+                //   <input ui="ecui.esr.CreateObject" name="a">
+                //   <input name="a.b">
+                //   <input ui="ecui.esr.CreateObject" name="a">
+                //   <input name="a.b">
+                // </form>
                 function setData(name, value) {
                     for (var i = 0, scope = data, list = name.split('.'); i < list.length - 1; i++) {
                         scope = scope[list[i]] = scope[list[i]] || {};
