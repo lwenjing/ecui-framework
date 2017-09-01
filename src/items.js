@@ -90,9 +90,7 @@ Item/Items - 定义选项操作相关的基本操作。
                 this.preventAlterItems();
 
                 // 初始化选项控件
-                dom.children(this.getBody()).forEach(function (item) {
-                    this.add(item);
-                }, this);
+                this.add(dom.children(this.getBody()));
 
                 this.premitAlterItems();
             },
@@ -113,53 +111,58 @@ Item/Items - 定义选项操作相关的基本操作。
              * add 方法中如果位置序号不合法，子选项控件将添加在末尾的位置。
              * @public
              *
-             * @param {string|HTMLElement|ecui.ui.Item} item 控件的 html 内容/控件对应的主元素对象/选项控件
+             * @param {string|Object|HTMLElement|ecui.ui.Item|Array} item 控件的 html 内容/控件的初始化参数对象/控件对应的主元素对象/选项控件/前面四项组合成的数组
              * @param {number} index 子选项控件需要添加的位置序号
-             * @param {Object} options 子控件初始化选项
-             * @return {ecui.ui.Item} 子选项控件
+             * @return {Array} 子选项控件数组
              */
-            add: function (item, index, options) {
+            add: function (item, index) {
                 var list = namedMap[this.getUID()],
-                    el;
+                    items = [],
+                    UIClass = this.Item || ui.Item,
+                    el = list[index] ? list[index].getOuter() : null;
 
                 this.preventAlterItems();
 
-                if (!(item instanceof ui.Item)) {
-                    // 根据是字符串还是Element对象选择不同的初始化方式
-                    if ('string' === typeof item) {
-                        this.getBody().appendChild(el = dom.create());
-                        el.innerHTML = item;
-                        item = el;
+                (item instanceof Array ? item : [item]).forEach(function (item) {
+                    if (!(item instanceof ui.Item)) {
+                        // 根据是字符串还是Element对象选择不同的初始化方式
+                        if (dom.isElement(item)) {
+                            var options = core.getOptions(item) || {};
+                        } else {
+                            if ('string' === typeof item) {
+                                item = {'': item};
+                            }
+                            options = item;
+                            this.getBody().appendChild(item = dom.create());
+                            item.innerHTML = options[''];
+                        }
+
+                        item.className += UIClass.CLASS;
+
+                        options.parent = this;
+                        item = core.$fastCreate(UIClass, item, null, options);
                     }
 
-                    var UIClass = this.Item || ui.Item;
-                    item.className += UIClass.CLASS;
-
-                    options = options || core.getOptions(item) || {};
-                    options.parent = this;
-                    item = core.$fastCreate(UIClass, item, this, options);
-                }
-
-                // 选项控件，直接添加
-                item.setParent(this);
+                    // 选项控件，直接添加
+                    item.setParent(this);
+                    if (item.getParent()) {
+                        items.push(item);
+                    }
+                }, this);
 
                 // 改变选项控件的位置
-                if (item.getParent()) {
-                    el = item.getOuter();
-                    util.remove(list, item);
-                    if (list[index]) {
-                        dom.insertBefore(el, list[index].getOuter());
-                        list.splice(index, 0, item);
-                    } else {
-                        dom.getParent(el).appendChild(el);
-                        list.push(item);
-                    }
+                if (el) {
+                    list.splice(list.length - items.length, items.length);
+                    items.forEach(function (item) {
+                        dom.insertBefore(item.getOuter(), el);
+                    });
+                    Array.prototype.splice.apply(list, [index, 0].concat(items));
                 }
 
                 this.premitAlterItems();
                 this.alterItems();
 
-                return item;
+                return items;
             },
 
             /**
@@ -169,28 +172,6 @@ Item/Items - 定义选项操作相关的基本操作。
             alterItems: function () {
                 if (!namedMap[this.getUID()].preventCount) {
                     this.$alterItems();
-                }
-            },
-
-            /**
-             * 向选项组最后添加子选项控件。
-             * append 方法是 add 方法去掉第二个 index 参数的版本。
-             * @public
-             *
-             * @param {string|Element|ecui.ui.Item|Array} item 控件的 html 内容/控件对应的主元素对象/选项控件/选项控件组
-             * @param {Object|Array} 子控件初始化选项，如果 item 是数组，options 也必须是数组一一对应
-             * @return {ecui.ui.Item} 子选项控件
-             */
-            append: function (item, options) {
-                if (item instanceof Array) {
-                    this.preventAlterItems();
-                    item.forEach(function (item, index) {
-                        this.add(item, null, options ? options[index] : null);
-                    }, this);
-                    this.premitAlterItems();
-                    this.alterItems();
-                } else {
-                    this.add(item, null, options);
                 }
             },
 
