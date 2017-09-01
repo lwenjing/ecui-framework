@@ -598,12 +598,17 @@
                             'Content-Type': 'application/json;charset=UTF-8'
                         },
                         url = method[1].split('?'),
-                        data;
+                        data = {};
 
                     if (method[0] === 'FORM') {
-                        data = {};
-                        Array.prototype.slice.call(document.forms[url[1]].elements).forEach(function (item) {
+                        var form = document.forms[url[1]],
+                            valid = true;
+
+                        Array.prototype.slice.call(form.elements).forEach(function (item) {
                             if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
+                                if (!core.triggerEvent(item, 'submit', new core.ECUIEvent())) {
+                                    valid = false;
+                                }
                                 for (var i = 0, scope = data, list = item.name.split('.'); i < list.length - 1; i++) {
                                     scope = scope[list[i]] = scope[list[i]] || {};
                                 }
@@ -617,8 +622,17 @@
                                 }
                             }
                         });
+
+                        if (!valid) {
+                            if (count === 1) {
+                                onerror();
+                            } else {
+                                count--;
+                                err.push({url: varUrl, name: varName});
+                            }
+                            return;
+                        }
                     } else if (url[1].indexOf('=') >= 0) {
-                        data = {};
                         url[1].split('&').forEach(function (item) {
                             item = item.split('=');
                             for (var i = 0, scope = data, list = item[0].split('.'); i < list.length - 1; i++) {
