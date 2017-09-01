@@ -50,7 +50,7 @@ ProgressCircle - 使用进度圆定义进度。
                     x2 = Math.round(Math.sin(radian) * radius),
                     y2 = Math.round(Math.cos(radian) * radius);
 
-                if (value < max && !x2) {
+                if (value < max && !x2 && y2 > 0) {
                     this._ePath.setAttribute('d', 'M 0 0 V ' + (radius * 2) + ' H ' + (radius * 2) + ' V 0');
                 } else {
                     this._ePath.setAttribute('d', 'M ' + x + ' ' + y + ' V ' + (y - radius) + ' A ' + radius + ' ' + radius + ' 0 ' + (x2 > 0 ? '1 0 ' : '0 0 ') + (x + x2) + ' ' + (y - y2));

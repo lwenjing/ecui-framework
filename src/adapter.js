@@ -309,6 +309,27 @@ var ecui;
             },
 
             /**
+             * 判断一个对象是否为 DOM 元素。
+             * @public
+             *
+             * @param {Object} obj 对象
+             * @return {boolean} 是否为 DOM 元素
+             */
+            isElement: ieVersion < 9 ? function (obj) {
+                // 通过检测nodeType是否只读来判断是不是 DOM 元素
+                if (obj.hasOwnProperty('nodeType') && obj.nodeType === 1) {
+                    obj.nodeType = 2;
+                    if (obj.nodeType === 1) {
+                        return true;
+                    }
+                    obj.nodeType = 1;
+                }
+                return false;
+            } : function (obj) {
+                return obj instanceof HTMLElement;
+            },
+
+            /**
              * 获取 Element 对象的最后一个子 Element 对象。
              * @public
              *
