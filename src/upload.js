@@ -5,7 +5,12 @@ Upload - 文件上传控件。
 标签控件直接HTML初始化的例子:
 <label ui="type:upload">
     <input type="file" name="file">
-    <div ui="type:progress"></div>
+    <div ui="type:progress-bar"></div>
+</label>
+或
+<label ui="type:upload">
+    <input type="file" name="file">
+    <svg ui="type:progress-circle"></svg>
 </label>
 
 属性
