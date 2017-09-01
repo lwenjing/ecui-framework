@@ -3,13 +3,14 @@ ProgressCircle - 使用进度圆定义进度。
 进度圆控件，继承自进度控件，使用进度圆显示一个任务执行的程度。
 
 进度圆控件直接HTML初始化的例子:
-<svg ui="type:progress-circle;max:100;value:0"></svg>
+<div ui="type:progress-circle;max:100;value:0"></div>
 
 属性
 */
 //{if 0}//
 (function () {
     var core = ecui,
+        dom = core.dom,
         ui = core.ui;
 //{/if}//
     /**
@@ -25,8 +26,8 @@ ProgressCircle - 使用进度圆定义进度。
         function (el, options) {
             ui.Progress.call(this, el, options);
 
-            el.innerHTML = '<path fill="#000"></path>';
-            this._ePath = el.firstChild;
+            el.innerHTML = '<svg><path fill="#000"></path></svg>';
+            this._ePath = el.lastChild.lastChild;
         },
         {
             /**
@@ -35,6 +36,16 @@ ProgressCircle - 使用进度圆定义进度。
             $dispose: function () {
                 this._ePath = null;
                 ui.Progress.prototype.$dispose.call(this);
+            },
+
+            /**
+             * @override
+             */
+            $initStructure: function (width, height) {
+                ui.Progress.prototype.$initStructure.call(this, width, height);
+                var el = dom.getParent(this._ePath);
+                el.style.width = width + 'px';
+                el.style.height = height + 'px';
             },
 
             /**

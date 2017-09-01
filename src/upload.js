@@ -10,7 +10,7 @@ Upload - 文件上传控件。
 或
 <label ui="type:upload">
     <input type="file" name="file">
-    <svg ui="type:progress-circle"></svg>
+    <div ui="type:progress-circle"></div>
 </label>
 
 属性
@@ -40,7 +40,7 @@ Upload - 文件上传控件。
                     progress.setMax(event.total);
                     progress.setValue(event.loaded);
                 } : undefined,
-                onsuccess: this.oncomplete,
+                onsuccess: this.onupload,
                 onerror: this.onerror
             });
         }.bind(this);

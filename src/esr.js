@@ -284,11 +284,20 @@
      */
     function replace(rule) {
         if (rule) {
-            return rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
+            var data;
+
+            rule = rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
                 name = name.split('|');
                 var value = util.parseValue(name[0], context);
-                return value === undefined ? (name[1] || '') : value;
+                value = value === undefined ? (name[1] || '') : value;
+                if (match === rule) {
+                    data = value;
+                    return '';
+                }
+                return value;
             });
+
+            return data || rule;
         }
         return '';
     }
@@ -591,6 +600,23 @@
             onerror = onerror || esr.onrequesterror || util.blank;
 
             function request(varUrl, varName) {
+                function setData(name, value) {
+                    for (var i = 0, scope = data, list = name.split('.'); i < list.length - 1; i++) {
+                        scope = scope[list[i]] = scope[list[i]] || {};
+                        if (scope instanceof Array) {
+                            scope = scope[scope.length - 1];
+                        }
+                    }
+                    if (scope.hasOwnProperty(list[i])) {
+                        if (!(scope[list[i]] instanceof Array)) {
+                            scope[list[i]] = [scope[list[i]]];
+                        }
+                        scope[list[i]].push(value);
+                    } else {
+                        scope[list[i]] = value;
+                    }
+                }
+
                 var method = varUrl.split(' ');
 
                 if (method[0] === 'JSON' || method[0] === 'FORM') {
@@ -598,54 +624,38 @@
                             'Content-Type': 'application/json;charset=UTF-8'
                         },
                         url = method[1].split('?'),
-                        data = {};
+                        data = {},
+                        valid = true;
 
-                    if (method[0] === 'FORM') {
-                        var form = document.forms[url[1]],
-                            valid = true;
+                    url[1].split('&').forEach(function (item) {
+                        item = item.split('=');
+                        if (item.length > 1) {
+                            setData(item[0], replace(item[1]));
+                        } else if (method[0] === 'FORM') {
+                            Array.prototype.slice.call(document.forms[item[0]].elements).forEach(function (item) {
+                                if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
+                                    if (item.getControl) {
+                                        if (!core.triggerEvent(item.getControl(), 'submit', core.createEvent('submit'))) {
+                                            valid = false;
+                                        }
+                                    }
+                                    setData(item.name, item.getControl ? item.getControl().getValue() : item.value);
+                                }
+                            });
 
-                        Array.prototype.slice.call(form.elements).forEach(function (item) {
-                            if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
-                                if (item.getControl) {
-                                    if (!core.triggerEvent(item.getControl(), 'submit', core.createEvent('submit'))) {
-                                        valid = false;
-                                    }
-                                }
-                                for (var i = 0, scope = data, list = item.name.split('.'); i < list.length - 1; i++) {
-                                    scope = scope[list[i]] = scope[list[i]] || {};
-                                }
-                                var value = item.getControl ? item.getControl().getValue() : item.value;
-                                if (scope.hasOwnProperty(list[i])) {
-                                    if (!(scope[list[i]] instanceof Array)) {
-                                        scope[list[i]] = [scope[list[i]]];
-                                    }
-                                    scope[list[i]].push(value);
+                            if (!valid) {
+                                if (count === 1) {
+                                    onerror();
                                 } else {
-                                    scope[list[i]] = value;
+                                    count--;
+                                    err.push({url: varUrl, name: varName});
                                 }
+                                return;
                             }
-                        });
-
-                        if (!valid) {
-                            if (count === 1) {
-                                onerror();
-                            } else {
-                                count--;
-                                err.push({url: varUrl, name: varName});
-                            }
-                            return;
+                        } else {
+                            util.extend(data, replace(url[1]));
                         }
-                    } else if (url[1].indexOf('=') >= 0) {
-                        url[1].split('&').forEach(function (item) {
-                            item = item.split('=');
-                            for (var i = 0, scope = data, list = item[0].split('.'); i < list.length - 1; i++) {
-                                scope = scope[list[i]] = scope[list[i]] || {};
-                            }
-                            scope[list[i]] = replace(item[1]);
-                        });
-                    } else {
-                        data = replace(url[1]);
-                    }
+                    });
                     method = 'POST';
                     url = url[0];
                     data = JSON.stringify(data);
