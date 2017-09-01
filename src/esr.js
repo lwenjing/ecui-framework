@@ -606,19 +606,22 @@
 
                         Array.prototype.slice.call(form.elements).forEach(function (item) {
                             if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
-                                if (!core.triggerEvent(item, 'submit', core.createEvent('submit'))) {
-                                    valid = false;
+                                if (item.getControl) {
+                                    if (!core.triggerEvent(item.getControl(), 'submit', core.createEvent('submit'))) {
+                                        valid = false;
+                                    }
                                 }
                                 for (var i = 0, scope = data, list = item.name.split('.'); i < list.length - 1; i++) {
                                     scope = scope[list[i]] = scope[list[i]] || {};
                                 }
+                                var value = item.getControl ? item.getControl().getValue() : item.value;
                                 if (scope.hasOwnProperty(list[i])) {
                                     if (!(scope[list[i]] instanceof Array)) {
                                         scope[list[i]] = [scope[list[i]]];
                                     }
-                                    scope[list[i]].push(item.value);
+                                    scope[list[i]].push(value);
                                 } else {
-                                    scope[list[i]] = item.value;
+                                    scope[list[i]] = value;
                                 }
                             }
                         });
