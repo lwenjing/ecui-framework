@@ -399,8 +399,45 @@ FileManager.prototype.join = function join(basePath, laterPath) {
     }
     return this.extractUrlParts(laterPath, basePath).path;
 };
+var urls = [];
 FileManager.prototype.doXHR = function doXHR(url, type, callback, errback) {
+    function doLocal() {
+        url = urls[0][0];
+        callback = urls[0][1];
 
+        logger.debug('Local: ' + url.slice(loc.lastIndexOf('/') + 1) + ' loading...');
+        el.src = url.slice(loc.lastIndexOf('/') + 1) + '?url=' + encodeURIComponent(loc);
+        var stop = ecui.util.timer(function () {
+            if (location.hash) {
+                logger.debug('Local: ' + url.slice(loc.lastIndexOf('/') + 1) + ' loaded');
+                stop();
+                callback(decodeURIComponent(location.hash.slice(1)));
+                urls.splice(0, 1);
+                if (urls.length) {
+                    ecui.util.timer(doLocal, 0);
+                } else {
+                    location.hash = '1';
+                }
+            }
+        }, -100);
+    }
+
+    var loc = location.href + '#';
+    loc = loc.slice(0, loc.indexOf('#'));
+    if (url.slice(0, 5) === 'file:') {
+        var el = ecui.$('LESS-FILE-PROTOCOL');
+        if (!el) {
+            el = document.createElement('IFRAME'),
+            el.id = 'LESS-FILE-PROTOCOL';
+            el.style.cssText = 'position:absolute;width:1px;height:1px;left:-10px;top:-10px';
+            document.body.appendChild(el);
+        }
+        urls.push([url, callback]);
+        if (urls.length === 1) {
+            doLocal();
+        }
+        return;
+    }
     var xhr = getXMLHttpRequest();
     var async = options.isFileProtocol ? options.fileAsync : options.async;
 
