@@ -307,6 +307,7 @@
         DEFAULT_PAGE: 'index',
         DEFAULT_MAIN: 'main',
 
+        // 用于创建空对象，参见request方法
         CreateObject: core.inherits(
             ui.Control,
             function (el, options) {
