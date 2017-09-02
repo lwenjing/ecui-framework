@@ -674,7 +674,10 @@
                                 return;
                             }
                         } else {
-                            util.extend(data, replace(url[1]));
+                            item = replace(item[1]);
+                            if ('object' === typeof item) {
+                                util.extend(data, item);
+                            }
                         }
                     });
                     method = 'POST';
