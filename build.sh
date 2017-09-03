@@ -10,6 +10,8 @@ then
     mkdir $output
 fi
 
+cd ..
+
 for file in `ls $1`
 do
     if [ -d $1"/"$file ]
@@ -64,3 +66,5 @@ tar -zcvf "../"$1".tar.gz" *
 cd ..
 
 rm -rf $output
+
+cd lib-fe

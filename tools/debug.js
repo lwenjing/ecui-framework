@@ -54,7 +54,9 @@
      */
     var moduleName,
         loc = location.href + '#',
-        waits = [];
+        waits = [],
+        oldRedirectFn = ecui.esr.redirect,
+        oldLocation;
 
     loc = loc.slice(0, loc.indexOf('#'));
 
@@ -84,7 +86,8 @@
                         if (waits.length) {
                             doLoad();
                         } else {
-                            location.hash = '';
+                            location.hash = oldLocation;
+                            ecui.esr.redirect = oldRedirectFn;
                             ecui.resume();
                         }
                     }
@@ -109,6 +112,8 @@
                 waits.push([url, callback]);
                 if (waits.length === 1) {
                     ecui.pause();
+                    oldLocation = location.hash;
+                    ecui.esr.redirect = ecui.util.blank;
                     doLoad();
                 }
             });
