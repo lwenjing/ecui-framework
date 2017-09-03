@@ -457,7 +457,7 @@
          */
         redirect: function (loc) {
             if (pauseStatus) {
-                if (window.onhashchange) {
+                if (!window.onhashchange) {
                     setTimeout(listener, 100);
                 }
             } else {
@@ -811,36 +811,4 @@
             }
         }
     };
-//{if 0}//
-    /**
-     * 动态加载模块，用于测试。
-     * @public
-     *
-     * @param {string} name 模块名
-     */
-    var moduleName;
-
-    esr.loadModule = function (name) {
-        document.write('<script type="text/javascript">ecui.esr.setModuleName("' + name + '")</script>');
-        document.write('<script type="text/javascript" src="' + name + '/' + name + '.js"></script>');
-    };
-
-    esr.setModuleName = function (name) {
-        moduleName = name;
-    };
-    esr.loadClass = function (filename) {
-        document.write('<script type="text/javascript" src="' + moduleName + '/class.' + filename + '.js"></script>');
-    };
-    esr.loadRoute = function (filename) {
-        document.write('<script type="text/javascript" src="' + moduleName + '/route.' + filename + '.js"></script>');
-        document.write('<link rel="stylesheet/less" type="text/css" href="' + moduleName + '/route.' + filename + '.css" />');
-        core.pause();
-        io.ajax(moduleName + '/route.' + filename + '.html', {
-            onsuccess: function (data) {
-                core.resume();
-                etpl.compile(data);
-            }
-        });
-    };
-//{/if}//
 }());

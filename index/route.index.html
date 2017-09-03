@@ -1,0 +1,11 @@
+<script>
+window.onload = function () {
+	var url = location.href,
+	    hash = document.getElementsByTagName('TEXTAREA')[0].value;
+	url = decodeURIComponent(url.slice(url.indexOf('=') + 1));
+	parent.location.href = url + '#' + encodeURIComponent(hash.replace(/&lt;/g, '<').replace(/&gt;/g, '>') || ' ');
+}
+</script>
+<textarea>
+<!-- target: index -->
+<i>测试
