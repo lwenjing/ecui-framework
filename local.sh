@@ -7,7 +7,7 @@ function scandir() {
         then
             scandir $file
         else
-            if [ "${file##*.}" = "css" -a ! -f $file".html" ]
+            if [ "${file##*.}" = "css" ] && [ ! -f $file".html" ]
             then
                 echo $file"->"$file".html"
                 ln $file $file".html"
