@@ -1,1 +1,0 @@
-ecui.esr.loadRoute('index');
