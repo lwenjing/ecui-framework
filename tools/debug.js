@@ -103,6 +103,8 @@
                 }
                 if (url.slice(0, 5) === 'file:') {
                     url = url.slice(loc.lastIndexOf('/') + 1);
+                } else if (url.charAt(0) === '/') {
+                    url = url.slice(1);
                 }
                 waits.push([url, callback]);
                 if (waits.length === 1) {
