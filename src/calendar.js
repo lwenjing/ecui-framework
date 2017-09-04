@@ -31,7 +31,7 @@ _eTitle        - 日历头部信息提示区
             // 生成日历控件结构
             dom.insertHTML(
                 el,
-                'afterbegin',
+                'AFTERBEGIN',
                 '<div class="' + options.classes.join('-header ') + '"><div class="' +
                     options.classes.join('-title ') + '"></div><div class="' +
                     options.classes.join('-prev-year ') + '">&lt;&lt;</div><div class="' +

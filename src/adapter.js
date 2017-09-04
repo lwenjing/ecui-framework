@@ -3,7 +3,7 @@ var ecui;
 (function () {
 //{/if}//
     var //{if 1}//undefined,//{/if}//
-        JAVASCRIPT = 'javascript',
+        //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
 
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
@@ -95,17 +95,16 @@ var ecui;
              * @param {string} cssText css文本
              */
             createStyleSheet: function (cssText) {
-                if (ieVersion) {
-                    var style = window.ecui;
-                    window.ecui = cssText;
-                    document.createStyleSheet(JAVASCRIPT + ':ecui');
-                    window.ecui = style;
+                var el = document.createElement('STYLE');
+                el.type = 'text/css';
+
+                if (ieVersion < 10) {
+                    el.styleSheet.cssText = cssText;
                 } else {
-                    style = document.createElement('STYLE');
-                    style.type = 'text/css';
-                    style.innerHTML = cssText;
-                    document.head.appendChild(style);
+                    el.innerHTML = cssText;
                 }
+
+                document.head.appendChild(el);
             },
 
             /**
@@ -146,7 +145,7 @@ var ecui;
              * @param {HTMLElement} el Element 对象
              * @return {HTMLElement} 父 Element 对象，如果没有，返回 null
              */
-            getParent: ieVersion ? function (el) {
+            getParent: ieVersion < 10 ? function (el) {
                 return el.parentElement;
             } : function (el) {
                 return el.parentNode;
@@ -304,6 +303,12 @@ var ecui;
                 range[name](el);
                 range.collapse(position.length > 9);
                 range.insertNode(range.createContextualFragment(html));
+            } : ieVersion === 10 ? function (el, position, html) {
+                var parent = dom.getParent(el);
+                if (!parent) {
+                    dom.create().appendChild(el);
+                }
+                el.insertAdjacentHTML(position, html);
             } : function (el, position, html) {
                 el.insertAdjacentHTML(position, html);
             },
@@ -317,12 +322,12 @@ var ecui;
              */
             isElement: ieVersion < 9 ? function (obj) {
                 // 通过检测nodeType是否只读来判断是不是 DOM 元素
-                if (obj.hasOwnProperty('nodeType') && obj.nodeType === 1) {
-                    obj.nodeType = 2;
-                    if (obj.nodeType === 1) {
+                if (!obj.hasOwnProperty && obj.nodeType === 1) {
+                    try {
+                        obj.nodeType = 2;
+                    } catch (e) {
                         return true;
                     }
-                    obj.nodeType = 1;
                 }
                 return false;
             } : function (obj) {
