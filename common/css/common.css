@@ -2,43 +2,69 @@
     margin: 0;
     padding: 0;
 }
+
 html * {
     outline: 0;
     -webkit-text-size-adjust: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     -webkit-font-smoothing: antialiased;
 }
-html, body {
+
+html,
+body {
     color: #495362;
     background: #FFF;
     font-size: 14px;
     font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
     height: 100%;
 }
+
 input,
 button,
 select,
 textarea {
     outline: none
 }
+
 table {
     border-collapse: collapse;
     border-spacing: 0
 }
-fieldset, img {
+
+fieldset,
+img {
     border: 0
 }
-address, caption, cite, code, dfn, em, strong, th, var {
+
+address,
+caption,
+cite,
+code,
+dfn,
+em,
+strong,
+th,
+var {
     font-style: normal;
     font-weight: normal
 }
-ol, ul ,li{
+
+ol,
+ul,
+li {
     list-style: none
 }
-h1, h2, h3, h4, h5, h6 {
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     font-size: 100%;
     font-weight: normal
 }
+
 a {
     color: #8492A6;
     text-decoration: none;
@@ -46,11 +72,11 @@ a {
 }
 
 .box {
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  -o-box-sizing: border-box;
-  -ms-box-sizing: border-box;
-  box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .ui-dialog h6,
@@ -60,30 +86,37 @@ a {
     margin: 0;
 }
 
+
 /*元素存在但显示为不可见*/
-.ui-visible-hidden{
-    visibility:hidden;
+
+.ui-visible-hidden {
+    visibility: hidden;
 }
 
 .clearfix {
     *zoom: 1;
 }
+
 .clearfix:before,
 .clearfix:after {
     display: table;
     content: "";
     line-height: 0;
 }
+
 .clearfix:after {
     clear: both;
 }
+
 .ui-hide {
     display: none !important;
 }
+
 #ECUI_LOCATOR {
     position: absolute;
     visibility: hidden;
 }
+
 .ui-valid {
     position: absolute !important;
     overflow: scroll !important;
@@ -94,11 +127,13 @@ a {
     height: 80px !important;
     border: 1px solid !important;
 }
+
 .ui-valid div {
     position: absolute !important;
     top: 0 !important;
     height: 90px !important;
 }
+
 .ui-item {
     overflow: hidden !important;
 }

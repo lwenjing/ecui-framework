@@ -1,15 +1,13 @@
 /*
-multilevel-select - 多级联动下拉框控件。
-多级联动下拉框控件，继承自基础控件，内部包含的下拉框能够对指定的数据集合进行多级联动。
+cities - 地区联动下拉框控件。
+地区联动下拉框控件，继承自multilevel-select控件。
 
 多级联动下拉框控件直接HTML初始化的例子:
-<div ui="type:multilevel-select">
+<div ui="type:cities">
     <select name="province"></select>
     <select name="city"></select>
 </div>
 
-属性
-_aSelect - 全部的下拉框控件列表
 */
 (function () {
     var core = ecui,
@@ -20,13 +18,8 @@ _aSelect - 全部的下拉框控件列表
         key,
         citys,
         item,
-        DEFAULT = '000000',
-        PROVINCE = {"000000": "全部"};
-        CITY = {
-            "000000": {
-                "000000": "全部"
-            }
-        };
+        PROVINCE = {},
+        CITY = {};
     for (code in daikuan.cities) {
         if (code.slice(2) == '0000') {
             PROVINCE[code] = daikuan.cities[code];
@@ -37,22 +30,12 @@ _aSelect - 全部的下拉框控件列表
             CITY[code.slice(0, 2) + '0000'][code] = daikuan.cities[code];
         }
     }
-    var CITYS = [{
-        value: '000000',
-        code: '全部',
-        children: [{
-            value: '000000',
-            code: '全部'
-        }]
-    }];
+    var CITYS = [];
     for (code in  PROVINCE) {
         citys = {
             value: code,
             code: PROVINCE[code],
-            children: [{
-                value: code,
-                code: '全部'
-            }]
+            children: []
         };
         item = CITY[code];
         for (key in item) {
@@ -81,18 +64,19 @@ _aSelect - 全部的下拉框控件列表
         'ui-cities',
         {
             $ready: function (options) {
-                options.value = options.value || '000000';
                 ui.MultilevelSelect.prototype.$ready.call(this, options);
                 var province = this.getSelect(0);
                 this.setData(CITYS);
-                province.setValue(options.value.slice(0, 2) + '0000');
-                core.triggerEvent(province, 'change');
-                core.addEventListener(province, 'change', provinceChange);
-                this.getSelect(1).setValue(options.value.slice(0, 4) + '00');
+                if (options.value && options.value != '') {
+                    province.setValue(options.value.slice(0, 2) + '0000');
+                    core.triggerEvent(province, 'change');
+                    core.addEventListener(province, 'change', provinceChange);
+                    this.getSelect(1).setValue(options.value.slice(0, 4) + '00');
+                }
             },
             setValue: function (val) {
                 this.getSelect(0).setValue(val.slice(0, 2) + '0000');
-                this.setOptions(this.getSelect(1), options.value.slice(0, 2) + '0000');
+                this.setOptions(this.getSelect(1), val.slice(0, 2) + '0000');
                 this.getSelect(1).setValue(val.slice(0, 4) + '00');
             }
         }
