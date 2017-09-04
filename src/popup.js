@@ -110,7 +110,7 @@ Popup - 定义弹出层相关的基本操作。
                 this.$Popup.$scroll.call(this, event);
 
                 var popup = namedMap[this.getUID()];
-                if (event.getNative().type === 'mousedown' && !dom.contain(popup.getOuter(), event.target)) {
+                if (event.type === 'mousedown' && !dom.contain(popup.getOuter(), event.target)) {
                     // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
                     popup.hide();
                 }
