@@ -2,10 +2,10 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-    <link rel="stylesheet/less" type="text/css" href="ecui.css.html" />
+    <link rel="stylesheet/less" type="text/css" href="ecui.css" />
     <script src="ecui.js"></script>
 </head>
-<body>
+<body data-ecui="load:esr">
     <label ui="type:upload;url:/file/upload/testUpload" style="display:block">
         <input type="file" name="file" style="display:none">
         <div ui="type:progress-bar"></div>
@@ -40,6 +40,7 @@
         <input name="a.b" value="2">
         <input name="a.c" value="11">
     </form>
+    <div id="main"></div>
 <!--
 <input ui="type:calendar-input;id:dd" name="cc" style="border:1px solid black;width:100px;height:20px">
 <input ui="type:calendar-input;id:dd2" name="cc" style="border:1px solid black;width:100px;height:20px">

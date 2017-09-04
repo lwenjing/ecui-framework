@@ -96,10 +96,10 @@ var ecui;
              */
             createStyleSheet: function (cssText) {
                 if (ieVersion) {
-                    var style = window.style;
-                    window.style = cssText;
-                    document.createStyleSheet(JAVASCRIPT + ':style');
-                    window.style = style;
+                    var style = window.ecui;
+                    window.ecui = cssText;
+                    document.createStyleSheet(JAVASCRIPT + ':ecui');
+                    window.ecui = style;
                 } else {
                     style = document.createElement('STYLE');
                     style.type = 'text/css';
@@ -561,7 +561,7 @@ var ecui;
                             function () {
                                 xhr.onreadystatechange = util.blank;
                                 xhr.abort();
-                                onerror();
+                                onerror(xhr);
                                 xhr = null;
                             },
                             options.timeout
@@ -573,7 +573,7 @@ var ecui;
                         stateChangeHandler();
                     }
                 } catch (e) {
-                    onerror();
+                    onerror(xhr);
                 }
 
                 function stateChangeHandler() {
@@ -591,7 +591,7 @@ var ecui;
                                 options.onsuccess(xhr.responseText, xhr);
                             }
                         } else {
-                            onerror();
+                            onerror(xhr);
                         }
 
                         /*

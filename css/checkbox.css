@@ -1,0 +1,13 @@
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.indexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+.ui-checkbox {
+    width: 17px;
+    height: 17px;
+    background-image: url('images/ecui/checkbox-normal.png');
+    background-repeat: no-repeat;
+}
+.ui-checkbox-checked {
+    background-image: url('images/ecui/checkbox-choice.png');
+}
+.ui-checkbox-disabled {
+    background-image: url('images/ecui/checkbox-disable.png');
+}

@@ -10,524 +10,537 @@
  /** * @license Apache v2
  */
 ecui.pause();
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof defineed&&defineed.amd)defineed([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.less=e()}}(function(){var defineed,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requireed=="function"&&requireed;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var addDataAttr = require("./utils").addDataAttr,
-    browser = require("./browser");
-
-module.exports = function(window, options) {
-
-    // use options from the current script tag data attribues
-    addDataAttr(options, browser.currentScript(window));
-
-    if (options.isFileProtocol === undefined) {
-        options.isFileProtocol = /^(file|(chrome|safari)(-extension)?|resource|qrc|app):/.test(window.location.protocol);
-    }
-
-    // Load styles asynchronously (default: false)
-    //
-    // This is set to `false` by default, so that the body
-    // doesn't start loading before the stylesheets are parsed.
-    // Setting this to `true` can result in flickering.
-    //
-    options.async = options.async || true;
-    options.fileAsync = options.fileAsync || false;
-
-    // Interval between watch polls
-    options.poll = options.poll || (options.isFileProtocol ? 1000 : 1500);
-
-    options.env = options.env || (window.location.hostname == '127.0.0.1' ||
-        window.location.hostname == '0.0.0.0'   ||
-        window.location.hostname == 'localhost' ||
-        (window.location.port &&
-            window.location.port.length > 0)      ||
-        options.isFileProtocol                   ? 'development'
-        : 'production');
-
-    var dumpLineNumbers = /!dumpLineNumbers:(comments|mediaquery|all)/.exec(window.location.hash);
-    if (dumpLineNumbers) {
-        options.dumpLineNumbers = dumpLineNumbers[1];
-    }
-
-    if (options.useFileCache === undefined) {
-        options.useFileCache = true;
-    }
-
-    if (options.onReady === undefined) {
-        options.onReady = true;
-    }
-
-};
-
-},{"./browser":3,"./utils":9}],2:[function(require,module,exports){
-/**
- * Kicks off less and compiles any stylesheets
- * used in the browser distributed version of less
- * to kick-start less using the browser api
- */
-/*global window */
-
-// shim Promise if required
-require('promise/polyfill.js');
-
-var options = window.less || {};
-require("./add-default-options")(window, options);
-
-var less = module.exports = require("./index")(window, options);
-
-ecui.dom.ready(function () {
-    if (/!watch/.test(window.location.hash)) {
-        less.watch();
-    }
-
-    less.pageLoadFinished = less.registerStylesheets().then(
-        function () {
-            return less.refresh(less.env === 'development');
+(function () {
+    function getModule(moduleName) {
+        if (!modules[moduleName]) {
+            var module = modules[moduleName] = {exports: {}},
+                define = defines[moduleName];
+            define[0].call(module.exports, function (moduleName) {
+                return getModule(define[1][moduleName] || moduleName);
+            }, module, module.exports);
         }
-    );
-});
-},{"./add-default-options":1,"./index":7,"promise/polyfill.js":undefined}],3:[function(require,module,exports){
-var utils = require("./utils");
-module.exports = {
-    createCSS: function (document, styles, sheet) {
-        // Strip the query-string
-        var href = sheet.href || '';
-
-        // If there is no title set, use the filename, minus the extension
-        var id = 'less:' + (sheet.title || utils.extractId(href));
-
-        // If this has already been inserted into the DOM, we may need to replace it
-        var oldStyleNode = document.getElementById(id);
-        var keepOldStyleNode = false;
-
-        // Create a new stylesheet node for insertion or (if necessary) replacement
-        var styleNode = document.createElement('style');
-        styleNode.setAttribute('type', 'text/css');
-        if (sheet.media) {
-            styleNode.setAttribute('media', sheet.media);
-        }
-        styleNode.id = id;
-
-        if (!styleNode.styleSheet) {
-            styleNode.appendChild(document.createTextNode(styles));
-
-            // If new contents match contents of oldStyleNode, don't replace oldStyleNode
-            keepOldStyleNode = (oldStyleNode !== null && oldStyleNode.childNodes.length > 0 && styleNode.childNodes.length > 0 &&
-                oldStyleNode.firstChild.nodeValue === styleNode.firstChild.nodeValue);
-        }
-
-        var head = document.getElementsByTagName('head')[0];
-
-        // If there is no oldStyleNode, just append; otherwise, only append if we need
-        // to replace oldStyleNode with an updated stylesheet
-        if (oldStyleNode === null || keepOldStyleNode === false) {
-            var nextEl = sheet && sheet.nextSibling || null;
-            if (nextEl) {
-                nextEl.parentNode.insertBefore(styleNode, nextEl);
-            } else {
-                head.appendChild(styleNode);
-            }
-        }
-        if (oldStyleNode && keepOldStyleNode === false) {
-            oldStyleNode.parentNode.removeChild(oldStyleNode);
-        }
-
-        // For IE.
-        // This needs to happen *after* the style element is added to the DOM, otherwise IE 7 and 8 may crash.
-        // See http://social.msdn.microsoft.com/Forums/en-US/7e081b65-878a-4c22-8e68-c10d39c2ed32/internet-explorer-crashes-appending-style-element-to-head
-        if (styleNode.styleSheet) {
-            try {
-                styleNode.styleSheet.cssText = styles;
-            } catch (e) {
-                throw new Error("Couldn't reassign styleSheet.cssText.");
-            }
-        }
-    },
-    currentScript: function(window) {
-        var document = window.document;
-        return document.currentScript || (function() {
-            var scripts = document.getElementsByTagName("script");
-            return scripts[scripts.length - 1];
-        })();
+        return modules[moduleName].exports;
     }
-};
 
-},{"./utils":9}],4:[function(require,module,exports){
-// Cache system is a bit outdated and could do with work
+    var colors = {
+        'aliceblue': '#f0f8ff',
+        'antiquewhite': '#faebd7',
+        'aqua': '#00ffff',
+        'aquamarine': '#7fffd4',
+        'azure': '#f0ffff',
+        'beige': '#f5f5dc',
+        'bisque': '#ffe4c4',
+        'black': '#000000',
+        'blanchedalmond': '#ffebcd',
+        'blue': '#0000ff',
+        'blueviolet': '#8a2be2',
+        'brown': '#a52a2a',
+        'burlywood': '#deb887',
+        'cadetblue': '#5f9ea0',
+        'chartreuse': '#7fff00',
+        'chocolate': '#d2691e',
+        'coral': '#ff7f50',
+        'cornflowerblue': '#6495ed',
+        'cornsilk': '#fff8dc',
+        'crimson': '#dc143c',
+        'cyan': '#00ffff',
+        'darkblue': '#00008b',
+        'darkcyan': '#008b8b',
+        'darkgoldenrod': '#b8860b',
+        'darkgray': '#a9a9a9',
+        'darkgrey': '#a9a9a9',
+        'darkgreen': '#006400',
+        'darkkhaki': '#bdb76b',
+        'darkmagenta': '#8b008b',
+        'darkolivegreen': '#556b2f',
+        'darkorange': '#ff8c00',
+        'darkorchid': '#9932cc',
+        'darkred': '#8b0000',
+        'darksalmon': '#e9967a',
+        'darkseagreen': '#8fbc8f',
+        'darkslateblue': '#483d8b',
+        'darkslategray': '#2f4f4f',
+        'darkslategrey': '#2f4f4f',
+        'darkturquoise': '#00ced1',
+        'darkviolet': '#9400d3',
+        'deeppink': '#ff1493',
+        'deepskyblue': '#00bfff',
+        'dimgray': '#696969',
+        'dimgrey': '#696969',
+        'dodgerblue': '#1e90ff',
+        'firebrick': '#b22222',
+        'floralwhite': '#fffaf0',
+        'forestgreen': '#228b22',
+        'fuchsia': '#ff00ff',
+        'gainsboro': '#dcdcdc',
+        'ghostwhite': '#f8f8ff',
+        'gold': '#ffd700',
+        'goldenrod': '#daa520',
+        'gray': '#808080',
+        'grey': '#808080',
+        'green': '#008000',
+        'greenyellow': '#adff2f',
+        'honeydew': '#f0fff0',
+        'hotpink': '#ff69b4',
+        'indianred': '#cd5c5c',
+        'indigo': '#4b0082',
+        'ivory': '#fffff0',
+        'khaki': '#f0e68c',
+        'lavender': '#e6e6fa',
+        'lavenderblush': '#fff0f5',
+        'lawngreen': '#7cfc00',
+        'lemonchiffon': '#fffacd',
+        'lightblue': '#add8e6',
+        'lightcoral': '#f08080',
+        'lightcyan': '#e0ffff',
+        'lightgoldenrodyellow': '#fafad2',
+        'lightgray': '#d3d3d3',
+        'lightgrey': '#d3d3d3',
+        'lightgreen': '#90ee90',
+        'lightpink': '#ffb6c1',
+        'lightsalmon': '#ffa07a',
+        'lightseagreen': '#20b2aa',
+        'lightskyblue': '#87cefa',
+        'lightslategray': '#778899',
+        'lightslategrey': '#778899',
+        'lightsteelblue': '#b0c4de',
+        'lightyellow': '#ffffe0',
+        'lime': '#00ff00',
+        'limegreen': '#32cd32',
+        'linen': '#faf0e6',
+        'magenta': '#ff00ff',
+        'maroon': '#800000',
+        'mediumaquamarine': '#66cdaa',
+        'mediumblue': '#0000cd',
+        'mediumorchid': '#ba55d3',
+        'mediumpurple': '#9370d8',
+        'mediumseagreen': '#3cb371',
+        'mediumslateblue': '#7b68ee',
+        'mediumspringgreen': '#00fa9a',
+        'mediumturquoise': '#48d1cc',
+        'mediumvioletred': '#c71585',
+        'midnightblue': '#191970',
+        'mintcream': '#f5fffa',
+        'mistyrose': '#ffe4e1',
+        'moccasin': '#ffe4b5',
+        'navajowhite': '#ffdead',
+        'navy': '#000080',
+        'oldlace': '#fdf5e6',
+        'olive': '#808000',
+        'olivedrab': '#6b8e23',
+        'orange': '#ffa500',
+        'orangered': '#ff4500',
+        'orchid': '#da70d6',
+        'palegoldenrod': '#eee8aa',
+        'palegreen': '#98fb98',
+        'paleturquoise': '#afeeee',
+        'palevioletred': '#d87093',
+        'papayawhip': '#ffefd5',
+        'peachpuff': '#ffdab9',
+        'peru': '#cd853f',
+        'pink': '#ffc0cb',
+        'plum': '#dda0dd',
+        'powderblue': '#b0e0e6',
+        'purple': '#800080',
+        'rebeccapurple': '#663399',
+        'red': '#ff0000',
+        'rosybrown': '#bc8f8f',
+        'royalblue': '#4169e1',
+        'saddlebrown': '#8b4513',
+        'salmon': '#fa8072',
+        'sandybrown': '#f4a460',
+        'seagreen': '#2e8b57',
+        'seashell': '#fff5ee',
+        'sienna': '#a0522d',
+        'silver': '#c0c0c0',
+        'skyblue': '#87ceeb',
+        'slateblue': '#6a5acd',
+        'slategray': '#708090',
+        'slategrey': '#708090',
+        'snow': '#fffafa',
+        'springgreen': '#00ff7f',
+        'steelblue': '#4682b4',
+        'tan': '#d2b48c',
+        'teal': '#008080',
+        'thistle': '#d8bfd8',
+        'tomato': '#ff6347',
+        'turquoise': '#40e0d0',
+        'violet': '#ee82ee',
+        'wheat': '#f5deb3',
+        'white': '#ffffff',
+        'whitesmoke': '#f5f5f5',
+        'yellow': '#ffff00',
+        'yellowgreen': '#9acd32'
+    };
 
-module.exports = function(window, options, logger) {
-    var cache = null;
-    if (options.env !== 'development') {
-        try {
-            cache = (typeof(window.localStorage) === 'undefined') ? null : window.localStorage;
-        } catch (_) {}
-    }
-    return {
-        setCSS: function(path, lastModified, styles) {
-            if (cache) {
-                logger.info('saving ' + path+ ' to cache.');
-                try {
-                    cache.setItem(path, styles);
-                    cache.setItem(path + ':timestamp', lastModified);
-                } catch(e) {
-                    //TODO - could do with adding more robust error handling
-                    logger.error('failed to save "' + path + '" to local storage for caching.');
-                }
-            }
+    var unitConversions = {
+        length: {
+            'm': 1,
+            'cm': 0.01,
+            'mm': 0.001,
+            'in': 0.0254,
+            'px': 0.0254 / 96,
+            'pt': 0.0254 / 72,
+            'pc': 0.0254 / 72 * 12
         },
-        getCSS: function(path, webInfo) {
-            var css       = cache && cache.getItem(path),
-                timestamp = cache && cache.getItem(path + ':timestamp');
-
-            if (timestamp && webInfo.lastModified &&
-                (new Date(webInfo.lastModified).valueOf() ===
-                    new Date(timestamp).valueOf())) {
-                // Use local copy
-                return css;
-            }
+        duration: {
+            's': 1,
+            'ms': 0.001
+        },
+        angle: {
+            'rad': 1 / (2 * Math.PI),
+            'deg': 1 / 360,
+            'grad': 1 / 400,
+            'turn': 1
         }
     };
-};
 
-},{}],5:[function(require,module,exports){
-var utils = require("./utils"),
-    browser = require("./browser");
-
-module.exports = function(window, less, options) {
-
-    function errorHTML(e, rootHref) {
-        var id = 'less-error-message:' + utils.extractId(rootHref || "");
-        var template = '<li><label>{line}</label><pre class="{class}">{content}</pre></li>';
-        var elem = window.document.createElement('div'), timer, content, errors = [];
-        var filename = e.filename || rootHref;
-        var filenameNoPath = filename.match(/([^\/]+(\?.*)?)$/)[1];
-
-        elem.id        = id;
-        elem.className = "less-error-message";
-
-        content = '<h3>'  + (e.type || "Syntax") + "Error: " + (e.message || 'There is an error in your .less file') +
-            '</h3>' + '<p>in <a href="' + filename   + '">' + filenameNoPath + "</a> ";
-
-        var errorline = function (e, i, classname) {
-            if (e.extract[i] !== undefined) {
-                errors.push(template.replace(/\{line\}/, (parseInt(e.line, 10) || 0) + (i - 1))
-                    .replace(/\{class\}/, classname)
-                    .replace(/\{content\}/, e.extract[i]));
-            }
-        };
-
-        if (e.extract) {
-            errorline(e, 0, '');
-            errorline(e, 1, 'line');
-            errorline(e, 2, '');
-            content += 'on line ' + e.line + ', column ' + (e.column + 1) + ':</p>' +
-                '<ul>' + errors.join('') + '</ul>';
-        }
-        if (e.stack && (e.extract || options.logLevel >= 4)) {
-            content += '<br/>Stack Trace</br />' + e.stack.split('\n').slice(1).join('<br/>');
-        }
-        elem.innerHTML = content;
-
-        // CSS for error messages
-        browser.createCSS(window.document, [
-            '.less-error-message ul, .less-error-message li {',
-            'list-style-type: none;',
-            'margin-right: 15px;',
-            'padding: 4px 0;',
-            'margin: 0;',
-            '}',
-            '.less-error-message label {',
-            'font-size: 12px;',
-            'margin-right: 15px;',
-            'padding: 4px 0;',
-            'color: #cc7777;',
-            '}',
-            '.less-error-message pre {',
-            'color: #dd6666;',
-            'padding: 4px 0;',
-            'margin: 0;',
-            'display: inline-block;',
-            '}',
-            '.less-error-message pre.line {',
-            'color: #ff0000;',
-            '}',
-            '.less-error-message h3 {',
-            'font-size: 20px;',
-            'font-weight: bold;',
-            'padding: 15px 0 5px 0;',
-            'margin: 0;',
-            '}',
-            '.less-error-message a {',
-            'color: #10a',
-            '}',
-            '.less-error-message .error {',
-            'color: red;',
-            'font-weight: bold;',
-            'padding-bottom: 2px;',
-            'border-bottom: 1px dashed red;',
-            '}'
-        ].join('\n'), { title: 'error-message' });
-
-        elem.style.cssText = [
-            "font-family: Arial, sans-serif",
-            "border: 1px solid #e00",
-            "background-color: #eee",
-            "border-radius: 5px",
-            "-webkit-border-radius: 5px",
-            "-moz-border-radius: 5px",
-            "color: #e00",
-            "padding: 15px",
-            "margin-bottom: 15px"
-        ].join(';');
-
-        if (options.env === 'development') {
-            timer = setInterval(function () {
-                var document = window.document,
-                    body = document.body;
-                if (body) {
-                    if (document.getElementById(id)) {
-                        body.replaceChild(elem, document.getElementById(id));
-                    } else {
-                        body.insertBefore(elem, body.firstChild);
-                    }
-                    clearInterval(timer);
-                }
-            }, 10);
-        }
+    function extractId(href) {
+        return href.replace(/^[a-z-]+:\/+?[^\/]+/, '')  // Remove protocol & domain
+            .replace(/[\?\&]livereload=\w+/, '')  // Remove LiveReload cachebuster
+            .replace(/^\//,                  '')  // Remove root /
+            .replace(/\.[a-zA-Z]+$/,         '')  // Remove simple extension
+            .replace(/[^\.\w-]+/g,           '-')  // Replace illegal characters
+            .replace(/\./g,                  ':'); // Replace dots with colons(for valid id)
     }
 
-    function error(e, rootHref) {
-        if (!options.errorReporting || options.errorReporting === "html") {
-            errorHTML(e, rootHref);
-        } else if (options.errorReporting === "console") {
-            errorConsole(e, rootHref);
-        } else if (typeof options.errorReporting === 'function') {
-            options.errorReporting("add", e, rootHref);
-        }
-    }
-
-    function removeErrorHTML(path) {
-        var node = window.document.getElementById('less-error-message:' + utils.extractId(path));
-        if (node) {
-            node.parentNode.removeChild(node);
-        }
-    }
-
-    function removeErrorConsole(path) {
-        //no action
-    }
-
-    function removeError(path) {
-        if (!options.errorReporting || options.errorReporting === "html") {
-            removeErrorHTML(path);
-        } else if (options.errorReporting === "console") {
-            removeErrorConsole(path);
-        } else if (typeof options.errorReporting === 'function') {
-            options.errorReporting("remove", path);
-        }
-    }
-
-    function errorConsole(e, rootHref) {
-        var template = '{line} {content}';
-        var filename = e.filename || rootHref;
-        var errors = [];
-        var content = (e.type || "Syntax") + "Error: " + (e.message || 'There is an error in your .less file') +
-            " in " + filename + " ";
-
-        var errorline = function (e, i, classname) {
-            if (e.extract[i] !== undefined) {
-                errors.push(template.replace(/\{line\}/, (parseInt(e.line, 10) || 0) + (i - 1))
-                    .replace(/\{class\}/, classname)
-                    .replace(/\{content\}/, e.extract[i]));
-            }
-        };
-
-        if (e.extract) {
-            errorline(e, 0, '');
-            errorline(e, 1, 'line');
-            errorline(e, 2, '');
-            content += 'on line ' + e.line + ', column ' + (e.column + 1) + ':\n' +
-                errors.join('\n');
-        }
-        if (e.stack && (e.extract || options.logLevel >= 4)) {
-            content += '\nStack Trace\n' + e.stack;
-        }
-        less.logger.error(content);
-    }
-
-    return {
-        add: error,
-        remove: removeError
-    };
-};
-
-},{"./browser":3,"./utils":9}],6:[function(require,module,exports){
-/*global window, XMLHttpRequest */
-
-module.exports = function(options, logger) {
-
-var AbstractFileManager = require("../less/environment/abstract-file-manager.js");
-
-var fileCache = {};
-
-//TODOS - move log somewhere. pathDiff and doing something similar in node. use pathDiff in the other browser file for the initial load
-
-function getXMLHttpRequest() {
-    if (window.XMLHttpRequest && (window.location.protocol !== "file:" || !("ActiveXObject" in window))) {
-        return new XMLHttpRequest();
-    } else {
-        try {
-            /*global ActiveXObject */
-            return new ActiveXObject("Microsoft.XMLHTTP");
-        } catch (e) {
-            logger.error("browser doesn't support AJAX.");
-            return null;
-        }
-    }
-}
-
-var FileManager = function() {
-};
-
-FileManager.prototype = new AbstractFileManager();
-
-FileManager.prototype.alwaysMakePathsAbsolute = function alwaysMakePathsAbsolute() {
-    return true;
-};
-FileManager.prototype.join = function join(basePath, laterPath) {
-    if (!basePath) {
-        return laterPath;
-    }
-    return this.extractUrlParts(laterPath, basePath).path;
-};
-var urls = [];
-FileManager.prototype.doXHR = function doXHR(url, type, callback, errback) {
-    function doLocal() {
-        url = urls[0][0];
-        callback = urls[0][1];
-
-        logger.debug('Local: ' + url.slice(loc.lastIndexOf('/') + 1) + ' loading...');
-        el.src = url.slice(loc.lastIndexOf('/') + 1) + '?url=' + encodeURIComponent(loc);
-        var stop = ecui.util.timer(function () {
-            if (location.hash) {
-                logger.debug('Local: ' + url.slice(loc.lastIndexOf('/') + 1) + ' loaded');
-                stop();
-                callback(decodeURIComponent(location.hash.slice(1)));
-                urls.splice(0, 1);
-                if (urls.length) {
-                    ecui.util.timer(doLocal, 0);
+    function addDataAttr(options, tag) {
+        for (var opt in tag.dataset) {
+            if (tag.dataset.hasOwnProperty(opt)) {
+                if (opt === 'env' || opt === 'dumpLineNumbers' || opt === 'rootpath' || opt === 'errorReporting') {
+                    options[opt] = tag.dataset[opt];
                 } else {
-                    location.hash = '1';
+                    try {
+                        options[opt] = JSON.parse(tag.dataset[opt]);
+                    } catch (ignore) {
+                    }
                 }
             }
-        }, -100);
-    }
-
-    var loc = location.href + '#';
-    loc = loc.slice(0, loc.indexOf('#'));
-    if (url.slice(0, 5) === 'file:') {
-        var el = ecui.$('LESS-FILE-PROTOCOL');
-        if (!el) {
-            el = document.createElement('IFRAME'),
-            el.id = 'LESS-FILE-PROTOCOL';
-            el.style.cssText = 'position:absolute;width:1px;height:1px;left:-10px;top:-10px';
-            document.body.appendChild(el);
-        }
-        urls.push([url, callback]);
-        if (urls.length === 1) {
-            doLocal();
-        }
-        return;
-    }
-    var xhr = getXMLHttpRequest();
-    var async = options.isFileProtocol ? options.fileAsync : options.async;
-
-    if (typeof(xhr.overrideMimeType) === 'function') {
-        xhr.overrideMimeType('text/css');
-    }
-    logger.debug("XHR: Getting '" + url + "'");
-    xhr.open('GET', url, async);
-    xhr.setRequestHeader('Accept', type || 'text/x-less, text/css; q=0.9, */*; q=0.5');
-    xhr.send(null);
-
-    function handleResponse(xhr, callback, errback) {
-        if (xhr.status >= 200 && xhr.status < 300) {
-            callback(xhr.responseText,
-                xhr.getResponseHeader("Last-Modified"));
-        } else if (typeof(errback) === 'function') {
-            errback(xhr.status, url);
         }
     }
 
-    if (options.isFileProtocol && !options.fileAsync) {
-        if (xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300)) {
-            callback(xhr.responseText);
-        } else {
-            errback(xhr.status, url);
+    function initOptions(options) {
+        // use options from the current script tag data attribues
+        addDataAttr(
+            options,
+            document.currentScript || (function () {
+                var scripts = document.getElementsByTagName('script');
+                return scripts[scripts.length - 1];
+            }())
+        );
+
+        if (options.isFileProtocol === undefined) {
+            options.isFileProtocol = /^(file|(chrome|safari)(-extension)?|resource|qrc|app):/.test(location.protocol);
         }
-    } else if (async && xhr.readyState != 4) {
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
-                handleResponse(xhr, callback, errback);
-            }
-        };
-    } else {
-        handleResponse(xhr, callback, errback);
-    }
-};
-FileManager.prototype.supports = function(filename, currentDirectory, options, environment) {
-    return true;
-};
 
-FileManager.prototype.clearFileCache = function() {
-    fileCache = {};
-};
+        // Interval between watch polls
+        options.poll = options.poll || (options.isFileProtocol ? 1000 : 1500);
 
-FileManager.prototype.loadFile = function loadFile(filename, currentDirectory, options, environment, callback) {
-    if (currentDirectory && !this.isPathAbsolute(filename)) {
-        filename = currentDirectory + filename;
-    }
+        options.env = options.env || (location.hostname === '127.0.0.1' ||
+            location.hostname === '0.0.0.0' ||
+            location.hostname === 'localhost' ||
+            (location.port && location.port.length > 0) ||
+            options.isFileProtocol ? 'development' : 'production');
 
-    options = options || {};
-
-    // sheet may be set to the stylesheet for the initial load or a collection of properties including
-    // some context variables for imports
-    var hrefParts = this.extractUrlParts(filename, window.location.href);
-    var href      = hrefParts.url;
-
-    if (options.useFileCache && fileCache[href]) {
-        try {
-            var lessText = fileCache[href];
-            callback(null, { contents: lessText, filename: href, webInfo: { lastModified: new Date() }});
-        } catch (e) {
-            callback({filename: href, message: "Error loading file " + href + " error was " + e.message});
+        var dumpLineNumbers = /!dumpLineNumbers:(comments|mediaquery|all)/.exec(location.hash);
+        if (dumpLineNumbers) {
+            options.dumpLineNumbers = dumpLineNumbers[1];
         }
-        return;
+
+        if (options.useFileCache === undefined) {
+            options.useFileCache = true;
+        }
+
+        if (options.onReady === undefined) {
+            options.onReady = true;
+        }
     }
 
-    this.doXHR(href, options.mime, function doXHRCallback(data, lastModified) {
-        // per file cache
-        fileCache[href] = data;
+    var defines = {
+        2: [
+            function (require, module) {
+                /**
+                 * Kicks off less and compiles any stylesheets
+                 * used in the browser distributed version of less
+                 * to kick-start less using the browser api
+                 */
+                /*global window */
 
-        // Use remote copy (re-parse)
-        callback(null, { contents: data, filename: href, webInfo: { lastModified: lastModified }});
-    }, function doXHRError(status, url) {
-        callback({ type: 'File', message: "'" + url + "' wasn't found (" + status + ")", href: href });
-    });
-};
+                var options = window.less || {};
+                initOptions(options);
 
-return FileManager;
-};
+                var less = module.exports = require("./index")(options);
 
-},{"../less/environment/abstract-file-manager.js":14}],7:[function(require,module,exports){
+                ecui.dom.ready(function () {
+                    if (/!watch/.test(location.hash)) {
+                        less.watch();
+                    }
+
+                    less.registerStylesheets();
+                    less.pageLoadFinished = less.refresh(less.env === 'development');
+                });
+            },
+            {"./index":7}
+        ],
+        5: [
+            function (require,module,exports){
+                module.exports = function (window, less, options) {
+
+                    function errorHTML(e, rootHref) {
+                        var id = 'less-error-message:' + extractId(rootHref || "");
+                        var template = '<li><label>{line}</label><pre class="{class}">{content}</pre></li>';
+                        var elem = window.document.createElement('div'), timer, content, errors = [];
+                        var filename = e.filename || rootHref;
+                        var filenameNoPath = filename.match(/([^\/]+(\?.*)?)$/)[1];
+
+                        elem.id        = id;
+                        elem.className = "less-error-message";
+
+                        content = '<h3>'  + (e.type || "Syntax") + "Error: " + (e.message || 'There is an error in your .less file') +
+                            '</h3>' + '<p>in <a href="' + filename   + '">' + filenameNoPath + "</a> ";
+
+                        var errorline = function (e, i, classname) {
+                            if (e.extract[i] !== undefined) {
+                                errors.push(template.replace(/\{line\}/, (parseInt(e.line, 10) || 0) + (i - 1))
+                                    .replace(/\{class\}/, classname)
+                                    .replace(/\{content\}/, e.extract[i]));
+                            }
+                        };
+
+                        if (e.extract) {
+                            errorline(e, 0, '');
+                            errorline(e, 1, 'line');
+                            errorline(e, 2, '');
+                            content += 'on line ' + e.line + ', column ' + (e.column + 1) + ':</p>' +
+                                '<ul>' + errors.join('') + '</ul>';
+                        }
+                        if (e.stack && (e.extract || options.logLevel >= 4)) {
+                            content += '<br/>Stack Trace</br />' + e.stack.split('\n').slice(1).join('<br/>');
+                        }
+                        elem.innerHTML = content;
+
+                        // CSS for error messages
+                        ecui.dom.createStyleSheet([
+                            '.less-error-message ul, .less-error-message li {',
+                            'list-style-type: none;',
+                            'margin-right: 15px;',
+                            'padding: 4px 0;',
+                            'margin: 0;',
+                            '}',
+                            '.less-error-message label {',
+                            'font-size: 12px;',
+                            'margin-right: 15px;',
+                            'padding: 4px 0;',
+                            'color: #cc7777;',
+                            '}',
+                            '.less-error-message pre {',
+                            'color: #dd6666;',
+                            'padding: 4px 0;',
+                            'margin: 0;',
+                            'display: inline-block;',
+                            '}',
+                            '.less-error-message pre.line {',
+                            'color: #ff0000;',
+                            '}',
+                            '.less-error-message h3 {',
+                            'font-size: 20px;',
+                            'font-weight: bold;',
+                            'padding: 15px 0 5px 0;',
+                            'margin: 0;',
+                            '}',
+                            '.less-error-message a {',
+                            'color: #10a',
+                            '}',
+                            '.less-error-message .error {',
+                            'color: red;',
+                            'font-weight: bold;',
+                            'padding-bottom: 2px;',
+                            'border-bottom: 1px dashed red;',
+                            '}'
+                        ].join('\n'));
+
+                        elem.style.cssText = [
+                            "font-family: Arial, sans-serif",
+                            "border: 1px solid #e00",
+                            "background-color: #eee",
+                            "border-radius: 5px",
+                            "-webkit-border-radius: 5px",
+                            "-moz-border-radius: 5px",
+                            "color: #e00",
+                            "padding: 15px",
+                            "margin-bottom: 15px"
+                        ].join(';');
+
+                        if (options.env === 'development') {
+                            timer = setInterval(function () {
+                                var document = window.document,
+                                    body = document.body;
+                                if (body) {
+                                    if (document.getElementById(id)) {
+                                        body.replaceChild(elem, document.getElementById(id));
+                                    } else {
+                                        body.insertBefore(elem, body.firstChild);
+                                    }
+                                    clearInterval(timer);
+                                }
+                            }, 10);
+                        }
+                    }
+
+                    function error(e, rootHref) {
+                        if (!options.errorReporting || options.errorReporting === "html") {
+                            errorHTML(e, rootHref);
+                        } else if (options.errorReporting === "console") {
+                            errorConsole(e, rootHref);
+                        } else if (typeof options.errorReporting === 'function') {
+                            options.errorReporting("add", e, rootHref);
+                        }
+                    }
+
+                    function removeErrorHTML(path) {
+                        var node = window.document.getElementById('less-error-message:' + extractId(path));
+                        if (node) {
+                            node.parentNode.removeChild(node);
+                        }
+                    }
+
+                    function removeErrorConsole(path) {
+                        //no action
+                    }
+
+                    function removeError(path) {
+                        if (!options.errorReporting || options.errorReporting === "html") {
+                            removeErrorHTML(path);
+                        } else if (options.errorReporting === "console") {
+                            removeErrorConsole(path);
+                        } else if (typeof options.errorReporting === 'function') {
+                            options.errorReporting("remove", path);
+                        }
+                    }
+
+                    function errorConsole(e, rootHref) {
+                        var template = '{line} {content}';
+                        var filename = e.filename || rootHref;
+                        var errors = [];
+                        var content = (e.type || "Syntax") + "Error: " + (e.message || 'There is an error in your .less file') +
+                            " in " + filename + " ";
+
+                        var errorline = function (e, i, classname) {
+                            if (e.extract[i] !== undefined) {
+                                errors.push(template.replace(/\{line\}/, (parseInt(e.line, 10) || 0) + (i - 1))
+                                    .replace(/\{class\}/, classname)
+                                    .replace(/\{content\}/, e.extract[i]));
+                            }
+                        };
+
+                        if (e.extract) {
+                            errorline(e, 0, '');
+                            errorline(e, 1, 'line');
+                            errorline(e, 2, '');
+                            content += 'on line ' + e.line + ', column ' + (e.column + 1) + ':\n' +
+                                errors.join('\n');
+                        }
+                        if (e.stack && (e.extract || options.logLevel >= 4)) {
+                            content += '\nStack Trace\n' + e.stack;
+                        }
+                        less.logger.error(content);
+                    }
+
+                    return {
+                        add: error,
+                        remove: removeError
+                    };
+                };
+            },
+            {}
+        ],
+        6:[
+            function (require,module,exports){
+                /*global window, XMLHttpRequest */
+
+                module.exports = function (options, logger) {
+
+                var AbstractFileManager = require("../less/environment/abstract-file-manager.js");
+
+                var fileCache = {};
+
+                var FileManager = function () {
+                };
+
+                FileManager.prototype = new AbstractFileManager();
+
+                FileManager.prototype.alwaysMakePathsAbsolute = function alwaysMakePathsAbsolute() {
+                    return true;
+                };
+                FileManager.prototype.join = function join(basePath, laterPath) {
+                    if (!basePath) {
+                        return laterPath;
+                    }
+                    return this.extractUrlParts(laterPath, basePath).path;
+                };
+
+                FileManager.prototype.doXHR = function doXHR(url, type, callback, errback) {
+                    ecui.io.ajax(url, {
+                        onsuccess: function (text, xhr) {
+                            callback(text, xhr.getResponseHeader("Last-Modified"));
+                        },
+                        onerror: errback ? function (xhr) {
+                            errback(xhr.status, url);
+                        } : undefined
+                    });
+                };
+                FileManager.prototype.supports = function (filename, currentDirectory, options, environment) {
+                    return true;
+                };
+
+                FileManager.prototype.clearFileCache = function () {
+                    fileCache = {};
+                };
+
+                FileManager.prototype.loadFile = function loadFile(filename, currentDirectory, options, environment, callback) {
+                    if (currentDirectory && !this.isPathAbsolute(filename)) {
+                        filename = currentDirectory + filename;
+                    }
+
+                    options = options || {};
+
+                    // sheet may be set to the stylesheet for the initial load or a collection of properties including
+                    // some context variables for imports
+                    var hrefParts = this.extractUrlParts(filename, window.location.href);
+                    var href      = hrefParts.url;
+
+                    if (options.useFileCache && fileCache[href]) {
+                        try {
+                            var lessText = fileCache[href];
+                            callback(null, { contents: lessText, filename: href, webInfo: { lastModified: new Date() }});
+                        } catch (e) {
+                            callback({filename: href, message: "Error loading file " + href + " error was " + e.message});
+                        }
+                        return;
+                    }
+
+                    this.doXHR(href, options.mime, function doXHRCallback(data, lastModified) {
+                        // per file cache
+                        fileCache[href] = data;
+
+                        // Use remote copy (re-parse)
+                        callback(null, { contents: data, filename: href, webInfo: { lastModified: lastModified }});
+                    }, function doXHRError(status, url) {
+                        callback({ type: 'File', message: "'" + url + "' wasn't found (" + status + ")", href: href });
+                    });
+                };
+
+                return FileManager;
+                };
+            },
+            {"../less/environment/abstract-file-manager.js":14}
+        ],
+        7:[function (require,module,exports){
 //
 // index.js
 // Should expose the additional browser functions on to the less object
 //
-var addDataAttr = require("./utils").addDataAttr,
-    browser = require("./browser");
-
-module.exports = function(window, options) {
-var document = window.document;
+module.exports = function (options) {
 var less = require('../less')();
 module.exports = less;
 less.options = options;
@@ -539,7 +552,39 @@ less.FileManager = FileManager;
 
 require("./log-listener")(less, options);
 var errors = require("./error-reporting")(window, less, options);
-var cache = less.cache = options.cache || require("./cache")(window, options, less.logger);
+var cache = less.cache =
+        options.cache ||
+        function (options, logger) {
+            var cache = null;
+            if (options.env !== 'development') {
+                cache = localStorage;
+            }
+            return {
+                setCSS: function (path, lastModified, styles) {
+                    if (cache) {
+                        logger.info('saving ' + path + ' to cache.');
+                        try {
+                            cache.setItem(path, styles);
+                            cache.setItem(path + ':timestamp', lastModified);
+                        } catch (e) {
+                            //TODO - could do with adding more robust error handling
+                            logger.error('failed to save "' + path + '" to local storage for caching.');
+                        }
+                    }
+                },
+                getCSS: function (path, webInfo) {
+                    var css       = cache && cache.getItem(path),
+                        timestamp = cache && cache.getItem(path + ':timestamp');
+
+                    if (timestamp && webInfo.lastModified &&
+                        (new Date(webInfo.lastModified).valueOf() ===
+                            new Date(timestamp).valueOf())) {
+                        // Use local copy
+                        return css;
+                    }
+                }
+            };
+        }(options, less.logger);
 
 //Setup user functions
 if (options.functions) {
@@ -555,20 +600,10 @@ function postProcessCSS(styles) {
     return styles;
 }
 
-function clone(obj) {
-    var cloned = {};
-    for(var prop in obj) {
-        if (obj.hasOwnProperty(prop)) {
-            cloned[prop] = obj[prop];
-        }
-    }
-    return cloned;
-}
-
 // only really needed for phantom
 function bind(func, thisArg) {
     var curryArgs = Array.prototype.slice.call(arguments, 2);
-    return function() {
+    return function () {
         var args = curryArgs.concat(Array.prototype.slice.call(arguments, 0));
         return func.apply(thisArg, args);
     };
@@ -581,7 +616,7 @@ function loadStyles(modifyVars) {
     for (var i = 0; i < styles.length; i++) {
         style = styles[i];
         if (style.type.match(typePattern)) {
-            var instanceOptions = clone(options);
+            var instanceOptions = ecui.util.extend({}, options);
             instanceOptions.modifyVars = modifyVars;
             var lessText = style.innerHTML || '';
             instanceOptions.filename = document.location.href.replace(/#.*$/, '');
@@ -589,7 +624,7 @@ function loadStyles(modifyVars) {
             /*jshint loopfunc:true */
             // use closure to store current style
             less.render(lessText, instanceOptions,
-                    bind(function(style, e, result) {
+                    bind(function (style, e, result) {
                         if (e) {
                             errors.add(e, "inline");
                         } else {
@@ -607,7 +642,7 @@ function loadStyles(modifyVars) {
 
 function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
 
-    var instanceOptions = clone(options);
+    var instanceOptions = ecui.util.extend({}, options);
     addDataAttr(instanceOptions, sheet);
     instanceOptions.mime = sheet.type;
 
@@ -647,7 +682,7 @@ function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
         errors.remove(path);
 
         instanceOptions.rootFileInfo = newFileInfo;
-        less.render(data, instanceOptions, function(e, result) {
+        less.render(data, instanceOptions, function (e, result) {
             if (e) {
                 e.href = path;
                 callback(e);
@@ -661,7 +696,7 @@ function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
         });
     }
 
-    fileManager.loadFile(sheet.href, null, instanceOptions, environment, function(e, loadedFile) {
+    fileManager.loadFile(sheet.href, null, instanceOptions, environment, function (e, loadedFile) {
         if (e) {
             callback(e);
             return;
@@ -692,7 +727,7 @@ function initRunningMode(){
                     if (e) {
                         errors.add(e, e.href || sheet.href);
                     } else if (css) {
-                        browser.createCSS(window.document, css, sheet);
+                        ecui.dom.createStyleSheet(css);
                     }
                 });
             }
@@ -717,27 +752,23 @@ less.unwatch = function () {clearInterval(less.watchTimer); this.watchMode = fal
 //
 // Get all <link> tags with the 'rel' attribute set to "stylesheet/less"
 //
-less.registerStylesheets = function() {
-    return new Promise(function(resolve, reject) {
-        var links = document.getElementsByTagName('link');
-        less.sheets = [];
+less.registerStylesheets = function () {
+    var links = document.getElementsByTagName('link');
+    less.sheets = [];
 
-        for (var i = 0; i < links.length; i++) {
-            if (links[i].rel === 'stylesheet/less' || (links[i].rel.match(/stylesheet/) &&
-                (links[i].type.match(typePattern)))) {
-                less.sheets.push(links[i]);
-            }
+    for (var i = 0; i < links.length; i++) {
+        if (links[i].rel === 'stylesheet/less' || (links[i].rel.match(/stylesheet/) &&
+            (links[i].type.match(typePattern)))) {
+            less.sheets.push(links[i]);
         }
-
-        resolve();
-    });
+    }
 };
 
 //
 // With this function, it's possible to alter variables and re-render
 // CSS without reloading less-files
 //
-less.modifyVars = function(record) {
+less.modifyVars = function (record) {
     return less.refresh(true, record, false);
 };
 
@@ -745,46 +776,38 @@ less.refresh = function (reload, modifyVars, clearFileCache) {
     if ((reload || clearFileCache) && clearFileCache !== false) {
         fileManager.clearFileCache();
     }
-    return new Promise(function (resolve, reject) {
-        var startTime, endTime, totalMilliseconds;
-        startTime = endTime = new Date();
 
-        loadStyleSheets(function (e, css, _, sheet, webInfo) {
-            if (e) {
-                errors.add(e, e.href || sheet.href);
-                reject(e);
-                return;
-            }
-            if (webInfo.local) {
-                less.logger.info("loading " + sheet.href + " from cache.");
-            } else {
-                less.logger.info("rendered " + sheet.href + " successfully.");
-            }
-            browser.createCSS(window.document, css, sheet);
-            less.logger.info("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms');
-            if (webInfo.remaining === 0) {
-                totalMilliseconds = new Date() - startTime;
-                less.logger.info("less has finished. css generated in " + totalMilliseconds + 'ms');
-                resolve({
-                    startTime: startTime,
-                    endTime: endTime,
-                    totalMilliseconds: totalMilliseconds,
-                    sheets: less.sheets.length
-                });
-            }
-            endTime = new Date();
-        }, reload, modifyVars);
+    var startTime, endTime, totalMilliseconds;
+    startTime = endTime = new Date();
 
-        loadStyles(modifyVars);
-    });
+    loadStyleSheets(function (e, css, _, sheet, webInfo) {
+        if (e) {
+            errors.add(e, e.href || sheet.href);
+            return;
+        }
+        if (webInfo.local) {
+            less.logger.info("loading " + sheet.href + " from cache.");
+        } else {
+            less.logger.info("rendered " + sheet.href + " successfully.");
+        }
+        ecui.dom.createStyleSheet(css);
+        less.logger.info("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms');
+        if (webInfo.remaining === 0) {
+            totalMilliseconds = new Date() - startTime;
+            less.logger.info("less has finished. css generated in " + totalMilliseconds + 'ms');
+        }
+        endTime = new Date();
+    }, reload, modifyVars);
+
+    loadStyles(modifyVars);
 };
 
 less.refreshStyles = loadStyles;
     return less;
 };
 
-},{"../less":29,"./browser":3,"./cache":4,"./error-reporting":5,"./file-manager":6,"./log-listener":8,"./utils":9}],8:[function(require,module,exports){
-module.exports = function(less, options) {
+},{"../less":29,"./error-reporting":5,"./file-manager":6,"./log-listener":8}],8:[function (require,module,exports){
+module.exports = function (less, options) {
 
     var logLevel_debug = 4,
         logLevel_info = 3,
@@ -801,22 +824,22 @@ module.exports = function(less, options) {
 
     if (!options.loggers) {
         options.loggers = [{
-            debug: function(msg) {
+            debug: function (msg) {
                 if (options.logLevel >= logLevel_debug) {
                   //  console.log(msg);
                 }
             },
-            info: function(msg) {
+            info: function (msg) {
                 if (options.logLevel >= logLevel_info) {
                   //  console.log(msg);
                 }
             },
-            warn: function(msg) {
+            warn: function (msg) {
                 if (options.logLevel >= logLevel_warn) {
                     console.warn(msg);
                 }
             },
-            error: function(msg) {
+            error: function (msg) {
                 if (options.logLevel >= logLevel_error) {
                     console.error(msg);
                 }
@@ -828,33 +851,7 @@ module.exports = function(less, options) {
     }
 };
 
-},{}],9:[function(require,module,exports){
-module.exports = {
-    extractId: function(href) {
-        return href.replace(/^[a-z-]+:\/+?[^\/]+/, '' )  // Remove protocol & domain
-            .replace(/[\?\&]livereload=\w+/, '' )  // Remove LiveReload cachebuster
-            .replace(/^\//,                  '' )  // Remove root /
-            .replace(/\.[a-zA-Z]+$/,         '' )  // Remove simple extension
-            .replace(/[^\.\w-]+/g,           '-')  // Replace illegal characters
-            .replace(/\./g,                  ':'); // Replace dots with colons(for valid id)
-    },
-    addDataAttr: function(options, tag) {
-        for (var opt in tag.dataset) {
-            if (tag.dataset.hasOwnProperty(opt)) {
-                if (opt === "env" || opt === "dumpLineNumbers" || opt === "rootpath" || opt === "errorReporting") {
-                    options[opt] = tag.dataset[opt];
-                } else {
-                    try {
-                        options[opt] = JSON.parse(tag.dataset[opt]);
-                    }
-                    catch(_) {}
-                }
-            }
-        }
-    }
-};
-
-},{}],10:[function(require,module,exports){
+},{}],10:[function (require,module,exports){
 var contexts = {};
 module.exports = contexts;
 
@@ -891,7 +888,7 @@ var parseCopyProperties = [
     'pluginManager'     // Used as the plugin manager for the session
 ];
 
-contexts.Parse = function(options) {
+contexts.Parse = function (options) {
     copyFromOriginal(options, this, parseCopyProperties);
 
     if (typeof this.paths === "string") { this.paths = [this.paths]; }
@@ -911,7 +908,7 @@ var evalCopyProperties = [
     'importantScope'  // used to bubble up !important statements
     ];
 
-contexts.Eval = function(options, frames) {
+contexts.Eval = function (options, frames) {
     copyFromOriginal(options, this, evalCopyProperties);
 
     this.frames = frames || [];
@@ -937,7 +934,7 @@ contexts.Eval.prototype.isPathRelative = function (path) {
     return !/^(?:[a-z-]+:|\/)/i.test(path);
 };
 
-contexts.Eval.prototype.normalizePath = function( path ) {
+contexts.Eval.prototype.normalizePath = function ( path ) {
     var
       segments = path.split("/").reverse(),
       segment;
@@ -966,187 +963,8 @@ contexts.Eval.prototype.normalizePath = function( path ) {
 
 //todo - do the same for the toCSS ?
 
-},{}],11:[function(require,module,exports){
-module.exports = {
-    'aliceblue':'#f0f8ff',
-    'antiquewhite':'#faebd7',
-    'aqua':'#00ffff',
-    'aquamarine':'#7fffd4',
-    'azure':'#f0ffff',
-    'beige':'#f5f5dc',
-    'bisque':'#ffe4c4',
-    'black':'#000000',
-    'blanchedalmond':'#ffebcd',
-    'blue':'#0000ff',
-    'blueviolet':'#8a2be2',
-    'brown':'#a52a2a',
-    'burlywood':'#deb887',
-    'cadetblue':'#5f9ea0',
-    'chartreuse':'#7fff00',
-    'chocolate':'#d2691e',
-    'coral':'#ff7f50',
-    'cornflowerblue':'#6495ed',
-    'cornsilk':'#fff8dc',
-    'crimson':'#dc143c',
-    'cyan':'#00ffff',
-    'darkblue':'#00008b',
-    'darkcyan':'#008b8b',
-    'darkgoldenrod':'#b8860b',
-    'darkgray':'#a9a9a9',
-    'darkgrey':'#a9a9a9',
-    'darkgreen':'#006400',
-    'darkkhaki':'#bdb76b',
-    'darkmagenta':'#8b008b',
-    'darkolivegreen':'#556b2f',
-    'darkorange':'#ff8c00',
-    'darkorchid':'#9932cc',
-    'darkred':'#8b0000',
-    'darksalmon':'#e9967a',
-    'darkseagreen':'#8fbc8f',
-    'darkslateblue':'#483d8b',
-    'darkslategray':'#2f4f4f',
-    'darkslategrey':'#2f4f4f',
-    'darkturquoise':'#00ced1',
-    'darkviolet':'#9400d3',
-    'deeppink':'#ff1493',
-    'deepskyblue':'#00bfff',
-    'dimgray':'#696969',
-    'dimgrey':'#696969',
-    'dodgerblue':'#1e90ff',
-    'firebrick':'#b22222',
-    'floralwhite':'#fffaf0',
-    'forestgreen':'#228b22',
-    'fuchsia':'#ff00ff',
-    'gainsboro':'#dcdcdc',
-    'ghostwhite':'#f8f8ff',
-    'gold':'#ffd700',
-    'goldenrod':'#daa520',
-    'gray':'#808080',
-    'grey':'#808080',
-    'green':'#008000',
-    'greenyellow':'#adff2f',
-    'honeydew':'#f0fff0',
-    'hotpink':'#ff69b4',
-    'indianred':'#cd5c5c',
-    'indigo':'#4b0082',
-    'ivory':'#fffff0',
-    'khaki':'#f0e68c',
-    'lavender':'#e6e6fa',
-    'lavenderblush':'#fff0f5',
-    'lawngreen':'#7cfc00',
-    'lemonchiffon':'#fffacd',
-    'lightblue':'#add8e6',
-    'lightcoral':'#f08080',
-    'lightcyan':'#e0ffff',
-    'lightgoldenrodyellow':'#fafad2',
-    'lightgray':'#d3d3d3',
-    'lightgrey':'#d3d3d3',
-    'lightgreen':'#90ee90',
-    'lightpink':'#ffb6c1',
-    'lightsalmon':'#ffa07a',
-    'lightseagreen':'#20b2aa',
-    'lightskyblue':'#87cefa',
-    'lightslategray':'#778899',
-    'lightslategrey':'#778899',
-    'lightsteelblue':'#b0c4de',
-    'lightyellow':'#ffffe0',
-    'lime':'#00ff00',
-    'limegreen':'#32cd32',
-    'linen':'#faf0e6',
-    'magenta':'#ff00ff',
-    'maroon':'#800000',
-    'mediumaquamarine':'#66cdaa',
-    'mediumblue':'#0000cd',
-    'mediumorchid':'#ba55d3',
-    'mediumpurple':'#9370d8',
-    'mediumseagreen':'#3cb371',
-    'mediumslateblue':'#7b68ee',
-    'mediumspringgreen':'#00fa9a',
-    'mediumturquoise':'#48d1cc',
-    'mediumvioletred':'#c71585',
-    'midnightblue':'#191970',
-    'mintcream':'#f5fffa',
-    'mistyrose':'#ffe4e1',
-    'moccasin':'#ffe4b5',
-    'navajowhite':'#ffdead',
-    'navy':'#000080',
-    'oldlace':'#fdf5e6',
-    'olive':'#808000',
-    'olivedrab':'#6b8e23',
-    'orange':'#ffa500',
-    'orangered':'#ff4500',
-    'orchid':'#da70d6',
-    'palegoldenrod':'#eee8aa',
-    'palegreen':'#98fb98',
-    'paleturquoise':'#afeeee',
-    'palevioletred':'#d87093',
-    'papayawhip':'#ffefd5',
-    'peachpuff':'#ffdab9',
-    'peru':'#cd853f',
-    'pink':'#ffc0cb',
-    'plum':'#dda0dd',
-    'powderblue':'#b0e0e6',
-    'purple':'#800080',
-    'rebeccapurple':'#663399',
-    'red':'#ff0000',
-    'rosybrown':'#bc8f8f',
-    'royalblue':'#4169e1',
-    'saddlebrown':'#8b4513',
-    'salmon':'#fa8072',
-    'sandybrown':'#f4a460',
-    'seagreen':'#2e8b57',
-    'seashell':'#fff5ee',
-    'sienna':'#a0522d',
-    'silver':'#c0c0c0',
-    'skyblue':'#87ceeb',
-    'slateblue':'#6a5acd',
-    'slategray':'#708090',
-    'slategrey':'#708090',
-    'snow':'#fffafa',
-    'springgreen':'#00ff7f',
-    'steelblue':'#4682b4',
-    'tan':'#d2b48c',
-    'teal':'#008080',
-    'thistle':'#d8bfd8',
-    'tomato':'#ff6347',
-    'turquoise':'#40e0d0',
-    'violet':'#ee82ee',
-    'wheat':'#f5deb3',
-    'white':'#ffffff',
-    'whitesmoke':'#f5f5f5',
-    'yellow':'#ffff00',
-    'yellowgreen':'#9acd32'
-};
-},{}],12:[function(require,module,exports){
-module.exports = {
-    colors: require("./colors"),
-    unitConversions: require("./unit-conversions")
-};
-
-},{"./colors":11,"./unit-conversions":13}],13:[function(require,module,exports){
-module.exports = {
-    length: {
-        'm': 1,
-        'cm': 0.01,
-        'mm': 0.001,
-        'in': 0.0254,
-        'px': 0.0254 / 96,
-        'pt': 0.0254 / 72,
-        'pc': 0.0254 / 72 * 12
-    },
-    duration: {
-        's': 1,
-        'ms': 0.001
-    },
-    angle: {
-        'rad': 1 / (2 * Math.PI),
-        'deg': 1 / 360,
-        'grad': 1 / 400,
-        'turn': 1
-    }
-};
-},{}],14:[function(require,module,exports){
-var abstractFileManager = function() {
+},{}],14:[function (require,module,exports){
+var abstractFileManager = function () {
 };
 
 abstractFileManager.prototype.getPath = function (filename) {
@@ -1164,23 +982,23 @@ abstractFileManager.prototype.getPath = function (filename) {
     return filename.slice(0, j + 1);
 };
 
-abstractFileManager.prototype.tryAppendLessExtension = function(path) {
+abstractFileManager.prototype.tryAppendLessExtension = function (path) {
     return /(\.[a-z]*$)|([\?;].*)$/.test(path) ? path : path + '.less';
 };
 
-abstractFileManager.prototype.supportsSync = function() {
+abstractFileManager.prototype.supportsSync = function () {
     return false;
 };
 
-abstractFileManager.prototype.alwaysMakePathsAbsolute = function() {
+abstractFileManager.prototype.alwaysMakePathsAbsolute = function () {
     return false;
 };
 
-abstractFileManager.prototype.isPathAbsolute = function(filename) {
+abstractFileManager.prototype.isPathAbsolute = function (filename) {
     return (/^(?:[a-z-]+:|\/|\\)/i).test(filename);
 };
 
-abstractFileManager.prototype.join = function(basePath, laterPath) {
+abstractFileManager.prototype.join = function (basePath, laterPath) {
     if (!basePath) {
         return laterPath;
     }
@@ -1266,9 +1084,9 @@ abstractFileManager.prototype.extractUrlParts = function extractUrlParts(url, ba
 
 module.exports = abstractFileManager;
 
-},{}],15:[function(require,module,exports){
+},{}],15:[function (require,module,exports){
 var logger = require("../logger");
-var environment = function(externalEnvironment, fileManagers) {
+var environment = function (externalEnvironment, fileManagers) {
     this.fileManagers = fileManagers || [];
     externalEnvironment = externalEnvironment || {};
 
@@ -1319,449 +1137,7 @@ environment.prototype.clearFileManagers = function () {
 
 module.exports = environment;
 
-},{"../logger":31}],16:[function(require,module,exports){
-var Color = require("../tree/color"),
-    functionRegistry = require("./function-registry");
-
-// Color Blending
-// ref: http://www.w3.org/TR/compositing-1
-
-function colorBlend(mode, color1, color2) {
-    var ab = color1.alpha, cb, // backdrop
-        as = color2.alpha, cs, // source
-        ar, cr, r = [];        // result
-
-    ar = as + ab * (1 - as);
-    for (var i = 0; i < 3; i++) {
-        cb = color1.rgb[i] / 255;
-        cs = color2.rgb[i] / 255;
-        cr = mode(cb, cs);
-        if (ar) {
-            cr = (as * cs + ab * (cb -
-                  as * (cb + cs - cr))) / ar;
-        }
-        r[i] = cr * 255;
-    }
-
-    return new Color(r, ar);
-}
-
-var colorBlendModeFunctions = {
-    multiply: function(cb, cs) {
-        return cb * cs;
-    },
-    screen: function(cb, cs) {
-        return cb + cs - cb * cs;
-    },
-    overlay: function(cb, cs) {
-        cb *= 2;
-        return (cb <= 1) ?
-            colorBlendModeFunctions.multiply(cb, cs) :
-            colorBlendModeFunctions.screen(cb - 1, cs);
-    },
-    softlight: function(cb, cs) {
-        var d = 1, e = cb;
-        if (cs > 0.5) {
-            e = 1;
-            d = (cb > 0.25) ? Math.sqrt(cb)
-                : ((16 * cb - 12) * cb + 4) * cb;
-        }
-        return cb - (1 - 2 * cs) * e * (d - cb);
-    },
-    hardlight: function(cb, cs) {
-        return colorBlendModeFunctions.overlay(cs, cb);
-    },
-    difference: function(cb, cs) {
-        return Math.abs(cb - cs);
-    },
-    exclusion: function(cb, cs) {
-        return cb + cs - 2 * cb * cs;
-    },
-
-    // non-w3c functions:
-    average: function(cb, cs) {
-        return (cb + cs) / 2;
-    },
-    negation: function(cb, cs) {
-        return 1 - Math.abs(cb + cs - 1);
-    }
-};
-
-for (var f in colorBlendModeFunctions) {
-    if (colorBlendModeFunctions.hasOwnProperty(f)) {
-        colorBlend[f] = colorBlend.bind(null, colorBlendModeFunctions[f]);
-    }
-}
-
-functionRegistry.addMultiple(colorBlend);
-
-},{"../tree/color":47,"./function-registry":21}],17:[function(require,module,exports){
-var Dimension = require("../tree/dimension"),
-    Color = require("../tree/color"),
-    Quoted = require("../tree/quoted"),
-    Anonymous = require("../tree/anonymous"),
-    functionRegistry = require("./function-registry"),
-    colorFunctions;
-
-function clamp(val) {
-    return Math.min(1, Math.max(0, val));
-}
-function hsla(color) {
-    return colorFunctions.hsla(color.h, color.s, color.l, color.a);
-}
-function number(n) {
-    if (n instanceof Dimension) {
-        return parseFloat(n.unit.is('%') ? n.value / 100 : n.value);
-    } else if (typeof(n) === 'number') {
-        return n;
-    } else {
-        throw {
-            type: "Argument",
-            message: "color functions take numbers as parameters"
-        };
-    }
-}
-function scaled(n, size) {
-    if (n instanceof Dimension && n.unit.is('%')) {
-        return parseFloat(n.value * size / 100);
-    } else {
-        return number(n);
-    }
-}
-colorFunctions = {
-    rgb: function (r, g, b) {
-        return colorFunctions.rgba(r, g, b, 1.0);
-    },
-    rgba: function (r, g, b, a) {
-        var rgb = [r, g, b].map(function (c) { return scaled(c, 255); });
-        a = number(a);
-        return new Color(rgb, a);
-    },
-    hsl: function (h, s, l) {
-        return colorFunctions.hsla(h, s, l, 1.0);
-    },
-    hsla: function (h, s, l, a) {
-        function hue(h) {
-            h = h < 0 ? h + 1 : (h > 1 ? h - 1 : h);
-            if      (h * 6 < 1) { return m1 + (m2 - m1) * h * 6; }
-            else if (h * 2 < 1) { return m2; }
-            else if (h * 3 < 2) { return m1 + (m2 - m1) * (2 / 3 - h) * 6; }
-            else                { return m1; }
-        }
-
-        h = (number(h) % 360) / 360;
-        s = clamp(number(s)); l = clamp(number(l)); a = clamp(number(a));
-
-        var m2 = l <= 0.5 ? l * (s + 1) : l + s - l * s;
-        var m1 = l * 2 - m2;
-
-        return colorFunctions.rgba(hue(h + 1 / 3) * 255,
-            hue(h)       * 255,
-            hue(h - 1 / 3) * 255,
-            a);
-    },
-
-    hsv: function(h, s, v) {
-        return colorFunctions.hsva(h, s, v, 1.0);
-    },
-
-    hsva: function(h, s, v, a) {
-        h = ((number(h) % 360) / 360) * 360;
-        s = number(s); v = number(v); a = number(a);
-
-        var i, f;
-        i = Math.floor((h / 60) % 6);
-        f = (h / 60) - i;
-
-        var vs = [v,
-            v * (1 - s),
-            v * (1 - f * s),
-            v * (1 - (1 - f) * s)];
-        var perm = [[0, 3, 1],
-            [2, 0, 1],
-            [1, 0, 3],
-            [1, 2, 0],
-            [3, 1, 0],
-            [0, 1, 2]];
-
-        return colorFunctions.rgba(vs[perm[i][0]] * 255,
-            vs[perm[i][1]] * 255,
-            vs[perm[i][2]] * 255,
-            a);
-    },
-
-    hue: function (color) {
-        return new Dimension(color.toHSL().h);
-    },
-    saturation: function (color) {
-        return new Dimension(color.toHSL().s * 100, '%');
-    },
-    lightness: function (color) {
-        return new Dimension(color.toHSL().l * 100, '%');
-    },
-    hsvhue: function(color) {
-        return new Dimension(color.toHSV().h);
-    },
-    hsvsaturation: function (color) {
-        return new Dimension(color.toHSV().s * 100, '%');
-    },
-    hsvvalue: function (color) {
-        return new Dimension(color.toHSV().v * 100, '%');
-    },
-    red: function (color) {
-        return new Dimension(color.rgb[0]);
-    },
-    green: function (color) {
-        return new Dimension(color.rgb[1]);
-    },
-    blue: function (color) {
-        return new Dimension(color.rgb[2]);
-    },
-    alpha: function (color) {
-        return new Dimension(color.toHSL().a);
-    },
-    luma: function (color) {
-        return new Dimension(color.luma() * color.alpha * 100, '%');
-    },
-    luminance: function (color) {
-        var luminance =
-            (0.2126 * color.rgb[0] / 255) +
-                (0.7152 * color.rgb[1] / 255) +
-                (0.0722 * color.rgb[2] / 255);
-
-        return new Dimension(luminance * color.alpha * 100, '%');
-    },
-    saturate: function (color, amount) {
-        // filter: saturate(3.2);
-        // should be kept as is, so check for color
-        if (!color.rgb) {
-            return null;
-        }
-        var hsl = color.toHSL();
-
-        hsl.s += amount.value / 100;
-        hsl.s = clamp(hsl.s);
-        return hsla(hsl);
-    },
-    desaturate: function (color, amount) {
-        var hsl = color.toHSL();
-
-        hsl.s -= amount.value / 100;
-        hsl.s = clamp(hsl.s);
-        return hsla(hsl);
-    },
-    lighten: function (color, amount) {
-        var hsl = color.toHSL();
-
-        hsl.l += amount.value / 100;
-        hsl.l = clamp(hsl.l);
-        return hsla(hsl);
-    },
-    darken: function (color, amount) {
-        var hsl = color.toHSL();
-
-        hsl.l -= amount.value / 100;
-        hsl.l = clamp(hsl.l);
-        return hsla(hsl);
-    },
-    fadein: function (color, amount) {
-        var hsl = color.toHSL();
-
-        hsl.a += amount.value / 100;
-        hsl.a = clamp(hsl.a);
-        return hsla(hsl);
-    },
-    fadeout: function (color, amount) {
-        var hsl = color.toHSL();
-
-        hsl.a -= amount.value / 100;
-        hsl.a = clamp(hsl.a);
-        return hsla(hsl);
-    },
-    fade: function (color, amount) {
-        var hsl = color.toHSL();
-
-        hsl.a = amount.value / 100;
-        hsl.a = clamp(hsl.a);
-        return hsla(hsl);
-    },
-    spin: function (color, amount) {
-        var hsl = color.toHSL();
-        var hue = (hsl.h + amount.value) % 360;
-
-        hsl.h = hue < 0 ? 360 + hue : hue;
-
-        return hsla(hsl);
-    },
-    //
-    // Copyright (c) 2006-2009 Hampton Catlin, Nathan Weizenbaum, and Chris Eppstein
-    // http://sass-lang.com
-    //
-    mix: function (color1, color2, weight) {
-        if (!weight) {
-            weight = new Dimension(50);
-        }
-        var p = weight.value / 100.0;
-        var w = p * 2 - 1;
-        var a = color1.toHSL().a - color2.toHSL().a;
-
-        var w1 = (((w * a == -1) ? w : (w + a) / (1 + w * a)) + 1) / 2.0;
-        var w2 = 1 - w1;
-
-        var rgb = [color1.rgb[0] * w1 + color2.rgb[0] * w2,
-            color1.rgb[1] * w1 + color2.rgb[1] * w2,
-            color1.rgb[2] * w1 + color2.rgb[2] * w2];
-
-        var alpha = color1.alpha * p + color2.alpha * (1 - p);
-
-        return new Color(rgb, alpha);
-    },
-    greyscale: function (color) {
-        return colorFunctions.desaturate(color, new Dimension(100));
-    },
-    contrast: function (color, dark, light, threshold) {
-        // filter: contrast(3.2);
-        // should be kept as is, so check for color
-        if (!color.rgb) {
-            return null;
-        }
-        if (typeof light === 'undefined') {
-            light = colorFunctions.rgba(255, 255, 255, 1.0);
-        }
-        if (typeof dark === 'undefined') {
-            dark = colorFunctions.rgba(0, 0, 0, 1.0);
-        }
-        //Figure out which is actually light and dark!
-        if (dark.luma() > light.luma()) {
-            var t = light;
-            light = dark;
-            dark = t;
-        }
-        if (typeof threshold === 'undefined') {
-            threshold = 0.43;
-        } else {
-            threshold = number(threshold);
-        }
-        if (color.luma() < threshold) {
-            return light;
-        } else {
-            return dark;
-        }
-    },
-    argb: function (color) {
-        return new Anonymous(color.toARGB());
-    },
-    color: function(c) {
-        if ((c instanceof Quoted) &&
-            (/^#([a-f0-9]{6}|[a-f0-9]{3})$/i.test(c.value))) {
-            return new Color(c.value.slice(1));
-        }
-        if ((c instanceof Color) || (c = Color.fromKeyword(c.value))) {
-            c.value = undefined;
-            return c;
-        }
-        throw {
-            type:    "Argument",
-            message: "argument must be a color keyword or 3/6 digit hex e.g. #FFF"
-        };
-    },
-    tint: function(color, amount) {
-        return colorFunctions.mix(colorFunctions.rgb(255, 255, 255), color, amount);
-    },
-    shade: function(color, amount) {
-        return colorFunctions.mix(colorFunctions.rgb(0, 0, 0), color, amount);
-    }
-};
-functionRegistry.addMultiple(colorFunctions);
-
-},{"../tree/anonymous":43,"../tree/color":47,"../tree/dimension":53,"../tree/quoted":70,"./function-registry":21}],18:[function(require,module,exports){
-module.exports = function(environment) {
-    var Quoted = require("../tree/quoted"),
-        URL = require("../tree/url"),
-        functionRegistry = require("./function-registry"),
-        fallback = function(functionThis, node) {
-            return new URL(node, functionThis.index, functionThis.currentFileInfo).eval(functionThis.context);
-        },
-        logger = require('../logger');
-
-    functionRegistry.add("data-uri", function(mimetypeNode, filePathNode) {
-
-        if (!filePathNode) {
-            filePathNode = mimetypeNode;
-            mimetypeNode = null;
-        }
-
-        var mimetype = mimetypeNode && mimetypeNode.value;
-        var filePath = filePathNode.value;
-        var currentFileInfo = this.currentFileInfo;
-        var currentDirectory = currentFileInfo.relativeUrls ?
-            currentFileInfo.currentDirectory : currentFileInfo.entryPath;
-
-        var fragmentStart = filePath.indexOf('#');
-        var fragment = '';
-        if (fragmentStart !== -1) {
-            fragment = filePath.slice(fragmentStart);
-            filePath = filePath.slice(0, fragmentStart);
-        }
-
-        var fileManager = environment.getFileManager(filePath, currentDirectory, this.context, environment, true);
-
-        if (!fileManager) {
-            return fallback(this, filePathNode);
-        }
-
-        var useBase64 = false;
-
-        // detect the mimetype if not given
-        if (!mimetypeNode) {
-
-            mimetype = environment.mimeLookup(filePath);
-
-            if (mimetype === "image/svg+xml") {
-                useBase64 = false;
-            } else {
-                // use base 64 unless it's an ASCII or UTF-8 format
-                var charset = environment.charsetLookup(mimetype);
-                useBase64 = ['US-ASCII', 'UTF-8'].indexOf(charset) < 0;
-            }
-            if (useBase64) { mimetype += ';base64'; }
-        }
-        else {
-            useBase64 = /;base64$/.test(mimetype);
-        }
-
-        var fileSync = fileManager.loadFileSync(filePath, currentDirectory, this.context, environment);
-        if (!fileSync.contents) {
-            logger.warn("Skipped data-uri embedding of " + filePath + " because file not found");
-            return fallback(this, filePathNode || mimetypeNode);
-        }
-        var buf = fileSync.contents;
-        if (useBase64 && !environment.encodeBase64) {
-            return fallback(this, filePathNode);
-        }
-
-        buf = useBase64 ? environment.encodeBase64(buf) : encodeURIComponent(buf);
-
-        var uri = "data:" + mimetype + ',' + buf + fragment;
-
-        // IE8 cannot handle a data-uri larger than 32,768 characters. If this is exceeded
-        // and the --ieCompat flag is enabled, return a normal url() instead.
-        var DATA_URI_MAX = 32768;
-        if (uri.length >= DATA_URI_MAX) {
-
-            if (this.context.ieCompat !== false) {
-                logger.warn("Skipped data-uri embedding of " + filePath + " because its size (" + uri.length +
-                    " characters) exceeds IE8-safe " + DATA_URI_MAX + " characters!");
-
-                return fallback(this, filePathNode || mimetypeNode);
-            }
-        }
-
-        return new URL(new Quoted('"' + uri + '"', uri, false, this.index, this.currentFileInfo), this.index, this.currentFileInfo);
-    });
-};
-
-},{"../logger":31,"../tree/quoted":70,"../tree/url":77,"./function-registry":21}],19:[function(require,module,exports){
+},{"../logger":31}],19:[function (require,module,exports){
 var Keyword = require("../tree/keyword"),
     functionRegistry = require("./function-registry");
 
@@ -1790,47 +1166,47 @@ functionRegistry.add("default", defaultFunc.eval.bind(defaultFunc));
 
 module.exports = defaultFunc;
 
-},{"../tree/keyword":62,"./function-registry":21}],20:[function(require,module,exports){
+},{"../tree/keyword":62,"./function-registry":21}],20:[function (require,module,exports){
 var functionRegistry = require("./function-registry");
 
-var functionCaller = function(name, context, index, currentFileInfo) {
+var functionCaller = function (name, context, index, currentFileInfo) {
     this.name = name.toLowerCase();
     this.func = functionRegistry.get(this.name);
     this.index = index;
     this.context = context;
     this.currentFileInfo = currentFileInfo;
 };
-functionCaller.prototype.isValid = function() {
+functionCaller.prototype.isValid = function () {
     return Boolean(this.func);
 };
-functionCaller.prototype.call = function(args) {
+functionCaller.prototype.call = function (args) {
     return this.func.apply(this, args);
 };
 
 module.exports = functionCaller;
 
-},{"./function-registry":21}],21:[function(require,module,exports){
+},{"./function-registry":21}],21:[function (require,module,exports){
 module.exports = {
     _data: {},
-    add: function(name, func) {
+    add: function (name, func) {
         if (this._data.hasOwnProperty(name)) {
             //TODO warn
         }
         this._data[name] = func;
     },
-    addMultiple: function(functions) {
+    addMultiple: function (functions) {
         Object.keys(functions).forEach(
-            function(name) {
+            function (name) {
                 this.add(name, functions[name]);
             }.bind(this));
     },
-    get: function(name) {
+    get: function (name) {
         return this._data[name];
     }
 };
 
-},{}],22:[function(require,module,exports){
-module.exports = function(environment) {
+},{}],22:[function (require,module,exports){
+module.exports = function (environment) {
     var functions = {
         functionRegistry: require("./function-registry"),
         functionCaller: require("./function-caller")
@@ -1838,345 +1214,11 @@ module.exports = function(environment) {
 
     //register functions
     require("./default");
-    require("./color");
-    require("./color-blending");
-    require("./data-uri")(environment);
-    require("./math");
-    require("./number");
-    require("./string");
-    require("./svg")(environment);
-    require("./types");
 
     return functions;
 };
 
-},{"./color":17,"./color-blending":16,"./data-uri":18,"./default":19,"./function-caller":20,"./function-registry":21,"./math":23,"./number":24,"./string":25,"./svg":26,"./types":27}],23:[function(require,module,exports){
-var Dimension = require("../tree/dimension"),
-    functionRegistry = require("./function-registry");
-
-var mathFunctions = {
-    // name,  unit
-    ceil:  null,
-    floor: null,
-    sqrt:  null,
-    abs:   null,
-    tan:   "",
-    sin:   "",
-    cos:   "",
-    atan:  "rad",
-    asin:  "rad",
-    acos:  "rad"
-};
-
-function _math(fn, unit, n) {
-    if (!(n instanceof Dimension)) {
-        throw { type: "Argument", message: "argument must be a number" };
-    }
-    if (unit == null) {
-        unit = n.unit;
-    } else {
-        n = n.unify();
-    }
-    return new Dimension(fn(parseFloat(n.value)), unit);
-}
-
-for (var f in mathFunctions) {
-    if (mathFunctions.hasOwnProperty(f)) {
-        mathFunctions[f] = _math.bind(null, Math[f], mathFunctions[f]);
-    }
-}
-
-mathFunctions.round = function (n, f) {
-    var fraction = typeof(f) === "undefined" ? 0 : f.value;
-    return _math(function(num) { return num.toFixed(fraction); }, null, n);
-};
-
-functionRegistry.addMultiple(mathFunctions);
-
-},{"../tree/dimension":53,"./function-registry":21}],24:[function(require,module,exports){
-var Dimension = require("../tree/dimension"),
-    Anonymous = require("../tree/anonymous"),
-    functionRegistry = require("./function-registry");
-
-var minMax = function (isMin, args) {
-    args = Array.prototype.slice.call(args);
-    switch(args.length) {
-        case 0: throw { type: "Argument", message: "one or more arguments required" };
-    }
-    var i, j, current, currentUnified, referenceUnified, unit, unitStatic, unitClone,
-        order  = [], // elems only contains original argument values.
-        values = {}; // key is the unit.toString() for unified Dimension values,
-    // value is the index into the order array.
-    for (i = 0; i < args.length; i++) {
-        current = args[i];
-        if (!(current instanceof Dimension)) {
-            if(Array.isArray(args[i].value)) {
-                Array.prototype.push.apply(args, Array.prototype.slice.call(args[i].value));
-            }
-            continue;
-        }
-        currentUnified = current.unit.toString() === "" && unitClone !== undefined ? new Dimension(current.value, unitClone).unify() : current.unify();
-        unit = currentUnified.unit.toString() === "" && unitStatic !== undefined ? unitStatic : currentUnified.unit.toString();
-        unitStatic = unit !== "" && unitStatic === undefined || unit !== "" && order[0].unify().unit.toString() === "" ? unit : unitStatic;
-        unitClone = unit !== "" && unitClone === undefined ? current.unit.toString() : unitClone;
-        j = values[""] !== undefined && unit !== "" && unit === unitStatic ? values[""] : values[unit];
-        if (j === undefined) {
-            if(unitStatic !== undefined && unit !== unitStatic) {
-                throw{ type: "Argument", message: "incompatible types" };
-            }
-            values[unit] = order.length;
-            order.push(current);
-            continue;
-        }
-        referenceUnified = order[j].unit.toString() === "" && unitClone !== undefined ? new Dimension(order[j].value, unitClone).unify() : order[j].unify();
-        if ( isMin && currentUnified.value < referenceUnified.value ||
-            !isMin && currentUnified.value > referenceUnified.value) {
-            order[j] = current;
-        }
-    }
-    if (order.length == 1) {
-        return order[0];
-    }
-    args = order.map(function (a) { return a.toCSS(this.context); }).join(this.context.compress ? "," : ", ");
-    return new Anonymous((isMin ? "min" : "max") + "(" + args + ")");
-};
-functionRegistry.addMultiple({
-    min: function () {
-        return minMax(true, arguments);
-    },
-    max: function () {
-        return minMax(false, arguments);
-    },
-    convert: function (val, unit) {
-        return val.convertTo(unit.value);
-    },
-    pi: function () {
-        return new Dimension(Math.PI);
-    },
-    mod: function(a, b) {
-        return new Dimension(a.value % b.value, a.unit);
-    },
-    pow: function(x, y) {
-        if (typeof x === "number" && typeof y === "number") {
-            x = new Dimension(x);
-            y = new Dimension(y);
-        } else if (!(x instanceof Dimension) || !(y instanceof Dimension)) {
-            throw { type: "Argument", message: "arguments must be numbers" };
-        }
-
-        return new Dimension(Math.pow(x.value, y.value), x.unit);
-    },
-    percentage: function (n) {
-        return new Dimension(n.value * 100, '%');
-    }
-});
-
-},{"../tree/anonymous":43,"../tree/dimension":53,"./function-registry":21}],25:[function(require,module,exports){
-var Quoted = require("../tree/quoted"),
-    Anonymous = require("../tree/anonymous"),
-    JavaScript = require("../tree/javascript"),
-    functionRegistry = require("./function-registry");
-
-functionRegistry.addMultiple({
-    e: function (str) {
-        return new Anonymous(str instanceof JavaScript ? str.evaluated : str.value);
-    },
-    escape: function (str) {
-        return new Anonymous(
-            encodeURI(str.value).replace(/=/g, "%3D").replace(/:/g, "%3A").replace(/#/g, "%23").replace(/;/g, "%3B")
-                .replace(/\(/g, "%28").replace(/\)/g, "%29"));
-    },
-    replace: function (string, pattern, replacement, flags) {
-        var result = string.value;
-
-        result = result.replace(new RegExp(pattern.value, flags ? flags.value : ''), replacement.value);
-        return new Quoted(string.quote || '', result, string.escaped);
-    },
-    '%': function (string /* arg, arg, ...*/) {
-        var args = Array.prototype.slice.call(arguments, 1),
-            result = string.value;
-
-        for (var i = 0; i < args.length; i++) {
-            /*jshint loopfunc:true */
-            result = result.replace(/%[sda]/i, function(token) {
-                var value = token.match(/s/i) ? args[i].value : args[i].toCSS();
-                return token.match(/[A-Z]$/) ? encodeURIComponent(value) : value;
-            });
-        }
-        result = result.replace(/%%/g, '%');
-        return new Quoted(string.quote || '', result, string.escaped);
-    }
-});
-
-},{"../tree/anonymous":43,"../tree/javascript":60,"../tree/quoted":70,"./function-registry":21}],26:[function(require,module,exports){
-module.exports = function(environment) {
-    var Dimension = require("../tree/dimension"),
-        Color = require("../tree/color"),
-        Expression = require("../tree/expression"),
-        Quoted = require("../tree/quoted"),
-        URL = require("../tree/url"),
-        functionRegistry = require("./function-registry");
-
-    functionRegistry.add("svg-gradient", function(direction) {
-
-        function throwArgumentDescriptor() {
-            throw { type: "Argument",
-                message: "svg-gradient expects direction, start_color [start_position], [color position,]...," +
-                    " end_color [end_position]" };
-        }
-
-        if (arguments.length < 3) {
-            throwArgumentDescriptor();
-        }
-        var stops = Array.prototype.slice.call(arguments, 1),
-            gradientDirectionSvg,
-            gradientType = "linear",
-            rectangleDimension = 'x="0" y="0" width="1" height="1"',
-            renderEnv = {compress: false},
-            returner,
-            directionValue = direction.toCSS(renderEnv),
-            i, color, position, positionValue, alpha;
-
-        switch (directionValue) {
-            case "to bottom":
-                gradientDirectionSvg = 'x1="0%" y1="0%" x2="0%" y2="100%"';
-                break;
-            case "to right":
-                gradientDirectionSvg = 'x1="0%" y1="0%" x2="100%" y2="0%"';
-                break;
-            case "to bottom right":
-                gradientDirectionSvg = 'x1="0%" y1="0%" x2="100%" y2="100%"';
-                break;
-            case "to top right":
-                gradientDirectionSvg = 'x1="0%" y1="100%" x2="100%" y2="0%"';
-                break;
-            case "ellipse":
-            case "ellipse at center":
-                gradientType = "radial";
-                gradientDirectionSvg = 'cx="50%" cy="50%" r="75%"';
-                rectangleDimension = 'x="-50" y="-50" width="101" height="101"';
-                break;
-            default:
-                throw { type: "Argument", message: "svg-gradient direction must be 'to bottom', 'to right'," +
-                    " 'to bottom right', 'to top right' or 'ellipse at center'" };
-        }
-        returner = '<?xml version="1.0" ?>' +
-            '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="100%" height="100%" viewBox="0 0 1 1" preserveAspectRatio="none">' +
-            '<' + gradientType + 'Gradient id="gradient" gradientUnits="userSpaceOnUse" ' + gradientDirectionSvg + '>';
-
-        for (i = 0; i < stops.length; i+= 1) {
-            if (stops[i] instanceof Expression) {
-                color = stops[i].value[0];
-                position = stops[i].value[1];
-            } else {
-                color = stops[i];
-                position = undefined;
-            }
-
-            if (!(color instanceof Color) || (!((i === 0 || i + 1 === stops.length) && position === undefined) && !(position instanceof Dimension))) {
-                throwArgumentDescriptor();
-            }
-            positionValue = position ? position.toCSS(renderEnv) : i === 0 ? "0%" : "100%";
-            alpha = color.alpha;
-            returner += '<stop offset="' + positionValue + '" stop-color="' + color.toRGB() + '"' + (alpha < 1 ? ' stop-opacity="' + alpha + '"' : '') + '/>';
-        }
-        returner += '</' + gradientType + 'Gradient>' +
-            '<rect ' + rectangleDimension + ' fill="url(#gradient)" /></svg>';
-
-        returner = encodeURIComponent(returner);
-
-        returner = "data:image/svg+xml," + returner;
-        return new URL(new Quoted("'" + returner + "'", returner, false, this.index, this.currentFileInfo), this.index, this.currentFileInfo);
-    });
-};
-
-},{"../tree/color":47,"../tree/dimension":53,"../tree/expression":56,"../tree/quoted":70,"../tree/url":77,"./function-registry":21}],27:[function(require,module,exports){
-var Keyword = require("../tree/keyword"),
-    DetachedRuleset = require("../tree/detached-ruleset"),
-    Dimension = require("../tree/dimension"),
-    Color = require("../tree/color"),
-    Quoted = require("../tree/quoted"),
-    Anonymous = require("../tree/anonymous"),
-    URL = require("../tree/url"),
-    Operation = require("../tree/operation"),
-    functionRegistry = require("./function-registry");
-
-var isa = function (n, Type) {
-    return (n instanceof Type) ? Keyword.True : Keyword.False;
-    },
-    isunit = function (n, unit) {
-        if (unit === undefined) {
-            throw { type: "Argument", message: "missing the required second argument to isunit." };
-        }
-        unit = typeof unit.value === "string" ? unit.value : unit;
-        if (typeof unit !== "string") {
-            throw { type: "Argument", message: "Second argument to isunit should be a unit or a string." };
-        }
-        return (n instanceof Dimension) && n.unit.is(unit) ? Keyword.True : Keyword.False;
-    };
-functionRegistry.addMultiple({
-    isruleset: function (n) {
-        return isa(n, DetachedRuleset);
-    },
-    iscolor: function (n) {
-        return isa(n, Color);
-    },
-    isnumber: function (n) {
-        return isa(n, Dimension);
-    },
-    isstring: function (n) {
-        return isa(n, Quoted);
-    },
-    iskeyword: function (n) {
-        return isa(n, Keyword);
-    },
-    isurl: function (n) {
-        return isa(n, URL);
-    },
-    ispixel: function (n) {
-        return isunit(n, 'px');
-    },
-    ispercentage: function (n) {
-        return isunit(n, '%');
-    },
-    isem: function (n) {
-        return isunit(n, 'em');
-    },
-    isunit: isunit,
-    unit: function (val, unit) {
-        if(!(val instanceof Dimension)) {
-            throw { type: "Argument",
-                message: "the first argument to unit must be a number" +
-                    (val instanceof Operation ? ". Have you forgotten parenthesis?" : "") };
-        }
-        if (unit) {
-            if (unit instanceof Keyword) {
-                unit = unit.value;
-            } else {
-                unit = unit.toCSS();
-            }
-        } else {
-            unit = "";
-        }
-        return new Dimension(val.value, unit);
-    },
-    "get-unit": function (n) {
-        return new Anonymous(n.unit);
-    },
-    extract: function(values, index) {
-        index = index.value - 1; // (1-based index)
-        // handle non-array values as an array of length 1
-        // return 'undefined' if index is invalid
-        return Array.isArray(values.value) ?
-            values.value[index] : Array(values)[index];
-    },
-    length: function(values) {
-        var n = Array.isArray(values.value) ? values.value.length : 1;
-        return new Dimension(n);
-    }
-});
-
-},{"../tree/anonymous":43,"../tree/color":47,"../tree/detached-ruleset":52,"../tree/dimension":53,"../tree/keyword":62,"../tree/operation":68,"../tree/quoted":70,"../tree/url":77,"./function-registry":21}],28:[function(require,module,exports){
+},{"./default":19,"./function-caller":20,"./function-registry":21}],28:[function (require,module,exports){
 var contexts = require("./contexts"),
     Parser = require('./parser/parser');
 
@@ -2310,7 +1352,10 @@ module.exports = function(environment, fileManagers) {
 
     var less = {
         version: [2, 3, 1],
-        data: require('./data'),
+        data: {
+            colors: colors,
+            unitConversions: unitConversions
+        },
         tree: require('./tree'),
         Environment: (Environment = require("./environment/environment")),
         AbstractFileManager: require("./environment/abstract-file-manager"),
@@ -2335,7 +1380,7 @@ module.exports = function(environment, fileManagers) {
     return less;
 };
 
-},{"./contexts":10,"./data":12,"./environment/abstract-file-manager":14,"./environment/environment":15,"./functions":22,"./import-manager":28,"./less-error":30,"./logger":31,"./parse":33,"./parse-tree":32,"./parser/parser":36,"./plugin-manager":37,"./render":38,"./source-map-builder":39,"./source-map-output":40,"./transform-tree":41,"./tree":59,"./utils":80,"./visitors":84}],30:[function(require,module,exports){
+},{"./contexts":10,"./environment/abstract-file-manager":14,"./environment/environment":15,"./functions":22,"./import-manager":28,"./less-error":30,"./logger":31,"./parse":33,"./parse-tree":32,"./parser/parser":36,"./plugin-manager":37,"./render":38,"./source-map-builder":39,"./source-map-output":40,"./transform-tree":41,"./tree":59,"./utils":80,"./visitors":84}],30:[function(require,module,exports){
 var utils = require("./utils");
 
 var LessError = module.exports = function LessError(e, importManager, currentFilename) {
@@ -5133,8 +4178,7 @@ Call.prototype.genCSS = function (context, output) {
 module.exports = Call;
 
 },{"../functions/function-caller":20,"./node":67}],47:[function(require,module,exports){
-var Node = require("./node"),
-    colors = require("../data/colors");
+var Node = require("./node");
 
 //
 // RGB Colors - #ff0014, #eee
@@ -5320,7 +4364,7 @@ Color.fromKeyword = function(keyword) {
 };
 module.exports = Color;
 
-},{"../data/colors":11,"./node":67}],48:[function(require,module,exports){
+},{"./node":67}],48:[function(require,module,exports){
 var Node = require("./node");
 
 var Combinator = function (value) {
@@ -5475,7 +4519,6 @@ module.exports = DetachedRuleset;
 
 },{"../contexts":10,"./node":67}],53:[function(require,module,exports){
 var Node = require("./node"),
-    unitConversions = require("../data/unit-conversions"),
     Unit = require("./unit"),
     Color = require("./color");
 
@@ -5630,7 +4673,7 @@ Dimension.prototype.convertTo = function (conversions) {
 };
 module.exports = Dimension;
 
-},{"../data/unit-conversions":13,"./color":47,"./node":67,"./unit":76}],54:[function(require,module,exports){
+},{"./color":47,"./node":67,"./unit":76}],54:[function(require,module,exports){
 var Node = require("./node"),
     Ruleset = require("./ruleset");
 
@@ -7883,8 +6926,7 @@ UnicodeDescriptor.prototype.type = "UnicodeDescriptor";
 module.exports = UnicodeDescriptor;
 
 },{"./node":67}],76:[function(require,module,exports){
-var Node = require("./node"),
-    unitConversions = require("../data/unit-conversions");
+var Node = require("./node");
 
 var Unit = function (numerator, denominator, backupUnit) {
     this.numerator = numerator ? numerator.slice(0).sort() : [];
@@ -8002,7 +7044,7 @@ Unit.prototype.cancel = function () {
 };
 module.exports = Unit;
 
-},{"../data/unit-conversions":13,"./node":67}],77:[function(require,module,exports){
+},{"./node":67}],77:[function(require,module,exports){
 var Node = require("./node");
 
 var URL = function (val, index, currentFileInfo, isEvald) {
@@ -9347,452 +8389,9 @@ Visitor.prototype = {
 };
 module.exports = Visitor;
 
-},{"../tree":59}],88:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canMutationObserver = typeof window !== 'undefined'
-    && window.MutationObserver;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    var queue = [];
-
-    if (canMutationObserver) {
-        var hiddenDiv = document.createElement("div");
-        var observer = new MutationObserver(function () {
-            var queueList = queue.slice();
-            queue.length = 0;
-            queueList.forEach(function (fn) {
-                fn();
-            });
-        });
-
-        observer.observe(hiddenDiv, { attributes: true });
-
-        return function nextTick(fn) {
-            if (!queue.length) {
-                hiddenDiv.setAttribute('yes', 'no');
-            }
-            queue.push(fn);
-        };
-    }
-
-    if (canPost) {
-        window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],89:[function(require,module,exports){
-'use strict';
-
-var asap = require('asap')
-
-module.exports = Promise;
-function Promise(fn) {
-  if (typeof this !== 'object') throw new TypeError('Promises must be constructed via new')
-  if (typeof fn !== 'function') throw new TypeError('not a function')
-  var state = null
-  var value = null
-  var deferreds = []
-  var self = this
-
-  this.then = function(onFulfilled, onRejected) {
-    return new self.constructor(function(resolve, reject) {
-      handle(new Handler(onFulfilled, onRejected, resolve, reject))
-    })
-  }
-
-  function handle(deferred) {
-    if (state === null) {
-      deferreds.push(deferred)
-      return
-    }
-    asap(function() {
-      var cb = state ? deferred.onFulfilled : deferred.onRejected
-      if (cb === null) {
-        (state ? deferred.resolve : deferred.reject)(value)
-        return
-      }
-      var ret
-      try {
-        ret = cb(value)
-      }
-      catch (e) {
-        deferred.reject(e)
-        return
-      }
-      deferred.resolve(ret)
-    })
-  }
-
-  function resolve(newValue) {
-    try { //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
-      if (newValue === self) throw new TypeError('A promise cannot be resolved with itself.')
-      if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
-        var then = newValue.then
-        if (typeof then === 'function') {
-          doResolve(then.bind(newValue), resolve, reject)
-          return
-        }
-      }
-      state = true
-      value = newValue
-      finale()
-    } catch (e) { reject(e) }
-  }
-
-  function reject(newValue) {
-    state = false
-    value = newValue
-    finale()
-  }
-
-  function finale() {
-    for (var i = 0, len = deferreds.length; i < len; i++)
-      handle(deferreds[i])
-    deferreds = null
-  }
-
-  doResolve(fn, resolve, reject)
-}
-
-
-function Handler(onFulfilled, onRejected, resolve, reject){
-  this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null
-  this.onRejected = typeof onRejected === 'function' ? onRejected : null
-  this.resolve = resolve
-  this.reject = reject
-}
-
-/**
- * Take a potentially misbehaving resolver function and make sure
- * onFulfilled and onRejected are only called once.
- *
- * Makes no guarantees about asynchrony.
- */
-function doResolve(fn, onFulfilled, onRejected) {
-  var done = false;
-  try {
-    fn(function (value) {
-      if (done) return
-      done = true
-      onFulfilled(value)
-    }, function (reason) {
-      if (done) return
-      done = true
-      onRejected(reason)
-    })
-  } catch (ex) {
-    if (done) return
-    done = true
-    onRejected(ex)
-  }
-}
-
-},{"asap":91}],90:[function(require,module,exports){
-'use strict';
-
-//This file contains the ES6 extensions to the core Promises/A+ API
-
-var Promise = require('./core.js')
-var asap = require('asap')
-
-module.exports = Promise
-
-/* Static Functions */
-
-function ValuePromise(value) {
-  this.then = function (onFulfilled) {
-    if (typeof onFulfilled !== 'function') return this
-    return new Promise(function (resolve, reject) {
-      asap(function () {
-        try {
-          resolve(onFulfilled(value))
-        } catch (ex) {
-          reject(ex);
-        }
-      })
-    })
-  }
-}
-ValuePromise.prototype = Promise.prototype
-
-var TRUE = new ValuePromise(true)
-var FALSE = new ValuePromise(false)
-var NULL = new ValuePromise(null)
-var UNDEFINED = new ValuePromise(undefined)
-var ZERO = new ValuePromise(0)
-var EMPTYSTRING = new ValuePromise('')
-
-Promise.resolve = function (value) {
-  if (value instanceof Promise) return value
-
-  if (value === null) return NULL
-  if (value === undefined) return UNDEFINED
-  if (value === true) return TRUE
-  if (value === false) return FALSE
-  if (value === 0) return ZERO
-  if (value === '') return EMPTYSTRING
-
-  if (typeof value === 'object' || typeof value === 'function') {
-    try {
-      var then = value.then
-      if (typeof then === 'function') {
-        return new Promise(then.bind(value))
-      }
-    } catch (ex) {
-      return new Promise(function (resolve, reject) {
-        reject(ex)
-      })
-    }
-  }
-
-  return new ValuePromise(value)
-}
-
-Promise.all = function (arr) {
-  var args = Array.prototype.slice.call(arr)
-
-  return new Promise(function (resolve, reject) {
-    if (args.length === 0) return resolve([])
-    var remaining = args.length
-    function res(i, val) {
-      try {
-        if (val && (typeof val === 'object' || typeof val === 'function')) {
-          var then = val.then
-          if (typeof then === 'function') {
-            then.call(val, function (val) { res(i, val) }, reject)
-            return
-          }
-        }
-        args[i] = val
-        if (--remaining === 0) {
-          resolve(args);
-        }
-      } catch (ex) {
-        reject(ex)
-      }
-    }
-    for (var i = 0; i < args.length; i++) {
-      res(i, args[i])
-    }
-  })
-}
-
-Promise.reject = function (value) {
-  return new Promise(function (resolve, reject) { 
-    reject(value);
-  });
-}
-
-Promise.race = function (values) {
-  return new Promise(function (resolve, reject) { 
-    values.forEach(function(value){
-      Promise.resolve(value).then(resolve, reject);
-    })
-  });
-}
-
-/* Prototype Methods */
-
-Promise.prototype['catch'] = function (onRejected) {
-  return this.then(null, onRejected);
-}
-
-},{"./core.js":89,"asap":91}],91:[function(require,module,exports){
-(function (process){
-
-// Use the fastest possible means to execute a task in a future turn
-// of the event loop.
-
-// linked list of tasks (single, with head node)
-var head = {task: void 0, next: null};
-var tail = head;
-var flushing = false;
-var requestFlush = void 0;
-var isNodeJS = false;
-
-function flush() {
-    /* jshint loopfunc: true */
-
-    while (head.next) {
-        head = head.next;
-        var task = head.task;
-        head.task = void 0;
-        var domain = head.domain;
-
-        if (domain) {
-            head.domain = void 0;
-            domain.enter();
-        }
-
-        try {
-            task();
-
-        } catch (e) {
-            if (isNodeJS) {
-                // In node, uncaught exceptions are considered fatal errors.
-                // Re-throw them synchronously to interrupt flushing!
-
-                // Ensure continuation if the uncaught exception is suppressed
-                // listening "uncaughtException" events (as domains does).
-                // Continue in next event to avoid tick recursion.
-                if (domain) {
-                    domain.exit();
-                }
-                setTimeout(flush, 0);
-                if (domain) {
-                    domain.enter();
-                }
-
-                throw e;
-
-            } else {
-                // In browsers, uncaught exceptions are not fatal.
-                // Re-throw them asynchronously to avoid slow-downs.
-                setTimeout(function() {
-                   throw e;
-                }, 0);
-            }
-        }
-
-        if (domain) {
-            domain.exit();
-        }
-    }
-
-    flushing = false;
-}
-
-if (typeof process !== "undefined" && process.nextTick) {
-    // Node.js before 0.9. Note that some fake-Node environments, like the
-    // Mocha test runner, introduce a `process` global without a `nextTick`.
-    isNodeJS = true;
-
-    requestFlush = function () {
-        process.nextTick(flush);
-    };
-
-} else if (typeof setImmediate === "function") {
-    // In IE10, Node.js 0.9+, or https://github.com/NobleJS/setImmediate
-    if (typeof window !== "undefined") {
-        requestFlush = setImmediate.bind(window, flush);
-    } else {
-        requestFlush = function () {
-            setImmediate(flush);
-        };
-    }
-
-} else if (typeof MessageChannel !== "undefined") {
-    // modern browsers
-    // http://www.nonblocking.io/2011/06/windownexttick.html
-    var channel = new MessageChannel();
-    channel.port1.onmessage = flush;
-    requestFlush = function () {
-        channel.port2.postMessage(0);
-    };
-
-} else {
-    // old browsers
-    requestFlush = function () {
-        setTimeout(flush, 0);
-    };
-}
-
-function asap(task) {
-    tail = tail.next = {
-        task: task,
-        domain: isNodeJS && process.domain,
-        next: null
-    };
-
-    if (!flushing) {
-        flushing = true;
-        requestFlush();
-    }
-};
-
-module.exports = asap;
-
-
-}).call(this,require('_process'))
-},{"_process":88}],92:[function(require,module,exports){
-// should work in any browser without browserify
-
-if (typeof Promise.prototype.done !== 'function') {
-  Promise.prototype.done = function (onFulfilled, onRejected) {
-    var self = arguments.length ? this.then.apply(this, arguments) : this
-    self.then(null, function (err) {
-      setTimeout(function () {
-        throw err
-      }, 0)
-    })
-  }
-}
-},{}],"promise/polyfill.js":[function(require,module,exports){
-// not "use strict" so we can declare global "Promise"
-
-var asap = require('asap');
-
-if (typeof Promise === 'undefined') {
-  Promise = require('./lib/core.js')
-  require('./lib/es6-extensions.js')
-}
-
-require('./polyfill-done.js');
-
-},{"./lib/core.js":89,"./lib/es6-extensions.js":90,"./polyfill-done.js":92,"asap":91}]},{},[2])(2)
-});
+},{"../tree":59}]
+    },
+    modules = {};
+
+    window.less = getModule(2);
+}());
