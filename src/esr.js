@@ -801,7 +801,12 @@
             }
 
             core.addEventListener(control, 'dispose', function () {
-                util.remove(autoRender[value[1]], this);
+                for (var i = 0, item; item = autoRender[value[1]][i]; i++) {
+                    if (item[0] === this) {
+                        autoRender[value[1]].splice(i, 1);
+                        break;
+                    }
+                }
             });
 
             if (context[value[1]] !== undefined) {
