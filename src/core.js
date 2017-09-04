@@ -1255,6 +1255,7 @@
                     item.ondispose = util.blank;
                 }
                 core.triggerEvent(item, 'dispose');
+                core.removeControlListeners(item);
             });
         },
 
@@ -1730,7 +1731,7 @@
          *
          * @param {ecui.ui.Control} control ECUI 控件
          */
-        removeControlListener: function (control) {
+        removeControlListeners: function (control) {
             var name = control.getUID() + '#',
                 len = name.length;
             for (var key in eventListeners) {
