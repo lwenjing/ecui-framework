@@ -648,7 +648,6 @@
                         url = method[1].split('?'),
                         data = {},
                         valid = true;
-
                     url[1].split('&').forEach(function (item) {
                         item = item.split('=');
                         if (item.length > 1) {

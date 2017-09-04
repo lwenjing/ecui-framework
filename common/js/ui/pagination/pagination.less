@@ -1,0 +1,44 @@
+.pagination{
+	-moz-user-select: none; /*火狐-禁止文本选中*/
+	-webkit-user-select: none; /*webkit浏览器*/
+	-ms-user-select: none; /*IE10*/
+	-khtml-user-select: none; /*早期浏览器*/
+	user-select: none;
+	height:24px;
+	font-size:14px;
+	div{
+		float:left
+	}
+	.dynamic-page{
+		float:left;
+		div{
+			float:left
+		}
+		.pagination-button{
+			&:hover{
+				color:#38abff
+			}
+		}
+	}
+	.pagination-button{
+		margin-right:6px;
+		padding:0 4px;
+		min-width:16px;
+		height:24px;
+		text-align:center;
+		line-height:24px;
+		color:#495362;
+		border-radius:3px;
+		cursor:pointer
+	}
+	.pagination-button-hover{
+		color:#38abff;
+	}
+	.pagination-button-active{
+		background:#368cda;
+		color:#fff !important;
+	}
+	.disabled{
+		color:#ccc
+	}
+}
