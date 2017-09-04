@@ -1523,8 +1523,7 @@ return ParseTree;
 };
 
 },{"./less-error":30,"./logger":31,"./transform-tree":41}],33:[function(require,module,exports){
-var PromiseConstructor = typeof Promise === 'undefined' ? require('promise') : Promise,
-    contexts = require("./contexts"),
+var contexts = require("./contexts"),
     Parser = require('./parser/parser'),
     PluginManager = require('./plugin-manager');
 
@@ -1537,18 +1536,7 @@ module.exports = function(environment, ParseTree, ImportManager) {
             options = {};
         }
 
-        if (!callback) {
-            var self = this;
-            return new PromiseConstructor(function (resolve, reject) {
-                parse.call(self, input, options, function(err, output) {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(output);
-                    }
-                });
-            });
-        } else {
+        if (callback) {
             var context,
                 rootFileInfo,
                 pluginManager = new PluginManager(this);
@@ -1589,7 +1577,7 @@ module.exports = function(environment, ParseTree, ImportManager) {
     return parse;
 };
 
-},{"./contexts":10,"./parser/parser":36,"./plugin-manager":37,"promise":undefined}],34:[function(require,module,exports){
+},{"./contexts":10,"./parser/parser":36,"./plugin-manager":37}],34:[function(require,module,exports){
 // Split the input into chunks.
 module.exports = function (input, fail) {
     var len = input.length, level = 0, parenLevel = 0,
@@ -3677,8 +3665,6 @@ PluginManager.prototype.getFileManagers = function() {
 module.exports = PluginManager;
 
 },{}],38:[function(require,module,exports){
-var PromiseConstructor = typeof Promise === 'undefined' ? require('promise') : Promise;
-
 module.exports = function(environment, ParseTree, ImportManager) {
     var render = function (input, options, callback) {
         if (typeof(options) === 'function') {
@@ -3686,18 +3672,7 @@ module.exports = function(environment, ParseTree, ImportManager) {
             options = {};
         }
 
-        if (!callback) {
-            var self = this;
-            return new PromiseConstructor(function (resolve, reject) {
-                render.call(self, input, options, function(err, output) {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(output);
-                    }
-                });
-            });
-        } else {
+        if (callback) {
             this.parse(input, options, function(err, root, imports, options) {
                 if (err) { return callback(err); }
 
@@ -3716,7 +3691,7 @@ module.exports = function(environment, ParseTree, ImportManager) {
     return render;
 };
 
-},{"promise":undefined}],39:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module.exports = function (SourceMapOutput, environment) {
 
     var SourceMapBuilder = function (options) {
