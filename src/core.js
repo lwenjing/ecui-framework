@@ -1252,8 +1252,9 @@
             }).forEach(function (item) {
                 if (item.ondispose) {
                     item.ondispose();
+                    item.ondispose = util.blank;
                 }
-                item.$dispose();
+                core.triggerEvent(item, 'dispose');
             });
         },
 
