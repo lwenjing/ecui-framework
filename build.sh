@@ -6,6 +6,8 @@ fi
 
 if [ $1 = 'ecui' ]
 then
+    echo "build ecui-2.0.0"
+    lessc --plugin=less-plugin-clean-css ecui.css > ecui-2.0.0.css
     sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "ecui-2.0.0.js"
     exit 0
 fi
