@@ -4,13 +4,29 @@ then
     exit -1
 fi
 
+if [ $1 = 'ecui' ]
+then
+    sed -e "s/ *document.write('<script type=\"text\/javascript\" src/\/\/{include file/g" -e "s/><\/script>');/}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "ecui-2.0.0.js"
+    exit 0
+fi
+
 output="output-"$1
 if [ ! -d $output ]
 then
     mkdir $output
 fi
 
-cd ..
+if [ -f smarty4j.jar ]
+then
+    flag=1
+    cd ..
+fi
+
+if [ ! -d $1 ]
+then
+    echo $1" doesn't exist"
+    exit -2
+fi
 
 for file in `ls $1`
 do
@@ -67,4 +83,7 @@ cd ..
 
 rm -rf $output
 
-cd lib-fe
+if [ $flag ]
+then
+    cd lib-fe
+fi
