@@ -6,20 +6,20 @@ fi
 
 if [ $1 = 'ecui' ]
 then
-    sed -e "s/ *document.write('<script type=\"text\/javascript\" src/\/\/{include file/g" -e "s/><\/script>');/}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "ecui-2.0.0.js"
+    sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "ecui-2.0.0.js"
     exit 0
-fi
-
-output="output-"$1
-if [ ! -d $output ]
-then
-    mkdir $output
 fi
 
 if [ -f smarty4j.jar ]
 then
     flag=1
     cd ..
+fi
+
+output="output-"$1
+if [ ! -d $output ]
+then
+    mkdir $output
 fi
 
 if [ ! -d $1 ]
@@ -34,6 +34,7 @@ do
     then
     	if [ -f $1"/"$file"/"$file".js" ]
     	then
+            echo "process module-"$file
 	        if [ ! -d $output"/"$file ]
 	        then
 	            mkdir $output"/"$file
@@ -44,15 +45,21 @@ do
 	        sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass(*//g" -e "s/');/.html'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | sed -e "s/  / /g" -e "s/^[ ]*//g" -e "s/[ ]*$//g" -e "/^$/d" -e "/<script>window.onload=/d" > "../../"$output"/"$file"/"$file".html"
 	        cd ../..
 	    else
-	    	if [ ! -f $1"/"$file"/.ecuidebug" ]
-	    		cp -R $1"/"$file $output"/"
+	    	if [ ! -f $1"/"$file"/.buildignore" ]
+            then
+                if [ ! -d $output"/"$file"/" ]
+                then
+                    mkdir $output"/"$file"/"
+                fi
+	    		cp -R $1"/"$file"/"* $output"/"$file"/"
 	    	fi
 	    fi
     else
+        echo "process file-"$file
         if [ "${file##*.}" = "js" ]
         then
             cd $1
-            sed -e "/ecui.esr.loadModule/d" -e "s/document.write('<script type=\"text\/javascript\" src/\/\/{include file/g" -e "s/><\/script>');/}\/\//g" $file | java -jar ../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar ../lib-fe/webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/"$file
+            sed -e "/ecui.esr.loadModule/d" -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" $file | java -jar ../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar ../lib-fe/webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/"$file
             cd ..
         else
             if [ "${file##*.}" = "css" ]
@@ -72,8 +79,12 @@ done
 
 cd lib-fe
 lessc --plugin=less-plugin-clean-css ecui.css > "../"$output"/ecui.css"
-sed -e "s/ *document.write('<script type=\"text\/javascript\" src/\/\/{include file/g" -e "s/><\/script>');/}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/ecui.js"
-cp ie-es5.js "../"$output"/ie-es5.js"
+sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/ecui.js"
+java -jar webpacker.jar ie-es5.js --mode 1 --charset utf-8 -o "../"$output"/ie-es5.js"
+if [ ! -d "../"$output"/images/" ]
+then
+    mkdir "../"$output"/images/"
+fi
 cp -R images/* "../"$output"/images/"
 cd ..
 
