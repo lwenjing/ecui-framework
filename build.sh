@@ -17,6 +17,7 @@ then
     flag=1
     cd ..
 fi
+ln -s ../lib-fe/common $1"/common"
 
 output="output-"$1
 if [ ! -d $output ]
@@ -98,6 +99,7 @@ cd ..
 
 rm -rf $output
 
+rm $1"/common"
 if [ $flag ]
 then
     cd lib-fe

@@ -23,7 +23,7 @@ then
 	git checkout -b $2 "origin/"$2
 fi
 
-files=(common.css ecui.css common.js ecui.js ie-es5.js css images src tools)
+files=(common.css ecui.css common.js ecui.js ie-es5.js common css images src tools)
 for file in ${files[@]}
 do
 	if [ ! -f $1"/"$file ] && [ ! -d $1"/"$file ]
