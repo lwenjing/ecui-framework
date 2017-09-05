@@ -785,7 +785,7 @@
                     renderer.call(this, value[2].length > 1 ? context : data);
                 };
             } else {
-                renderer = value[3].length < 2 ? etpl.compile(control.getContent().replace(/$([\w.]+)/g, '${$1}')) : etpl.getRenderer(value[3].slice(1));
+                renderer = value[3].length < 2 ? etpl.compile(control.getContent().replace(/\$([\w.]+)/g, '${$1}')) : etpl.getRenderer(value[3].slice(1));
                 setData = function (data) {
                     core.dispose(this.getBody(), true);
                     this.setContent(renderer(value[2].length > 1 ? context : data));
