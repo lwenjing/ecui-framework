@@ -46,6 +46,54 @@
 }());
 
 (function () {
+    function doLoad() {
+        var el = ecui.$('LESS-FILE-PROTOCOL');
+        if (!el) {
+            el = document.createElement('IFRAME');
+            el.id = 'LESS-FILE-PROTOCOL';
+            el.style.cssText = 'position:absolute;width:1px;height:1px;left:-10px;top:-10px';
+            document.body.appendChild(el);
+        }
+
+        var path = waits[0][0],
+            callback = waits[0][1];
+
+        location.hash = '';
+        path = path.split('?');
+        if (path[0].slice(-5) !== '.html') {
+            path[0] += '.html';
+        }
+        if (path[1]) {
+            path.push('url=' + encodeURIComponent(loc));
+        } else {
+            path[1] = 'url=' + encodeURIComponent(loc);
+        }
+        el.src = path[0] + '?' + path.slice(1).join('&');
+        var stop = ecui.util.timer(function () {
+            if (location.hash && location.hash !== '#') {
+                stop();
+                callback(
+                    decodeURIComponent(location.hash.slice(1)),
+                    {
+                        getResponseHeader: function (name) {
+                            return {
+                                'Last-Modified': new Date(1970, 0, 1).toString()
+                            }[name];
+                        }
+                    }
+                );
+                waits.splice(0, 1);
+                if (waits.length) {
+                    doLoad();
+                } else {
+                    location.hash = oldLocation;
+                    ecui.esr.redirect = oldRedirectFn;
+                    ecui.resume();
+                }
+            }
+        }, -100);
+    }
+
     /**
      * 动态加载模块，用于测试。
      * @public
@@ -62,54 +110,13 @@
 
     if (loc.slice(0, 5) === 'file:') {
         ecui.io.ajax = function (url, options) {
-            function doLoad() {
-                var path = waits[0][0],
-                    callback = waits[0][1];
-
-                location.hash = '';
-                if (path.slice(-5) !== '.html') {
-                    path += '.html';
-                }
-                el.src = path + '?url=' + encodeURIComponent(loc);
-                var stop = ecui.util.timer(function () {
-                    if (location.hash && location.hash !== '#') {
-                        stop();
-                        callback(
-                            decodeURIComponent(location.hash.slice(1)),
-                            {
-                                getResponseHeader: function () {
-                                    return new Date(1970, 0, 1).toString();
-                                }
-                            }
-                        );
-                        waits.splice(0, 1);
-                        if (waits.length) {
-                            doLoad();
-                        } else {
-                            location.hash = oldLocation;
-                            ecui.esr.redirect = oldRedirectFn;
-                            ecui.resume();
-                        }
-                    }
-                }, -100);
-            }
-
-            var el = ecui.$('LESS-FILE-PROTOCOL'),
-                callback = options.onsuccess;
-
             ecui.dom.ready(function () {
-                if (!el) {
-                    el = document.createElement('IFRAME');
-                    el.id = 'LESS-FILE-PROTOCOL';
-                    el.style.cssText = 'position:absolute;width:1px;height:1px;left:-10px;top:-10px';
-                    document.body.appendChild(el);
-                }
                 if (url.slice(0, 5) === 'file:') {
                     url = url.slice(loc.lastIndexOf('/') + 1);
                 } else if (url.charAt(0) === '/') {
                     url = url.slice(1);
                 }
-                waits.push([url, callback]);
+                waits.push([url, options.onsuccess]);
                 if (waits.length === 1) {
                     ecui.pause();
                     oldLocation = location.hash;
