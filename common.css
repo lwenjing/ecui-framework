@@ -1,2 +1,2 @@
-@import (less) "common/css/common.css";
+@import (less) "common/css/common.less";
 @import (less) "common/js/ui/control.less";
