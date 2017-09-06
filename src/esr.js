@@ -144,11 +144,7 @@
                 moduleName + '/' + moduleName + '.js',
                 function () {
                     pauseStatus = false;
-                    if (esr.getRoute(name)) {
-                        callRoute(name, options);
-                    //} else {
-                    //    低版本IE失败
-                    }
+                    callRoute(name, options);
                 },
                 {
                     onerror: function () {
