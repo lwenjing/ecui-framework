@@ -17,9 +17,18 @@ _bDefault  - 默认的选中状态
 (function () {
 //{if 0}//
     var core = ecui,
+        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
+    /**
+     * 为控件的 INPUT 节点绑定事件。
+     * @private
+     */
+    function change(event) {
+        setChecked.call(core.wrapEvent(event).target.getControl(), true);
+    }
+
     /**
      * 单选框控件刷新。
      * @private
@@ -32,6 +41,22 @@ _bDefault  - 默认的选中状态
             el.defaultChecked = el.checked = checked;
         }
         this.alterSubType(this.isChecked() ? 'checked' : '');
+    }
+
+    /**
+     * 设置单选框选中状态。
+     * @private
+     *
+     * @param {boolean} checked 新的状态，如果忽略表示不改变当前状态
+     */
+    function setChecked(checked) {
+        if (checked) {
+            this.getItems().forEach(function (item) {
+                flush.call(item, item === this);
+            }, this);
+        } else {
+            flush.call(this, false);
+        }
     }
 
     /**
@@ -52,6 +77,7 @@ _bDefault  - 默认的选中状态
 
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
             this._bDefault = this.getInput().defaultChecked;
+            dom.addEventListener(this.getInput(), 'change', change);
         },
         {
             /**
@@ -169,15 +195,25 @@ _bDefault  - 默认的选中状态
              */
             setChecked: function (checked) {
                 if (this.isChecked() !== checked) {
-                    if (checked) {
-                        this.getItems().forEach(function (item) {
-                            flush.call(item, item === this);
-                        }, this);
-                    } else {
-                        flush.call(this, false);
-                    }
+                    setChecked.call(this, checked);
                 }
             }
         }
     );
+
+    /**
+     * 设置单选框控件的值。
+     * @public
+     *
+     * @param {string} name 单选框控件的名称
+     * @param {string} value 单选框控件的值
+     */
+    ui.Radio.setValue = function (name, value) {
+        value = String(value);
+        core.query(function (item) {
+            return item instanceof ui.Radio && item.getName() === name && item.getValue() === value;
+        }).forEach(function (item) {
+            item.setChecked(true);
+        });
+    };
 }());
