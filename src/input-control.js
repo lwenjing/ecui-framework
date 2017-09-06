@@ -173,8 +173,6 @@ _eInput        - INPUT对象
     /**
      * 为控件的 INPUT 节点绑定事件。
      * @private
-     *
-     * @param {ecui.ui.InputControl} control 输入框控件
      */
     function bindEvent() {
         core.$bind(this._eInput, this);

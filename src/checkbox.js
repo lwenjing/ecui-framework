@@ -20,31 +20,17 @@ _aDependents     - 所有的从属复选框
 (function () {
 //{if 0}//
     var core = ecui,
+        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
     /**
-     * 改变复选框状态。
+     * 为控件的 INPUT 节点绑定事件。
      * @private
-     *
-     * @param {number} status 新的状态，0--全选，1--未选，2--半选
      */
-    function change(status) {
-        if (status !== this._nStatus) {
-            // 状态发生改变时进行处理
-            this.alterSubType(['checked', '', 'part'][status]);
-
-            this._nStatus = status;
-
-            var el = this.getInput();
-            el.defaultChecked = el.checked = !status;
-
-            // 如果有主复选框，刷新主复选框的状态
-            if (this._cSubject) {
-                flush.call(this._cSubject);
-            }
-            core.triggerEvent(this, 'change');
-        }
+    function change() {
+        var control = core.wrapEvent(event).target.getControl();
+        setStatus.call(control, control.getInput().checked ? 0 : 1);
     }
 
     /**
@@ -62,7 +48,31 @@ _aDependents     - 所有的从属复选框
         });
 
         if (status !== undefined) {
-            change.call(this, status);
+            setStatus.call(this, status);
+        }
+    }
+
+    /**
+     * 改变复选框状态。
+     * @private
+     *
+     * @param {number} status 新的状态，0--全选，1--未选，2--半选
+     */
+    function setStatus(status) {
+        if (status !== this._nStatus) {
+            // 状态发生改变时进行处理
+            this.alterSubType(['checked', '', 'part'][status]);
+
+            this._nStatus = status;
+
+            var el = this.getInput();
+            el.defaultChecked = el.checked = !status;
+
+            // 如果有主复选框，刷新主复选框的状态
+            if (this._cSubject) {
+                flush.call(this._cSubject);
+            }
+            core.triggerEvent(this, 'change');
         }
     }
 
@@ -88,6 +98,7 @@ _aDependents     - 所有的从属复选框
             this._aDependents = [];
 
             core.delegate(options.subject, this, this.setSubject);
+            dom.addEventListener(this.getInput(), 'change', change);
         },
         {
             /**
@@ -96,6 +107,11 @@ _aDependents     - 所有的从属复选框
              */
             $click: function (event) {
                 ui.InputControl.prototype.$click.call(this, event);
+                for (var el = this.getMain(); el; el = dom.getParent(el)) {
+                    if (el.tagName === 'LABEL') {
+                        return;
+                    }
+                }
                 this.setChecked(!!this._nStatus);
             },
 
@@ -159,7 +175,7 @@ _aDependents     - 所有的从属复选框
                 ui.InputControl.prototype.$ready.call(this, options);
                 if (!this._aDependents.length) {
                     // 如果控件是主复选框，应该直接根据从属复选框的状态来显示自己的状态
-                    change.call(this, this.getInput().checked ? 0 : 1);
+                    setStatus.call(this, this.getInput().checked ? 0 : 1);
                 }
             },
 
@@ -211,14 +227,13 @@ _aDependents     - 所有的从属复选框
              * @param {boolean} checked 是否选中
              */
             setChecked: function (checked) {
-                change.call(this, checked ? 0 : 1);
+                setStatus.call(this, checked ? 0 : 1);
                 // 如果有从属复选框，全部改为与当前复选框相同的状态
                 this._aDependents.forEach(function (item) {
                     item._cSubject = null;
                     item.setChecked(checked);
                     item._cSubject = this;
                 }, this);
-
             },
 
             /**

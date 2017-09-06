@@ -101,9 +101,12 @@
      * @param {string} name 模块名
      */
     var moduleName,
+        moduleCallback,
+        moduleRoute,
         loc = location.href + '#',
         waits = [],
         oldRedirectFn = ecui.esr.redirect,
+        oldLoadScriptFn = ecui.io.loadScript,
         oldLocation;
 
     loc = loc.slice(0, loc.indexOf('#'));
@@ -127,26 +130,48 @@
         };
     }
 
-    ecui.esr.loadModule = function (name) {
-        document.write('<script type="text/javascript">ecui.esr.setModuleName("' + name + '")</script>');
-        document.write('<script type="text/javascript" src="' + name + '/' + name + '.js"></script>');
+    ecui.io.loadScript = function (url, callback, options) {
+        var name = url.slice(0, -3).split('/');
+        if (name[0] === name[1]) {
+            moduleName = name[0];
+            moduleCallback = callback;
+            moduleRoute = [];
+            callback = ecui.util.blank;
+        }
+        oldLoadScriptFn.call(this, url, callback, options);
     };
 
-    ecui.esr.setModuleName = function (name) {
-        moduleName = name;
-    };
+    function load() {
+        var filename = moduleRoute[0];
+        oldLoadScriptFn(moduleName + '/route.' + filename + '.js');
+        ecui.dom.insertHTML(document.head, 'BEFOREEND', '<link rel="stylesheet/less" type="text/css" href="' + moduleName + '/route.' + filename + '.css" />');
+        window.less.sheets = [document.head.lastChild];
+        window.less.refresh(true, undefined, false);
+        var stop = ecui.util.timer(function () {
+            if (document.head.lastChild.tagName === 'STYLE') {
+                stop();
+                ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
+                    onsuccess: function (data) {
+                        etpl.compile(data);
+                        moduleRoute.splice(0, 1);
+                        if (moduleRoute.length) {
+                            load();
+                        } else {
+                            moduleCallback();
+                        }
+                    }
+                });
+            }
+        }, -50);
+    }
+
     ecui.esr.loadClass = function (filename) {
-        document.write('<script type="text/javascript" src="' + moduleName + '/class.' + filename + '.js"></script>');
+        oldLoadScriptFn(moduleName + '/class.' + filename + '.js');
     };
     ecui.esr.loadRoute = function (filename) {
-        document.write('<script type="text/javascript" src="' + moduleName + '/route.' + filename + '.js"></script>');
-        document.write('<link rel="stylesheet/less" type="text/css" href="' + moduleName + '/route.' + filename + '.css" />');
-        ecui.pause();
-        ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
-            onsuccess: function (data) {
-                etpl.compile(data);
-                ecui.resume();
-            }
-        });
+        moduleRoute.push(filename);
+        if (moduleRoute.length === 1) {
+            load();
+        }
     };
 }());
