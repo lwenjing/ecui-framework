@@ -202,6 +202,20 @@ _bDefault  - 默认的选中状态
     );
 
     /**
+     * 获取单选框控件的值。
+     * @public
+     *
+     * @param {string} name 单选框控件的名称
+     * @return {string} 单选框控件的值，没有选中的项返回null
+     */
+    ui.Radio.getValue = function (name) {
+        var control = core.query(function (item) {
+                return item instanceof ui.Radio && item.getName() === name && item.isChecked();
+            })[0];
+        return control ? control.getValue() : null;
+    };
+
+    /**
      * 设置单选框控件的值。
      * @public
      *
