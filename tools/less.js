@@ -269,7 +269,7 @@ ecui.pause();
                 var options = window.less || {};
                 initOptions(options);
 
-                var less = module.exports = require("./index")(options);
+                var less = module.exports = require('./index')(options);
 
                 ecui.dom.ready(function () {
                     if (/!watch/.test(location.hash)) {
@@ -280,10 +280,10 @@ ecui.pause();
                     less.pageLoadFinished = less.refresh(less.env === 'development');
                 });
             },
-            {"./index":7}
+            {'./index': 7}
         ],
         5: [
-            function (require,module,exports){
+            function (require, module) {
                 module.exports = function (window, less, options) {
 
                     function errorHTML(e, rootHref) {
@@ -294,10 +294,10 @@ ecui.pause();
                         var filenameNoPath = filename.match(/([^\/]+(\?.*)?)$/)[1];
 
                         elem.id        = id;
-                        elem.className = "less-error-message";
+                        elem.className = 'less-error-message';
 
-                        content = '<h3>'  + (e.type || "Syntax") + "Error: " + (e.message || 'There is an error in your .less file') +
-                            '</h3>' + '<p>in <a href="' + filename   + '">' + filenameNoPath + "</a> ";
+                        content = '<h3>'  + (e.type || 'Syntax') + 'Error: ' + (e.message || 'There is an error in your .less file') +
+                            '</h3>' + '<p>in <a href="' + filename   + '">' + filenameNoPath + '</a> ';
 
                         var errorline = function (e, i, classname) {
                             if (e.extract[i] !== undefined) {
@@ -360,15 +360,15 @@ ecui.pause();
                         ].join('\n'));
 
                         elem.style.cssText = [
-                            "font-family: Arial, sans-serif",
-                            "border: 1px solid #e00",
-                            "background-color: #eee",
-                            "border-radius: 5px",
-                            "-webkit-border-radius: 5px",
-                            "-moz-border-radius: 5px",
-                            "color: #e00",
-                            "padding: 15px",
-                            "margin-bottom: 15px"
+                            'font-family: Arial, sans-serif',
+                            'border: 1px solid #e00',
+                            'background-color: #eee',
+                            'border-radius: 5px',
+                            '-webkit-border-radius: 5px',
+                            '-moz-border-radius: 5px',
+                            'color: #e00',
+                            'padding: 15px',
+                            'margin-bottom: 15px'
                         ].join(';');
 
                         if (options.env === 'development') {
@@ -388,12 +388,12 @@ ecui.pause();
                     }
 
                     function error(e, rootHref) {
-                        if (!options.errorReporting || options.errorReporting === "html") {
+                        if (!options.errorReporting || options.errorReporting === 'html') {
                             errorHTML(e, rootHref);
-                        } else if (options.errorReporting === "console") {
+                        } else if (options.errorReporting === 'console') {
                             errorConsole(e, rootHref);
                         } else if (typeof options.errorReporting === 'function') {
-                            options.errorReporting("add", e, rootHref);
+                            options.errorReporting('add', e, rootHref);
                         }
                     }
 
@@ -404,17 +404,17 @@ ecui.pause();
                         }
                     }
 
-                    function removeErrorConsole(path) {
+                    function removeErrorConsole() {
                         //no action
                     }
 
                     function removeError(path) {
-                        if (!options.errorReporting || options.errorReporting === "html") {
+                        if (!options.errorReporting || options.errorReporting === 'html') {
                             removeErrorHTML(path);
-                        } else if (options.errorReporting === "console") {
+                        } else if (options.errorReporting === 'console') {
                             removeErrorConsole(path);
                         } else if (typeof options.errorReporting === 'function') {
-                            options.errorReporting("remove", path);
+                            options.errorReporting('remove', path);
                         }
                     }
 
@@ -422,8 +422,8 @@ ecui.pause();
                         var template = '{line} {content}';
                         var filename = e.filename || rootHref;
                         var errors = [];
-                        var content = (e.type || "Syntax") + "Error: " + (e.message || 'There is an error in your .less file') +
-                            " in " + filename + " ";
+                        var content = (e.type || 'Syntax') + 'Error: ' + (e.message || 'There is an error in your .less file') +
+                            ' in ' + filename + ' ';
 
                         var errorline = function (e, i, classname) {
                             if (e.extract[i] !== undefined) {
@@ -454,86 +454,86 @@ ecui.pause();
             },
             {}
         ],
-        6:[
-            function (require,module,exports){
+        6: [
+            function (require, module) {
                 /*global window, XMLHttpRequest */
 
                 module.exports = function (options, logger) {
 
-                var AbstractFileManager = require("../less/environment/abstract-file-manager.js");
+                    var AbstractFileManager = require('../less/environment/abstract-file-manager.js');
 
-                var fileCache = {};
+                    var fileCache = {};
 
-                var FileManager = function () {
-                };
+                    var FileManager = function () {
+                    };
 
-                FileManager.prototype = new AbstractFileManager();
+                    FileManager.prototype = new AbstractFileManager();
 
-                FileManager.prototype.alwaysMakePathsAbsolute = function alwaysMakePathsAbsolute() {
-                    return true;
-                };
-                FileManager.prototype.join = function join(basePath, laterPath) {
-                    if (!basePath) {
-                        return laterPath;
-                    }
-                    return this.extractUrlParts(laterPath, basePath).path;
-                };
-
-                FileManager.prototype.doXHR = function doXHR(url, type, callback, errback) {
-                    ecui.io.ajax(url, {
-                        onsuccess: function (text, xhr) {
-                            callback(text, xhr.getResponseHeader("Last-Modified"));
-                        },
-                        onerror: errback ? function (xhr) {
-                            errback(xhr.status, url);
-                        } : undefined
-                    });
-                };
-                FileManager.prototype.supports = function (filename, currentDirectory, options, environment) {
-                    return true;
-                };
-
-                FileManager.prototype.clearFileCache = function () {
-                    fileCache = {};
-                };
-
-                FileManager.prototype.loadFile = function loadFile(filename, currentDirectory, options, environment, callback) {
-                    if (currentDirectory && !this.isPathAbsolute(filename)) {
-                        filename = currentDirectory + filename;
-                    }
-
-                    options = options || {};
-
-                    // sheet may be set to the stylesheet for the initial load or a collection of properties including
-                    // some context variables for imports
-                    var hrefParts = this.extractUrlParts(filename, window.location.href);
-                    var href      = hrefParts.url;
-
-                    if (options.useFileCache && fileCache[href]) {
-                        try {
-                            var lessText = fileCache[href];
-                            callback(null, { contents: lessText, filename: href, webInfo: { lastModified: new Date() }});
-                        } catch (e) {
-                            callback({filename: href, message: "Error loading file " + href + " error was " + e.message});
+                    FileManager.prototype.alwaysMakePathsAbsolute = function alwaysMakePathsAbsolute() {
+                        return true;
+                    };
+                    FileManager.prototype.join = function join(basePath, laterPath) {
+                        if (!basePath) {
+                            return laterPath;
                         }
-                        return;
-                    }
+                        return this.extractUrlParts(laterPath, basePath).path;
+                    };
 
-                    this.doXHR(href, options.mime, function doXHRCallback(data, lastModified) {
-                        // per file cache
-                        fileCache[href] = data;
+                    FileManager.prototype.doXHR = function doXHR(url, type, callback, errback) {
+                        ecui.io.ajax(url, {
+                            onsuccess: function (text, xhr) {
+                                callback(text, xhr.getResponseHeader('Last-Modified'));
+                            },
+                            onerror: errback ? function (xhr) {
+                                errback(xhr.status, url);
+                            } : undefined
+                        });
+                    };
+                    FileManager.prototype.supports = function () {
+                        return true;
+                    };
 
-                        // Use remote copy (re-parse)
-                        callback(null, { contents: data, filename: href, webInfo: { lastModified: lastModified }});
-                    }, function doXHRError(status, url) {
-                        callback({ type: 'File', message: "'" + url + "' wasn't found (" + status + ")", href: href });
-                    });
-                };
+                    FileManager.prototype.clearFileCache = function () {
+                        fileCache = {};
+                    };
 
-                return FileManager;
+                    FileManager.prototype.loadFile = function loadFile(filename, currentDirectory, options, environment, callback) {
+                        if (currentDirectory && !this.isPathAbsolute(filename)) {
+                            filename = currentDirectory + filename;
+                        }
+
+                        options = options || {};
+
+                        // sheet may be set to the stylesheet for the initial load or a collection of properties including
+                        // some context variables for imports
+                        var hrefParts = this.extractUrlParts(filename, window.location.href);
+                        var href      = hrefParts.url;
+
+                        if (options.useFileCache && fileCache[href]) {
+                            try {
+                                var lessText = fileCache[href];
+                                callback(null, { contents: lessText, filename: href, webInfo: { lastModified: new Date() }});
+                            } catch (e) {
+                                callback({filename: href, message: 'Error loading file ' + href + ' error was ' + e.message});
+                            }
+                            return;
+                        }
+
+                        this.doXHR(href, options.mime, function doXHRCallback(data, lastModified) {
+                            // per file cache
+                            fileCache[href] = data;
+
+                            // Use remote copy (re-parse)
+                            callback(null, { contents: data, filename: href, webInfo: { lastModified: lastModified }});
+                        }, function doXHRError(status, url) {
+                            callback({ type: 'File', message: "'" + url + "' wasn't found (" + status + ")", href: href });
+                        });
+                    };
+
+                    return FileManager;
                 };
             },
-            {"../less/environment/abstract-file-manager.js":14}
+            {'../less/environment/abstract-file-manager.js': 14}
         ],
         7:[function (require,module,exports){
 //
