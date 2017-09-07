@@ -249,7 +249,7 @@
                         bubble(activedControl, 'deactivate', event);
                     }
 
-                    // 将 activeControl 的设置复位，此时表示没有鼠标左键点击
+                    // 将 activedControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
                 }
             },
@@ -368,8 +368,8 @@
 
                 var target = currEnv.target,
                     // 计算期待移到的位置
-                    expectX = target.getX() + mouseX - currEnv.x,
-                    expectY = target.getY() + mouseY - currEnv.y,
+                    expectX = currEnv.targetX + mouseX - currEnv.x,
+                    expectY = currEnv.targetY + mouseY - currEnv.y,
                     // 计算实际允许移到的位置
                     x = Math.min(Math.max(expectX, currEnv.left), currEnv.right),
                     y = Math.min(Math.max(expectY, currEnv.top), currEnv.bottom);
@@ -378,8 +378,8 @@
                     target.setPosition(x, y);
                 }
 
-                currEnv.x = mouseX + target.getX() - expectX;
-                currEnv.y = mouseY + target.getY() - expectY;
+                currEnv.x = mouseX + currEnv.targetX - expectX;
+                currEnv.y = mouseY + currEnv.targetY - expectY;
 
                 // 增加对drag时控件mouseover行为的处理
                 x = event.pageX;
@@ -500,7 +500,7 @@
                     var el = item.getOuter();
                     if (item !== target && !item.isTransparent() && !dom.hasClass(el, 'ui-hide') && dom.contain(document.body, el)) {
                         var pos = dom.getPosition(el);
-                        if (pos.top <= this.pageY && pos.top + item.getHeight() >= this.pageY && pos.left <= this.pageX && pos.left + item.getWidth() >= this.pageX) {
+                        if (pos.top <= mouseY && pos.top + item.getHeight() >= mouseY && pos.left <= mouseX && pos.left + item.getWidth() >= mouseX) {
                             if (control) {
                                 if (compareZIndex(control, item) < 0) {
                                     control = item;
@@ -756,6 +756,8 @@
                 window,
                 'unload',
                 function () {
+                    focusedControl = hoveredControl = activedControl = null;
+
                     allControls.forEach(function (item) {
                         item.$dispose();
                     });
@@ -1284,7 +1286,6 @@
                 var el = control.getOuter(),
                     parent = el.offsetParent,
                     style = dom.getStyle(parent),
-                    // 缓存，防止多次reflow
                     x = control.getX(),
                     y = control.getY();
 
@@ -1301,6 +1302,8 @@
                 util.extend(dragEnv, options);
                 dragEnv.right = Math.max(dragEnv.right - control.getWidth(), dragEnv.left);
                 dragEnv.bottom = Math.max(dragEnv.bottom - control.getHeight(), dragEnv.top);
+                dragEnv.targetX = x;
+                dragEnv.targetY = y;
 
                 el.style.left = x + 'px';
                 el.style.top = y + 'px';
@@ -1876,7 +1879,6 @@
             }
 
             var parent = getCommonParent(focusedControl, control);
-
             bubble(focusedControl, 'blur', null, parent);
             bubble(focusedControl = control, 'focus', null, parent);
         },
