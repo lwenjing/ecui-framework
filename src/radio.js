@@ -93,7 +93,7 @@ _bDefault  - 默认的选中状态
              * 接管对空格键的处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 键盘事件
+             * @param {ECUIEvent} event 键盘事件
              */
             $keydown: function (event) {
                 ui.InputControl.prototype.$keydown.call(this, event);
@@ -106,7 +106,7 @@ _bDefault  - 默认的选中状态
              * 接管对空格键的处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 键盘事件
+             * @param {ECUIEvent} event 键盘事件
              */
             $keypress: function (event) {
                 ui.InputControl.prototype.$keypress.call(this, event);
@@ -119,7 +119,7 @@ _bDefault  - 默认的选中状态
              * 接管对空格键的处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 键盘事件
+             * @param {ECUIEvent} event 键盘事件
              */
             $keyup: function (event) {
                 ui.InputControl.prototype.$keyup.call(this, event);

@@ -19,6 +19,7 @@ _bFocusable         - 控件是否允许获取焦点
 _bDisabled          - 控件的状态，为true时控件不处理任何事件
 _bCached            - 控件是否已经读入缓存
 _bReady             - 控件是否已经完全生成
+_bTransparent       - 控件是否透明，在这种状态下，事件可以穿透控件到达控件下方的控件，但会影响效率，请谨慎使用
 _sUID               - 控件的内部ID
 _sPrimary           - 控件定义时的基本样式
 _sClass             - 控件的当前样式
@@ -86,14 +87,15 @@ $$padding           - 内填充宽度缓存
     /**
      * 初始化基础控件。
      * options 对象支持的属性如下：
-     * type       控件的类型样式
-     * primary    控件的基本样式
-     * current    控件的当前样式
-     * capturable 是否需要捕获鼠标事件，默认捕获
-     * userSelect 是否允许选中内容，默认允许
-     * focusable  是否允许获取焦点，默认允许
-     * resizable  是否允许改变大小，默认不允许
-     * disabled   是否失效，默认有效
+     * type        控件的类型样式
+     * primary     控件的基本样式
+     * current     控件的当前样式
+     * capturable  是否需要捕获鼠标事件，默认捕获
+     * userSelect  是否允许选中内容，默认允许
+     * focusable   是否允许获取焦点，默认允许
+     * resizable   是否允许改变大小，默认不允许
+     * disabled    是否失效，默认有效
+     * transparent 是否透明，默认不透明
      * @public
      *
      * @param {Object} options 初始化选项
@@ -113,6 +115,7 @@ $$padding           - 内填充宽度缓存
             this._bUserSelect = options.userSelect !== false;
             this._bFocusable = options.focusable !== false;
             this._bResizable = !!options.resizable;
+            this._bTransparent = options.transparent === true;
 
             this._aStatus = ['', ' '];
             this._sSubType = '';
@@ -123,12 +126,10 @@ $$padding           - 内填充宽度缓存
              * 控件获得激活时，添加状态样式 -active。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $activate: function () {
-                if (ieVersion < 9) {
-                    this.alterClass('+active');
-                }
+                this.alterClass('+active');
             },
 
             /**
@@ -144,7 +145,7 @@ $$padding           - 内填充宽度缓存
              * 控件失去焦点时，移除状态样式 -focus。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $blur: function () {
                 this.alterClass('-focus');
@@ -186,12 +187,10 @@ $$padding           - 内填充宽度缓存
              * 控件失去激活时，移除状态样式 -active。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $deactivate: function () {
-                if (ieVersion < 9) {
-                    this.alterClass('-active');
-                }
+                this.alterClass('-active');
             },
 
             /**
@@ -237,7 +236,7 @@ $$padding           - 内填充宽度缓存
              * 控件拖拽结束的默认处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $dragend: util.blank,
 
@@ -245,7 +244,7 @@ $$padding           - 内填充宽度缓存
              * 控件拖拽的默认处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              * @param {number} x x轴坐标
              * @param {number} y y轴坐标
              */
@@ -255,7 +254,7 @@ $$padding           - 内填充宽度缓存
              * 控件拖拽开始的默认处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $dragstart: util.blank,
 
@@ -288,7 +287,7 @@ $$padding           - 内填充宽度缓存
              * 控件获得焦点时，添加状态样式 -focus。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $focus: function () {
                 this.alterClass('+focus');
@@ -352,7 +351,7 @@ $$padding           - 内填充宽度缓存
              * 控件强制拦截点击的默认处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $intercept: util.blank,
 
@@ -361,12 +360,10 @@ $$padding           - 内填充宽度缓存
              * 鼠标移出控件区域时，控件失去悬停状态，移除状态样式 -hover。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $mouseout: function () {
-                if (ieVersion < 9) {
-                    this.alterClass('-hover');
-                }
+                this.alterClass('-hover');
             },
 
             /**
@@ -374,12 +371,10 @@ $$padding           - 内填充宽度缓存
              * 鼠标移入控件区域时，控件获得悬停状态，添加状态样式 -hover。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $mouseover: function () {
-                if (ieVersion < 9) {
-                    this.alterClass('+hover');
-                }
+                this.alterClass('+hover');
             },
 
             /**
@@ -402,7 +397,7 @@ $$padding           - 内填充宽度缓存
              * 控件对重绘的默认处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $repaint: util.blank,
 
@@ -431,7 +426,7 @@ $$padding           - 内填充宽度缓存
              * 控件对滚动事件的默认处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $scroll: util.blank,
 
@@ -508,12 +503,16 @@ $$padding           - 内填充宽度缓存
                     var classes = core.$getClasses(this.constructor, this._sClass);
                     if (className.charAt(0) === '+') {
                         className = '-' + className.slice(1) + ' ';
-                        dom.addClass(this._eMain, classes.join(className));
-                        this._aStatus.push(className);
+                        if (this._aStatus.indexOf(className) < 0) {
+                            dom.addClass(this._eMain, classes.join(className));
+                            this._aStatus.push(className);
+                        }
                     } else {
                         className += ' ';
-                        dom.removeClass(this._eMain, classes.join(className));
-                        util.remove(this._aStatus, className);
+                        if (this._aStatus.indexOf(className) >= 0) {
+                            dom.removeClass(this._eMain, classes.join(className));
+                            util.remove(this._aStatus, className);
+                        }
                     }
                 }
             },
@@ -1039,6 +1038,16 @@ $$padding           - 内填充宽度缓存
             },
 
             /**
+             * 判断是否处于透明状态。
+             * @public
+             *
+             * @return {boolean} 控件是否透明
+             */
+            isTransparent: function () {
+                return this._bTransparent;
+            },
+
+            /**
              * 判断是否允许选中内容。
              * @public
              *
@@ -1167,6 +1176,16 @@ $$padding           - 内填充宽度缓存
                         this._sHeight = this._eMain.style.height;
                     }
                 }
+            },
+
+            /**
+             * 设置控件是否处于透明状态。
+             * @public
+             *
+             * @param {boolean} transparent 控件是否透明
+             */
+            setTransparent: function (transparent) {
+                return this._bTransparent = transparent;
             },
 
             /**

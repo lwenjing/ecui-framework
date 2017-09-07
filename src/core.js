@@ -199,6 +199,9 @@
 
                 var control = event.getControl();
                 bubble(control, 'mousemove', event);
+                if (hoveredControl !== control) {
+                    currEnv.mouseover(event);
+                }
             },
 
             // 鼠标移入的处理，需要计算是不是位于当前移入的控件之外，如果是需要触发移出事件
@@ -369,8 +372,7 @@
                     expectY = target.getY() + mouseY - currEnv.y,
                     // 计算实际允许移到的位置
                     x = Math.min(Math.max(expectX, currEnv.left), currEnv.right),
-                    y = Math.min(Math.max(expectY, currEnv.top), currEnv.bottom),
-                    control;
+                    y = Math.min(Math.max(expectY, currEnv.top), currEnv.bottom);
 
                 if (core.triggerEvent(target, 'dragmove', event, x, y)) {
                     target.setPosition(x, y);
@@ -383,32 +385,6 @@
                 x = event.pageX;
                 y = event.pageY;
 
-                if (currEnv.move === 'through') {
-                    control = null;
-                    allControls.forEach(function (item) {
-                        var pos = item.getOuter();
-                        if (item !== target && dom.contain(document.body, pos)) {
-                            pos = dom.getPosition(pos);
-                            if (pos.top <= y && pos.top + item.getHeight() >= y && pos.left <= x && pos.left + item.getWidth() >= x) {
-                                if (control) {
-                                    if (compareZIndex(control, item) < 0) {
-                                        control = item;
-                                    }
-                                } else {
-                                    control = item;
-                                }
-                            }
-                        }
-                    });
-                }
-
-                if (control !== undefined) {
-                    bubble(control, 'mousemove', event);
-                    target = getCommonParent(control, hoveredControl);
-                    bubble(hoveredControl, 'mouseout', event, target);
-                    hoveredControl = control;
-                    bubble(control, 'mouseover', event, target);
-                }
                 event.exit();
             },
 
@@ -495,21 +471,56 @@
 
     util.extend(ECUIEvent.prototype, {
         /**
+         * 终止全部事件操作。
+         * @public
+         */
+        exit: function () {
+            this.preventDefault();
+            this.stopPropagation();
+        },
+
+        /**
          * 获取触发事件的 ECUI 控件 对象
          * @public
          *
          * @return {ecui.ui.Control} 控件对象
          */
         getControl: function () {
+            if (this._cControl !== undefined) {
+                return this._cControl;
+            }
+
             var control = core.findControl(this.target);
+
+            if (control && control.isTransparent()) {
+                this._bThrough = true;
+                var target = control;
+                control = null;
+                allControls.forEach(function (item) {
+                    var el = item.getOuter();
+                    if (item !== target && !item.isTransparent() && !dom.hasClass(el, 'ui-hide') && dom.contain(document.body, el)) {
+                        var pos = dom.getPosition(el);
+                        if (pos.top <= this.pageY && pos.top + item.getHeight() >= this.pageY && pos.left <= this.pageX && pos.left + item.getWidth() >= this.pageX) {
+                            if (control) {
+                                if (compareZIndex(control, item) < 0) {
+                                    control = item;
+                                }
+                            } else {
+                                control = item;
+                            }
+                        }
+                    }
+                }, this);
+            }
+
             if (control && !control.isDisabled()) {
                 for (; control; control = control.getParent()) {
                     if (control.isCapturable()) {
-                        return control;
+                        return this._cControl = control;
                     }
                 }
             }
-            return null;
+            return this._cControl = null;
         },
 
         /**
@@ -520,6 +531,10 @@
          */
         getNative: function () {
             return this._oNative;
+        },
+
+        isThrough: function () {
+            return !!this._bThrough;
         },
 
         /**
@@ -550,15 +565,6 @@
                     this._oNative.stopPropagation();
                 }
             }
-        },
-
-        /**
-         * 终止全部事件操作。
-         * @public
-         */
-        exit: function () {
-            this.preventDefault();
-            this.stopPropagation();
         }
     });
 
@@ -568,7 +574,7 @@
      *
      * @param {ecui.ui.Control} start 开始冒泡的控件
      * @param {string} type 事件类型
-     * @param {ecui.ui.Event} 事件对象
+     * @param {ECUIEvent} 事件对象
      * @param {ecui.ui.Control} end 终止冒泡的控件，如果不设置将一直冒泡至顶层
      */
     function bubble(start, type, event, end) {
@@ -783,7 +789,7 @@
      * 判断点击是否发生在滚动条区域。
      * @private
      *
-     * @param {ecui.ui.Event} event 事件对象
+     * @param {ECUIEvent} event 事件对象
      * @return {boolean} 点击是否发生在滚动条区域
      */
     function isScrollClick(event) {
@@ -801,7 +807,7 @@
      * @private
      *
      * @param {ecui.ui.Control} control 需要操作的控件
-     * @param {ecui.ui.Event} event 事件对象
+     * @param {ECUIEvent} event 事件对象
      */
     function mousedown(control, event) {
         if (!isScrollClick(event)) {
@@ -850,7 +856,7 @@
      * 滚轮事件处理。
      * @private
      *
-     * @param {ecui.ui.Event} event 事件对象
+     * @param {ECUIEvent} event 事件对象
      * @param {number} detail 滚动距离
      */
     function onmousewheel(event, detail) {
@@ -888,7 +894,7 @@
      * @private
      *
      * @param {ecui.ui.Control} control 需要操作的控件
-     * @param {ecui.ui.Event} event 事件对象
+     * @param {ECUIEvent} event 事件对象
      */
     function onselectstart(control, event) {
         if (!isMobile) {
@@ -1266,11 +1272,10 @@
          * right  {number} 控件允许拖拽到的最大X轴坐标
          * bottom {number} 控件允许拖拽到的最大Y轴坐标
          * left   {number} 控件允许拖拽到的最小X轴坐标
-         * move   {string} 移动模式，目前仅支持 through，表示移动时鼠标的hover要穿透当前拖拽层
          * @public
          *
          * @param {ecui.ui.Control} control 需要进行拖拽的 ECUI 控件对象
-         * @param {ecui.ui.Event} event 事件对象
+         * @param {ECUIEvent} event 事件对象
          * @param {Object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
@@ -1883,7 +1888,7 @@
          *
          * @param {ecui.ui.Control} control 控件对象
          * @param {string} name 事件名
-         * @param {ecui.ui.Event} event 事件对象，可以为 false 表示直接阻止默认事件处理
+         * @param {ECUIEvent} event 事件对象，可以为 false 表示直接阻止默认事件处理
          * @param {Object} ... 事件的其它参数
          * @return {boolean} 是否阻止默认事件处理
          */
@@ -1939,7 +1944,7 @@
          * @public
          *
          * @param {Event} event 事件对象
-         * @return {ecui.ui.Event} 标准化后的事件对象
+         * @return {ECUIEvent} 标准化后的事件对象
          */
         wrapEvent: function (event) {
             if (event instanceof ECUIEvent) {

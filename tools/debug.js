@@ -144,7 +144,11 @@
     function load() {
         var filename = moduleRoute[0];
         oldLoadScriptFn(moduleName + '/route.' + filename + '.js');
-        ecui.dom.insertHTML(document.head, 'BEFOREEND', '<link rel="stylesheet/less" type="text/css" href="' + moduleName + '/route.' + filename + '.css" />');
+        var el = document.createElement('LINK');
+        el.setAttribute('rel', 'stylesheet/less');
+        el.setAttribute('type', 'text/css');
+        el.setAttribute('href', moduleName + '/route.' + filename + '.css');
+        document.head.appendChild(el);
         window.less.sheets = [document.head.lastChild];
         window.less.refresh(true, undefined, false);
         var stop = ecui.util.timer(function () {

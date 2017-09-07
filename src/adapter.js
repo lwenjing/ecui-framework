@@ -701,7 +701,9 @@ var ecui;
                     scr.setAttribute('charset', options.charset);
                 }
                 scr.setAttribute('src', url);
-                scr.onerror = options.onerror;
+                if (!(ieVersion < 9)) {
+                    scr.onerror = options.onerror;
+                }
                 document.head.appendChild(scr);
             }
         },

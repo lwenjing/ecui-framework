@@ -193,7 +193,7 @@ _aChildren     - 子控件集合
              * 节点点击事件的默认处理。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $nodeclick: function () {
                 var root = this.getRoot();
@@ -211,7 +211,7 @@ _aChildren     - 子控件集合
              * 鼠标移出节点区域时，控件解除悬停状态，移除状态样式 -nodehover。与 mouseout 不同的是， nodeout 没有与父结点关联。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $nodeout: function () {
                 this.alterClass('-nodehover');
@@ -222,7 +222,7 @@ _aChildren     - 子控件集合
              * 鼠标移入节点区域时，控件获得悬停状态，添加状态样式 -nodehover。与 mouseover 不同的是， nodeover 没有与父结点关联。
              * @protected
              *
-             * @param {ecui.ui.Event} event 事件对象
+             * @param {ECUIEvent} event 事件对象
              */
             $nodeover: function () {
                 this.alterClass('+nodehover');
