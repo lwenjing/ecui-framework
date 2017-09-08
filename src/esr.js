@@ -116,10 +116,18 @@
                         }) !== false) {
                         esr.render(name, route);
                     }
+                } else if (!route.model.length) {
+                    esr.render(name, route);
                 } else {
-                    esr.request.call(route, route.model, function () {
+                    if (route.onbeforerequest) {
+                        route.onbeforerequest(context);
+                    }
+                    esr.request(route.model, function () {
                         esr.render(name, route);
-                    }, route.onrequesterror);
+                    });
+                    if (route.onafterrequest) {
+                        route.onafterrequest(context);
+                    }
                 }
             }
         } else {
@@ -322,7 +330,14 @@
          */
         callRoute: function (loc, childRoute) {
             loc = parseLocation(loc);
-            callRoute(loc[''], childRoute ? true : loc);
+            if (childRoute) {
+                for (var key in loc) {
+                    if (loc.hasOwnProperty(key)) {
+                        context[key] = loc[key];
+                    }
+                }
+            }
+            callRoute(loc[''], childRoute || loc);
         },
 
         /**
@@ -331,27 +346,23 @@
          *
          * @param {string} name 路由名
          * @param {Object} options 需要改变的参数
-         * @param {boolean} rewrite 是否回写原来的参数
          */
-        change: function (name, options, rewrite) {
+        change: function (name, options) {
             options = options || {};
 
-            var oldOptions = parseLocation(currLocation);
-            if (rewrite) {
-                rewrite = options[''] || oldOptions[''];
-                for (var key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        if (options[key] === null) {
-                            delete oldOptions[key];
-                        } else {
-                            oldOptions[key] = options[key];
-                        }
+            var oldOptions = parseLocation(currLocation),
+                url = options[''] || oldOptions[''];
+
+            for (var key in options) {
+                if (options.hasOwnProperty(key)) {
+                    if (options[key] === null) {
+                        delete oldOptions[key];
+                    } else {
+                        oldOptions[key] = options[key];
                     }
                 }
-            } else {
-                rewrite = options[''] || oldOptions[''];
-                oldOptions = options;
             }
+
             var list = [];
             delete oldOptions[''];
             for (key in oldOptions) {
@@ -359,7 +370,7 @@
                     list.push(key + '=' + encodeURIComponent(oldOptions[key]));
                 }
             }
-            list.sort().splice(0, 0, rewrite);
+            list.sort().splice(0, 0, url);
             esr.setLocation(list.join('~'));
 
             if (name) {
@@ -585,16 +596,6 @@
          * @param {Function} onerror 至少一个请求失败时调用的函数，会传入一个参数Array说明是哪些url失败
          */
         request: function (urls, onsuccess, onerror) {
-            if ('string' === typeof urls) {
-                urls = [urls];
-            }
-
-            var err = [],
-                count = urls.length;
-
-            onsuccess = onsuccess || util.blank;
-            onerror = onerror || esr.onrequesterror || util.blank;
-
             function request(varUrl, varName) {
                 // 对于FORM表单的对象列表提交，可以通过产生一个特殊的ECUI控件来完成，例如：
                 // <form>
@@ -728,20 +729,28 @@
                 });
             }
 
-            pauseStatus = true;
-            if (this.onbeforerequest) {
-                this.onbeforerequest(context);
+            if ('string' === typeof urls) {
+                urls = [urls];
             }
-            urls.forEach(function (item) {
-                var url = item.split('@');
-                if (url[1]) {
-                    request(url[1], url[0]);
-                } else {
-                    request(url[0]);
-                }
-            });
-            if (this.onafterrequest) {
-                this.onafterrequest(context);
+
+            var err = [],
+                count = urls.length;
+
+            onsuccess = onsuccess || util.blank;
+            onerror = onerror || esr.onrequesterror || util.blank;
+
+            if (count) {
+                pauseStatus = true;
+                urls.forEach(function (item) {
+                    var url = item.split('@');
+                    if (url[1]) {
+                        request(url[1], url[0]);
+                    } else {
+                        request(url[0]);
+                    }
+                });
+            } else {
+                onsuccess();
             }
         }
     };
