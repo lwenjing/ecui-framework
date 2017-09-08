@@ -339,27 +339,23 @@
          *
          * @param {string} name 路由名
          * @param {Object} options 需要改变的参数
-         * @param {boolean} rewrite 是否回写原来的参数
          */
-        change: function (name, options, rewrite) {
+        change: function (name, options) {
             options = options || {};
 
-            var oldOptions = parseLocation(currLocation);
-            if (rewrite) {
-                rewrite = options[''] || oldOptions[''];
-                for (var key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        if (options[key] === null) {
-                            delete oldOptions[key];
-                        } else {
-                            oldOptions[key] = options[key];
-                        }
+            var oldOptions = parseLocation(currLocation),
+                url = options[''] || oldOptions[''];
+
+            for (var key in options) {
+                if (options.hasOwnProperty(key)) {
+                    if (options[key] === null) {
+                        delete oldOptions[key];
+                    } else {
+                        oldOptions[key] = options[key];
                     }
                 }
-            } else {
-                rewrite = options[''] || oldOptions[''];
-                oldOptions = options;
             }
+
             var list = [];
             delete oldOptions[''];
             for (key in oldOptions) {
@@ -367,7 +363,7 @@
                     list.push(key + '=' + encodeURIComponent(oldOptions[key]));
                 }
             }
-            list.sort().splice(0, 0, rewrite);
+            list.sort().splice(0, 0, url);
             esr.setLocation(list.join('~'));
 
             if (name) {
