@@ -310,6 +310,20 @@
             }
         ),
 
+        // 用于创建空数组，参见request方法
+        CreateArray: core.inherits(
+            ui.Control,
+            function (el, options) {
+                ui.Control.call(this, el, options);
+                dom.addClass(el, 'ui-hide');
+            },
+            {
+                getValue: function () {
+                    return [];
+                }
+            }
+        ),
+
         /**
          * 添加路由信息。
          * @public
