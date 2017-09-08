@@ -1,5 +1,30 @@
 /*jslint forin:true*/
 (function () {
+    function consoleScroll() {
+        var body = document.getElementById('SimulateConsole');
+        body.style.bottom = -document.body.parentElement.scrollTop + 'px';
+    }
+
+    window.console = {
+        log: function () {
+            var body = document.getElementById('SimulateConsole');
+            if (!body) {
+                body = document.createElement('DIV');
+                body.id = 'SimulateConsole';
+                body.style.cssText = 'width:100%;height:100px;border-top:1px solid black;background:white;position:absolute;left:0;bottom:0';
+                document.body.appendChild(body);
+                window.attachEvent('onscroll', consoleScroll);
+            }
+            var text = [];
+            for (var i = 0; i < arguments.length; i++) {
+                text.push(arguments[i]);
+            }
+            var el = document.createElement('DIV');
+            el.innerHTML = text.join(' ');
+            body.appendChild(el);
+        }
+    };
+
     Date.now = function now() {
         return +new Date();
     };
