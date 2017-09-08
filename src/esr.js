@@ -330,7 +330,14 @@
          */
         callRoute: function (loc, childRoute) {
             loc = parseLocation(loc);
-            callRoute(loc[''], childRoute ? true : loc);
+            if (childRoute) {
+                for (var key in loc) {
+                    if (loc.hasOwnProperty(key)) {
+                        context[key] = loc[key];
+                    }
+                }
+            }
+            callRoute(loc[''], childRoute || loc);
         },
 
         /**
