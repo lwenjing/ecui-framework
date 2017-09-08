@@ -116,14 +116,16 @@
                         }) !== false) {
                         esr.render(name, route);
                     }
+                } else if (!route.model.length) {
+                    esr.render(name, route);
                 } else {
-                    if (route.model.length > 0 && route.onbeforerequest) {
+                    if (route.onbeforerequest) {
                         route.onbeforerequest(context);
                     }
                     esr.request(route.model, function () {
                         esr.render(name, route);
                     });
-                    if (route.model.length > 0 && route.onafterrequest) {
+                    if (route.onafterrequest) {
                         route.onafterrequest(context);
                     }
                 }
