@@ -67,7 +67,7 @@ cities - 地区联动下拉框控件。
                 ui.MultilevelSelect.prototype.$ready.call(this, options);
                 var province = this.getSelect(0);
                 this.setData(CITYS);
-                if (options.value && options.value != '') {
+                if (options.value && options.value != '' && options.value != '0') {
                     province.setValue(options.value.slice(0, 2) + '0000');
                     core.triggerEvent(province, 'change');
                     core.addEventListener(province, 'change', provinceChange);
