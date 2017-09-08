@@ -621,7 +621,7 @@
                 function setData(name, value) {
                     for (var i = 0, scope = data, list = name.split('.'); i < list.length - 1; i++) {
                         scope = scope[list[i]] = scope[list[i]] || {};
-                        if (scope instanceof Array) {
+                        if (scope instanceof Array && scope.length) {
                             scope = scope[scope.length - 1];
                         }
                     }
