@@ -171,7 +171,8 @@
 
                         mousedown(control, event);
                     } else {
-                        if (control = core.findControl(target = event.target)) {
+                        target = event.target;
+                        if (control = event.getTarget()) {
                             // 如果点击的是失效状态的控件，检查是否需要取消文本选择
                             onselectstart(control, event);
                             // 检查是否INPUT/SELECT/TEXTAREA/BUTTON标签，需要失去焦点，
@@ -263,7 +264,7 @@
 
                 event = core.wrapEvent(event);
 
-                var control = core.findControl(event.target);
+                var control = event.getTarget();
                 if (control && control.isDisabled()) {
                     // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
                     event.preventDefault();
@@ -293,7 +294,7 @@
             selectstart: function (event) {
                 // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现
                 event = core.wrapEvent(event);
-                onselectstart(core.findControl(event.target), event);
+                onselectstart(event.getTarget(), event);
             },
 
             // dragend 实质上也是mouseup的行为
@@ -490,7 +491,7 @@
                 return this._cControl;
             }
 
-            var control = core.findControl(this.target);
+            var control = this.getTarget();
 
             if (control && control.isTransparent()) {
                 this._bThrough = true;
@@ -533,6 +534,25 @@
             return this._oNative;
         },
 
+        /**
+         * 获取触发浏览器事件的控件对象。
+         * @public
+         *
+         * @return {ecui.ui.Control} 控件对象
+         */
+        getTarget: function () {
+            if (this._cTarget !== undefined) {
+                return this._cTarget;
+            }
+            return this._cTarget = core.findControl(this.target);
+        },
+
+        /**
+         * 事件是否穿透了 DOM 节点，如果控件设置了transparent属性，则浏览器事件将穿过这个控件到达下层的DOM元素。
+         * @public
+         *
+         * @return {boolean} 是否穿透了 DOM 节点
+         */
         isThrough: function () {
             return !!this._bThrough;
         },

@@ -141,15 +141,6 @@ _uOptions     - 下拉选择框
                     },
 
                     /**
-                     * 对于下拉框选项，鼠标移入即自动获得焦点。
-                     * @override
-                     */
-                    $mouseover: function (event) {
-                        ui.Item.prototype.$mouseover.call(this, event);
-                        core.setFocused(this);
-                    },
-
-                    /**
                      * 获取选项的值。
                      * getValue 方法返回选项控件的值，即选项选中时整个下拉框控件的值。
                      * @public
