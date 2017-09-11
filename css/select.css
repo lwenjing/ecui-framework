@@ -31,7 +31,7 @@
 .ui-select-focus {
     border-color: #368cda;
 }
-.ui-select-disabled,
+.ui-select-disabled {
     border-color: #e0e6ed;
 }
 .ui-select-disabled {

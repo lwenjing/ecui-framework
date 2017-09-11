@@ -87,7 +87,8 @@ _uOptions     - 下拉选择框
 
                 // 转化select标签
                 optionsEl.innerHTML = Array.prototype.map.call(oldEl.options, function (item) {
-                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + '">' + util.encodeHTML(item.text) + '</div>';
+                    var optionText = dom.getAttribute(item, core.getAttributeName());
+                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
                 }).join('');
             } else {
                 optionsEl = oldEl;
