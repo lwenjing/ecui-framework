@@ -11,7 +11,9 @@ _cFor - 被转发的控件对象
 //{if 0}//
 (function () {
     var core = ecui,
-        ui = core.ui;
+        ui = core.ui,
+
+        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
 //{/if}//
     /**
      * 初始化标签控件。
@@ -40,6 +42,7 @@ _cFor - 被转发的控件对象
                 var target = this._cFor || core.query(function (item) {
                         return item instanceof ui.InputControl && this.contain(item);
                     }, this)[0];
+
                 if (target && !target.isDisabled() && !target.contain(event.getControl())) {
                     core.triggerEvent(target, 'click', event);
                 }
@@ -57,6 +60,27 @@ _cFor - 被转发的控件对象
             }
         }
     );
+
+    // 初始化事件转发信息
+    (function () {
+        function build(name) {
+            ui.Label.prototype['$' + name] = function (event) {
+                ui.Control.prototype['$' + name].call(this, event);
+
+                var target = this._cFor || core.query(function (item) {
+                        return item instanceof ui.InputControl && this.contain(item);
+                    }, this)[0];
+
+                if (target && !target.isDisabled() && !target.contain(event.getControl())) {
+                    core.triggerEvent(target, name, event);
+                }
+            };
+        }
+
+        for (var i = 0; i < 7; ) {
+            build(eventNames[i++]);
+        }
+    }());
 //{if 0}//
 }());
 //{/if}//
