@@ -137,7 +137,7 @@ Item/Items - 定义选项操作相关的基本操作。
                                 item[this.TEXTNAME] = item;
                             }
                             options = item;
-                            this.getBody().appendChild(item = dom.create());
+                            this.getBody().appendChild(item = dom.create(options.primary));
                             item.innerHTML = options[this.TEXTNAME];
                         }
 
