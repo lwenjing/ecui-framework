@@ -57,7 +57,7 @@ Popup - 定义弹出层相关的基本操作。
             $click: function (event) {
                 this.$Popup.$click.call(this, event);
                 var popup = namedMap[this.getUID()];
-                if (event.getControl() === this) {
+                if (dom.contain(this.getOuter(), event.target)) {
                     if (popup.isShow()) {
                         owner = null;
 

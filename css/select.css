@@ -22,19 +22,16 @@
         overflow: hidden;
     }
 }
-.ui-select:hover,
 .ui-select-hover {
     border-color: #8492a6;
 }
-.ui-select:active,
 .ui-select-active {
     border-color: #368cda;
 }
 .ui-select-focus {
     border-color: #368cda;
 }
-.ui-select-disabled,
-.ui-select-disabled:hover {
+.ui-select-disabled {
     border-color: #e0e6ed;
 }
 .ui-select-disabled {
@@ -61,7 +58,6 @@
         font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
         text-overflow: ellipsis;
     }
-    .ui-select-item:hover,
     .ui-select-item-hover,
     .ui-select-item-focus {
         background-color: #368cda;

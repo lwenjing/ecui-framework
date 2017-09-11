@@ -87,7 +87,8 @@ _uOptions     - 下拉选择框
 
                 // 转化select标签
                 optionsEl.innerHTML = Array.prototype.map.call(oldEl.options, function (item) {
-                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + '">' + util.encodeHTML(item.text) + '</div>';
+                    var optionText = dom.getAttribute(item, core.getAttributeName());
+                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
                 }).join('');
             } else {
                 optionsEl = oldEl;
@@ -138,15 +139,6 @@ _uOptions     - 下拉选择框
                         parent._uOptions.hide();
                         setSelected.call(parent, this);
                         core.triggerEvent(parent, 'change');
-                    },
-
-                    /**
-                     * 对于下拉框选项，鼠标移入即自动获得焦点。
-                     * @override
-                     */
-                    $mouseover: function (event) {
-                        ui.Item.prototype.$mouseover.call(this, event);
-                        core.setFocused(this);
                     },
 
                     /**
