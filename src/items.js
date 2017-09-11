@@ -12,22 +12,6 @@ Item/Items - 定义选项操作相关的基本操作。
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
 //{/if}//
-    /**
-     * 选项控件交互处理。
-     * @private
-     *
-     * @param {Event} 事件对象
-     */
-    function onitem(event) {
-        var parent = this.getParent();
-
-        ui.Control.prototype['$' + event.type].call(this, event);
-
-        if (parent) {
-            core.triggerEvent(parent, 'item' + event.type.replace('mouse', ''), event, this);
-        }
-    }
-
     var namedMap = {};
 
     /**
@@ -137,7 +121,7 @@ Item/Items - 定义选项操作相关的基本操作。
                                 item[this.TEXTNAME] = item;
                             }
                             options = item;
-                            this.getBody().appendChild(item = dom.create());
+                            this.getBody().appendChild(item = dom.create(options.primary));
                             item.innerHTML = options[this.TEXTNAME];
                         }
 
@@ -266,8 +250,22 @@ Item/Items - 定义选项操作相关的基本操作。
         }
     };
 
-    eventNames.every(function (item, index) {
-        ui.Item.prototype['$' + item] = onitem;
-        return index < 6;
-    });
+    // 初始化事件转发信息
+    (function () {
+        function build(name) {
+            ui.Item.prototype['$' + name] = function (event) {
+                ui.Control.prototype['$' + name].call(this, event);
+
+                var parent = this.getParent();
+
+                if (parent) {
+                    core.triggerEvent(parent, 'item' + name.replace('mouse', ''), event, this);
+                }
+            };
+        }
+
+        for (var i = 0; i < 7; ) {
+            build(eventNames[i++]);
+        }
+    }());
 }());

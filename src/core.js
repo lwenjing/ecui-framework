@@ -1368,7 +1368,6 @@
          * @return {ecui.ui.Control} 指定名称的 ECUI 控件对象，如果不存在返回 null
          */
         get: function (id) {
-            initEnvironment();
             return namedControls[id] || null;
         },
 
