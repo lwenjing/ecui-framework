@@ -323,7 +323,7 @@ _uOptions     - 下拉选择框
             $mousewheel: function (event) {
                 ui.InputControl.prototype.$mousewheel.call(this, event);
                 var body = this.getBody(),
-                    target = event.getControl();
+                    target = event.getTarget();
                 if (this._uOptions.isShow() && (ieVersion < 9 || !target || !dom.contain(body, target.getOuter()) || (!body.scrollTop && event.detail < 0) || (body.scrollTop === body.scrollHeight - body.clientHeight && event.detail > 0))) {
                     event.preventDefault();
                 }
