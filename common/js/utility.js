@@ -18,6 +18,32 @@
     ];
     //统一对请求成功返回参数做分类
     ecui.esr.onparsedata = function (url, data) {
+        if (url.indexOf('v1/base/series') >= 0) {
+            data = data.data;
+            var options = [];
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0, list = data[i].serials; j < list.length; j++) {
+                    options.push({
+                        value: list[j].serialid,
+                        code: list[j].serialname
+                    });
+                }
+            }
+            return options;
+        }
+        if (url.indexOf('v1/base/motorcycletype') >= 0) {
+            data = data.data;
+            options = [];
+            for (i = 0; i < data.length; i++) {
+                for (j = 0, list = data[i].carmodels; j < list.length; j++) {
+                    options.push({
+                        value: list[j].carid,
+                        code: list[j].carname + '-' + data[i].caryear
+                    });
+                }
+            }
+            return options;
+        }
         var code = data.code;
         if (0 === code) {
             data = data.data;

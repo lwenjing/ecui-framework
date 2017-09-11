@@ -1,4 +1,4 @@
-(function () {
+/*(function () {
     var oldDisposeFn = ecui.ui.InputControl.prototype.$dispose,
         oldReadyFn = ecui.ui.InputControl.prototype.$ready;
 
@@ -43,7 +43,7 @@
         }
         oldReadyFn.call(this, options);
     };
-}());
+}());*/
 
 (function () {
     function doLoad() {
