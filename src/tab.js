@@ -6,12 +6,12 @@ Tab - 定义分页选项卡的操作。
 <div ui="type:tab;selected:1">
     <!-- 包含容器的选项卡 -->
     <div>
-        <h6>标题1</h6>
+        <strong>标题1</strong>
         <!-- 这里是容器 -->
         ...
     </div>
     <!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 -->
-    <h6 ui="selected:true">标题2</h6>
+    <strong ui="selected:true">标题2</strong>
 </div>
 
 属性
@@ -82,7 +82,7 @@ _eContainer      - 容器 DOM 元素
                 ui.Item,
                 'ui-tab-item',
                 function (el, options) {
-                    if (el.tagName !== 'H6') {
+                    if (el.tagName !== 'STRONG') {
                         var containerEl = el;
                         el = dom.first(el);
                         el.className = containerEl.className;

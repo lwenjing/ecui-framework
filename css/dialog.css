@@ -17,6 +17,7 @@
         background: url(images/ecui/close_hover.png) no-repeat;
     }
     .ui-dialog-title {
+        display: block;
         padding-left: 15px;
         background-color: #368CDA;
         border: none;

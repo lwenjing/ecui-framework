@@ -4,7 +4,7 @@ Dialog - 定义独立于文档布局的内容区域的基本操作。
 
 窗体控件直接HTML初始化的例子:
 <div ui="type:dialog">
-  <h6>窗体的标题</h6>
+  <strong>窗体的标题</strong>
   <!-- 这里放窗体的内容 -->
   ...
 </div>
@@ -52,7 +52,7 @@ _uClose     - 关闭按钮
             var bodyEl = el,
                 titleEl = dom.first(el);
 
-            if (titleEl && titleEl.tagName !== 'H6') {
+            if (titleEl && titleEl.tagName !== 'STRONG') {
                 titleEl = undefined;
             }
 
