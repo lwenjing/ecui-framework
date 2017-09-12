@@ -6,3 +6,4 @@ document.write('<script type="text/javascript" src="common/js/cityData.js"></scr
 document.write('<script type="text/javascript" src="common/js/ui/pagination/pagination.js"></script>');
 document.write('<script type="text/javascript" src="common/js/ui/moduleLink.js"></script>');
 document.write('<script type="text/javascript" src="common/js/ui/cityselect/cities.js"></script>');
+document.write('<script type="text/javascript" src="common/js/ui/inputselect/inputselect.js"></script>');
