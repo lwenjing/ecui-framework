@@ -72,6 +72,10 @@ _cFor - 被转发的控件对象
                     }, this)[0];
 
                 if (target && !target.isDisabled() && !target.contain(event.getControl())) {
+                    if (name === 'click') {
+                        core.setFocused(target);
+                    }
+
                     core.triggerEvent(target, name, event);
                 }
             };
