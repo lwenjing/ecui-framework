@@ -501,6 +501,17 @@ $$padding           - 内填充宽度缓存
             alterClass: function (className) {
                 if (this._sClass) {
                     var classes = core.$getClasses(this.constructor, this._sClass);
+
+                    if (this._sSubType) {
+                        classes.pop();
+                        var type = this.getType();
+                        if (this._sPrimary !== type) {
+                            classes.push(this._sPrimary + '-' + this._sSubType);
+                        }
+                        classes.push(type + '-' + this._sSubType);
+                        classes.push('');
+                    }
+
                     if (className.charAt(0) === '+') {
                         className = '-' + className.slice(1) + ' ';
                         if (this._aStatus.indexOf(className) < 0) {
@@ -522,17 +533,18 @@ $$padding           - 内填充宽度缓存
              * 控件的子类型会自动基于控件的类型与基本样式进行扩展，目前一个控件只能有一个子类型，用于 checkbox/radio/treeview 等改变状态使用，需要移除子类型只需要传入空字符串即可。
              * @public
              *
-             * @param {string} type 子类型名
+             * @param {string} subtype 子类型名
              */
-            alterSubType: function (type) {
-                if (this._sSubType !== type) {
+            alterSubType: function (subtype) {
+                if (this._sSubType !== subtype) {
+                    var type = this.getType();
                     if (this._sSubType) {
-                        dom.removeClass(this._eMain, (this._sPrimary ? this._aStatus.join(this._sPrimary + '-' + this._sSubType) : '') + this._aStatus.join(this.getType() + '-' + this._sSubType));
+                        dom.removeClass(this._eMain, (this._sPrimary !== type ? this._aStatus.join(this._sPrimary + '-' + this._sSubType) : '') + this._aStatus.join(type + '-' + this._sSubType));
                     }
-                    if (type) {
-                        dom.addClass(this._eMain, (this._sPrimary ? this._aStatus.join(this._sPrimary + '-' + type) : '') + this._aStatus.join(this.getType() + '-' + type));
+                    if (subtype) {
+                        dom.addClass(this._eMain, (this._sPrimary !== type ? this._aStatus.join(this._sPrimary + '-' + subtype) : '') + this._aStatus.join(type + '-' + subtype));
                     }
-                    this._sSubType = type;
+                    this._sSubType = subtype;
                 }
             },
 
