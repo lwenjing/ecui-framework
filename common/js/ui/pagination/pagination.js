@@ -105,7 +105,7 @@ _nTotalPage       - 总页数
                 }
 
                 // 填充数字按钮区
-                this._eChildren[2].innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
+                this.getMain().innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
             }
         }
     );
