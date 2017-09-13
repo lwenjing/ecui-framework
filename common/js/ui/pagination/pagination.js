@@ -101,7 +101,7 @@ _nTotalPage       - 总页数
 
 
                 for (var start = Math.max(1, currentPage - middlePage + 1), end = Math.min(totalPage, Math.max(maxPage, currentPage - maxPage + middlePage)); start <= end; start++) {
-                    html.push('<' + (start === currentPage ? 'strong' : 'span') + '>' + start + '</span>');
+                    html.push(start === currentPage ? '<strong>' + start + '</strong>' : '<span>' + start + '</span>');
                 }
 
                 // 填充数字按钮区
