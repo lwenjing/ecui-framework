@@ -6,21 +6,8 @@
 	user-select: none;
 	height:24px;
 	font-size:14px;
-	div{
-		float:left
-	}
-	.dynamic-page{
-		float:left;
-		div{
-			float:left
-		}
-		.pagination-button{
-			&:hover{
-				color:#38abff
-			}
-		}
-	}
-	.pagination-button{
+	span,font,strong{
+		display:inline-block;
 		margin-right:6px;
 		padding:0 4px;
 		min-width:16px;
@@ -31,14 +18,15 @@
 		border-radius:3px;
 		cursor:pointer
 	}
-	.pagination-button-hover{
+	font{
+		color:#ccc;
+		cursor:default;
+	}
+	span:hover{
 		color:#38abff;
 	}
-	.pagination-button-active{
+	strong{
 		background:#368cda;
 		color:#fff !important;
-	}
-	.disabled{
-		color:#ccc
 	}
 }

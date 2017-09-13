@@ -99,12 +99,12 @@ _nTotalPage       - 总页数
                     maxPage = this.PAGEFORMAT.maxPage,
                     middlePage = this.PAGEFORMAT.middlePage;
 
-                for (var start = Math.max(1, currentPage - middlePage + 1), end = Math.min(totalPage, Math.max(maxPage, currentPage - maxPage + middlePage)); start <= end; start++) {
+                for (var start = Math.max(1, Math.min(totalPage - maxPage + 1, currentPage - middlePage + 1)), end = Math.min(totalPage, Math.max(maxPage, currentPage + maxPage - middlePage)); start <= end; start++) {
                     html.push(start === currentPage ? '<strong>' + start + '</strong>' : '<span>' + start + '</span>');
                 }
 
                 // 填充数字按钮区
-                this.getMain().innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>' + html.join('') + '<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
+                this.getMain().innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
             }
         }
     );
