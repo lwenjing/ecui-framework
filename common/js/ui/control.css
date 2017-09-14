@@ -1,3 +1,3 @@
-@import (less) "pagination/pagination.less";
-@import (less) "cityselect/cities.less";
-@import (less) "inputselect/inputselect.less";
+@import (less) "pagination/pagination.css";
+@import (less) "cityselect/cities.css";
+@import (less) "inputselect/inputselect.css";
