@@ -144,7 +144,7 @@ _bDefault  - 默认的选中状态
              */
             $reset: function (event) {
                 // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
-                this.getInput().checked = this._bDefault;
+                this.setChecked(this._bDefault);
                 ui.InputControl.prototype.$reset.call(this, event);
             },
 

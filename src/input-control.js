@@ -157,17 +157,11 @@ _eInput        - INPUT对象
     function resetForm(event) {
         event = core.wrapEvent(event);
 
-        // 复位的处理延后执行，是为了能读取复位后的值
-        util.timer(
-            function () {
-                Array.prototype.forEach.call(this.elements, function (item) {
-                    if (item.getControl) {
-                        core.triggerEvent(item.getControl(), 'reset', event);
-                    }
-                });
-            },
-            0
-        );
+        Array.prototype.forEach.call(this.elements, function (item) {
+            if (item.getControl) {
+                core.triggerEvent(item.getControl(), 'reset', event);
+            }
+        });
     }
 
     /**

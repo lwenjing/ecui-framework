@@ -73,7 +73,8 @@ _uOptions     - 下拉选择框
         ui.InputControl,
         'ui-select',
         function (el, options) {
-            util.setDefault(options, 'inputType', 'hidden');
+            util.setDefault(options, 'hidden', true);
+            util.setDefault(options, 'inputType', 'text');
 
             var oldEl = el;
             el = dom.insertBefore(dom.create(el.className), el);
@@ -336,6 +337,14 @@ _uOptions     - 下拉选择框
             $ready: function (options) {
                 ui.InputControl.prototype.$ready.call(this, options);
                 this.setValue(this.getValue());
+            },
+
+            /**
+             * @override
+             */
+            $reset: function (event) {
+                this.setValue(this.getInput().defaultValue);
+                ui.InputControl.prototype.$ready.call(this, event);
             },
 
             /**
