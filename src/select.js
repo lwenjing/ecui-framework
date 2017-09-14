@@ -342,9 +342,10 @@ _uOptions     - 下拉选择框
             /**
              * @override
              */
-            $reset: function (event) {
-                this.setValue(this.getInput().defaultValue);
-                ui.InputControl.prototype.$ready.call(this, event);
+            $reset: function () {
+                var el = this.getInput();
+                el.value = el.defaultValue;
+                ui.InputControl.prototype.$reset.call(this);
             },
 
             /**

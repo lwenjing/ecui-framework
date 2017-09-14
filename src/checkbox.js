@@ -182,10 +182,10 @@ _aDependents     - 所有的从属复选框
             /**
              * @override
              */
-            $reset: function (event) {
+            $reset: function () {
                 // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
                 this.getInput().checked = this._bDefault;
-                ui.InputControl.prototype.$reset.call(this, event);
+                ui.InputControl.prototype.$reset.call(this);
             },
 
             /**

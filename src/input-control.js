@@ -151,15 +151,11 @@ _eInput        - INPUT对象
     /**
      * 表单复位事件处理。
      * @private
-     *
-     * @param {Event} event 事件对象
      */
-    function resetForm(event) {
-        event = core.wrapEvent(event);
-
+    function resetForm() {
         Array.prototype.forEach.call(this.elements, function (item) {
             if (item.getControl) {
-                core.triggerEvent(item.getControl(), 'reset', event);
+                core.triggerEvent(item.getControl(), 'reset');
             }
         });
     }
@@ -318,8 +314,6 @@ _eInput        - INPUT对象
             /**
              * 输入重置事件的默认处理。
              * @protected
-             *
-             * @param {Event} event 事件对象
              */
             $reset: function () {
                 this.$ready();
