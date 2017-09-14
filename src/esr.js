@@ -693,30 +693,30 @@
                     method: method,
                     headers: headers,
                     data: data,
-                    onsuccess: function (data) {
+                    onsuccess: function (text) {
                         count--;
                         try {
-                            data = JSON.parse(data);
+                            var data = JSON.parse(text);
 
                             if (esr.onparsedata) {
-                                data = esr.onparsedata(url, data);
+                                try {
+                                    data = esr.onparsedata(url, data);
+                                } catch (e) {
+                                    err.push({handle: e, url: varUrl, name: varName});
+                                }
                             }
 
-                            if ('number' === typeof data) {
-                                err.push({code: data, url: varUrl, name: varName});
+                            if (varName) {
+                                esr.setData(varName, data);
                             } else {
-                                if (varName) {
-                                    esr.setData(varName, data);
-                                } else {
-                                    for (var key in data) {
-                                        if (data.hasOwnProperty(key)) {
-                                            esr.setData(key, data[key]);
-                                        }
+                                for (var key in data) {
+                                    if (data.hasOwnProperty(key)) {
+                                        esr.setData(key, data[key]);
                                     }
                                 }
                             }
                         } catch (e) {
-                            err.push({url: varUrl, name: varName});
+                            err.push({handle: e, url: varUrl, name: varName});
                         }
 
                         if (!count) {
