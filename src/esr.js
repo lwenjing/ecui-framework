@@ -699,11 +699,7 @@
                             var data = JSON.parse(text);
 
                             if (esr.onparsedata) {
-                                try {
-                                    data = esr.onparsedata(url, data);
-                                } catch (e) {
-                                    err.push({handle: e, url: varUrl, name: varName});
-                                }
+                                data = esr.onparsedata(url, data);
                             }
 
                             if (varName) {
