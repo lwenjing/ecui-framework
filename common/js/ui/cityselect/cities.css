@@ -3,13 +3,15 @@
 	position: relative;
 	font-size: 0px;
 	.ui-select {
+		background:url('images/ecui/arrow.png') no-repeat;
+		background-position: 100px center !important;
+		background-color: #FFF; 
 		position: relative;
 		width: 120px !important;
 		height: 30px !important;
 		line-height: 30px !important;
 		padding-right: 0px;
 		margin: 0px 5px;
-		background: #FFF;
 		vertical-align: middle;
 		font-size: 14px;
 		display: inline-block !important;
