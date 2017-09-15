@@ -1,3 +1,4 @@
-@import (less) "pagination/pagination.less";
-@import (less) "cityselect/cities.less";
-@import (less) "inputselect/inputselect.less";
+/*<script>window.onload=function(){var url=location.href,hash=document.getElementsByTagName('TEXTAREA')[0].value;url=decodeURIComponent(url.slice(url.indexOf('=')+1));parent.location.href=url+'#'+encodeURIComponent(hash.slice(hash.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')||' ');}</script><textarea>*/
+@import (less) "pagination/pagination.css";
+@import (less) "cityselect/cities.css";
+@import (less) "inputselect/inputselect.css";
