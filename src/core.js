@@ -698,7 +698,9 @@
      * @return {ecui.ui.Control} 公共的父控件，如果没有，返回 null
      */
     function getCommonParent(control1, control2) {
-        if (control1 !== control2 && (control1 || control2)) {
+        /*jslint eqeq:true*/
+        if (control1 != control2) {
+            /*jslint eqeq:false*/
             var i = 0,
                 list1 = [],
                 list2 = [];
