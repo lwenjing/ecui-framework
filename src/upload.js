@@ -21,7 +21,7 @@ Upload - 文件上传控件。
         dom = core.dom,
         ui = core.ui;
 //{/if}//
-    function fileChange() {
+    function fileChangeHandler() {
         var reader = new FileReader(),
             file = this._eFile.files[0],
             progress = core.query(function (item) {
@@ -69,7 +69,7 @@ Upload - 文件上传控件。
 
             init: function (options) {
                 ui.Control.prototype.init.call(this, options);
-                dom.addEventListener(this._eFile, 'change', fileChange.bind(this));
+                dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
             }
         }
     );

@@ -12,6 +12,23 @@ var ecui;
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 
     ecui = {
+        /**
+         * 返回指定id的 DOM 对象。
+         * @public
+         *
+         * @param {string} id DOM 对象标识
+         * @return {HTMLElement} DOM 对象
+         */
+        $: function (id) {
+            return document.getElementById(id);
+        },
+
+        strict: isStrict,
+        webkit: isWebkit,
+        ie: ieVersion,
+        firefox: firefoxVersion,
+        opera: operaVersion,
+
         dom: {
             /**
              * 为 Element 对象添加新的样式。
@@ -535,73 +552,6 @@ var ecui;
              * @param {Object} options 选项
              */
             ajax: function (url, options) {
-                options = options || {};
-
-                var data = options.data || '',
-                    async = options.async !== false,
-                    method = (options.method || 'GET').toUpperCase(),
-                    headers = options.headers || {},
-                    onerror = options.onerror || util.blank,
-                    // 基本的逻辑来自lili同学提供的patch
-                    xhr;
-
-                try {
-                    if (window.ActiveXObject) {
-                        try {
-                            xhr = new ActiveXObject('Msxml2.XMLHTTP');
-                        } catch (e) {
-                            xhr = new ActiveXObject('Microsoft.XMLHTTP');
-                        }
-                    } else {
-                        xhr = new XMLHttpRequest();
-                    }
-
-                    if (options.onupload && xhr.upload) {
-                        xhr.upload.onprogress = options.onupload;
-                    }
-
-                    if (method === 'GET') {
-                        if (data) {
-                            url += (url.indexOf('?') >= 0 ? '&' : '?') + data;
-                            data = null;
-                        }
-                        if (!options.cache) {
-                            url += (url.indexOf('?') >= 0 ? '&' : '?') + 'b' + Date.now() + '=1';
-                        }
-                    }
-
-                    xhr.open(method, url, async);
-
-                    if (async) {
-                        xhr.onreadystatechange = stateChangeHandler;
-                    }
-
-                    for (var key in headers) {
-                        if (headers.hasOwnProperty(key)) {
-                            xhr.setRequestHeader(key, headers[key]);
-                        }
-                    }
-
-                    if (options.timeout) {
-                        var stop = util.timer(
-                            function () {
-                                xhr.onreadystatechange = util.blank;
-                                xhr.abort();
-                                onerror(xhr);
-                                xhr = null;
-                            },
-                            options.timeout
-                        );
-                    }
-                    xhr.send(data);
-
-                    if (!async) {
-                        stateChangeHandler();
-                    }
-                } catch (e) {
-                    onerror(xhr);
-                }
-
                 function stateChangeHandler() {
                     if (xhr.readyState === 4) {
                         try {
@@ -648,6 +598,74 @@ var ecui;
                             stop();
                         }
                     }
+                }
+
+                options = options || {};
+
+                var data = options.data || '',
+                    async = options.async !== false,
+                    method = (options.method || 'GET').toUpperCase(),
+                    headers = options.headers || {},
+                    onerror = options.onerror || util.blank,
+                    // 基本的逻辑来自lili同学提供的patch
+                    stop,
+                    xhr;
+
+                try {
+                    if (window.ActiveXObject) {
+                        try {
+                            xhr = new ActiveXObject('Msxml2.XMLHTTP');
+                        } catch (e) {
+                            xhr = new ActiveXObject('Microsoft.XMLHTTP');
+                        }
+                    } else {
+                        xhr = new XMLHttpRequest();
+                    }
+
+                    if (options.onupload && xhr.upload) {
+                        xhr.upload.onprogress = options.onupload;
+                    }
+
+                    if (method === 'GET') {
+                        if (data) {
+                            url += (url.indexOf('?') >= 0 ? '&' : '?') + data;
+                            data = null;
+                        }
+                        if (!options.cache) {
+                            url += (url.indexOf('?') >= 0 ? '&' : '?') + 'b' + Date.now() + '=1';
+                        }
+                    }
+
+                    xhr.open(method, url, async);
+
+                    if (async) {
+                        xhr.onreadystatechange = stateChangeHandler;
+                    }
+
+                    for (var key in headers) {
+                        if (headers.hasOwnProperty(key)) {
+                            xhr.setRequestHeader(key, headers[key]);
+                        }
+                    }
+
+                    if (options.timeout) {
+                        stop = util.timer(
+                            function () {
+                                xhr.onreadystatechange = util.blank;
+                                xhr.abort();
+                                onerror(xhr);
+                                xhr = null;
+                            },
+                            options.timeout
+                        );
+                    }
+                    xhr.send(data);
+
+                    if (!async) {
+                        stateChangeHandler();
+                    }
+                } catch (e) {
+                    onerror(xhr);
                 }
             },
 
@@ -747,8 +765,8 @@ var ecui;
             encodeHTML: function (source) {
                 return source.replace(
                     /[&<>"']/g,
-                    function (c) {
-                        return '&#' + c.charCodeAt(0) + ';';
+                    function (match) {
+                        return '&#' + match.charCodeAt(0) + ';';
                     }
                 );
             },
@@ -1054,34 +1072,13 @@ var ecui;
         };
 
     /**
-     * 返回指定id的 DOM 对象。
-     * @public
-     *
-     * @param {string} id DOM 对象标识
-     * @return {HTMLElement} DOM 对象
-     */
-    core.$ = function (id) {
-        return document.getElementById(id);
-    };
-
-    core.strict = isStrict;
-    core.webkit = isWebkit;
-    core.ie = ieVersion;
-    core.firefox = firefoxVersion;
-    core.opera = operaVersion;
-
-    /**
      * 设置页面加载完毕后自动执行的方法。
      * @public
      *
      * @param {Function} func 需要自动执行的方法
      */
     dom.ready = (function () {
-        var hasReady = false,
-            list = [],
-            check;
-
-        function ready() {
+        function loadedHandler() {
             if (!hasReady) {
                 // 在处理的过程中，可能又有新的dom.ready函数被添加，需要添加到最后而不是直接执行
                 for (var i = 0, func; func = list[i++]; ) {
@@ -1092,28 +1089,32 @@ var ecui;
             }
         }
 
-        if (document.addEventListener && !operaVersion) {
-            document.addEventListener('DOMContentLoaded', ready, false);
-        } else if (ieVersion && window === top) {
-            check = function () {
-                try {
-                    document.documentElement.doScroll('left');
-                    ready();
-                } catch (e) {
-                    util.timer(check);
-                }
-            };
-            check();
+        function checkLoaded() {
+            try {
+                document.documentElement.doScroll('left');
+                loadedHandler();
+            } catch (e) {
+                setTimeout(checkLoaded, 50);
+            }
         }
 
-        dom.addEventListener(window, 'load', ready);
+        var hasReady = false,
+            list = [];
+
+        if (document.addEventListener && !operaVersion) {
+            document.addEventListener('DOMContentLoaded', loadedHandler, false);
+        } else if (ieVersion && window === top) {
+            checkLoaded();
+        }
+
+        dom.addEventListener(window, 'load', loadedHandler);
 
         return function (func) {
             list.push(func);
             if (hasReady) {
                 // 在一次处理的过程中防止重入
                 hasReady = false;
-                ready();
+                loadedHandler();
             }
         };
     }());

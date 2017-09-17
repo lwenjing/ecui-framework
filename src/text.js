@@ -19,8 +19,8 @@ _nMaxValue    - 允许提交的最大值
 _oRegExp      - 允许提交的格式正则表达式
 _ePlaceHolder - 为空时的提示信息标签
 */
-(function () {
 //{if 0}//
+(function () {
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
@@ -247,4 +247,6 @@ _ePlaceHolder - 为空时的提示信息标签
             }
         }
     );
+//{if 0}//
 }());
+//{/if}//

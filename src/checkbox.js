@@ -28,18 +28,20 @@ _aDependents     - 所有的从属复选框
      * 为控件的 INPUT 节点绑定事件。
      * @private
      */
-    function change(event) {
+    function changeHandler(event) {
         var control = core.wrapEvent(event).target.getControl();
-        setStatus.call(control, control.getInput().checked ? 0 : 1);
+        setStatus(control, control.getInput().checked ? 0 : 1);
     }
 
     /**
      * 复选框控件刷新，计算所有从复选框，根据它们的选中状态计算自身的选中状态。
      * @private
+     *
+     * @param {ecui.ui.Checkbox} checkbox 复选框控件
      */
-    function flush() {
+    function refresh(checkbox) {
         var status;
-        this._aDependents.forEach(function (item) {
+        checkbox._aDependents.forEach(function (item) {
             if (status !== undefined && status !== item._nStatus) {
                 status = 2;
             } else {
@@ -48,7 +50,7 @@ _aDependents     - 所有的从属复选框
         });
 
         if (status !== undefined) {
-            setStatus.call(this, status);
+            setStatus(checkbox, status);
         }
     }
 
@@ -56,23 +58,24 @@ _aDependents     - 所有的从属复选框
      * 改变复选框状态。
      * @private
      *
+     * @param {ecui.ui.Checkbox} checkbox 复选框控件
      * @param {number} status 新的状态，0--全选，1--未选，2--半选
      */
-    function setStatus(status) {
-        if (status !== this._nStatus) {
+    function setStatus(checkbox, status) {
+        if (status !== checkbox._nStatus) {
             // 状态发生改变时进行处理
-            this.alterSubType(['checked', '', 'part'][status]);
+            checkbox.alterSubType(['checked', '', 'part'][status]);
 
-            this._nStatus = status;
+            checkbox._nStatus = status;
 
-            var el = this.getInput();
+            var el = checkbox.getInput();
             el.defaultChecked = el.checked = !status;
 
             // 如果有主复选框，刷新主复选框的状态
-            if (this._cSubject) {
-                flush.call(this._cSubject);
+            if (checkbox._cSubject) {
+                refresh(checkbox._cSubject);
             }
-            core.triggerEvent(this, 'change');
+            core.triggerEvent(checkbox, 'change');
         }
     }
 
@@ -98,7 +101,7 @@ _aDependents     - 所有的从属复选框
             this._aDependents = [];
 
             core.delegate(options.subject, this, this.setSubject);
-            dom.addEventListener(this.getInput(), 'change', change);
+            dom.addEventListener(this.getInput(), 'change', changeHandler);
         },
         {
             /**
@@ -175,7 +178,7 @@ _aDependents     - 所有的从属复选框
                 ui.InputControl.prototype.$ready.call(this, options);
                 if (!this._aDependents.length) {
                     // 如果控件是主复选框，应该直接根据从属复选框的状态来显示自己的状态
-                    setStatus.call(this, this.getInput().checked ? 0 : 1);
+                    setStatus(this, this.getInput().checked ? 0 : 1);
                 }
             },
 
@@ -227,7 +230,7 @@ _aDependents     - 所有的从属复选框
              * @param {boolean} checked 是否选中
              */
             setChecked: function (checked) {
-                setStatus.call(this, checked ? 0 : 1);
+                setStatus(this, checked ? 0 : 1);
                 // 如果有从属复选框，全部改为与当前复选框相同的状态
                 this._aDependents.forEach(function (item) {
                     item._cSubject = null;
@@ -251,12 +254,12 @@ _aDependents     - 所有的从属复选框
                     if (oldSubject) {
                         // 已经设置过主复选框，需要先释放引用
                         util.remove(oldSubject._aDependents, this);
-                        flush.call(oldSubject);
+                        refresh(oldSubject);
                     }
 
                     if (checkbox) {
                         checkbox._aDependents.push(this);
-                        flush.call(checkbox);
+                        refresh(checkbox);
                     }
                 }
             }

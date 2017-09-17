@@ -132,34 +132,6 @@ _eInput        - INPUT对象
         };
 
     /**
-     * 表单提交事件处理。
-     * @private
-     *
-     * @param {Event} event 事件对象
-     */
-    function submitForm(event) {
-        event = core.wrapEvent(event);
-
-        Array.prototype.forEach.call(this.elements, function (item) {
-            if (item.getControl) {
-                core.triggerEvent(item.getControl(), 'submit', event);
-            }
-        });
-    }
-
-    /**
-     * 表单复位事件处理。
-     * @private
-     */
-    function resetForm() {
-        Array.prototype.forEach.call(this.elements, function (item) {
-            if (item.getControl) {
-                core.triggerEvent(item.getControl(), 'reset');
-            }
-        });
-    }
-
-    /**
      * 为控件的 INPUT 节点绑定事件。
      * @private
      */
@@ -173,6 +145,34 @@ _eInput        - INPUT对象
                 }
             }
         }
+    }
+
+    /**
+     * 表单提交事件处理。
+     * @private
+     *
+     * @param {Event} event 事件对象
+     */
+    function submitHandler(event) {
+        event = core.wrapEvent(event);
+
+        Array.prototype.forEach.call(this.elements, function (item) {
+            if (item.getControl) {
+                core.triggerEvent(item.getControl(), 'submit', event);
+            }
+        });
+    }
+
+    /**
+     * 表单复位事件处理。
+     * @private
+     */
+    function resetHandler() {
+        Array.prototype.forEach.call(this.elements, function (item) {
+            if (item.getControl) {
+                core.triggerEvent(item.getControl(), 'reset');
+            }
+        });
     }
 
     /**
@@ -334,8 +334,8 @@ _eInput        - INPUT对象
                 ui.Control.prototype.$setParent.call(this, parent);
                 if (parent = this._eInput.form) {
                     if (!parent.getControl) {
-                        dom.addEventListener(parent, 'submit', submitForm);
-                        dom.addEventListener(parent, 'reset', resetForm);
+                        dom.addEventListener(parent, 'submit', submitHandler);
+                        dom.addEventListener(parent, 'reset', resetHandler);
                         parent.getControl = util.blank;
                     }
                 }

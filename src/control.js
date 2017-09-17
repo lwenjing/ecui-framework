@@ -1196,7 +1196,7 @@ $$padding           - 内填充宽度缓存
              * @param {boolean} transparent 控件是否透明
              */
             setTransparent: function (transparent) {
-                return this._bTransparent = transparent;
+                this._bTransparent = transparent;
             },
 
             /**

@@ -37,10 +37,12 @@ _aChildren     - 子控件集合
     /**
      * 树视图控件刷新，根据子树视图控件的数量及显示的状态设置样式。
      * @private
+     *
+     * @param {ecui.ui.TreeView} tree 树控件
      */
-    function flush() {
-        if (this._aChildren) {
-            this.alterSubType(this._aChildren.length ? (this._bCollapsed ? 'collapsed' : 'expanded') : (!this._eChildren || this._bAutoType ? 'leaf' : 'empty'));
+    function refresh(tree) {
+        if (tree._aChildren) {
+            tree.alterSubType(tree._aChildren.length ? (tree._bCollapsed ? 'collapsed' : 'expanded') : (!tree._eChildren || tree._bAutoType ? 'leaf' : 'empty'));
         }
     }
 
@@ -97,7 +99,7 @@ _aChildren     - 子控件集合
                 return item;
             }, this) : [];
 
-            flush.call(this);
+            refresh(this);
         },
         {
             /**
@@ -243,7 +245,7 @@ _aChildren     - 子控件集合
                     }
 
                     util.remove(oldParent._aChildren, this);
-                    flush.call(oldParent);
+                    refresh(oldParent);
                 }
 
                 ui.Control.prototype.$setParent.call(this, parent);
@@ -306,7 +308,7 @@ _aChildren     - 子控件集合
                     }
                 }
 
-                flush.call(this);
+                refresh(this);
 
                 return item;
             },
@@ -319,7 +321,7 @@ _aChildren     - 子控件集合
                 if (this._eChildren && !this._bCollapsed) {
                     this._bCollapsed = true;
                     dom.addClass(this._eChildren, 'ui-hide');
-                    flush.call(this);
+                    refresh(this);
                 }
             },
 
@@ -331,7 +333,7 @@ _aChildren     - 子控件集合
                 if (this._eChildren && this._bCollapsed) {
                     this._bCollapsed = false;
                     dom.removeClass(this._eChildren, 'ui-hide');
-                    flush.call(this);
+                    refresh(this);
                 }
             },
 

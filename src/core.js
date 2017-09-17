@@ -611,21 +611,6 @@
     }
 
     /**
-     * 设置document节点上的鼠标事件。
-     * @private
-     *
-     * @param {Object} env 环境描述对象，保存当前的鼠标光标位置与document上的鼠标事件等
-     * @param {boolean} remove 如果为true表示需要移除data上的鼠标事件，否则是添加鼠标事件
-     */
-    function changeHandler(env, remove) {
-        for (var i = 0, func = remove ? dom.removeEventListener : dom.addEventListener, name; i < 5; ) {
-            if (env[name = eventNames[i++]]) {
-                func(document, name, env[name]);
-            }
-        }
-    }
-
-    /**
      * 比较两个控件的叠加顺序。
      * @private
      *
@@ -938,16 +923,31 @@
      */
     function setEnv(env) {
         var newEnv = {};
-        changeHandler(currEnv, true);
+        setHandler(currEnv, true);
 
         util.extend(newEnv, currEnv);
         util.extend(newEnv, env);
         newEnv.x = mouseX;
         newEnv.y = mouseY;
-        changeHandler(newEnv);
+        setHandler(newEnv);
 
         envStack.push(currEnv);
         currEnv = newEnv;
+    }
+
+    /**
+     * 设置document节点上的鼠标事件。
+     * @private
+     *
+     * @param {Object} env 环境描述对象，保存当前的鼠标光标位置与document上的鼠标事件等
+     * @param {boolean} remove 如果为true表示需要移除data上的鼠标事件，否则是添加鼠标事件
+     */
+    function setHandler(env, remove) {
+        for (var i = 0, func = remove ? dom.removeEventListener : dom.addEventListener, name; i < 5; ) {
+            if (env[name = eventNames[i++]]) {
+                func(document, name, env[name]);
+            }
+        }
     }
 
     util.extend(core, {
@@ -1279,11 +1279,7 @@
                     }
                 }
             }).forEach(function (item) {
-                if (item.ondispose) {
-                    item.ondispose();
-                    item.ondispose = util.blank;
-                }
-                core.triggerEvent(item, 'dispose');
+                item.$dispose();
                 core.removeControlListeners(item);
             });
         },
@@ -1874,8 +1870,8 @@
          * @public
          */
         restore: function () {
-            changeHandler(currEnv, true);
-            changeHandler(currEnv = envStack.pop());
+            setHandler(currEnv, true);
+            setHandler(currEnv = envStack.pop());
         },
 
         /**

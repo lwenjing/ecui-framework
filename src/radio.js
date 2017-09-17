@@ -26,36 +26,38 @@ _bDefault  - 默认的选中状态
      * @private
      */
     function change(event) {
-        setChecked.call(core.wrapEvent(event).target.getControl(), true);
+        setChecked(core.wrapEvent(event).target.getControl(), true);
     }
 
     /**
      * 单选框控件刷新。
      * @private
      *
+     * @param {ecui.ui.Radio} radio 单选框控件
      * @param {boolean} checked 新的状态，如果忽略表示不改变当前状态
      */
-    function flush(checked) {
+    function refresh(radio, checked) {
         if (checked !== undefined) {
-            var el = this.getInput();
+            var el = radio.getInput();
             el.defaultChecked = el.checked = checked;
         }
-        this.alterSubType(this.isChecked() ? 'checked' : '');
+        radio.alterSubType(radio.isChecked() ? 'checked' : '');
     }
 
     /**
      * 设置单选框选中状态。
      * @private
      *
+     * @param {ecui.ui.Radio} radio 单选框控件
      * @param {boolean} checked 新的状态，如果忽略表示不改变当前状态
      */
-    function setChecked(checked) {
+    function setChecked(radio, checked) {
         if (checked) {
-            this.getItems().forEach(function (item) {
-                flush.call(item, item === this);
-            }, this);
+            radio.getItems().forEach(function (item) {
+                refresh(item, item === radio);
+            });
         } else {
-            flush.call(this, false);
+            refresh(radio, false);
         }
     }
 
@@ -136,7 +138,7 @@ _bDefault  - 默认的选中状态
              */
             $ready: function (options) {
                 ui.InputControl.prototype.$ready.call(this, options);
-                flush.call(this);
+                refresh(this);
             },
 
             /**
@@ -195,7 +197,7 @@ _bDefault  - 默认的选中状态
              */
             setChecked: function (checked) {
                 if (this.isChecked() !== checked) {
-                    setChecked.call(this, checked);
+                    setChecked(this, checked);
                 }
             }
         }

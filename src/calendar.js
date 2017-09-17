@@ -41,7 +41,6 @@ _eTitle        - 日历头部信息提示区
             );
 
             // 获取el所有直属节点
-            console.log(el.firstChild);
             var headers = dom.children(el.firstChild);
             // 定义头部展示区
             this._eTitle = headers[0];

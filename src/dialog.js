@@ -26,11 +26,13 @@ _uClose     - 关闭按钮
 
     /**
      * 刷新所有显示的窗体的zIndex属性。
-     * @protected
+     * @private
+     *
+     * @param {ecui.ui.Dialog} dialog 窗体控件
      */
-    function flush() {
-        util.remove(dialogs, this);
-        dialogs.push(this);
+    function refresh(dialog) {
+        util.remove(dialogs, dialog);
+        dialogs.push(dialog);
 
         // 改变当前窗体之后的全部窗体z轴位置，将当前窗体置顶
         var num = dialogs.length - modalCount;
@@ -156,7 +158,7 @@ _uClose     - 关闭按钮
              */
             $focus: function () {
                 ui.Control.prototype.$focus.call(this);
-                flush.call(this);
+                refresh(this);
             },
 
             /**
@@ -258,7 +260,7 @@ _uClose     - 关闭按钮
 
                 var result = ui.Control.prototype.show.call(this);
                 if (!result) {
-                    flush.call(this);
+                    refresh(this);
                 }
                 return result;
             },
@@ -280,7 +282,7 @@ _uClose     - 关闭按钮
 
                     this._bModal = true;
                     if (!ui.Control.prototype.show.call(this)) {
-                        flush.call(this);
+                        refresh(this);
                     }
                     this.center();
                 }

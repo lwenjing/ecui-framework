@@ -31,33 +31,36 @@ _uOptions     - 下拉选择框
     /**
      * 下拉框刷新。
      * @private
+     *
+     * @param {ecui.ui.Select} select 下拉框控件
      */
-    function flush() {
-        if (this._cSelected) {
-            core.setFocused(this._cSelected);
+    function refresh(select) {
+        if (select._cSelected) {
+            core.setFocused(select._cSelected);
         }
-        this._uOptions.getBody().scrollTop = this.getBodyHeight() * this.getItems().indexOf(this._cSelected);
+        select._uOptions.getBody().scrollTop = select.getBodyHeight() * select.getItems().indexOf(select._cSelected);
     }
 
     /**
      * 改变下拉框当前选中的项。
      * @private
      *
+     * @param {ecui.ui.Select} select 下拉框控件
      * @param {ecui.ui.Select.Item} item 新选中的项
      */
-    function setSelected(item) {
+    function setSelected(select, item) {
         item = item || null;
-        if (item !== this._cSelected) {
-            this._uText.setContent(item ? item.getBody().innerHTML : '');
-            ui.InputControl.prototype.setValue.call(this, item ? item._sValue : '');
+        if (item !== select._cSelected) {
+            select._uText.setContent(item ? item.getBody().innerHTML : '');
+            ui.InputControl.prototype.setValue.call(select, item ? item._sValue : '');
             if (item) {
-                if (this._uOptions.isShow()) {
+                if (select._uOptions.isShow()) {
                     core.setFocused(item);
                 }
             } else {
-                core.loseFocus(this._cSelected);
+                core.loseFocus(select._cSelected);
             }
-            this._cSelected = item;
+            select._cSelected = item;
         }
     }
 
@@ -152,7 +155,7 @@ _uOptions     - 下拉选择框
                         ui.Item.prototype.$click.call(this, event);
                         var parent = this.getParent();
                         parent._uOptions.hide();
-                        setSelected.call(parent, this);
+                        setSelected(parent, this);
                         core.triggerEvent(parent, 'change');
                     },
 
@@ -199,7 +202,7 @@ _uOptions     - 下拉选择框
                      */
                     $show: function () {
                         ui.Control.prototype.$show.call(this);
-                        flush.call(this.getParent());
+                        refresh(this.getParent());
                     }
                 }
             ),
@@ -321,7 +324,7 @@ _uOptions     - 下拉选择框
                             // 回车键选中，ESC键取消
                             if (which === 13) {
                                 if (focus.getParent() === this && this._cSelected !== focus) {
-                                    setSelected.call(this, focus);
+                                    setSelected(this, focus);
                                     core.triggerEvent(this, 'change');
                                 }
                             }
@@ -368,7 +371,7 @@ _uOptions     - 下拉选择框
              */
             $remove: function (item) {
                 if (item === this._cSelected) {
-                    setSelected.call(this);
+                    setSelected(this);
                 }
                 ui.InputControl.prototype.$remove.call(this, item);
             },
@@ -394,7 +397,7 @@ _uOptions     - 下拉选择框
                 this._nOptionSize = value;
                 this.alterItems();
                 if (this._uOptions.isShow()) {
-                    flush.call(this);
+                    refresh(this);
                     this.setPopupPosition();
                 }
             },
@@ -406,7 +409,7 @@ _uOptions     - 下拉选择框
              * @param {number} index 选项的序号
              */
             setSelectedIndex: function (index) {
-                setSelected.call(this, this.getItems()[index]);
+                setSelected(this, this.getItems()[index]);
             },
 
             /**
@@ -419,13 +422,13 @@ _uOptions     - 下拉选择框
             setValue: function (value) {
                 if (this.getItems().every(function (item) {
                         if (item._sValue === value) {
-                            setSelected.call(this, item);
+                            setSelected(this, item);
                             return false;
                         }
                         return true;
                     }, this)) {
                     // 找不到满足条件的项，将选中的值清除
-                    setSelected.call(this);
+                    setSelected(this);
                 }
             }
         },

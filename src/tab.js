@@ -30,15 +30,17 @@ _eContainer      - 容器 DOM 元素
     /**
      * 移除容器 DOM 元素。
      * @private
+     *
+     * @param {ecui.ui.Tab} tab 选项卡控件
      */
-    function removeContainer() {
-        if (this._eContainer) {
-            var parent = this.getParent();
+    function removeContainer(tab) {
+        if (tab._eContainer) {
+            var parent = tab.getParent();
             if (parent) {
                 if (parent.getItems().every(function (item) {
-                        return item === this || item._eContainer !== this._eContainer;
-                    }, this)) {
-                    dom.remove(this._eContainer);
+                        return item === tab || item._eContainer !== tab._eContainer;
+                    })) {
+                    dom.remove(tab._eContainer);
                 }
             }
         }
@@ -136,7 +138,7 @@ _eContainer      - 容器 DOM 元素
                      */
                     $setParent: function (parent) {
                         if (!parent) {
-                            removeContainer.call(this);
+                            removeContainer(this);
                         } else if (this._eContainer && dom.getParent(this._eContainer) !== parent.getMain()) {
                             parent.getMain().appendChild(this._eContainer);
                         }
@@ -163,7 +165,7 @@ _eContainer      - 容器 DOM 元素
                     setContainer: function (el) {
                         var parent = this.getParent();
 
-                        removeContainer.call(this);
+                        removeContainer(this);
                         if (this._eContainer = el) {
                             parent.getMain().appendChild(el);
                             // 如果当前节点被选中需要显示容器元素，否则隐藏
