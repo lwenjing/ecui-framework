@@ -77,20 +77,34 @@ _uOptions     - 下拉选择框
             util.setDefault(options, 'inputType', 'text');
 
             var oldEl = el;
-            el = dom.insertBefore(dom.create(el.className), el);
-            el.style.cssText = oldEl.style.cssText;
+            el = dom.insertBefore(
+                dom.create(
+                    {
+                        className: el.className,
+                        style: {
+                            cssText: oldEl.style.cssText
+                        }
+                    }
+                ),
+                el
+            );
 
             if (oldEl.tagName === 'SELECT') {
-                var optionsEl = dom.create(options.classes.join('-options ') + 'ui-popup ui-hide');
-
                 options.name = oldEl.name;
                 options.value = oldEl.value;
 
-                // 转化select标签
-                optionsEl.innerHTML = Array.prototype.map.call(oldEl.options, function (item) {
-                    var optionText = dom.getAttribute(item, core.getAttributeName());
-                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
-                }).join('');
+                var optionsEl = dom.create(
+                    {
+                        className: options.classes.join('-options ') + 'ui-popup ui-hide',
+                        innerHTML: Array.prototype.map.call(
+                            oldEl.options,
+                            function (item) {
+                                var optionText = dom.getAttribute(item, core.getAttributeName());
+                                return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
+                            }
+                        ).join('')
+                    }
+                );
             } else {
                 optionsEl = oldEl;
                 optionsEl.className = options.classes.join('-options ') + 'ui-hide';

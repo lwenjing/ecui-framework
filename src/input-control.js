@@ -49,8 +49,7 @@ _eInput        - INPUT对象
                 timer = util.timer(
                     function () {
                         control._bIME = false;
-                    },
-                    0
+                    }
                 );
             },
 
@@ -195,8 +194,17 @@ _eInput        - INPUT对象
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 // 根据表单项初始化
                 var inputEl = el;
-                el = dom.insertBefore(dom.create(el.className), el);
-                el.style.cssText = inputEl.style.cssText;
+                el = dom.insertBefore(
+                    dom.create(
+                        {
+                            className: el.className,
+                            style: {
+                                cssText: inputEl.style.cssText
+                            }
+                        }
+                    ),
+                    el
+                );
                 inputEl.className = '';
                 inputEl.style.cssText = '';
                 el.appendChild(inputEl);

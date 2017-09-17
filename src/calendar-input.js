@@ -48,7 +48,7 @@ _uCalendar     - 日历控件
                 }
             }
         ),
-        singleton = core.$fastCreate(Calendar, dom.create(Calendar.CLASS + 'ui-popup ui-hide'));
+        singleton = core.$fastCreate(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'}));
 
     /**
      * 初始化日历输入框控件。

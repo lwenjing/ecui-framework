@@ -32,10 +32,16 @@
                 dom.addClass(el, 'ui-retina');
 
                 var style = dom.getStyle(el),
-                    img = dom.create('', 'IMG');
+                    img = dom.create(
+                        'IMG',
+                        {
+                            style: {
+                                cssText: 'top:' + style.backgroundPositionY + ';left:' + style.backgroundPositionX
+                            },
+                            src: style.backgroundImage.replace(/(^url\("?|"?\)$)/g, '')
+                        }
+                    );
 
-                img.style.cssText = 'top:' + style.backgroundPositionY + ';left:' + style.backgroundPositionX;
-                img.src = style.backgroundImage.replace(/(^url\("?|"?\)$)/g, '');
                 if (img.complete) {
                     setImageSize.call(img);
                 } else {

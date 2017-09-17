@@ -280,14 +280,13 @@ _aChildren     - 子控件集合
                     el;
 
                 if ('string' === typeof item) {
-                    el = dom.create('', 'LI');
-                    el.innerHTML = item;
+                    el = dom.create('LI', {innerHTML: item});
                     item = createChild(el, this, options);
                 }
 
                 // 这里需要先 setParent，否则 getRoot 的值将不正确
                 if (!this._eChildren) {
-                    this._eChildren = dom.create(this.getPrimary() + '-children ' + this.getType() + '-children', 'UL');
+                    this._eChildren = dom.create('UL', {className: this.getPrimary() + '-children ' + this.getType() + '-children'});
                     dom.insertAfter(this._eChildren, this.getOuter());
                 }
                 item.setParent(this);

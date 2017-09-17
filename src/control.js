@@ -936,8 +936,7 @@ $$padding           - 内填充宽度缓存
                                         core.triggerEvent(item.control, 'ready', item.options);
                                     });
                                     waitReadyList = null;
-                                },
-                                0
+                                }
                             );
                         }
                         if (this.$ready !== util.blank || this.onready) {

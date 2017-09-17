@@ -122,13 +122,18 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         function (el, options) {
             if (el.tagName === 'TABLE') {
                 var table = el;
-                dom.insertBefore(el = dom.create(table.className), table);
-                if (options.width) {
-                    el.style.width = options.width;
-                }
-                if (options.height) {
-                    el.style.height = options.height;
-                }
+                el = dom.insertBefore(
+                    dom.create(
+                        {
+                            className: table.className,
+                            style: {
+                                width: options.width,
+                                height: options.height
+                            }
+                        }
+                    ),
+                    table
+                );
                 table.className = '';
             } else {
                 table = el.getElementsByTagName('TABLE')[0];
@@ -136,7 +141,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
             this._bHeadFloat = !!options.headFloat;
 
-            el.appendChild(body = dom.create(options.classes.join('-body ')));
+            el.appendChild(body = dom.create({className: options.classes.join('-body ')}));
             body.appendChild(table);
 
             var i = 0,
@@ -156,7 +161,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
             if (head.tagName !== 'THEAD') {
                 body = head;
-                dom.insertBefore(head = dom.create('', 'THEAD'), o).appendChild((list = dom.children(o))[0]);
+                dom.insertBefore(head = dom.create('THEAD'), o).appendChild((list = dom.children(o))[0]);
             } else {
                 o = dom.children(head);
                 headRowCount = o.length;
@@ -172,9 +177,14 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             }
 
             // 初始化表格区域
-            o = dom.create(options.classes.join('-head '));
-            o.innerHTML = '<table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table>';
-            el.appendChild(o);
+            o = el.appendChild(
+                dom.create(
+                    {
+                        className: options.classes.join('-head '),
+                        innerHTML: '<table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table>'
+                    }
+                )
+            );
 
             ui.Control.prototype.constructor.call(this, el, options);
 
@@ -611,11 +621,15 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 var headRowCount = this._aHeadRows.length,
                     rows = this._aHeadRows.concat(this._aRows),
                     primary = options.primary || '',
-                    el = dom.create(primary + this._sHCellClass, 'TH'),
+                    el = dom.create(
+                        'TH',
+                        {
+                            className: primary + this._sHCellClass,
+                            innerHTML: options.title
+                        }
+                    ),
                     col = core.$fastCreate(this.HCell, el, this),
                     row;
-
-                el.innerHTML = options.title || '';
 
                 primary += this._sCellClass;
                 for (var i = 0, o; row = rows[i]; i++) {
@@ -634,8 +648,20 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                             this._aHCells.splice(index, 0, col);
                             i = headRowCount - 1;
                         } else {
-                            row._aElements.splice(index, 0, o = row.getBody().insertBefore(dom.create(primary, 'TD'), o));
-                            o.getControl = getControlBuilder();
+                            row._aElements.splice(
+                                index,
+                                0,
+                                o = row.getBody().insertBefore(
+                                    dom.create(
+                                        'TD',
+                                        {
+                                            className: primary,
+                                            getControl: getControlBuilder()
+                                        }
+                                    ),
+                                    o
+                                )
+                            );
                         }
                     } else {
                         // 出现跨列的插入列操作，需要修正colspan的属性值
@@ -668,7 +694,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             addRow: function (data, index) {
                 var j = 1,
                     body = this.getBody(),
-                    el = dom.create(),
                     html = ['<table><tbody><tr class="' + this._sRowClass + '">'],
                     rowCols = [],
                     row = this._aRows[index],
@@ -698,8 +723,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 }
 
                 html[j] = '</tr></tbody></table>';
-                el.innerHTML = html.join('');
-                el = el.lastChild.lastChild.lastChild;
+                var el = dom.create(
+                        {
+                            innerHTML: html.join('')
+                        }
+                    ).lastChild.lastChild.lastChild;
 
                 body.insertBefore(el, row ? row.getOuter() : null);
                 row = core.$fastCreate(this.Row, el, this);

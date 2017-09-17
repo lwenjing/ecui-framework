@@ -56,10 +56,19 @@ _uClose     - 关闭按钮
                 titleEl = undefined;
             }
 
-            el = dom.insertBefore(dom.create(el.className), el);
-            el.style.cssText = bodyEl.style.cssText;
-            // 生成标题控件与内容区域控件对应的Element对象
-            el.innerHTML = '<div class="' + options.classes.join('-close ') + '"></div>' + (titleEl ? '' : '<h6 class="' + options.classes.join('-title ') + '"></h6>');
+            el = dom.insertBefore(
+                dom.create(
+                    {
+                        // 生成标题控件与内容区域控件对应的Element对象
+                        className: el.className,
+                        style: {
+                            cssText: bodyEl.style.cssText
+                        },
+                        innerHTML: '<div class="' + options.classes.join('-close ') + '"></div>' + (titleEl ? '' : '<strong class="' + options.classes.join('-title ') + '"></strong>')
+                    }
+                ),
+                el
+            );
 
             if (titleEl) {
                 titleEl.className += ' ' + options.classes.join('-title ');

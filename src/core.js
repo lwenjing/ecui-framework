@@ -181,8 +181,7 @@
                                 util.timer(
                                     function () {
                                         target.blur();
-                                    },
-                                    0
+                                    }
                                 );
                                 event.preventDefault();
                             }
@@ -1024,7 +1023,7 @@
                 options.primary = RegExp.$1;
             } else {
                 // 没有传入主元素，需要自动生成，此种情况比较少见，不推荐使用
-                el = options.main = dom.create(primary + UIClass.CLASS);
+                el = options.main = dom.create({className: primary + UIClass.CLASS});
                 if (!primary) {
                     options.primary = UIClass.TYPES[0];
                 }
@@ -1705,9 +1704,19 @@
                 if (!maskElements.length) {
                     dom.addClass(el, 'ecui-mask');
                 }
-                maskElements.push(el = el.appendChild(dom.create('ui-mask')));
+                maskElements.push(
+                    el = el.appendChild(
+                        dom.create(
+                            {
+                                className: 'ui-mask',
+                                style: {
+                                    cssText: text + 'block;z-index:' + (zIndex || 32767)
+                                }
+                            }
+                        )
+                    )
+                );
                 dom.setStyle(el, 'opacity', opacity);
-                el.style.cssText += text + 'block;z-index:' + (zIndex || 32767);
 
                 unmasks.push(
 

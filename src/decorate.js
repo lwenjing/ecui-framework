@@ -51,7 +51,7 @@ Decorate - 装饰器插件。
         var id = control.getUID(),
             el = (this._oInner = namedMap[id] || control).getOuter();
 
-        dom.insertBefore(this._eMain = dom.create(this._sPrimary = primary), el).appendChild(el);
+        dom.insertBefore(this._eMain = dom.create({className: this._sPrimary = primary}), el).appendChild(el);
         core.$bind(this._eMain, control);
         control.clearCache();
 

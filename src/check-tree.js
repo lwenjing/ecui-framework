@@ -39,7 +39,16 @@ _uCheckbox - 复选框控件
             ui.TreeView.call(this, el, options);
 
             el = this.getMain();
-            this._uCheckbox = core.$fastCreate(ui.Checkbox, el.insertBefore(dom.create(options.classes.join('-checkbox ') + 'ui-checkbox'), el.firstChild), this, options);
+            this._uCheckbox =
+                core.$fastCreate(
+                    ui.Checkbox,
+                    el.insertBefore(
+                        dom.create({className: options.classes.join('-checkbox ') + 'ui-checkbox'}),
+                        el.firstChild
+                    ),
+                    this,
+                    options
+                );
 
             for (var i = 0, list = this.getChildren(), item; item = list[i++]; ) {
                 if (options.subject) {

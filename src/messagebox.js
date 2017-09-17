@@ -33,8 +33,12 @@ MessageBox - 消息框功能。
      */
     core.$messagebox = function (text, buttonTexts) {
         if (!instance) {
-            el = dom.create('ui-messagebox ui-hide');
-            el.innerHTML = '<div class="ui-messagebox-text"></div><div class="ui-messagebox-buttons"></div>';
+            el = dom.create(
+                {
+                    className: 'ui-messagebox ui-hide',
+                    innerHTML: '<div class="ui-messagebox-text"></div><div class="ui-messagebox-buttons"></div>'
+                }
+            );
             instance = core.create(ui.Dialog, {main: el, parent: document.body, resizable: true});
         }
 

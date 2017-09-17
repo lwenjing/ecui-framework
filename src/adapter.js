@@ -76,16 +76,34 @@ var ecui;
              * 创建 Element 对象。
              * @public
              *
-             * @param {string} className 样式名称
              * @param {string} tagName 标签名称，默认创建一个空的 div 对象
+             * @param {object} options 标签初始值参数
              * @return {HTMLElement} 创建的 Element 对象
              */
-            create: function (className, tagName) {
-                tagName = document.createElement(tagName || 'DIV');
-                if (className) {
-                    tagName.className = className;
+            create: function (tagName, options) {
+                function copy(des, src) {
+                    for (var key in src) {
+                        if (src.hasOwnProperty(key)) {
+                            if (src[key]) {
+                                if ('object' === typeof src[key]) {
+                                    copy(des[key], src[key]);
+                                } else {
+                                    des[key] = src[key];
+                                }
+                            }
+                        }
+                    }
                 }
-                return tagName;
+
+                if ('object' === typeof tagName) {
+                    options = tagName;
+                    tagName = 'DIV';
+                }
+                var el = document.createElement(tagName);
+                if (options) {
+                    copy(el, options);
+                }
+                return el;
             },
 
             /**
@@ -179,9 +197,9 @@ var ecui;
                         }
                     }
 
-                    style = el.getBoundingClientRect();
-                    top += html.scrollTop + body.scrollTop - html.clientTop + Math.floor(style.top);
-                    left += html.scrollLeft + body.scrollLeft - html.clientLeft + Math.floor(style.left);
+                    var bound = el.getBoundingClientRect();
+                    top += html.scrollTop + body.scrollTop - html.clientTop + Math.floor(bound.top);
+                    left += html.scrollLeft + body.scrollLeft - html.clientLeft + Math.floor(bound.left);
                 } else if (el === body) {
                     top = html.scrollTop + body.scrollTop;
                     left = html.scrollLeft + body.scrollLeft;
@@ -446,12 +464,12 @@ var ecui;
             setInput: function (el, name, type) {
                 if (!el) {
                     if (type === 'textarea') {
-                        el = dom.create('', 'TEXTAREA');
+                        el = dom.create('TEXTAREA');
                     } else {
                         if (ieVersion < 9) {
-                            return dom.create('', '<input type="' + (type || '') + '" name="' + (name || '') + '">');
+                            return dom.create('<input type="' + (type || '') + '" name="' + (name || '') + '">');
                         }
-                        el = dom.create('', 'INPUT');
+                        el = dom.create('INPUT');
                     }
                 }
 
@@ -459,14 +477,19 @@ var ecui;
                 type = type === undefined ? el.type : type;
 
                 if (el.name !== name || el.type !== type) {
-                    if ((ieVersion && type !== 'textarea') || (el.type !== type && (el.type === 'textarea' || type === 'textarea'))) {
-                        dom.insertHTML(el, 'AFTEREND', '<' + (type === 'textarea' ? 'textarea' : 'input type="' + type + '"') + ' name="' + name + '" class="' + el.className + '" style="' + el.style.cssText + '" ' + (el.disabled ? 'disabled' : '') + (el.readOnly ? ' readOnly' : '') + '>');
-                        name = el;
-                        (el = el.nextSibling).value = name.value;
-                        if (type === 'radio') {
-                            el.checked = name.checked;
+                    if ((ieVersion < 10 && type !== 'textarea') || (el.type !== type && (el.type === 'textarea' || type === 'textarea'))) {
+                        var oldEl = el;
+                        dom.insertHTML(
+                            oldEl,
+                            'AFTEREND',
+                            '<' + (type === 'textarea' ? 'textarea' : 'input type="' + type + '"') + ' name="' + name + '" class="' + el.className + '" style="' + el.style.cssText + '" ' + (el.disabled ? 'disabled' : '') + (el.readOnly ? ' readOnly' : '') + '>'
+                        );
+                        el = oldEl.nextSibling;
+                        el.value = oldEl.value;
+                        if (type === 'radio' || type === 'checkbox') {
+                            el.checked = oldEl.checked;
                         }
-                        dom.remove(name);
+                        dom.remove(oldEl);
                     } else {
                         el.type = type;
                         el.name = name;
@@ -520,8 +543,6 @@ var ecui;
                     headers = options.headers || {},
                     onerror = options.onerror || util.blank,
                     // 基本的逻辑来自lili同学提供的patch
-                    stop,
-                    key,
                     xhr;
 
                 try {
@@ -555,14 +576,14 @@ var ecui;
                         xhr.onreadystatechange = stateChangeHandler;
                     }
 
-                    for (key in headers) {
+                    for (var key in headers) {
                         if (headers.hasOwnProperty(key)) {
                             xhr.setRequestHeader(key, headers[key]);
                         }
                     }
 
                     if (options.timeout) {
-                        stop = util.timer(
+                        var stop = util.timer(
                             function () {
                                 xhr.onreadystatechange = util.blank;
                                 xhr.abort();
@@ -620,8 +641,7 @@ var ecui;
                             function () {
                                 xhr.onreadystatechange = util.blank;
                                 xhr = null;
-                            },
-                            0
+                            }
                         );
 
                         if (stop) {
@@ -743,9 +763,12 @@ var ecui;
             decodeHTML: (function () {
                 return function (source) {
                     //处理转义的中文和实体字符
-                    return source.replace(/&(quot|lt|gt|amp|#([\d]+));/g, function (match, $1, $2) {
-                        return __ECUI__EscapeCharacter[$1] || String.fromCharCode(+$2);
-                    });
+                    return source.replace(
+                        /&(quot|lt|gt|amp|#([\d]+));/g,
+                        function (match, $1, $2) {
+                            return __ECUI__EscapeCharacter[$1] || String.fromCharCode(+$2);
+                        }
+                    );
                 };
             }()),
 
@@ -913,6 +936,8 @@ var ecui;
                     );
                 }
 
+                delay = delay || 0;
+
                 var args = Array.prototype.slice.call(arguments, 3),
                     handle = build(),
                     pausing;
@@ -1004,7 +1029,10 @@ var ecui;
                 },
 
                 set: function (el, value) {
-                    el.style.filter = el.style.filter.replace(/alpha\([^\)]*\)/gi, '') + (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') + '(opacity=' + value * 100 + ')' : '');
+                    el.style.filter =
+                        el.style.filter.replace(/alpha\([^\)]*\)/gi, '') +
+                            (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') +
+                            '(opacity=' + value * 100 + ')' : '');
                 }
             } : undefined,
 
@@ -1072,7 +1100,7 @@ var ecui;
                     document.documentElement.doScroll('left');
                     ready();
                 } catch (e) {
-                    util.timer(check, 0);
+                    util.timer(check);
                 }
             };
             check();
