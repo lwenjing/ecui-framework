@@ -4,22 +4,12 @@
     height: 28px;
     padding-right: 30px;
     background: url(images/ecui/arrow.png) no-repeat 120px center;
-    vertical-align: middle;
     font-size: 14px;
     font-family: "宋体";
-    .inline-block();
     border: 1px solid #acbaca;
     color: #8492a6;
     .ui-combox-text {
-        overflow: hidden !important;
-        padding: 0;
-        display: block;
-        border: none;
-        background-color: #fff;
-        color: #495362;
-        font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
-        cursor: pointer;
-        overflow: hidden;
+        display: none;
     }
     input {
     	outline: none;
