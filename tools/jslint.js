@@ -350,7 +350,7 @@ var JSLINT = (function () {
 // web browser environment.
 
         browser = array_to_object([
-            'clearInterval', 'clearTimeout', 'document', 'event', 'FileReader', 'FormData',
+            'clearInterval', 'clearTimeout', 'document', 'FileReader', 'FormData',
             'frames', 'history', 'Image', 'localStorage', 'location', 'name',
             'navigator', 'Option', 'parent', 'screen', 'sessionStorage',
             'setInterval', 'setTimeout', 'Storage', 'window', 'XMLHttpRequest',
