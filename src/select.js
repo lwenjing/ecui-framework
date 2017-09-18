@@ -76,7 +76,7 @@ _uOptions     - 下拉选择框
         ui.InputControl,
         'ui-select',
         function (el, options) {
-            util.setDefault(options, 'hidden', true);
+            util.setDefault(options, 'readOnly', true);
             util.setDefault(options, 'inputType', 'text');
 
             var oldEl = el;

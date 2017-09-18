@@ -91,7 +91,6 @@ _aDependents     - 所有的从属复选框
         ui.InputControl,
         'ui-checkbox',
         function (el, options) {
-            util.setDefault(options, 'hidden', true);
             util.setDefault(options, 'inputType', 'checkbox');
 
             ui.InputControl.call(this, el, options);
@@ -127,48 +126,6 @@ _aDependents     - 所有的从属复选框
                     item._cSubject = null;
                 });
                 ui.InputControl.prototype.$dispose.call(this);
-            },
-
-            /**
-             * 接管对空格键的处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 键盘事件
-             */
-            $keydown: function (event) {
-                ui.InputControl.prototype.$keydown.call(this, event);
-                if (event.which === 32) {
-                    event.preventDefault();
-                }
-            },
-
-            /**
-             * 接管对空格键的处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 键盘事件
-             */
-            $keypress: function (event) {
-                ui.InputControl.prototype.$keypress.call(this, event);
-                if (event.which === 32) {
-                    event.preventDefault();
-                }
-            },
-
-            /**
-             * 接管对空格键的处理。
-             * @protected
-             *
-             * @param {ECUIEvent} event 键盘事件
-             */
-            $keyup: function (event) {
-                ui.InputControl.prototype.$keyup.call(this, event);
-                if (event.which === 32) {
-                    if (core.getKey() === 32) {
-                        this.setChecked(!!this._nStatus);
-                    }
-                    event.preventDefault();
-                }
             },
 
             /**

@@ -3,6 +3,13 @@
     width: 17px;
     height: 17px;
     background: url('images/ecui/radio-normal.png');
+    input {
+    	position: absolute !important;
+    	width: 1px !important;
+    	height: 1px !important;
+    	left: -20px !important;
+    	top: -20px !important;
+    }
 }
 .ui-radio-checked {
     background-image: url('images/ecui/radio-choice.png')

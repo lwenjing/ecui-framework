@@ -4,6 +4,13 @@
     height: 17px;
     background-image: url('images/ecui/checkbox-normal.png');
     background-repeat: no-repeat;
+    input {
+    	position: absolute !important;
+    	width: 1px !important;
+    	height: 1px !important;
+    	left: -20px !important;
+    	top: -20px !important;
+    }
 }
 .ui-checkbox-checked {
     background-image: url('images/ecui/checkbox-choice.png');

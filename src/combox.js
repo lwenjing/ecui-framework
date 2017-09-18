@@ -42,9 +42,9 @@ _sInputWidth   - INPUT对象初始宽度
      */
     ui.Combox = core.inherits(
         ui.Select,
-        'ui-combox',
+        '*ui-combox',
         function (el, options) {
-            util.setDefault(options, 'hidden', false);
+            util.setDefault(options, 'readOnly', false);
             ui.Select.call(this, el, options);
         },
         {
@@ -64,7 +64,10 @@ _sInputWidth   - INPUT对象初始宽度
              */
             $initStructure: function (width, height) {
                 ui.Select.prototype.$initStructure.call(this, width, height);
-                this.getInput().style.width = width + 'px';
+
+                var el = this.getInput();
+                el.style.width = width + 'px';
+                el.style.height = height + 'px';
             },
 
             /**

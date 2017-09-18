@@ -12,7 +12,6 @@ InputControl - 定义输入数据的基本操作，不建议直接控件化。
 </div>
 
 属性
-_bHidden       - 输入框是否隐藏
 _eInput        - INPUT对象
 */
 (function () {
@@ -137,7 +136,7 @@ _eInput        - INPUT对象
      */
     function bindEvent() {
         core.$bind(this._eInput, this);
-        if (!this._bHidden) {
+        if (this._eInput.type !== 'hidden') {
             // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
             for (var name in events) {
                 if (events.hasOwnProperty(name)) {
@@ -182,7 +181,7 @@ _eInput        - INPUT对象
      * value        输入框的默认值
      * checked      输入框是否默认选中(radio/checkbox有效)
      * inputType    输入框的类型，默认为 text
-     * hidden       输入框是否隐藏，隐藏状态下将不会绑定键盘事件
+     * readOnly     输入框是否只读
      * @public
      *
      * @param {Object} options 初始化选项
@@ -217,13 +216,8 @@ _eInput        - INPUT对象
                 }
             }
 
-            if (inputEl.type === 'hidden') {
-                this._bHidden = true;
-            } else if (options.hidden) {
-                dom.addClass(inputEl, 'ui-hide');
-                this._bHidden = true;
-            } else {
-                this._bHidden = false;
+            if (options.readOnly) {
+                inputEl.readOnly = true;
             }
             if (options.checked) {
                 inputEl.defaultChecked = inputEl.checked = true;
@@ -257,7 +251,7 @@ _eInput        - INPUT对象
                 ui.Control.prototype.$disable.call(this);
                 var body = this.getBody();
 
-                if (this._bHidden) {
+                if (this._eInput.type === 'hidden') {
                     this._eInput.disabled = true;
                 } else {
                     body.removeChild(this._eInput);
@@ -285,7 +279,7 @@ _eInput        - INPUT对象
                 ui.Control.prototype.$enable.call(this);
                 var body = this.getBody();
 
-                if (this._bHidden) {
+                if (this._eInput.type === 'hidden') {
                     this._eInput.disabled = false;
                 } else {
                     body.innerHTML = '';

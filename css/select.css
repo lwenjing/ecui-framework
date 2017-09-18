@@ -21,6 +21,13 @@
         cursor: pointer;
         overflow: hidden;
     }
+    input {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        left: -20px !important;
+        top: -20px !important;
+    }
 }
 .ui-select-hover {
     border-color: #8492a6;
