@@ -3,10 +3,10 @@ cities - 地区联动下拉框控件。
 地区联动下拉框控件，继承自multilevel-select控件。
 
 多级联动下拉框控件直接HTML初始化的例子:
-<div ui="type:cities">
-    <select name="province"></select>
-    <select name="city"></select>
-</div>
+省市二级联动：
+<div ui="type:cities;mutli:2"></div>
+省市区三级联动：
+<div ui="type:cities;multi:3"></div>
 
 */
 (function () {
@@ -48,7 +48,7 @@ cities - 地区联动下拉框控件。
             };
             item = CITY[code];
             for (key in item) {
-                if (type === 'AREA') {
+                if (type === '3') {
                     area = {
                         value: key,
                         code: item[key],
@@ -65,7 +65,7 @@ cities - 地区联动下拉框控件。
                         delete area.children;
                     }
                     citys.children.push(area);
-                } else if (type === 'CITY') {
+                } else if (type === '2') {
                     citys.children.push({
                         value: key,
                         code: item[key]
@@ -94,18 +94,22 @@ cities - 地区联动下拉框控件。
     ui.Cities = core.inherits(
         ui.MultilevelSelect,
         'ui-cities',
+        function (el, options) {
+            el.innerHTML = options.multi == '3' ? '<select></select><select></select><select name="' + options.name + '"></select>' : '<select></select><select name="' + options.name + '"></select>';
+            ui.MultilevelSelect.call(this, el, options);
+        },
         {
             $ready: function (options) {
                 ui.MultilevelSelect.prototype.$ready.call(this, options);
                 var province = this.getSelect(0);
                 var city = this.getSelect(1);
-                this.setData(getCITYS(this.getSelect(2) ? 'AREA' : 'CITY'));
+                this.setData(getCITYS(options.multi));
                 if (options.value && options.value != '' && options.value != '0') {
                     province.setValue(options.value.slice(0, 2) + '0000');
                     core.triggerEvent(province, 'change');
                     core.addEventListener(province, 'change', provinceChange);
                     this.getSelect(1).setValue(options.value.slice(0, 4) + '00');
-                    if (this.getSelect(2)) {
+                    if (options.multi == '3') {
                         core.triggerEvent(city, 'change');
                         core.addEventListener(city, 'change', cityChange);
                     }
