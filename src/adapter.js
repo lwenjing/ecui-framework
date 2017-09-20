@@ -743,7 +743,68 @@ var ecui;
                     scr.onerror = options.onerror;
                 }
                 document.head.appendChild(scr);
-            }
+            },
+
+            /**
+             * 创建一个长连接，对于不支持websocket的浏览器，使用comet模拟实现，在url中使用|分隔websocket与comet的地址，如/ws:8080|/comet:8080。
+             * @public
+             *
+             * @param {string} url 长连接的地址
+             * @param {Function} callback 每接受一个正确的数据报文时产生的回调函数，数据报文是一个紧凑的json字符串，使用\n分隔不同的数据报文
+             * @param {Function} onerror io失败时的处理
+             * @return {Object} 操作对象，使用close关闭长连接
+             */
+            openSocket: function (url, callback, onerror) {
+                var recvbuf = '',
+                    sendbuf = '';
+
+                function onrecieve(text) {
+                    recvbuf += text;
+                    for (;;) {
+                        var index = recvbuf.indexOf('\n');
+                        if (index < 0) {
+                            return;
+                        }
+                        callback(JSON.parse(recvbuf.slice(0, index)));
+                        recvbuf = recvbuf.slice(index + 1);
+                    }
+                }
+
+                function ajax() {
+                    if (url[1]) {
+                        io.ajax(url[1], {
+                            method: 'POST',
+                            data: sendbuf,
+                            onsuccess: function (text) {
+                                onrecieve(text);
+                                ajax();
+                            },
+                            onerror: onerror
+                        });
+                        sendbuf = '';
+                    }
+                }
+
+                url = url.split('|');
+                if (ieVersion < 10 && url[1]) {
+                    ajax();
+                    socket = {
+                        close: function () {
+                            url[1] = null;
+                        },
+
+                        send: function (data) {
+                            sendbuf += data;
+                        }
+                    };
+                } else {
+                    var socket = new WebSocket('ws://' + url[0]);
+                    socket.onmessage = onrecieve;
+                    socket.onerror = onerror;
+                }
+
+                return socket;
+            },
         },
         ui: {},
         util: {
@@ -1016,7 +1077,7 @@ var ecui;
     var core = ecui,
         dom = core.dom,
         //{if 1}//ext = core.ext,//{/if}//
-        //{if 1}//io = core.io,//{/if}//
+        io = core.io,
         //{if 1}//ui = core.ui,//{/if}//
         util = core.util;
 

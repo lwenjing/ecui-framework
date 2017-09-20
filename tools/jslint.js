@@ -354,7 +354,7 @@ var JSLINT = (function () {
             'frames', 'history', 'Image', 'localStorage', 'location', 'name',
             'navigator', 'Option', 'parent', 'screen', 'sessionStorage',
             'setInterval', 'setTimeout', 'Storage', 'window', 'XMLHttpRequest',
-            'top', 'ActiveXObject', 'getComputedStyle', 'HTMLElement'
+            'top', 'ActiveXObject', 'getComputedStyle', 'HTMLElement', 'WebSocket'
         ], false),
 
 // bundle contains the text messages.
