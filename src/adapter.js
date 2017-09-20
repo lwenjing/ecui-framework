@@ -770,6 +770,10 @@ var ecui;
                     }
                 }
 
+                function ajaxErrorHandler() {
+                    ajax();
+                }
+
                 function ajax() {
                     if (url[1]) {
                         io.ajax(url[1], {
@@ -779,16 +783,30 @@ var ecui;
                                 onrecieve(text);
                                 ajax();
                             },
-                            onerror: onerror
+                            onerror: onerror || ajaxErrorHandler
                         });
                         sendbuf = '';
                     }
                 }
 
+                var socket;
+
+                function websocketErrorHandler() {
+                    socket.close();
+                    websocket();
+                }
+
+                function websocket() {
+                    socket = new WebSocket('ws://' + url[0]);
+                    socket.onmessage = onrecieve;
+                    socket.onerror = onerror || websocketErrorHandler;
+                }
+
                 url = url.split('|');
+
                 if (ieVersion < 10 && url[1]) {
                     ajax();
-                    socket = {
+                    return {
                         close: function () {
                             url[1] = null;
                         },
@@ -797,13 +815,18 @@ var ecui;
                             sendbuf += data;
                         }
                     };
-                } else {
-                    var socket = new WebSocket('ws://' + url[0]);
-                    socket.onmessage = onrecieve;
-                    socket.onerror = onerror;
                 }
 
-                return socket;
+                websocket();
+                return {
+                    close: function () {
+                        socket.close();
+                    },
+
+                    send: function (data) {
+                        socket.send(data);
+                    }
+                };
             },
         },
         ui: {},
