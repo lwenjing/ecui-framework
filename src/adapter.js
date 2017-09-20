@@ -758,8 +758,8 @@ var ecui;
                 var recvbuf = '',
                     sendbuf = '';
 
-                function onrecieve(text) {
-                    recvbuf += text;
+                function onrecieve(event) {
+                    recvbuf += event.data;
                     for (;;) {
                         var index = recvbuf.indexOf('\n');
                         if (index < 0) {
