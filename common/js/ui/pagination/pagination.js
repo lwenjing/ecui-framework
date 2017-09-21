@@ -3,7 +3,7 @@ pagination - 分页控件。
 定制分页控件，继承自基础控件
 
 分页视图控件直接HTML初始化的例子:
-<div ui="type:pagination;pageNo:1;totalPage:304";id:test></div>
+<div ui="type:pagination;page:'1-20';total:304";id:test></div>
 
 外部调用获取当前点击页数的方法（通过在外部定义go方法，进行业务代码实现）:
 ecui.get('test').go = function(pageNo){
@@ -11,7 +11,6 @@ ecui.get('test').go = function(pageNo){
 }
 
 属性
-_eChildren        - 分页区域所有子节点
 _nCurrentPage     - 当前页数
 _nTotalPage       - 总页数
 
@@ -27,11 +26,12 @@ _nTotalPage       - 总页数
         'ui-pagination',
         function (el, options) {
             ui.Control.call(this, el, options);
-
+            var offset = options.page.split('-');
+            var pageSize = +offset[1] - offset[0] + 1;
             // 定义当前页数
-            this._nCurrentPage = +options.pageNo;
+            this._nCurrentPage = Math.ceil(+offset[1] / pageSize);
             // 定义总页数
-            this._nTotalPage = +options.totalPage;
+            this._nTotalPage = Math.ceil(options.total / pageSize);
         },
         {
             /**
