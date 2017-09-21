@@ -674,6 +674,24 @@
     }
 
     /**
+     * dispose一个控件，dispose情况特殊，ondispose不能阻止$dispose函数的执行。
+     * @private
+     *
+     * @param {ecui.ui.Control} control 控件
+     */
+    function disposeControl(control) {
+        try {
+            var fn = control.ondispose;
+            if (fn) {
+                control.ondispose = util.blank;
+                fn.call(control);
+            }
+        } catch (ignore) {
+        }
+        core.triggerEvent(control, 'dispose');
+    }
+
+    /**
      * 获取两个控件的公共父控件。
      * @private
      *
@@ -765,7 +783,7 @@
                     focusedControl = hoveredControl = activedControl = null;
 
                     allControls.forEach(function (item) {
-                        item.$dispose();
+                        disposeControl(item);
                     });
 
                     // 清除闭包中引用的 Element 对象
@@ -1279,7 +1297,7 @@
                     }
                 }
             }).forEach(function (item) {
-                item.$dispose();
+                disposeControl(item);
                 core.removeControlListeners(item);
             });
         },
