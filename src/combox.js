@@ -60,6 +60,24 @@ _sInputWidth   - INPUT对象初始宽度
             ),
 
             /**
+             * 控件失效，阻止输入框提交
+             * @override
+             */
+            $disable: function () {
+                ui.Select.prototype.$disable.call(this);
+                this.getInput().style.display = 'none';
+            },
+
+            /**
+             * 控件解除失效，需要将输入框设置为可提交
+             * @override
+             */
+            $enable: function () {
+                ui.Select.prototype.$enable.call(this);
+                this.getInput().style.display = '';
+            },
+
+            /**
              * @override
              */
             $initStructure: function (width, height) {

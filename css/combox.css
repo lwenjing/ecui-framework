@@ -9,9 +9,10 @@
     border: 1px solid #acbaca;
     color: #8492a6;
     .ui-combox-text {
-        display: none;
+        position: absolute;
     }
     input {
+        position: absolute;
     	outline: none;
     }
 }

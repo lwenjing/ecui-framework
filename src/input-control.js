@@ -249,17 +249,7 @@ _eInput        - INPUT对象
              */
             $disable: function () {
                 ui.Control.prototype.$disable.call(this);
-                var body = this.getBody();
-
-                if (this._eInput.type === 'hidden') {
-                    this._eInput.disabled = true;
-                } else {
-                    body.removeChild(this._eInput);
-                    if (this._eInput.type !== 'password') {
-                        // 如果输入框是密码框需要直接隐藏，不允许将密码显示在浏览器中
-                        body.innerHTML = util.encodeHTML(this._eInput.value);
-                    }
-                }
+                this._eInput.disabled = true;
             },
 
             /**
@@ -277,14 +267,7 @@ _eInput        - INPUT对象
              */
             $enable: function () {
                 ui.Control.prototype.$enable.call(this);
-                var body = this.getBody();
-
-                if (this._eInput.type === 'hidden') {
-                    this._eInput.disabled = false;
-                } else {
-                    body.innerHTML = '';
-                    body.appendChild(this._eInput);
-                }
+                this._eInput.disabled = false;
             },
 
             /**

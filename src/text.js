@@ -100,11 +100,46 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
+             * 控件失效，阻止输入框提交
+             * @override
+             */
+            $disable: function () {
+                ui.InputControl.prototype.$disable.call(this);
+
+                var body = this.getBody(),
+                    input = this.getInput();
+
+                body.removeChild(this._eInput);
+                if (input.type === 'password') {
+                    // 如果输入框是密码框需要直接隐藏，不允许将密码显示在浏览器中
+                    var value = '';
+                    for (var i = this.getValue().length; i--; ) {
+                        value += '*';
+                    }
+                    body.innerHTML = value;
+                } else {
+                    body.innerHTML = util.encodeHTML(this._eInput.value);
+                }
+            },
+
+            /**
              * @override
              */
             $dispose: function () {
                 this._ePlaceHolder = null;
                 ui.InputControl.prototype.$dispose.call(this);
+            },
+
+            /**
+             * 控件解除失效，需要将输入框设置为可提交
+             * @override
+             */
+            $enable: function () {
+                ui.InputControl.prototype.$enable.call(this);
+
+                var body = this.getBody();
+                body.innerHTML = '';
+                body.appendChild(this.getInput());
             },
 
             /**
