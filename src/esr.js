@@ -652,7 +652,7 @@
                             Array.prototype.slice.call(document.forms[item[0]].elements).forEach(function (item) {
                                 if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                                     if (item.getControl) {
-                                        if (!core.triggerEvent(item.getControl(), 'submit', core.createEvent('submit'))) {
+                                        if (!core.triggerEvent(item.getControl(), 'validate')) {
                                             valid = false;
                                         }
                                     }

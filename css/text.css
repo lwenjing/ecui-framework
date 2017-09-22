@@ -20,7 +20,8 @@
         color: #c0ccda;
     }
 }
-.ui-text-empty {
+.ui-text-empty,
+.ui-text-error {
     .ui-placeholder {
         z-index: 1;
     }

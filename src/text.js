@@ -12,7 +12,6 @@ Text - 定义文本输入数据的基本操作。
 
 属性
 _bTrim        - 字符串是否需要过滤两端空白
-_bBlur        - 失去焦点时是否需要校验
 _nMinLength   - 允许提将近最小长度
 _nMaxLength   - 允许提交的最大长度
 _nMinValue    - 允许提交的最小值
@@ -33,12 +32,10 @@ _ePlaceHolder - 为空时的提示信息标签
     /**
      * 初始化格式化输入框控件。
      * options 对象支持的属性如下：
-     * valid 在什么情况下校验，表单提交时一定会校验，blur表示需要在失去焦点时校验
      * trim 是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
      * len [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)长度
      * num [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)值
      * regexp 正则表达式，自动在两端添加^与$
-     *
      * @public
      *
      * @param {Object} options 初始化选项
@@ -71,12 +68,6 @@ _ePlaceHolder - 为空时的提示信息标签
             if (options.regexp) {
                 this._oRegExp = new RegExp('^' + options.regexp + '$');
             }
-            if (options.valid) {
-                options = options.valid.split(',');
-                if (options.indexOf('blur') >= 0) {
-                    this._bBlur = true;
-                }
-            }
 
             if (ieVersion < 10) {
                 el = this.getInput();
@@ -95,18 +86,6 @@ _ePlaceHolder - 为空时的提示信息标签
             }
         },
         {
-            /**
-             * 控件失去焦点事件的默认处理。
-             * 控件失去焦点时默认调用 $blur 方法，删除控件在 $focus 方法中添加的扩展样式 -focus。如果控件处于可操作状态(参见 isEnabled)，blur 方法触发 onblur 事件，如果事件返回值不为 false，则调用 $blur 方法。
-             * @protected
-             */
-            $blur: function () {
-                ui.InputControl.prototype.$blur.call(this);
-                if (this._bBlur) {
-                    this.validate();
-                }
-            },
-
             /**
              * @override
              */
@@ -167,9 +146,11 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $error: function () {
                 this.alterClass('+error');
-                if (!this._ePlaceHolder) {
-                    var el = this.getInput();
-                    dom.addClass(el, 'ui-error');
+
+                var el = this.getInput();
+                if (this._ePlaceHolder) {
+                    el.style.display = 'none';
+                } else {
                     this._sErrValue = el.value;
                     el.value = '';
                 }
@@ -181,9 +162,11 @@ _ePlaceHolder - 为空时的提示信息标签
             $focus: function () {
                 ui.InputControl.prototype.$focus.call(this);
                 this.alterClass('-error');
-                if (this._sErrValue !== undefined) {
-                    var el = this.getInput();
-                    dom.removeClass(el, 'ui-error');
+
+                var el = this.getInput();
+                if (this._ePlaceHolder) {
+                    el.style.display = '';
+                } else if (this._sErrValue !== undefined) {
                     el.value = this._sErrValue;
                     delete this._sErrValue;
                 }
@@ -225,16 +208,42 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
-             * 输入框控件提交前的默认处理。
-             * @protected
-             *
-             * @param {Event} event 事件对象
+             * @override
              */
-            $submit: function (event) {
-                ui.InputControl.prototype.$submit.call(this, event);
-                if (!this.validate()) {
-                    event.preventDefault();
+            $validate: function () {
+                ui.InputControl.prototype.$validate.call(this);
+
+                var err = {},
+                    value = this.getValue(),
+                    length = value.length,
+                    result = true;
+
+                value = +value;
+                if (this._nMinLength > length) {
+                    err.minLength = this._nMinLength;
+                    result = false;
                 }
+                if (this._nMaxLength < length) {
+                    err.maxLength = this._nMaxLength;
+                    result = false;
+                }
+                if (this._nMinValue > value) {
+                    err.minValue = this._nMinValue;
+                    result = false;
+                }
+                if (this._nMaxValue < value) {
+                    err.maxValue = this._nMaxValue;
+                    result = false;
+                }
+                if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
+                    err.format = true;
+                    result = false;
+                }
+
+                if (!result) {
+                    core.triggerEvent(this, 'error', null, [err]);
+                }
+                return result;
             },
 
             /**
@@ -283,49 +292,6 @@ _ePlaceHolder - 为空时的提示信息标签
                 range.select();
             } : function (pos) {
                 this._eInput.setSelectionRange(pos, pos);
-            },
-
-            /**
-             * 检测输入框当前的值是否合法。
-             * @public
-             *
-             * @return {boolean} 当前值是否合法
-             */
-            validate: function () {
-                var err = {},
-                    value = this.getValue(),
-                    length = value.length,
-                    result = true;
-
-                value = +value;
-                if (this.onvalidate && this.onvalidate(err)) {
-                    result = false;
-                }
-                if (this._nMinLength > length) {
-                    err.minLength = this._nMinLength;
-                    result = false;
-                }
-                if (this._nMaxLength < length) {
-                    err.maxLength = this._nMaxLength;
-                    result = false;
-                }
-                if (this._nMinValue > value) {
-                    err.minValue = this._nMinValue;
-                    result = false;
-                }
-                if (this._nMaxValue < value) {
-                    err.maxValue = this._nMaxValue;
-                    result = false;
-                }
-                if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
-                    err.format = true;
-                    result = false;
-                }
-
-                if (!result) {
-                    core.triggerEvent(this, 'error', null, [err]);
-                }
-                return result;
             }
         }
     );
