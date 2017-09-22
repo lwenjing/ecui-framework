@@ -148,12 +148,8 @@ _ePlaceHolder - 为空时的提示信息标签
                 this.alterClass('+error');
 
                 var el = this.getInput();
-                if (this._ePlaceHolder) {
-                    el.style.display = 'none';
-                } else {
-                    this._sErrValue = el.value;
-                    el.value = '';
-                }
+                this._sErrValue = el.value;
+                el.value = '';
             },
 
             /**
@@ -163,10 +159,8 @@ _ePlaceHolder - 为空时的提示信息标签
                 ui.InputControl.prototype.$focus.call(this);
                 this.alterClass('-error');
 
-                var el = this.getInput();
-                if (this._ePlaceHolder) {
-                    el.style.display = '';
-                } else if (this._sErrValue !== undefined) {
+                if (this._sErrValue !== undefined) {
+                    var el = this.getInput();
                     el.value = this._sErrValue;
                     delete this._sErrValue;
                 }
