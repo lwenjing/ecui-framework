@@ -11,37 +11,48 @@
 <body>
    <!--蓝色按钮-->
    <div ui="type:button;" class="blue-btn">normal</div>
-   <div ui="type:button;" class="blue-btn-hover">hover</div>
-   <div ui="type:button;" class="blue-btn-active">pressed</div>
-   <div ui="type:button;" class="blue-btn-disabled">disabled</div>
+   <div ui="type:button;capturable:false" class="blue-btn-hover">hover</div>
+   <div ui="type:button;capturable:false" class="blue-btn-active">pressed</div>
+   <div ui="type:button;capturable:false" class="ui-disabled blue-btn">disabled</div>
    <br>
    <br>
    <!--白色按钮-->
    <div ui="type:button;" class="white-btn">normal</div>
-   <div ui="type:button;" class="white-btn-hover">hover</div>
-   <div ui="type:button;" class="white-btn-active">pressed</div>
-   <div ui="type:button;" class="white-btn-disabled">disabled</div>
+   <div ui="type:button;capturable:false" class="white-btn-hover">hover</div>
+   <div ui="type:button;capturable:false" class="white-btn-active">pressed</div>
+   <div ui="type:button;capturable:false" class="ui-disabled white-btn">disabled</div>
    <br>
    <br>
    <!--checkbox-->
     <input ui="type:checkbox;" checked="checked">
-    <input ui="type:checkbox;">
-    <input ui="type:checkbox;" class="ui-checkbox-disabled">
+    <input ui="type:checkbox;capturable:false">
+    <input ui="type:checkbox;capturable:false" class="ui-disabled">
     <br>
     <br>
     <!--select-->
     <select ui="type:select;" class="ui-select">
         <option>管理员</option>
+        <option>管理员</option>
     </select> 
-    <select ui="type:select;" class="ui-select-hover">
+    <select ui="type:select;capturable:false" class="ui-select-hover">
         <option>管理员</option>
     </select>
-    <select ui="type:select;" class="ui-select-active">
+    <select ui="type:select;capturable:false" class="ui-select-active">
         <option>管理员</option>
     </select>
-    <select ui="type:select;" class="ui-select-disabled">
+    <select ui="type:select;capturable:false" class="ui-disabled">
         <option>管理员</option>
-    </select>                
+    </select>
+    <br>
+    <br>  
+    <!--input-->  
+    <input ui="type:text;" class="" placeholder="输入框">  
+    <input ui="type:text;capturable:false" class="ui-text-hover">   
+    <input ui="type:text;capturable:false" class="ui-text-active">   
+    <input ui="type:text;capturable:false" class="ui-disabled">
+
+    <!---->
+
 </body>
 </html>
 

@@ -39,7 +39,7 @@
 .ui-select-focus {
     border:1px solid #368cda;
 }
-.ui-select-disabled {
+.ui-select-disabled,.ui-disabled.ui-select{
     background:#eff2f7 url(images/ecui/arrow.png) no-repeat 120px center;
     border:1px solid #e0e6ed;
     .ui-select-text,
@@ -60,7 +60,6 @@
         text-indent: 5px;
         line-height: 28px;
         overflow: hidden;
-        font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
         text-overflow: ellipsis;
     }
     .ui-select-item-hover,
