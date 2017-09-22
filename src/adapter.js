@@ -134,6 +134,12 @@ var ecui;
                 el.type = 'text/css';
 
                 if (ieVersion < 10) {
+                    var reg = ieVersion > 6 ? new RegExp('[_' + (ieVersion > 7 ? '\\*\\+' : '') + ']\\w+:[^;}]+[;}]', 'g') : null;
+                    if (reg) {
+                        cssText = cssText.replace(reg, function (match) {
+                            return match.slice(-1) === '}' ? '}' : '';
+                        });
+                    }
                     el.styleSheet.cssText = cssText;
                 } else {
                     el.innerHTML = cssText;
