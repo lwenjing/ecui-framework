@@ -18,12 +18,16 @@
         color: #c0ccda;
     }
 }
-.ui-text:hover,
+.ui-text-empty,
+.ui-text-error {
+    .ui-placeholder {
+        z-index: 1;
+    }
+}
 .ui-text-hover {
     border:1px solid #8492a6;
     color: #8492a6;
 }
-.ui-text:active,
 .ui-text-active {
     border:1px  solid #368CDA;
 }

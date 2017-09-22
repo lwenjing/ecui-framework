@@ -12,6 +12,7 @@ InputControl - 定义输入数据的基本操作，不建议直接控件化。
 </div>
 
 属性
+_bBlur         - 失去焦点时是否需要校验
 _eInput        - INPUT对象
 */
 (function () {
@@ -182,6 +183,7 @@ _eInput        - INPUT对象
      * checked      输入框是否默认选中(radio/checkbox有效)
      * inputType    输入框的类型，默认为 text
      * readOnly     输入框是否只读
+     * valid        在什么情况下校验，表单提交时一定会校验，blur表示需要在失去焦点时校验
      * @public
      *
      * @param {Object} options 初始化选项
@@ -227,6 +229,13 @@ _eInput        - INPUT对象
 
             this._eInput = inputEl;
             bindEvent.call(this);
+
+            if (options.valid) {
+                options = options.valid.split(',');
+                if (options.indexOf('blur') >= 0) {
+                    this._bBlur = true;
+                }
+            }
         },
         {
             /**
@@ -241,6 +250,10 @@ _eInput        - INPUT对象
                 } catch (ignore) {
                 }
                 dom.addEventListener(this._eInput, 'blur', events.blur);
+
+                if (this._bBlur) {
+                    core.triggerEvent(this, 'validate');
+                }
             },
 
             /**
@@ -344,7 +357,18 @@ _eInput        - INPUT对象
              *
              * @param {Event} event 事件对象
              */
-            $submit: util.blank,
+            $submit: function (event) {
+                ui.Control.prototype.$submit.call(this, event);
+                if (!core.triggerEvent(this, 'validate')) {
+                    event.preventDefault();
+                }
+            },
+
+            /**
+             * 输入格式校验事件的默认处理。
+             * @protected
+             */
+            $validate: util.blank,
 
             /**
              * 获取控件的输入元素。
