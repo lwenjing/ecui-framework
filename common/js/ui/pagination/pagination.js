@@ -3,7 +3,7 @@ pagination - 分页控件。
 定制分页控件，继承自基础控件
 
 分页视图控件直接HTML初始化的例子:
-<div ui="type:pagination;page:'1-20';total:304";id:test></div>
+<div ui="type:pagination;page:1-20;total:304";id:test></div>
 
 外部调用获取当前点击页数的方法（通过在外部定义go方法，进行业务代码实现）:
 ecui.get('test').go = function(pageNo){
