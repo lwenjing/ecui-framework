@@ -39,7 +39,7 @@
 .ui-text-focus {
     border:1px solid #368CDA;
 }
-.ui-disabled.ui-text,
+.ui-disabled .ui-text,
 .ui-text-disabled,
 .ui-text-disabled:hover
 {   background-color: #eff2f7;

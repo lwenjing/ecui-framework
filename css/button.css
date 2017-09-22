@@ -43,7 +43,7 @@
 
 
 }
-.ui-disabled.blue-btn,
+.ui-disabled .blue-btn,
 .blue-btn-disabled,
 .blue-btn-disabled:hover
  {
@@ -99,7 +99,7 @@
     font-size: 14px;
 
 }
-.ui-disabled.white-btn,
+.ui-disabled .white-btn,
 .white-btn-disabled,
 .white-btn-disabled:hover {
     background-color: #fff;

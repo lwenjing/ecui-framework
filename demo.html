@@ -13,20 +13,26 @@
    <div ui="type:button;" class="blue-btn">normal</div>
    <div ui="type:button;capturable:false" class="blue-btn-hover">hover</div>
    <div ui="type:button;capturable:false" class="blue-btn-active">pressed</div>
-   <div ui="type:button;capturable:false" class="ui-disabled blue-btn">disabled</div>
+   <div class="ui-disabled">
+       <input ui="type:button;capturable:false" class="blue-btn" value="disabled">
+   </div>
    <br>
    <br>
    <!--白色按钮-->
    <div ui="type:button;" class="white-btn">normal</div>
    <div ui="type:button;capturable:false" class="white-btn-hover">hover</div>
    <div ui="type:button;capturable:false" class="white-btn-active">pressed</div>
-   <div ui="type:button;capturable:false" class="ui-disabled white-btn">disabled</div>
+   <div class="ui-disabled">
+       <input ui="type:button;capturable:false" class="white-btn" value="disabled">
+   </div>
    <br>
    <br>
    <!--checkbox-->
-    <input ui="type:checkbox;" checked="checked">
-    <input ui="type:checkbox;capturable:false">
-    <input ui="type:checkbox;capturable:false" class="ui-disabled">
+    <input ui="type:checkbox;" class="ui-checkbox">
+    <input ui="type:checkbox;capturable:false" class="ui-checkbox-checked">
+    <div class="ui-disabled" ui="disabled:true;">
+        <input ui="type:checkbox;capturable:false">
+    </div>
     <br>
     <br>
     <!--select-->
@@ -40,18 +46,33 @@
     <select ui="type:select;capturable:false" class="ui-select-active">
         <option>管理员</option>
     </select>
-    <select ui="type:select;capturable:false" class="ui-disabled">
-        <option>管理员</option>
-    </select>
+    <div class="ui-disabled" ui="disable:true">
+        <select ui="type:select;capturable:false" class="">
+            <option>管理员</option>
+        </select>
+    </div>
     <br>
     <br>  
     <!--input-->  
     <input ui="type:text;" class="" placeholder="输入框">  
     <input ui="type:text;capturable:false" class="ui-text-hover">   
-    <input ui="type:text;capturable:false" class="ui-text-active">   
-    <input ui="type:text;capturable:false" class="ui-disabled">
+    <input ui="type:text;capturable:false" class="ui-text-active"> 
+    <div class="ui-disabled" ui="disable:true">  
+        <input ui="type:text;capturable:false">
+    </div>
     <br>
     <br> 
+    <!--radio-->
+    <input ui="type:radio;" class="ui-radio">
+    <input ui="type:radio;capturable:false" class="ui-radio-checked">
+    <div class="ui-disabled">
+     <input ui="type:radio;capturable:false">
+    </div>
+    <div class="ui-disabled">
+        <input ui="type:radio;capturable:false" class="ui-radio-checked">
+    </div>
+    <br>
+    <br>
     <!--calender-->
     <div ui="type:month-view;"></div>
     <br>
@@ -60,6 +81,10 @@
     <br>
     <br> 
     <div ui="type:calendar;"></div>
+    <!--combox-->
+    <!-- <br>
+    <br>
+    <div ui="type:text;" class="ui-combox"></div> -->
 </body>
 </html>
 
