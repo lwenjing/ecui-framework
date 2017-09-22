@@ -827,7 +827,7 @@ var ecui;
                         socket.send(data);
                     }
                 };
-            },
+            }
         },
         ui: {},
         util: {

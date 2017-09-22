@@ -12,10 +12,12 @@ Text - 定义文本输入数据的基本操作。
 
 属性
 _bTrim        - 字符串是否需要过滤两端空白
+_bBlur        - 失去焦点时是否需要校验
 _nMinLength   - 允许提将近最小长度
 _nMaxLength   - 允许提交的最大长度
 _nMinValue    - 允许提交的最小值
 _nMaxValue    - 允许提交的最大值
+_sErrValue    - 检验错误的文本值
 _oRegExp      - 允许提交的格式正则表达式
 _ePlaceHolder - 为空时的提示信息标签
 */
@@ -31,6 +33,7 @@ _ePlaceHolder - 为空时的提示信息标签
     /**
      * 初始化格式化输入框控件。
      * options 对象支持的属性如下：
+     * valid 在什么情况下校验，表单提交时一定会校验，blur表示需要在失去焦点时校验
      * trim 是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
      * len [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)长度
      * num [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)值
@@ -47,18 +50,32 @@ _ePlaceHolder - 为空时的提示信息标签
             ui.InputControl.call(this, el, options);
 
             this._bTrim = options.trim !== false;
-            if (options.len && options.len.charAt(0) === '[') {
-                el = options.len.slice(1, -1).split(',');
+            if (options.len) {
+                el = options.len.split('-');
+                if (el.length === 1) {
+                    el[1] = el[0];
+                    el[0] = 0;
+                }
                 this._nMinLength = +el[0];
                 this._nMaxLength = +el[1];
             }
-            if (options.num && options.num.charAt(0) === '[') {
-                el = options.num.slice(1, -1).split(',');
+            if (options.num) {
+                el = options.num.split('-');
+                if (el.length === 1) {
+                    el[1] = el[0];
+                    el[0] = 0;
+                }
                 this._nMinValue = +el[0];
                 this._nMaxValue = +el[1];
             }
             if (options.regexp) {
                 this._oRegExp = new RegExp('^' + options.regexp + '$');
+            }
+            if (options.valid) {
+                options = options.valid.split(',');
+                if (options.indexOf('blur') >= 0) {
+                    this._bBlur = true;
+                }
             }
 
             if (ieVersion < 10) {
@@ -85,7 +102,9 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $blur: function () {
                 ui.InputControl.prototype.$blur.call(this);
-                this.validate();
+                if (this._bBlur) {
+                    this.validate();
+                }
             },
 
             /**
@@ -140,6 +159,34 @@ _ePlaceHolder - 为空时的提示信息标签
                 var body = this.getBody();
                 body.innerHTML = '';
                 body.appendChild(this.getInput());
+            },
+
+            /**
+             * 控件格式校验错误的默认处理。
+             * @protected
+             */
+            $error: function () {
+                this.alterClass('+error');
+                if (!this._ePlaceHolder) {
+                    var el = this.getInput();
+                    dom.addClass(el, 'ui-error');
+                    this._sErrValue = el.value;
+                    el.value = '';
+                }
+            },
+
+            /**
+             * @override
+             */
+            $focus: function () {
+                ui.InputControl.prototype.$focus.call(this);
+                this.alterClass('-error');
+                if (this._sErrValue !== undefined) {
+                    var el = this.getInput();
+                    dom.removeClass(el, 'ui-error');
+                    el.value = this._sErrValue;
+                    delete this._sErrValue;
+                }
             },
 
             /**
