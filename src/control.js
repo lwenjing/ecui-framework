@@ -902,6 +902,7 @@ $$padding           - 内填充宽度缓存
                 if (!this._bReady) {
                     if (this._bDisabled) {
                         this.alterClass('+disabled');
+                        dom.addClass(this.getMain(), 'ui-disabled');
                     }
 
                     var el = this.getOuter();
