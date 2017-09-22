@@ -15,6 +15,7 @@
 .ui-checkbox-checked {
     background-image: url('images/ecui/checkbox-choice.png');
 }
-.ui-checkbox-disabled,.ui-disabled.ui-checkbox{
+.ui-checkbox-disabled,
+.ui-disabled .ui-checkbox{
     background-image: url('images/ecui/checkbox-disable.png');
 }
