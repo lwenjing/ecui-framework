@@ -117,8 +117,12 @@ cities - 地区联动下拉框控件。
             },
             setValue: function (val) {
                 this.getSelect(0).setValue(val.slice(0, 2) + '0000');
-                this.setOptions(this.getSelect(1), val.slice(0, 2) + '0000');
+                core.triggerEvent(this.getSelect(0), 'change');
                 this.getSelect(1).setValue(val.slice(0, 4) + '00');
+                if (this.getSelect(2)) {
+                    core.triggerEvent(this.getSelect(1), 'change');
+                    this.getSelect(2).setValue(val);
+                }
             }
         }
     );
