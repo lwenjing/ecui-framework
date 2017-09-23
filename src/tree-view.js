@@ -159,16 +159,15 @@ _aChildren     - 子控件集合
             $mouseout: function (event) {
                 ui.Control.prototype.$mouseout.call(this, event);
 
-                var control = event.getControl();
-
                 if (hovered) {
                     if (!this.contain(hovered)) {
                         return;
                     }
-                    if (this.getRoot().contain(control)) {
-                        core.triggerEvent(control, 'nodeover', event);
-                    } else {
-                        control = null;
+                    for (var control = event.getControl(); control; control = control.getParent()) {
+                        if (control instanceof ui.TreeView) {
+                            core.triggerEvent(control, 'nodeover', event);
+                            break;
+                        }
                     }
                     core.triggerEvent(hovered, 'nodeout', event);
                     hovered = control;
