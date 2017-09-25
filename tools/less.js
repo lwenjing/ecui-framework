@@ -236,11 +236,11 @@ ecui.pause();
         // Interval between watch polls
         options.poll = options.poll || (options.isFileProtocol ? 1000 : 1500);
 
-        options.env = options.env || (location.hostname === '127.0.0.1' ||
+        options.env = /* options.env || (location.hostname === '127.0.0.1' ||
             location.hostname === '0.0.0.0' ||
             location.hostname === 'localhost' ||
             (location.port && location.port.length > 0) ||
-            options.isFileProtocol ? 'development' : 'production');
+            options.isFileProtocol ? */ 'development' /* : 'production') */;
 
         var dumpLineNumbers = /!dumpLineNumbers:(comments|mediaquery|all)/.exec(location.hash);
         if (dumpLineNumbers) {
