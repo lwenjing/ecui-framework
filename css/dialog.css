@@ -12,7 +12,6 @@
         right: 15px;
         cursor: pointer;
     }
-    .ui-dialog-close:hover,
     .ui-dialog-close-hover {
         background: url(images/ecui/close_hover.png) no-repeat;
     }

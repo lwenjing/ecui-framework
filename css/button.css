@@ -15,7 +15,6 @@
     cursor: pointer;
     font-size: 14px;
 }
-.blue-btn:hover,
 .blue-btn-hover {
     background-color: #429aeb;
     border: 1px solid #429aeb;
@@ -28,7 +27,6 @@
     cursor: pointer;
     font-size: 14px;
 }
-.blue-btn:active,
 .blue-btn-active {
     background-color: #2e7bc2;
     border: 1px solid #2e7bc2;
@@ -44,9 +42,7 @@
 
 }
 .ui-disabled .blue-btn,
-.blue-btn-disabled,
-.blue-btn-disabled:hover
- {
+.blue-btn-disabled {
     background-color: #EFF2F7;
     border:1px solid #eff2f7;
     color: #E0E6ED;
@@ -71,7 +67,6 @@
     cursor: pointer;
     font-size: 14px;
 }
-.white-btn:hover,
 .white-btn-hover {
     background-color: #fff;
     border: 1px solid #368cda;
@@ -85,7 +80,6 @@
     font-size: 14px;
 
 }
-.white-btn:active,
 .white-btn-active {
     background-color: #2E7BC2;
     border: 1px solid #2e7bc2;
@@ -100,8 +94,7 @@
 
 }
 .ui-disabled .white-btn,
-.white-btn-disabled,
-.white-btn-disabled:hover {
+.white-btn-disabled {
     background-color: #fff;
     border:1px solid #EFF2F7;
     color: #e0e6ed;

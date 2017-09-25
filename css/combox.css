@@ -30,9 +30,7 @@
     border-color: #e0e6ed;
 }
 .ui-combox-disabled {
-    .ui-combox-text,
-    .ui-combox-text:hover,
-    .ui-combox-text:active {
+    .ui-combox-text {
         background-color: #eff2f7;
         color: #e0e6ed
     }

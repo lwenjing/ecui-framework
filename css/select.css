@@ -38,9 +38,7 @@
 {
     background:#eff2f7 url(images/ecui/arrow.png) no-repeat 120px center;
     border:1px solid #e0e6ed;
-    .ui-select-text,
-    .ui-select-text:hover,
-    .ui-select-text:active {
+    .ui-select-text {
         background-color: #eff2f7;
         color: #e0e6ed
     }

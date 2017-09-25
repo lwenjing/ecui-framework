@@ -22,13 +22,11 @@
         td:hover {
             background: #c0ccda;
         }
-        td.ui-calendar-date-selected ,
-        td.ui-calendar-date-selected:hover {
+        td.ui-calendar-date-selected {
             background: #368cda;
             color: #fff;
         }
-        td.ui-calendar-date-disabled,
-        td.ui-calendar-date-disabled:hover {
+        td.ui-calendar-date-disabled {
             color: #dde3eb;
             background: #fff;
         }

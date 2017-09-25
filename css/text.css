@@ -40,9 +40,8 @@
     border:1px solid #368CDA;
 }
 .ui-disabled .ui-text,
-.ui-text-disabled,
-.ui-text-disabled:hover
-{   background-color: #eff2f7;
+.ui-text-disabled {
+    background-color: #eff2f7;
     border:1px solid #e0e6ed;
     color: #e0e6ed;
     input{
