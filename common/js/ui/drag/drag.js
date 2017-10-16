@@ -41,7 +41,6 @@ drag - 拖拽控件
                 oldIndex = start = Math.floor((event.pageX - left) / width);
                 ecui.dom.addClass(boxes[start], 'hover');
                 ecui.drag(this, event);
-                // console.log(start, oldIndex);
             },
             $dragmove: function (event) {
                 var boxes = this.getMain().getElementsByTagName('TD'),
@@ -73,8 +72,7 @@ drag - 拖拽控件
                 for (i = 0; item = ret[i++]; ) {
                     ecui.dom.addClass(boxes[item], 'selected');
                 }
-                // console.log(ret);
-                // console.log(start, oldIndex);
+                this.ondragend(ret, start, oldIndex);
             }
         }
     );
