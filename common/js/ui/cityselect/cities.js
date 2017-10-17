@@ -112,6 +112,7 @@ cities - 地区联动下拉框控件。
                     if (options.multi == '3') {
                         core.triggerEvent(city, 'change');
                         core.addEventListener(city, 'change', cityChange);
+                        this.getSelect(2).setValue(options.value);
                     }
                 }
             },
