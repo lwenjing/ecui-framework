@@ -7,7 +7,7 @@
     background: url(images/ecui/arrow.png) no-repeat 120px center;
     border: 1px solid #acbaca;
     border-radius: 2px;
-    color: #8492A6;
+    color: #495362;
     .ui-select-text {
         position: absolute !important;
         overflow: hidden !important;
@@ -15,7 +15,7 @@
         display: block;
         border: none;
         background-color: #fff;
-        color: #8492A6;
+        color: #495362;
         cursor: pointer;
     }
     input {
