@@ -48,3 +48,9 @@
     }
     
 }
+.ui-text-error {
+    border-color: #D0021B;
+    input::placeholder {
+        color: #D0021B;
+    }
+}
