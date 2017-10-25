@@ -18,4 +18,7 @@
 		border: 1px solid #acbaca !important;
 		color: #8492a6;
 	}
+	.ui-select-focus {
+	    border: 1px solid #368cda !important;
+	}
 }

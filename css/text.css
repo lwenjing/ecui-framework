@@ -6,14 +6,14 @@
     line-height: 30px;
     border: 1px solid #acbaca;
     border-radius: 2px;
-    color: #8492a6;
+    color: #495362;
     font-size: 14px;
     .ui-placeholder {
         position: absolute;
     }
     input,
     textarea {
-        color: #8492a6;
+        color: #495362;
         font-size: 14px;
     }
     .ui-placeholder,
@@ -30,7 +30,7 @@
 }
 .ui-text-hover {
     border:1px solid #8492a6;
-    color: #8492a6;
+    color: #495362;
 }
 .ui-text-active {
     border:1px  solid #368CDA;
