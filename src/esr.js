@@ -644,6 +644,7 @@
                         url = method[1].split('?'),
                         data = {},
                         valid = true;
+
                     url[1].split('&').forEach(function (item) {
                         item = item.split('=');
                         if (item.length > 1) {
@@ -659,16 +660,6 @@
                                     setData(item.name, item.getControl ? item.getControl().getValue() : item.value);
                                 }
                             });
-
-                            if (!valid) {
-                                if (count === 1) {
-                                    onerror();
-                                } else {
-                                    count--;
-                                    err.push({url: varUrl, name: varName});
-                                }
-                                return;
-                            }
                         } else {
                             item = replace(item[1]);
                             if ('object' === typeof item) {
@@ -676,6 +667,17 @@
                             }
                         }
                     });
+
+                    if (!valid) {
+                        if (count === 1) {
+                            onerror();
+                        } else {
+                            count--;
+                            err.push({url: varUrl, name: varName});
+                        }
+                        return;
+                    }
+
                     method = 'POST';
                     url = url[0];
                     data = JSON.stringify(data);

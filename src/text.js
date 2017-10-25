@@ -145,7 +145,7 @@ _ePlaceHolder - 为空时的提示信息标签
              * @protected
              */
             $error: function () {
-                this.alterClass('+error');
+                this.alterSubType('error');
 
                 var el = this.getInput();
                 this._sErrValue = el.value;
@@ -157,7 +157,7 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $focus: function () {
                 ui.InputControl.prototype.$focus.call(this);
-                this.alterClass('-error');
+                this.alterSubType('');
 
                 if (this._sErrValue !== undefined) {
                     var el = this.getInput();
