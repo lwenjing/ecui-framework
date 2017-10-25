@@ -74,11 +74,13 @@
                 });
             }
             return data;
-        } else if (code == 12011) {
+        } else if (code === 12011) {
             // 分支3.4：登录相关的错误
             window.location = './login.html';
         } else if (code === 300000) {
             throw data.msg;
+        } else {
+            window.alert(data.msg);
         }
         return code;
     };
