@@ -4,7 +4,7 @@
     position: relative;
     table{
     	width: 100%;
-    	table-layout: fixed;
+    	/*table-layout: fixed;*/
     }
 	.ui-table-head {
 	    position: absolute !important;
@@ -18,7 +18,7 @@
 		    background: #f7fcff;
 		    border-top: 2px solid #a9d3fa;
 		    font-size: 16px;
-		    padding: 0 10px;
+		    padding: 0 0 0 10px;
 		    text-align: left;
 	    }
 	}
@@ -29,7 +29,7 @@
     		background: #f7fcff;
 		}
 	    .ui-table-cell{
-	    	padding: 10px;
+	    	padding: 0 0 0 10px;
 		    text-align: left;
 		    text-overflow: ellipsis;
 		    overflow: hidden;
