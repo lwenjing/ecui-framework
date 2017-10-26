@@ -29,7 +29,6 @@
 		}
 	    .ui-table-cell{
 	    	height: 50px;
-		    line-height: 50px;
 	    	padding: 0 0 0 10px;
 		    text-align: left;
 		    text-overflow: ellipsis;
