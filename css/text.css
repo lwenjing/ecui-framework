@@ -50,6 +50,10 @@
 }
 .ui-text-error {
     border-color: #D0021B;
+    background-color: #FFEAD6;
+    input {
+        background-color: #FFEAD6;
+    }
     input::placeholder {
         color: #D0021B;
     }
