@@ -675,6 +675,7 @@
                             count--;
                             err.push({url: varUrl, name: varName});
                         }
+                        pauseStatus = false;
                         return;
                     }
 
