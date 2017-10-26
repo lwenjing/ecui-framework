@@ -487,24 +487,15 @@ $$padding           - 内填充宽度缓存
 
             /**
              * 为控件添加/移除一个扩展样式。
-             * 扩展样式分别附加在类型样式与当前样式之后(参见 getTypes 与 getClass 方法)，使用-号进行分隔。如果类型样式为 ui-control，当前样式为 demo，扩展样式 hover 后，控件主元素将存在四个样式，分别为 ui-control、demo、ui-control-hover 与 demo-hover。
+             * 扩展样式分别附加在类型样式与当前样式之后(参见 getType 与 getClass 方法)，使用-号进行分隔。如果类型样式为 ui-control，当前样式为 demo，扩展样式 hover 后，控件主元素将存在四个样式，分别为 ui-control、demo、ui-control-hover 与 demo-hover。
              * @public
              *
              * @param {string} className 扩展样式名，以+号开头表示添加扩展样式，以-号开头表示移除扩展样式
              */
             alterClass: function (className) {
                 if (this._sClass) {
-                    var classes = core.$getClasses(this.constructor, this._sClass);
-
-                    if (this._sSubType) {
-                        classes.pop();
-                        var type = this.getType();
-                        if (this._sPrimary !== type) {
-                            classes.push(this._sPrimary + '-' + this._sSubType);
-                        }
-                        classes.push(type + '-' + this._sSubType);
-                        classes.push('');
-                    }
+                    var classes = this.getClasses(this);
+                    classes.push('');
 
                     if (className.charAt(0) === '+') {
                         className = '-' + className.slice(1) + ' ';
@@ -531,12 +522,22 @@ $$padding           - 内填充宽度缓存
              */
             alterSubType: function (subtype) {
                 if (this._sSubType !== subtype) {
-                    var type = this.getType();
+                    var classes = core.$getClasses(this.constructor, this._sClass);
                     if (this._sSubType) {
-                        dom.removeClass(this._eMain, (this._sPrimary !== type ? this._aStatus.join(this._sPrimary + '-' + this._sSubType) : '') + this._aStatus.join(type + '-' + this._sSubType));
+                        dom.removeClass(
+                            this._eMain,
+                            classes.map(function (item) {
+                                return this._aStatus.join(item + '-' + this._sSubType);
+                            }, this).join('')
+                        );
                     }
                     if (subtype) {
-                        dom.addClass(this._eMain, (this._sPrimary !== type ? this._aStatus.join(this._sPrimary + '-' + subtype) : '') + this._aStatus.join(type + '-' + subtype));
+                        dom.addClass(
+                            this._eMain,
+                            classes.map(function (item) {
+                                return this._aStatus.join(item + '-' + subtype);
+                            }, this).join('')
+                        );
                     }
                     this._sSubType = subtype;
                 }
@@ -720,6 +721,24 @@ $$padding           - 内填充宽度缓存
             },
 
             /**
+             * 获取控件的全部样式。
+             * @public
+             *
+             * @return {Array} 控件的全部样式
+             */
+            getClasses: function () {
+                var classes = core.$getClasses(this.constructor, this._sClass);
+                if (this._sSubType) {
+                    classes = classes.concat(
+                        classes.map(function (item) {
+                            return item + '-' + this._sSubType;
+                        }, this)
+                    );
+                }
+                return classes;
+            },
+
+            /**
              * 获取控件的内容。
              * @public
              *
@@ -815,17 +834,6 @@ $$padding           - 内填充宽度缓存
              */
             getType: function () {
                 return this.constructor.TYPES[0];
-            },
-
-            /**
-             * 获取控件的类型样式组。
-             * getTypes 方法返回控件的类型样式组，类型样式在控件继承时指定。
-             * @public
-             *
-             * @return {Array} 控件的类型样式组
-             */
-            getTypes: function () {
-                return this._sSubType ? this.constructor.TYPES.concat([this.constructor.TYPES[0] + '-' + this._sSubType, this._sPrimary + '-' + this._sSubType]) : this.constructor.TYPES.slice();
             },
 
             /**
@@ -1101,20 +1109,21 @@ $$padding           - 内填充宽度缓存
              * @param {string} currClass 控件的当前样式名称
              */
             setClass: function (currClass) {
-                var oldClass = this._sClass,
-                    classes = this.getTypes(),
-                    list;
-
                 currClass = currClass || this._sPrimary;
 
                 // 如果基本样式没有改变不需要执行
-                if (currClass !== oldClass) {
-                    classes.splice(0, 0, this._sClass = currClass);
-                    list = classes.map(function (item) {
-                        return this._aStatus.join(item);
-                    }, this);
-                    classes[0] = oldClass;
-                    this._eMain.className = list.join('') + this._eMain.className.split(/\s+/).join('  ').replace(new RegExp('(^| )(' + classes.join('|') + ')(-[^ ]+)?( |$)', 'g'), '');
+                if (currClass !== this._sClass) {
+                    var classes = this.getClasses(),
+                        className = this._eMain.className.split(/\s+/).join('  ').replace(new RegExp('(^| )(' + classes.join('|') + ')(-[^ ]+)?( |$)', 'g'), '');
+
+                    this._sClass = currClass;
+
+                    classes = this.getClasses();
+
+                    this._eMain.className =
+                        classes.map(function (item) {
+                            return this._aStatus.join(item);
+                        }, this).join('') + className;
                 }
             },
 

@@ -1049,6 +1049,7 @@
 
             // 生成控件
             options.classes = core.$getClasses(UIClass, options.primary);
+            options.classes.push('');
             var control = new UIClass(el, options);
 
             if (parent) {
@@ -1098,6 +1099,7 @@
             }
 
             options.classes = core.$getClasses(UIClass, options.primary);
+            options.classes.push('');
             var control = new UIClass(el, options);
             control.$setParent(parent);
             oncreate(control, options);
@@ -1118,7 +1120,6 @@
             if (current && current !== UIClass.TYPES[0]) {
                 classes.push(current);
             }
-            classes.push('');
             return classes;
         },
 
