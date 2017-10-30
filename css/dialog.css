@@ -18,7 +18,7 @@
         background: url(images/ecui/icons.png) no-repeat;
         background-position:0 -114px ;
     }
-    .ui-dialog-title {
+    strong.ui-dialog-title {
         display: block;
         padding-left: 15px;
         height: 45px;
