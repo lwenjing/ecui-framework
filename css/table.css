@@ -3,6 +3,7 @@
     overflow: hidden !important;
     .ui-table-layout {
 	    position: relative;
+	    overflow: auto;
 	}
     table{
     	width: 100%;

@@ -145,12 +145,12 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 dom.create(
                     {
                         className: options.classes.join('-layout '),
-                        innerHTML: '<div class="' + options.classes.join('-body ') + '"></div><div class="' + options.classes.join('-head ') + '"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
+                        innerHTML: '<table cellspacing="0" class="ui-table-head ' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table>'
                     }
                 )
             );
-            body = el.lastChild.firstChild;
-            body.appendChild(table);
+            dom.insertBefore(table, el.lastChild.firstChild);
+            dom.addClass(table, 'ui-table-body');
 
             var i = 0,
                 list = dom.children(table),
@@ -571,12 +571,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
-                var body = dom.getParent(dom.getParent(this.getBody()));
-                dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.firstChild);
-                body.style.paddingTop = this.$$paddingTop + 'px';
-                body.style.height = (height - this.$$paddingTop) + 'px';
-
-                this._uHead.$setSize(width - (body.offsetHeight === body.scrollHeight ? 0 : core.getScrollNarrow()), this.$$paddingTop);
+                dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild);
+                dom.getParent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
             },
 
             /**
@@ -602,7 +598,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 var el = this._uHead.getOuter();
                 el.lastChild.style.marginLeft = -dom.getParent(dom.getParent(this.getBody())).scrollLeft + 'px';
                 if (this._bHeadFloat) {
-                    el.style.top = Math.max(0, util.getView().top - dom.getPosition(this.getMain()).top) + 'px';
+                    el.style.top = Math.max(0, util.getView().top + dom.getParent(el).scrollTop - dom.getPosition(this.getMain()).top) + 'px';
                 }
             },
 
