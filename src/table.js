@@ -141,7 +141,15 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
             this._bHeadFloat = !!options.headFloat;
 
-            el.appendChild(body = dom.create({className: options.classes.join('-body ')}));
+            el.appendChild(
+                dom.create(
+                    {
+                        className: options.classes.join('-layout '),
+                        innerHTML: '<div class="' + options.classes.join('-body ') + '"></div><div class="' + options.classes.join('-head ') + '"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
+                    }
+                )
+            );
+            body = el.lastChild.firstChild;
             body.appendChild(table);
 
             var i = 0,
@@ -176,21 +184,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 }
             }
 
-            // 初始化表格区域
-            o = el.appendChild(
-                dom.create(
-                    {
-                        className: options.classes.join('-head '),
-                        innerHTML: '<table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table>'
-                    }
-                )
-            );
-
             ui.Control.prototype.constructor.call(this, el, options);
 
             // 初始化表格区域
             this.$setBody(body);
-            (this._uHead = core.$fastCreate(ui.Control, o, this)).$setBody(head);
+            (this._uHead = core.$fastCreate(ui.Control, el.lastChild.lastChild, this)).$setBody(head);
 
             // 以下初始化所有的行控件
             for (i = 0; o = list[i]; i++) {
@@ -600,8 +598,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             $scroll: function () {
                 ui.Control.prototype.$scroll.call(this);
+
+                var el = this._uHead.getOuter();
+                el.lastChild.style.marginLeft = -dom.getParent(dom.getParent(this.getBody())).scrollLeft + 'px';
                 if (this._bHeadFloat) {
-                    dom.getParent(dom.getParent(dom.getParent(this._uHead.getBody()))).style.top = Math.max(0, util.getView().top - dom.getPosition(this.getMain()).top) + 'px';
+                    el.style.top = Math.max(0, util.getView().top - dom.getPosition(this.getMain()).top) + 'px';
                 }
             },
 
