@@ -110,7 +110,7 @@ _uOptions     - 下拉选择框
                 );
             } else {
                 optionsEl = oldEl;
-                optionsEl.className = options.classes.join('-options ') + 'ui-hide';
+                optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
                 oldEl.style.cssText = '';
             }
 
