@@ -142,14 +142,14 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             this._bHeadFloat = !!options.headFloat;
 
             el.appendChild(
-                dom.create(
+                this._eLayout = dom.create(
                     {
                         className: options.classes.join('-layout '),
                         innerHTML: '<table cellspacing="0" class="ui-table-head ' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table>'
                     }
                 )
             );
-            dom.insertBefore(table, el.lastChild.lastChild);
+            dom.insertBefore(table, this._eLayout.lastChild);
             dom.addClass('ui-table-body');
 
             var i = 0,
@@ -543,6 +543,14 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             },
 
             /**
+             * @override
+             */
+            $dispose: function () {
+                this._eLayout = null;
+                ui.Control.prototype.$dispose.call(this);
+            },
+
+            /**
              * 获取单元格主元素。
              * $getElement 方法在合法的行列序号内一定会返回一个 Element 对象，如果当前单元格被合并，将返回合并后的 Element 对象。
              * @protected
@@ -571,11 +579,9 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
-                var body = dom.getParent(dom.getParent(this.getBody()));
-                console.log(body);
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild);
-                body.style.paddingTop = this.$$paddingTop + 'px';
-                body.style.height = (height - this.$$paddingTop) + 'px';
+                dom.getParent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
+                this.getLayout().style.height = height + 'px';
             },
 
             /**
@@ -584,10 +590,9 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $resize: function () {
                 ui.Control.prototype.$resize.call(this);
 
-                var body = dom.getParent(dom.getParent(this.getBody()));
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
-                body.style.paddingTop = '';
-                body.style.height = '';
+                dom.getParent(this.getBody()).style.marginTop = '';
+                this.getLayout().style.height = '';
             },
 
             /**
@@ -596,9 +601,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $scroll: function () {
                 ui.Control.prototype.$scroll.call(this);
 
-                var el = this._uHead.getOuter();
                 if (this._bHeadFloat) {
-                    el.style.top = Math.max(0, util.getView().top + dom.getParent(el).scrollTop - dom.getPosition(this.getOuter()).top) + 'px';
+                    this._uHead.getOuter().style.top = Math.max(0, util.getView().top + this.getLayout().scrollTop - dom.getPosition(this.getOuter()).top) + 'px';
                 }
             },
 
@@ -793,6 +797,16 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             getHCells: function () {
                 return this._aHCells.slice();
+            },
+
+            /**
+             * 获取定位的 DOM 元素。
+             * @public
+             *
+             * @return {HTMLElement} 定位的 DOM 元素
+             */
+            getLayout: function () {
+                return this._eLayout;
             },
 
             /**

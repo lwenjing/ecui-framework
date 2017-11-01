@@ -33,6 +33,7 @@
 
 @import (less) "css/calendar.css";
 @import (less) "css/calendar-input.css";
+@import (less) "css/locked-table.css";
 @import (less) "css/check-tree.css";
 @import (less) "css/multilevel-select.css";
 @import (less) "css/upload.css";

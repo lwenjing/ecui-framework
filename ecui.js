@@ -36,6 +36,7 @@
 
     document.write('<script type="text/javascript" src="src/calendar.js"></script>');
     document.write('<script type="text/javascript" src="src/calendar-input.js"></script>');
+    document.write('<script type="text/javascript" src="src/locked-table.js"></script>');
     document.write('<script type="text/javascript" src="src/check-tree.js"></script>');
     document.write('<script type="text/javascript" src="src/multilevel-select.js"></script>');
     document.write('<script type="text/javascript" src="src/upload.js"></script>');
