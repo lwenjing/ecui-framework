@@ -8,4 +8,7 @@
 	.ui-locked-table-body {
 		position: absolute !important;
 	}
+	td {
+		background-color: #FFF;
+	}
 }
