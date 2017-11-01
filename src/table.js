@@ -149,8 +149,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                     }
                 )
             );
-            dom.insertBefore(table, el.lastChild.firstChild);
-            dom.addClass(table, 'ui-table-body');
+            dom.insertBefore(table, el.lastChild.lastChild);
+            dom.addClass('ui-table-body');
 
             var i = 0,
                 list = dom.children(table),
@@ -571,8 +571,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
+                var body = dom.getParent(dom.getParent(this.getBody()));
+                console.log(body);
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild);
-                dom.getParent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
+                body.style.paddingTop = this.$$paddingTop + 'px';
+                body.style.height = (height - this.$$paddingTop) + 'px';
             },
 
             /**
@@ -585,8 +588,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
                 body.style.paddingTop = '';
                 body.style.height = '';
-
-                this._uHead.$resize();
             },
 
             /**
@@ -596,9 +597,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 ui.Control.prototype.$scroll.call(this);
 
                 var el = this._uHead.getOuter();
-                el.lastChild.style.marginLeft = -dom.getParent(dom.getParent(this.getBody())).scrollLeft + 'px';
                 if (this._bHeadFloat) {
-                    el.style.top = Math.max(0, util.getView().top + dom.getParent(el).scrollTop - dom.getPosition(this.getMain()).top) + 'px';
+                    el.style.top = Math.max(0, util.getView().top + dom.getParent(el).scrollTop - dom.getPosition(this.getOuter()).top) + 'px';
                 }
             },
 

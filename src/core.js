@@ -13,6 +13,7 @@
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
 //{/if}//
     var isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
+        ieScrollHandler,          // 处理IE的DOM滚动事件
         isMobileScroll,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
@@ -149,13 +150,16 @@
                         lastClick = {time: Date.now()};
                     }
 
+                    // IE8以下的版本，需要自己手动触发滚动条事件，不会冒泡
+                    if (ieVersion < 9 && isScrollClick(event)) {
+                        ieScrollHandler = util.timer(onscroll, -20, this, event);
+                    }
+
                     if (control) {
                         // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
                         // 常见的表现是需要点击两次才能进行滚动操作，而且中途不能离开控件区域
                         // 以免触发悬停状态的样式改变。
-                        if (ieVersion < 9 && isScrollClick(event)) {
-                            onscroll(event);
-                        } else {
+                        if (!ieScrollHandler) {
                             for (; target; target = target.getParent()) {
                                 if (target.isFocusable()) {
                                     if (!(target !== control && target.contain(focusedControl))) {
@@ -196,6 +200,12 @@
 
             mousemove: function (event) {
                 event = core.wrapEvent(event);
+
+                if (ieScrollHandler) {
+                    ieScrollHandler();
+                    ieScrollHandler = null;
+                    onscroll(event);
+                }
 
                 var control = event.getControl();
                 bubble(control, 'mousemove', event);
@@ -888,6 +898,10 @@
     function onmousewheel(event, detail) {
         event = core.wrapEvent(event);
         event.detail = detail;
+
+        if (ieVersion < 9) {
+            util.timer(onscroll, 0, this, event);
+        }
 
         // 拖拽状态下，不允许滚动
         if (currEnv.type === 'drag') {
