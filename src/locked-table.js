@@ -57,27 +57,59 @@ _eFill       - 用于控制中部宽度的单元格
     }
 
     /**
+     * 恢复行内的单元格到锁定列或基本列中。
+     * @private
+     *
+     * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
+     */
+    function restoreRow(row) {
+        var i = 0,
+            table = row.getParent(),
+            cols = table.getHCells(),
+            list = row.$getElements(),
+            first,
+            o;
+
+        row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = '';
+
+        row = row.getMain();
+        first = row.firstChild;
+
+        for (; cols[i]; ) {
+            if (o = list[i++]) {
+                if (i <= table._nLeft) {
+                    row.insertBefore(o, first);
+                } else if (i > table._nRight) {
+                    row.appendChild(o);
+                }
+            }
+        }
+    }
+
+    /**
      * 拆分行内的单元格到锁定列或基本列中。
      * @private
      *
-     * @param {ecui.ui.LockedTable.LockedHead|ecui.ui.LockedTable.LockedRow} locked 锁定表头控件或者锁定行控件
+     * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
      */
-    function UI_LOCKED_TABLE_ROW_SPLIT(locked) {
+    function splitRow(row) {
         var i = 0,
-            table = locked.getParent(),
+            table = row.getParent(),
             cols = table.getHCells(),
-            list = locked.$getElements(),
+            list = row.$getElements(),
             o;
 
         for (; cols[i]; ) {
             if (o = list[i++]) {
                 if (i <= table._nLeft) {
-                    locked._eLeft.appendChild(o);
+                    row._eLeft.appendChild(o);
                 } else if (i > table._nRight) {
-                    locked._eRight.appendChild(o);
+                    row._eRight.appendChild(o);
                 }
             }
         }
+
+        row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
     }
 
     /**
@@ -107,7 +139,7 @@ _eFill       - 用于控制中部宽度的单元格
 
             for (; el = rows[i]; ) {
                 el = el.getMain();
-                list[i++] = '<tr class="' + el.className + '" style="' + el.style.cssText + '"></tr>';
+                list[i++] = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td style="padding:0px;border:0px;width:0px"></td></tr>';
             }
 
             o = '<table cellspacing="0" class="ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length - headRows.length).join('') + '</tbody></table><table cellspacing="0" class="' + this._uHead.getMain().className + '"><thead>' + list.join('') + '</thead></table>';
@@ -139,9 +171,18 @@ _eFill       - 用于控制中部宽度的单元格
             }
         },
         {
+            /**
+             * 初始化高级表格行控件。
+             * @public
+             *
+             * @param {Object} options 初始化选项
+             */
             Row: core.inherits(
                 ui.Table.prototype.Row,
                 {
+                    /**
+                     * @override
+                     */
                     $dispose: function () {
                         this._eLeft = this._eRight = null;
                         ui.Table.prototype.Row.prototype.$dispose.call(this);
@@ -149,6 +190,9 @@ _eFill       - 用于控制中部宽度的单元格
                 }
             ),
 
+            /**
+             * @override
+             */
             $cache: function (style, cacheSize) {
                 ui.Table.prototype.$cache.call(this, style, cacheSize);
 
@@ -168,40 +212,79 @@ _eFill       - 用于控制中部宽度的单元格
                 this._uRightMain.cache(false, true);
             },
 
+            /**
+             * @override
+             */
             $dispose: function () {
                 this._eFill = null;
                 ui.Table.prototype.$dispose.call(this);
             },
 
+            /**
+             * @override
+             */
             $initStructure: function (width, height) {
                 ui.Table.prototype.$initStructure.call(this, width, height);
 
                 for (var i = 0, row; row = this._aHeadRows[i++]; ) {
-                    UI_LOCKED_TABLE_ROW_SPLIT(row);
+                    splitRow(row);
                 }
                 for (i = 0; row = this._aRows[i++]; ) {
-                    UI_LOCKED_TABLE_ROW_SPLIT(row);
+                    splitRow(row);
                 }
 
-                var leftHead = this._uLeftHead.getOuter(),
-                    rightHead = this._uRightHead.getOuter(),
-                    leftMain = this._uLeftMain.getOuter(),
-                    rightMain = this._uRightMain.getOuter(),
-                    tableWidth = util.toNumber(this._uHead.getMain().style.width);
+                var leftHead = this._uLeftHead.getMain(),
+                    rightHead = this._uRightHead.getMain(),
+                    leftMain = this._uLeftMain.getMain(),
+                    rightMain = this._uRightMain.getMain(),
+                    table = dom.getParent(this.getBody()),
+                    head = this._uHead.getMain(),
+                    tableWidth = util.toNumber(head.style.width);
 
                 this._eFill.style.width = tableWidth + 'px';
-                this._uHead.getMain().style.marginLeft = dom.getParent(this.getBody()).style.marginLeft = leftHead.style.width = leftMain.style.width = this.$$paddingLeft + 'px';
+                leftHead.style.width = leftMain.style.width = this.$$paddingLeft + 'px';
                 rightHead.style.width = rightMain.style.width = this.$$paddingRight + 'px';
-
+                table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
+                table.style.width = head.style.width = (tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
                 leftHead.style.left = leftMain.style.left = '0px';
                 rightHead.style.right = rightMain.style.right = '0px';
-
-                leftMain.style.top = rightMain.style.top = dom.getParent(this.getBody()).style.marginTop;
-
-                dom.getParent(this.getBody()).style.width = (tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
-                this._uHead.getMain().style.width = (tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
+                leftMain.style.top = rightMain.style.top = table.style.marginTop;
             },
 
+            /**
+             * @override
+             */
+            $resize: function () {
+                ui.Table.prototype.$resize.call(this);
+
+                for (var i = 0, row; row = this._aHeadRows[i++]; ) {
+                    restoreRow(row);
+                }
+                for (i = 0; row = this._aRows[i++]; ) {
+                    restoreRow(row);
+                }
+
+                var leftHead = this._uLeftHead.getMain(),
+                    rightHead = this._uRightHead.getMain(),
+                    leftMain = this._uLeftMain.getMain(),
+                    rightMain = this._uRightMain.getMain(),
+                    table = dom.getParent(this.getBody()),
+                    head = this._uHead.getMain(),
+                    tableWidth = util.toNumber(head.style.width);
+
+                this._eFill.style.width = '';
+                leftHead.style.width = leftMain.style.width = '';
+                rightHead.style.width = rightMain.style.width = '';
+                table.style.marginLeft = head.style.marginLeft = '';
+                table.style.width = head.style.width = (tableWidth + this.$$paddingLeft + this.$$paddingRight) + 'px';
+                leftHead.style.left = leftMain.style.left = '';
+                rightHead.style.right = rightMain.style.right = '';
+                leftMain.style.top = rightMain.style.top = '';
+            },
+
+            /**
+             * @override
+             */
             $scroll: function () {
                 ui.Table.prototype.$scroll.call(this);
 
@@ -212,49 +295,11 @@ _eFill       - 用于控制中部宽度的单元格
                 if (this._bHeadFloat) {
                     this._uLeftHead.getOuter().style.top = this._uRightHead.getOuter().style.top = Math.max(0, util.getView().top + this.getLayout().scrollTop - dom.getPosition(this.getOuter()).top) + 'px';
                 }
-            }
-/*
-            $resize: function () {
-                var o = this.getMain().style;
-                o.paddingLeft = o.paddingRight = '';
-                this.$$paddingLeft = this.$$paddingRight = 0;
-                ui.Table.prototype.$resize.call(this);
             },
 
-            $setSize: function (width, height) {
-                var o = this.getMain().style,
-                    i = 0,
-                    layout = dom.getParent(this.getBody()),
-                    lockedHead = this._uLockedHead,
-                    style = dom.getParent(dom.getParent(lockedHead.getBody())).style;
-
-                o.paddingLeft = this.$$paddingLeft + 'px';
-                o.paddingRight = this.$$paddingRight + 'px';
-
-                ui.Table.prototype.$setSize.call(this, width, height);
-
-                o = this._uHead.getWidth() + this.$$paddingLeft + this.$$paddingRight;
-                lockedHead.$setSize(0, this.$$paddingTop);
-                style.height = this.$$paddingTop + 'px';
-                this._uLockedMain.$setSize(o, this.getBodyHeight());
-                style.width = this._uLockedMain.getBody().lastChild.style.width = o + 'px';
-
-                width = layout.style.width;
-
-                style = layout.previousSibling.style;
-                style.width = util.toNumber(width) + this.$$paddingLeft + this.$$paddingRight + 'px';
-                style.height = util.toNumber(layout.style.height) + this.$$paddingTop + 'px';
-
-                var rows = this._aHeadRows.concat(this._aRows);
-                for (; o = rows[i++]; ) {
-                    o._eFill.style.width = width;
-
-                    style = Math.max(o.getHeight(), o._eFill.offsetHeight);
-                    o._eFill.style.height = style + 'px';
-                    o.getCell(this._nLeft).$setSize(0, style);
-                }
-            },
-
+            /**
+             * @override
+             */
             addColumn: function (options, index) {
                 if (index >= 0) {
                     if (index < this._nLeft) {
@@ -267,32 +312,39 @@ _eFill       - 用于控制中部宽度的单元格
                 return ui.Table.prototype.addColumn.call(this, options, index);
             },
 
+            /**
+             * @override
+             */
             addRow: function (data, index) {
-                this.repaint = util.blank;
+                this.resize = util.blank;
 
-                var row = ui.Table.prototype.addRow.call(this, data, index);
-                index = this.getRows().indexOf(row);
-                var lockedRow = this._aRows[index],
+                var row = ui.Table.prototype.addRow.call(this, data, index),
                     el = row.getMain(),
-                    o = dom.create();
+                    leftBody = this._uLeftMain.getBody(),
+                    rightBody = this._uRightMain.getBody(),
+                    o = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td style="padding:0px;border:0px;width:0px"></td></tr>';
 
-                o.innerHTML = '<table cellspacing="0"><tbody><tr class="' + el.className + '" style="' + el.style.cssText + '"><td style="padding:0px;border:0px"></td></tr></tbody></table>';
+                index = this.getRows().indexOf(row);
+                o = dom.create(
+                    {
+                        innerHTML: '<table cellspacing="0"><tbody>' + o + o + '</tbody></table>'
+                    }
+                ).lastChild.lastChild;
 
-                UI_LOCKED_TABLE_CREATE_LOCKEDROW(el = o.lastChild.lastChild.lastChild, row);
-                this._uLockedMain.getBody().lastChild.lastChild.insertBefore(el, lockedRow && lockedRow.getOuter());
-                UI_LOCKED_TABLE_ROW_SPLIT(row);
+                initLockedRow(row, o.firstChild, o.lastChild);
+                leftBody.insertBefore(o.firstChild, dom.children(leftBody)[index]);
+                rightBody.insertBefore(o.firstChild, dom.children(rightBody)[index]);
+                splitRow(row);
 
-                delete this.repaint;
-                this.repaint();
+                delete this.resize;
+                this.resize();
 
                 return row;
             },
 
-            init: function () {
-                ui.Table.prototype.init.call(this);
-                UI_LOCKED_TABLE_ALL_SPLIT(this);
-            },
-
+            /**
+             * @override
+             */
             removeColumn: function (index) {
                 ui.Table.prototype.removeColumn.call(this, index);
                 if (index >= 0) {
@@ -303,7 +355,20 @@ _eFill       - 用于控制中部宽度的单元格
                         this._nRight--;
                     }
                 }
-            }*/
+            },
+
+            /**
+             * @override
+             */
+            removeRow: function (index) {
+                var leftBody = this._uLeftMain.getBody(),
+                    rightBody = this._uRightMain.getBody();
+
+                leftBody.removeChild(dom.children(leftBody)[index]);
+                rightBody.removeChild(dom.children(rightBody)[index]);
+
+                ui.Table.prototype.removeRow.call(this, index);
+            }
         }
     );
 
@@ -312,16 +377,17 @@ _eFill       - 用于控制中部宽度的单元格
      * 行控件鼠标事件发生时，需要通知关联的行控件也同步产生默认的处理。
      * @protected
      */
-/*    (function () {
+    (function () {
         function build(name) {
             ui.LockedTable.prototype.Row.prototype[name] = function (event) {
                 ui.Table.prototype.Row.prototype[name].call(this, event);
-                dom.getParent(this._eFill).className = this.getMain().className;
+                dom.getParent(this._eLeft).className = this.getMain().className;
+                dom.getParent(this._eRight).className = this.getMain().className;
             };
         }
 
         for (var i = 0; i < 11; ) {
             build('$' + eventNames[i++]);
         }
-    }());*/
+    }());
 }());
