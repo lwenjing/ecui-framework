@@ -579,7 +579,9 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild);
                 dom.getParent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
-                this.getLayout().style.height = height + 'px';
+                if (this.getMain().style.height) {
+                    this.getLayout().style.height = height + 'px';
+                }
             },
 
             /**
