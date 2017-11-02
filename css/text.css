@@ -40,11 +40,12 @@
 }
 .ui-disabled .ui-text,
 .ui-text-disabled {
-    background-color: #eff2f7;
-    border:1px solid #e0e6ed;
-    color: #e0e6ed;
+    background-color: #EFF2F7;
+    border:1px solid #E0E6ED;
+    color: #E0E6ED;
     input{
-        background-color: #eff2f7;
+        color: #8492A6;
+        background-color: #EFF2F7;
     }
     
 }
