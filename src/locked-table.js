@@ -316,8 +316,6 @@ _eFill       - 用于控制中部宽度的单元格
              * @override
              */
             addRow: function (data, index) {
-                this.resize = util.blank;
-
                 var row = ui.Table.prototype.addRow.call(this, data, index),
                     el = row.getMain(),
                     leftBody = this._uLeftMain.getBody(),
@@ -335,9 +333,6 @@ _eFill       - 用于控制中部宽度的单元格
                 leftBody.insertBefore(o.firstChild, dom.children(leftBody)[index]);
                 rightBody.insertBefore(o.firstChild, dom.children(rightBody)[index]);
                 splitRow(row);
-
-                delete this.resize;
-                this.resize();
 
                 return row;
             },
@@ -361,13 +356,18 @@ _eFill       - 用于控制中部宽度的单元格
              * @override
              */
             removeRow: function (index) {
-                var leftBody = this._uLeftMain.getBody(),
-                    rightBody = this._uRightMain.getBody();
+                var row = this.getRow(index);
+                if (row) {
+                    restoreRow(row);
 
-                leftBody.removeChild(dom.children(leftBody)[index]);
-                rightBody.removeChild(dom.children(rightBody)[index]);
+                    var leftBody = this._uLeftMain.getBody(),
+                        rightBody = this._uRightMain.getBody();
 
-                ui.Table.prototype.removeRow.call(this, index);
+                    leftBody.removeChild(dom.children(leftBody)[index]);
+                    rightBody.removeChild(dom.children(rightBody)[index]);
+
+                    return ui.Table.prototype.removeRow.call(this, index);
+                }
             }
         }
     );

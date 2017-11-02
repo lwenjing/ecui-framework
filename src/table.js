@@ -447,7 +447,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                         }
 
                         ui.Control.prototype.$hide.call(this);
-                        table.resize();
                     },
 
                     /**
@@ -484,7 +483,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                         }
 
                         ui.Control.prototype.$show.call(this);
-                        table.resize();
                     },
 
                     /**
@@ -750,7 +748,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 }
 
                 row._aElements = rowCols;
-                this.resize();
                 return row;
             },
 
@@ -900,6 +897,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              * @public
              *
              * @param {number} index 行序号，从0开始计数
+             * @return {ui.Table.Row} 被删除的行控件，如果不存在返回undefined
              */
             removeRow: function (index) {
                 var i = 0,
@@ -926,7 +924,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                     core.dispose(row);
                     this._aRows.splice(index, 1);
 
-                    this.resize();
+                    return row;
                 }
             }
         }
