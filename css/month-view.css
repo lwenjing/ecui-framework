@@ -21,8 +21,11 @@
             border-radius: 2px;
             padding: 0px;
         }
+        td.ui-today {
+            color: #368CDA;
+        }
         td:hover {
-            background: #c0ccda;
+            background: #368cda;
         }
         td.ui-calendar-date-selected {
             background: #368cda;
