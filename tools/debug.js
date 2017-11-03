@@ -144,29 +144,45 @@
     function load() {
         var filename = moduleRoute[0];
         oldLoadScriptFn(moduleName + '/route.' + filename + '.js');
-        var el = document.createElement('LINK');
-        el.setAttribute('rel', 'stylesheet/less');
-        el.setAttribute('type', 'text/css');
-        el.setAttribute('href', moduleName + '/route.' + filename + '.css');
-        document.head.appendChild(el);
-        window.less.sheets = [document.head.lastChild];
-        window.less.refresh(true, undefined, false);
-        var stop = ecui.util.timer(function () {
-            if (document.head.lastChild.tagName === 'STYLE') {
-                stop();
-                ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
-                    onsuccess: function (data) {
-                        etpl.compile(data);
-                        moduleRoute.splice(0, 1);
-                        if (moduleRoute.length) {
-                            load();
-                        } else {
-                            moduleCallback();
-                        }
+
+        ecui.io.ajax(moduleName + '/route.' + filename + '.css', {
+            onsuccess: function (cssText) {
+                var el = document.createElement('STYLE');
+                el.setAttribute('type', 'text/less');
+                if (ecui.ie < 10) {
+                    var reg = ecui.ie > 6 ? new RegExp('[_' + (ecui.ie > 7 ? '\\*\\+' : '') + ']\\w+:[^;}]+[;}]', 'g') : null;
+                    if (reg) {
+                        cssText = cssText.replace(reg, function (match) {
+                            return match.slice(-1) === '}' ? '}' : '';
+                        });
                     }
-                });
+                    el.styleSheet.cssText = cssText;
+                } else {
+                    el.innerHTML = cssText;
+                }
+                document.head.appendChild(el);
+
+                window.less.sheets = [document.head.lastChild];
+                window.less.refresh(true, undefined, false);
+
+                var stop = ecui.util.timer(function () {
+                    if (document.head.lastChild.getAttribute('type') !== 'text/less') {
+                        stop();
+                        ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
+                            onsuccess: function (data) {
+                                etpl.compile(data);
+                                moduleRoute.splice(0, 1);
+                                if (moduleRoute.length) {
+                                    load();
+                                } else {
+                                    moduleCallback();
+                                }
+                            }
+                        });
+                    }
+                }, -50);
             }
-        }, -50);
+        });
     }
 
     ecui.esr.loadClass = function (filename) {
