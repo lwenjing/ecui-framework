@@ -147,6 +147,8 @@
 
         ecui.io.ajax(moduleName + '/route.' + filename + '.css', {
             onsuccess: function (cssText) {
+                var el = document.createElement('STYLE');
+                el.setAttribute('type', 'text/less');
                 if (ecui.ie < 10) {
                     var reg = ecui.ie > 6 ? new RegExp('[_' + (ecui.ie > 7 ? '\\*\\+' : '') + ']\\w+:[^;}]+[;}]', 'g') : null;
                     if (reg) {
@@ -154,14 +156,17 @@
                             return match.slice(-1) === '}' ? '}' : '';
                         });
                     }
+                    el.styleSheet.cssText = cssText;
+                } else {
+                    el.innerHTML = cssText;
                 }
+                document.head.appendChild(el);
 
-                window.less.render(cssText, null, function (style, e, result) {
-                    ecui.dom.createStyleSheet(result.css);
-                });
+                window.less.sheets = [];
+                window.less.refresh(true, undefined, false);
 
                 var stop = ecui.util.timer(function () {
-                    if (document.head.lastChild.tagName === 'STYLE') {
+                    if (document.head.lastChild.getAttribute('type') !== 'text/less') {
                         stop();
                         ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
                             onsuccess: function (data) {
