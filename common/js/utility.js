@@ -59,7 +59,6 @@
         if (data.data.pageNo !== undefined && data.data.total === undefined &&  data.data.offset === undefined) {
             data.data.total = data.data.totalRecord;
             data.data.offset = data.data.pageSize * (data.data.pageNo - 1);
-            console.log(data);
         }
         var code = data.code;
         if (0 === code) {
