@@ -9,7 +9,8 @@ var ecui;
         isWebkit = /webkit/i.test(navigator.userAgent),
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        safariVersion = /(\d+\.\d)(\.\d)?\s+safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 
     ecui = {
         /**
@@ -28,6 +29,7 @@ var ecui;
         ie: ieVersion,
         firefox: firefoxVersion,
         opera: operaVersion,
+        safari: safariVersion,
 
         dom: {
             /**
