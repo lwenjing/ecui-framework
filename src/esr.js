@@ -18,7 +18,10 @@
         currLocation = '',
         checkLeave = true,
         pauseStatus,
-        cssload = {};
+        cssload = {},
+        localStorage,
+        metaVersion,
+        meta;
 
     /**
      * 增加IE的history信息。
@@ -582,6 +585,25 @@
          * @public
          */
         load: function () {
+            if (window.localStorage) {
+                localStorage = window.localStorage;
+            } else {
+                localStorage = dom.setInput(null, null, 'hidden');
+                localStorage.addBehavior('#default#userData');
+                document.body.appendChild(localStorage);
+                localStorage.getItem = function (key) {
+                    localStorage.load('ecui');
+                    return localStorage.getAttribute(key);
+                };
+                localStorage.setItem = function (key, value) {
+                    localStorage.setAttribute(key, value);
+                    localStorage.save('ecui');
+                };
+            }
+
+            metaVersion = localStorage.getItem('esr_meta_version') || '0';
+            meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
+
             for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
                 if (el.href.slice(-1) === '#') {
                     el.href = JAVASCRIPT + ':void(0)';
@@ -631,16 +653,15 @@
                     }
                 }
 
-                var method = varUrl.split(' ');
+                var method = varUrl.split(' '),
+                    headers = {'x-enum-version': metaVersion};
 
                 if (method[0] === 'JSON' || method[0] === 'FORM') {
-                    var headers = {
-                            'Content-Type': 'application/json;charset=UTF-8'
-                        },
-                        url = method[1].split('?'),
+                    var url = method[1].split('?'),
                         data = {},
                         valid = true;
 
+                    headers['Content-Type'] = 'application/json;charset=UTF-8';
                     url[1].split('&').forEach(function (item) {
                         item = item.split('=');
                         if (item.length > 1) {
@@ -695,16 +716,23 @@
                     onsuccess: function (text) {
                         count--;
                         try {
-                            var data = JSON.parse(text);
+                            var data = JSON.parse(text),
+                                key;
+
+                            if (data.meta) {
+                                metaUpdate = true;
+                            }
 
                             if (esr.onparsedata) {
                                 data = esr.onparsedata(url, data);
+                            } else {
+                                data = data.data;
                             }
 
                             if (varName) {
                                 esr.setData(varName, data);
                             } else {
-                                for (var key in data) {
+                                for (key in data) {
                                     if (data.hasOwnProperty(key)) {
                                         esr.setData(key, data[key]);
                                     }
@@ -717,7 +745,7 @@
                         if (!count) {
                             pauseStatus = false;
                             if (err.length > 0) {
-                                if (onerror(err, onsuccess, onerror) === false) {
+                                if (onerror(err) === false) {
                                     return;
                                 }
                             }
@@ -729,7 +757,7 @@
                         err.push({url: varUrl, name: varName});
                         if (!count) {
                             pauseStatus = false;
-                            if (onerror(err, onsuccess, onerror) === false) {
+                            if (onerror(err) === false) {
                                 return;
                             }
                             onsuccess();
@@ -743,9 +771,39 @@
             }
 
             var err = [],
-                count = urls.length;
+                count = urls.length,
+                metaUpdate,
+                handle = onsuccess || util.blank;
 
-            onsuccess = onsuccess || util.blank;
+            onsuccess = function () {
+                if (metaUpdate) {
+                    io.ajax(
+                        'qa/base/' + metaVersion,
+                        {
+                            onsuccess: function (text) {
+                                var data = JSON.parse(text);
+                                for (var key in data.meta.record) {
+                                    if (data.meta.record.hasOwnProperty(key)) {
+                                        meta[key] = meta[key] || {};
+                                        for (var i = 0, items = data.meta.record[key], item; item = items[i++]; ) {
+                                            meta[key][item.id] = item;
+                                        }
+                                    }
+                                }
+                                if (data.meta.version) {
+                                    metaVersion = data.meta.version;
+                                }
+                                localStorage.setItem('esr_meta', JSON.stringify(meta));
+                                localStorage.setItem('esr_meta_version', metaVersion);
+                                handle();
+                            },
+                            onerror: function () {
+                                onerror();
+                            }
+                        }
+                    );
+                }
+            };
             onerror = onerror || esr.onrequesterror || util.blank;
 
             if (count) {
