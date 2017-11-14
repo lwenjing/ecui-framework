@@ -530,6 +530,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 this._uHead.cache(false, true);
 
                 this.$$paddingTop = this._uHead.getBody().offsetHeight;
+                this.$$tableWidth = this.getBody().offsetWidth;
 
                 for (var i = 0; style = this._aRows[i++]; ) {
                     style.cache(true, true);
@@ -582,6 +583,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 if (this.getMain().style.height) {
                     this.getLayout().style.height = height + 'px';
                 }
+
+                util.timer(this.$scroll, 0, this);
             },
 
             /**

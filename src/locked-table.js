@@ -39,6 +39,8 @@ _eFill       - 用于控制中部宽度的单元格
         ui = core.ui,
         util = core.util,
 
+        safariVersion = /(\d+\.\d)(\.\d)?\s+safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
 //{/if}//
     /**
@@ -127,6 +129,8 @@ _eFill       - 用于控制中部宽度的单元格
         function (el, options) {
             ui.Table.prototype.constructor.call(this, el, options);
 
+            this._sTableWidth = dom.getParent(this.getBody()).style.width;
+
             var i = 0,
                 headRows = this._aHeadRows,
                 rows = headRows.concat(this._aRows),
@@ -139,7 +143,7 @@ _eFill       - 用于控制中部宽度的单元格
 
             for (; el = rows[i]; ) {
                 el = el.getMain();
-                list[i++] = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td style="padding:0px;border:0px;width:0px"></td></tr>';
+                list[i++] = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td style="padding:0px;border:0px;width:0px;background:transparent"></td></tr>';
             }
 
             o = '<table cellspacing="0" class="ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length - headRows.length).join('') + '</tbody></table><table cellspacing="0" class="' + this._uHead.getMain().className + '"><thead>' + list.join('') + '</thead></table>';
@@ -197,6 +201,8 @@ _eFill       - 用于控制中部宽度的单元格
                 ui.Table.prototype.$cache.call(this, style, cacheSize);
 
                 this.$$paddingLeft = 0;
+                this.$$tdWidth = safariVersion ? 1 : 0;
+
                 for (var i = 0, list = this.getHCells(); i < this._nLeft; ) {
                     this.$$paddingLeft += list[i++].getWidth();
                 }
@@ -233,22 +239,14 @@ _eFill       - 用于控制中部宽度的单元格
                     splitRow(row);
                 }
 
-                var leftHead = this._uLeftHead.getMain(),
-                    rightHead = this._uRightHead.getMain(),
-                    leftMain = this._uLeftMain.getMain(),
-                    rightMain = this._uRightMain.getMain(),
-                    table = dom.getParent(this.getBody()),
-                    head = this._uHead.getMain(),
-                    tableWidth = util.toNumber(head.style.width);
+                var table = dom.getParent(this.getBody()),
+                    head = this._uHead.getMain();
 
-                this._eFill.style.width = tableWidth + 'px';
-                leftHead.style.width = leftMain.style.width = this.$$paddingLeft + 'px';
-                rightHead.style.width = rightMain.style.width = this.$$paddingRight + 'px';
+                this._eFill.style.width = this.$$tableWidth + 'px';
+                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (this.$$tdWidth + this.$$paddingLeft) + 'px';
+                this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$tdWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
-                table.style.width = head.style.width = (tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
-                leftHead.style.left = leftMain.style.left = '0px';
-                rightHead.style.right = rightMain.style.right = '0px';
-                leftMain.style.top = rightMain.style.top = table.style.marginTop;
+                table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
             },
 
             /**
@@ -269,16 +267,15 @@ _eFill       - 用于控制中部宽度的单元格
                     leftMain = this._uLeftMain.getMain(),
                     rightMain = this._uRightMain.getMain(),
                     table = dom.getParent(this.getBody()),
-                    head = this._uHead.getMain(),
-                    tableWidth = util.toNumber(head.style.width);
+                    head = this._uHead.getMain();
 
                 this._eFill.style.width = '';
                 leftHead.style.width = leftMain.style.width = '';
                 rightHead.style.width = rightMain.style.width = '';
                 table.style.marginLeft = head.style.marginLeft = '';
-                table.style.width = head.style.width = (tableWidth + this.$$paddingLeft + this.$$paddingRight) + 'px';
+                table.style.width = head.style.width = this._sTableWidth;
                 leftHead.style.left = leftMain.style.left = '';
-                rightHead.style.right = rightMain.style.right = '';
+                rightHead.style.left = rightMain.style.left = '';
                 leftMain.style.top = rightMain.style.top = '';
             },
 
@@ -288,8 +285,8 @@ _eFill       - 用于控制中部宽度的单元格
             $scroll: function () {
                 ui.Table.prototype.$scroll.call(this);
 
-                this._uLeftHead.getOuter().style.left = this._uLeftMain.getOuter().style.left = this.getLayout().scrollLeft + 'px';
-                this._uRightHead.getOuter().style.right = this._uRightMain.getOuter().style.right = -this.getLayout().scrollLeft + 'px';
+                this._uLeftHead.getOuter().style.left = this._uLeftMain.getOuter().style.left = (this.getLayout().scrollLeft - this.$$tdWidth) + 'px';
+                this._uRightHead.getOuter().style.left = this._uRightMain.getOuter().style.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$tdWidth) + 'px';
 
                 this._uLeftMain.getOuter().style.top = this._uRightMain.getOuter().style.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this._uHead.getOuter()).scrollTop) + 'px';
                 if (this._bHeadFloat) {
