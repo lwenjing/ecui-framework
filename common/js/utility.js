@@ -16,6 +16,7 @@
             }
         }
     ];
+
     //统一对请求成功返回参数做分类
     ecui.esr.onparsedata = function (url, data) {
         if (url.indexOf('v1/base/series') >= 0) {
@@ -78,12 +79,14 @@
                 });
             }
             return data;
-        } else if (code === 12011) {
+        }
+        if (code === 12011) {
             // 分支3.4：登录相关的错误
             window.location = './login.html';
-        } else if (code === 300000) {
-            throw data.msg;
         } else {
+            if (code === 300000) {
+                throw data.msg;
+            }
             window.alert(data.msg);
         }
         return code;
