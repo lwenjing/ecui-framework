@@ -193,7 +193,7 @@ _eRight      - 右侧乐定行的Element元素
                 ui.Table.prototype.$cache.call(this, style, cacheSize);
 
                 this.$$paddingLeft = 0;
-                this.$$tdWidth = safariVersion ? 1 : 0;
+                this.$$emptyTDWidth = safariVersion ? 1 : 0;
 
                 for (var i = 0, list = this.getHCells(); i < this._nLeft; ) {
                     this.$$paddingLeft += list[i++].getWidth();
@@ -226,17 +226,19 @@ _eRight      - 右侧乐定行的Element元素
 
                 this._aHeadRows.forEach(function (item) {
                     splitRow.call(this, item);
-                });
+                }, this);
                 this._aRows.forEach(function (item) {
                     splitRow.call(this, item);
-                });
+                }, this);
 
                 var table = dom.getParent(this.getBody()),
                     head = this._uHead.getMain();
 
+                this.$$scrollFixed = this.$$tableHeight > height ? core.getScrollNarrow() : 0;
+
                 this._eFill.style.width = this.$$tableWidth + 'px';
-                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (this.$$tdWidth + this.$$paddingLeft) + 'px';
-                this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$tdWidth + this.$$paddingRight) + 'px';
+                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (this.$$emptyTDWidth + this.$$paddingLeft) + 'px';
+                this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$emptyTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
             },
@@ -249,10 +251,10 @@ _eRight      - 右侧乐定行的Element元素
 
                 this._aHeadRows.forEach(function (item) {
                     restoreRow.call(this, item);
-                });
+                }, this);
                 this._aRows.forEach(function (item) {
                     restoreRow.call(this, item);
-                });
+                }, this);
 
                 var leftHead = this._uLeftHead.getMain(),
                     rightHead = this._uRightHead.getMain(),
@@ -277,8 +279,8 @@ _eRight      - 右侧乐定行的Element元素
             $scroll: function () {
                 ui.Table.prototype.$scroll.call(this);
 
-                this._uLeftHead.getOuter().style.left = this._uLeftMain.getOuter().style.left = (this.getLayout().scrollLeft - this.$$tdWidth) + 'px';
-                this._uRightHead.getOuter().style.left = this._uRightMain.getOuter().style.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$tdWidth) + 'px';
+                this._uLeftHead.getOuter().style.left = this._uLeftMain.getOuter().style.left = (this.getLayout().scrollLeft - this.$$emptyTDWidth) + 'px';
+                this._uRightHead.getOuter().style.left = this._uRightMain.getOuter().style.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$emptyTDWidth - this.$$scrollFixed) + 'px';
 
                 this._uLeftMain.getOuter().style.top = this._uRightMain.getOuter().style.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this._uHead.getOuter()).scrollTop) + 'px';
                 if (this._bHeadFloat) {

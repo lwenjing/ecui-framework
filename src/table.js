@@ -531,7 +531,10 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 this._uHead.cache(false, true);
 
                 this.$$paddingTop = this._uHead.getBody().offsetHeight;
-                this.$$tableWidth = this.getBody().offsetWidth;
+
+                var table = dom.getParent(this.getBody());
+                this.$$tableWidth = table.offsetWidth;
+                this.$$tableHeight = table.offsetHeight;
 
                 this._aRows.forEach(function (item) {
                     item.cache(true, true);
@@ -852,10 +855,10 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 });
                 this._aHeadRows.forEach(function (item) {
                     initRow.call(this, item);
-                });
+                }, this);
                 this._aRows.forEach(function (item) {
                     initRow.call(this, item);
-                });
+                }, this);
 
                 ui.Control.prototype.init.call(this, options);
             },
