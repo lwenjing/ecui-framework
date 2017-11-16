@@ -99,9 +99,9 @@ _aSelect - 全部的下拉框控件列表
              * @param {Object} data 多级联动数据，是一个数组，每一项都包含code,value属性，children属性可以不包含，如果包含，结构与data相同
              */
             setData: function (data) {
-                for (var i = 0, item; item = this._aSelect[i++]; ) {
+                this._aSelect.forEach(function (item) {
                     item.removeAll(true);
-                }
+                });
                 this._aSelect[0].add(data);
             }
         }

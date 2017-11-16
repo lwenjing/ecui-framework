@@ -27,11 +27,9 @@ Decorate - 装饰器插件。
                     var Decorate = decorates[util.toCamelCase($1.charAt(0).toUpperCase() + $1.slice(1))];
 
                     // 获取需要调用的装饰器列表
-                    $2 = $2.split(/\s+/);
-                    // 以下使用 el 计数
-                    for (var i = 0; $0 = $2[i++]; ) {
-                        $1 = new Decorate(control, $0);
-                    }
+                    $2.split(/\s+/).forEach(function (item) {
+                        item = new Decorate(control, item);
+                    });
                 }
             );
         },
@@ -271,10 +269,21 @@ Decorate - 装饰器插件。
         }
 
         // 这里批量生成函数代理
-        for (var i = 0, names = [['$cache', 2], ['$resize', 0], ['$setSize', 2], ['alterClass', 1], ['getOuter', 0], ['getMinimumWidth', 0], ['getMinimumHeight', 0], ['getWidth', 0], ['getHeight', 0], ['init', 1]]; i < 10; ) {
+        [
+            ['$cache', 2],
+            ['$resize', 0],
+            ['$setSize', 2],
+            ['alterClass', 1],
+            ['getOuter', 0],
+            ['getMinimumWidth', 0],
+            ['getMinimumHeight', 0],
+            ['getWidth', 0],
+            ['getHeight', 0],
+            ['init', 1]
+        ].forEach(function (item) {
             // 如果是代理进入的，会多出来一个参数作为标志位
-            build(names[i][0], names[i++][1]);
-        }
+            build(item[0], item[1]);
+        });
     }());
 /*
 LRDecorator - 左右扩展装饰器，将区域分为"左-控件-右"三部分，使用paddingLeft与paddingRight作为左右区域的宽度

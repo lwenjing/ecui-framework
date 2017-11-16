@@ -4,6 +4,13 @@
 		position: absolute !important;
 		z-index: -1 !important;
 		height: 1px !important;
+		top: 0px;
+	}
+	.ui-locked-table-height {
+		padding: 0px !important;
+		border: 0px !important;
+		width: 0px !important;
+		background: transparent !important;
 	}
 	.ui-locked-table-body {
 		position: absolute !important;

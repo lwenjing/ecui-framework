@@ -80,7 +80,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
      * @param {ecui.ui.Table.Row} row 行控件
      */
     function initRow(row) {
-        for (var i = 0, list = row.getParent()._aHCells, el, item; item = list[i]; ) {
+        for (var i = 0, list = this._aHCells, el, item; item = list[i]; ) {
             if ((el = row._aElements[i++]) && el !== item.getMain()) {
                 var width = item.getWidth() - item.getMinimumWidth();
                 while (row._aElements[i] === null) {
@@ -304,42 +304,41 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                      */
                     $setStyles: function (name, value) {
                         var table = this.getParent(),
-                            rows = table._aHeadRows.concat(table._aRows),
                             body = this.getMain(),
                             cols = table._aHCells,
                             index = cols.indexOf(this);
 
                         body.style[name] = value;
 
-                        for (var i = 0, o; o = rows[i++]; ) {
+                        table._aHeadRows.concat(table._aRows).forEach(function (item) {
                             // 以下使用 body 表示列元素列表
-                            body = o._aElements;
-                            o = body[index];
-                            if (o) {
-                                o.style[name] = value;
+                            body = item._aElements;
+                            item = body[index];
+                            if (item) {
+                                item.style[name] = value;
                             }
-                            if (o !== false) {
-                                for (var j = index; !(o = body[j]); j--) {}
+                            if (item !== false) {
+                                for (var i = index; !(item = body[i]); i--) {}
 
-                                var width = -cols[j].getMinimumWidth(),
+                                var width = -cols[i].getMinimumWidth(),
                                     colspan = 0;
 
                                 do {
-                                    if (!cols[j].getOuter().style.display) {
-                                        width += cols[j].getWidth();
+                                    if (!cols[i].getOuter().style.display) {
+                                        width += cols[i].getWidth();
                                         colspan++;
                                     }
-                                } while (body[++j] === null);
+                                } while (body[++i] === null);
 
                                 if (width > 0) {
-                                    o.style.display = '';
-                                    o.style.width = width + 'px';
-                                    o.setAttribute('colSpan', colspan);
+                                    item.style.display = '';
+                                    item.style.width = width + 'px';
+                                    item.setAttribute('colSpan', colspan);
                                 } else {
-                                    o.style.display = 'none';
+                                    item.style.display = 'none';
                                 }
                             }
-                        }
+                        });
                     },
 
                     /**
@@ -367,9 +366,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                      * @return {Array} 单元格控件数组
                      */
                     getCells: function () {
-                        for (var i = 0, index = this._aHCells.indexOf(this), o, result = []; o = this._aRows[i]; ) {
-                            result[i++] = o.getCell(index);
-                        }
+                        var result = [],
+                            i = this._aHCells.indexOf(this);
+                        this._aRows.forEach(function (item, index) {
+                            result[index] = item.getCell(i);
+                        });
                         return result;
                     },
 
@@ -532,13 +533,13 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 this.$$paddingTop = this._uHead.getBody().offsetHeight;
                 this.$$tableWidth = this.getBody().offsetWidth;
 
-                for (var i = 0; style = this._aRows[i++]; ) {
-                    style.cache(true, true);
-                }
+                this._aRows.forEach(function (item) {
+                    item.cache(true, true);
+                });
 
-                for (i = 0; style = this._aHCells[i++]; ) {
-                    style.cache(true, true);
-                }
+                this._aHCells.forEach(function (item) {
+                    item.cache(true, true);
+                });
             },
 
             /**
@@ -605,7 +606,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 ui.Control.prototype.$scroll.call(this);
 
                 if (this._bHeadFloat) {
-                    this._uHead.getOuter().style.top = Math.max(0, util.getView().top + this.getLayout().scrollTop - dom.getPosition(this.getOuter()).top) + 'px';
+                    this._uHead.getOuter().style.top = Math.max(0, Math.min(this.getBodyHeight() - this.$$paddingTop, util.getView().top + this.getLayout().scrollTop - dom.getPosition(this.getOuter()).top)) + 'px';
                 }
             },
 
@@ -846,15 +847,15 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              * @override
              */
             init: function (options) {
-                for (var i = 0, o; o = this._aHCells[i++]; ) {
-                    o.$setSize(o.getWidth());
-                }
-                for (i = 0; o = this._aHeadRows[i++]; ) {
-                    initRow(o);
-                }
-                for (i = 0; o = this._aRows[i++]; ) {
-                    initRow(o);
-                }
+                this._aHCells.forEach(function (item) {
+                    item.$setSize(item.getWidth());
+                });
+                this._aHeadRows.forEach(function (item) {
+                    initRow.call(this, item);
+                });
+                this._aRows.forEach(function (item) {
+                    initRow.call(this, item);
+                });
 
                 ui.Control.prototype.init.call(this, options);
             },
@@ -866,34 +867,33 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              * @param {number} index 列序号，从0开始计数
              */
             removeColumn: function (index) {
-                var i = 0,
-                    cols = this._aHCells,
-                    o = cols[index];
+                var cols = this._aHCells,
+                    col = cols[index];
 
-                if (o) {
-                    o.hide();
+                if (col) {
+                    col.hide();
 
-                    dom.remove(o.getOuter());
-                    core.dispose(o);
+                    dom.remove(col.getOuter());
+                    core.dispose(col);
                     cols.splice(index, 1);
 
-                    for (; o = this._aRows[i++]; ) {
-                        cols = o._aElements;
-                        if (o = cols[index]) {
+                    this._aRows.forEach(function (item) {
+                        cols = item._aElements;
+                        if (item = cols[index]) {
                             if (cols[index + 1] === null) {
                                 // 如果是被合并的列，需要保留
                                 cols.splice(index + 1, 1);
                             } else {
-                                dom.remove(o);
-                                if (o.getControl !== getControlBuilder()) {
-                                    core.dispose(o.getControl());
+                                dom.remove(item);
+                                if (item.getControl !== getControlBuilder()) {
+                                    core.dispose(item.getControl());
                                 }
                                 cols.splice(index, 1);
                             }
                         } else {
                             cols.splice(index, 1);
                         }
-                    }
+                    });
                 }
             },
 

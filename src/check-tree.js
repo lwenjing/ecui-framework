@@ -50,7 +50,7 @@ _uCheckbox - 复选框控件
                     options
                 );
 
-            for (var i = 0, list = this.getChildren(), item; item = list[i++]; ) {
+            this.getChildren().forEach(function (item) {
                 if (options.subject) {
                     if (options.subject === true) {
                         item._uCheckbox.setSubject(this._uCheckbox);
@@ -58,7 +58,7 @@ _uCheckbox - 复选框控件
                         core.delegate(options.subject, item._uCheckbox, item._uCheckbox.setSubject);
                     }
                 }
-            }
+            }, this);
         },
         {
             /**
@@ -76,9 +76,10 @@ _uCheckbox - 复选框控件
              * @return {Array} 全部选中的树控件列表
              */
             getChecked: function () {
-                for (var i = 0, list = this.getChildren(), result = this.isChecked() ? [this] : [], item; item = list[i++]; ) {
+                var result = this.isChecked() ? [this] : [];
+                this.getChildren().forEach(function (item) {
                     result = result.concat(item.getChecked());
-                }
+                });
                 return result;
             },
 

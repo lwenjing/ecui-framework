@@ -245,11 +245,11 @@
         var el = document.getElementById(route.main || esr.DEFAULT_MAIN);
         el.style.visibility = 'hidden';
 
-        for (var i = 0, items = getRouteMains(route), item; item = items[i++]; ) {
+        getRouteMains(route).forEach(function (item) {
             if (item.route.ondispose) {
                 item.route.ondispose();
             }
-        }
+        });
 
         core.dispose(el);
         el.innerHTML = etpl.render(route.view || name, context);

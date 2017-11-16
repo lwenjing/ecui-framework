@@ -30,14 +30,14 @@ _uLockedHead - 锁定的表头区
 _uLockedMain - 锁定的行内容区
 
 表格行与锁定行属性
-_eFill       - 用于控制中部宽度的单元格
+_eLeft       - 左侧锁定行的Element元素
+_eRight      - 右侧乐定行的Element元素
 */
 (function () {
 //{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util,
 
         safariVersion = /(\d+\.\d)(\.\d)?\s+safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
 
@@ -65,27 +65,23 @@ _eFill       - 用于控制中部宽度的单元格
      * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
      */
     function restoreRow(row) {
-        var i = 0,
-            table = row.getParent(),
-            cols = table.getHCells(),
-            list = row.$getElements(),
-            first,
-            o;
+        var elements = row.$getElements(),
+            first;
 
         row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = '';
 
         row = row.getMain();
         first = row.firstChild;
 
-        for (; cols[i]; ) {
-            if (o = list[i++]) {
-                if (i <= table._nLeft) {
-                    row.insertBefore(o, first);
-                } else if (i > table._nRight) {
-                    row.appendChild(o);
+        this.getHCells().forEach(function (item, index) {
+            if (item = elements[index]) {
+                if (index < this._nLeft) {
+                    row.insertBefore(item, first);
+                } else if (index >= this._nRight) {
+                    row.appendChild(item);
                 }
             }
-        }
+        }, this);
     }
 
     /**
@@ -95,21 +91,17 @@ _eFill       - 用于控制中部宽度的单元格
      * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
      */
     function splitRow(row) {
-        var i = 0,
-            table = row.getParent(),
-            cols = table.getHCells(),
-            list = row.$getElements(),
-            o;
+        var elements = row.$getElements();
 
-        for (; cols[i]; ) {
-            if (o = list[i++]) {
-                if (i <= table._nLeft) {
-                    row._eLeft.appendChild(o);
-                } else if (i > table._nRight) {
-                    row._eRight.appendChild(o);
+        this.getHCells().forEach(function (item, index) {
+            if (item = elements[index]) {
+                if (index < this._nLeft) {
+                    row._eLeft.appendChild(item);
+                } else if (index >= this._nRight) {
+                    row._eRight.appendChild(item);
                 }
             }
-        }
+        }, this);
 
         row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
     }
@@ -141,10 +133,10 @@ _eFill       - 用于控制中部宽度的单元格
             this._nLeft = options.leftLock || 0;
             this._nRight = this.getColumnCount() - (options.rightLock || 0);
 
-            for (; el = rows[i]; ) {
-                el = el.getMain();
-                list[i++] = '<tr class="' + el.className + '" style="' + el.style.cssText + '"><td style="padding:0px;border:0px;width:0px;background:transparent"></td></tr>';
-            }
+            rows.forEach(function (item, index) {
+                item = item.getMain();
+                list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-height"></td></tr>';
+            });
 
             o = '<table cellspacing="0" class="ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length - headRows.length).join('') + '</tbody></table><table cellspacing="0" class="' + this._uHead.getMain().className + '"><thead>' + list.join('') + '</thead></table>';
             dom.insertHTML(layout, 'beforeEnd', '<div class="ui-locked-table-fill"></div>' + o + o);
@@ -232,12 +224,12 @@ _eFill       - 用于控制中部宽度的单元格
             $initStructure: function (width, height) {
                 ui.Table.prototype.$initStructure.call(this, width, height);
 
-                for (var i = 0, row; row = this._aHeadRows[i++]; ) {
-                    splitRow(row);
-                }
-                for (i = 0; row = this._aRows[i++]; ) {
-                    splitRow(row);
-                }
+                this._aHeadRows.forEach(function (item) {
+                    splitRow.call(this, item);
+                });
+                this._aRows.forEach(function (item) {
+                    splitRow.call(this, item);
+                });
 
                 var table = dom.getParent(this.getBody()),
                     head = this._uHead.getMain();
@@ -255,12 +247,12 @@ _eFill       - 用于控制中部宽度的单元格
             $resize: function () {
                 ui.Table.prototype.$resize.call(this);
 
-                for (var i = 0, row; row = this._aHeadRows[i++]; ) {
-                    restoreRow(row);
-                }
-                for (i = 0; row = this._aRows[i++]; ) {
-                    restoreRow(row);
-                }
+                this._aHeadRows.forEach(function (item) {
+                    restoreRow.call(this, item);
+                });
+                this._aRows.forEach(function (item) {
+                    restoreRow.call(this, item);
+                });
 
                 var leftHead = this._uLeftHead.getMain(),
                     rightHead = this._uRightHead.getMain(),
@@ -290,7 +282,7 @@ _eFill       - 用于控制中部宽度的单元格
 
                 this._uLeftMain.getOuter().style.top = this._uRightMain.getOuter().style.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this._uHead.getOuter()).scrollTop) + 'px';
                 if (this._bHeadFloat) {
-                    this._uLeftHead.getOuter().style.top = this._uRightHead.getOuter().style.top = Math.max(0, util.getView().top + this.getLayout().scrollTop - dom.getPosition(this.getOuter()).top) + 'px';
+                    this._uLeftHead.getOuter().style.top = this._uRightHead.getOuter().style.top = this.$getSection('Head').getMain().style.top;
                 }
             },
 
@@ -329,7 +321,7 @@ _eFill       - 用于控制中部宽度的单元格
                 initLockedRow(row, o.firstChild, o.lastChild);
                 leftBody.insertBefore(o.firstChild, dom.children(leftBody)[index]);
                 rightBody.insertBefore(o.firstChild, dom.children(rightBody)[index]);
-                splitRow(row);
+                splitRow.call(this, row);
 
                 return row;
             },
@@ -355,7 +347,7 @@ _eFill       - 用于控制中部宽度的单元格
             removeRow: function (index) {
                 var row = this.getRow(index);
                 if (row) {
-                    restoreRow(row);
+                    restoreRow.call(this, row);
 
                     var leftBody = this._uLeftMain.getBody(),
                         rightBody = this._uRightMain.getBody();

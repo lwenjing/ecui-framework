@@ -266,15 +266,14 @@
                     keyframes.push(keyframe);
                     times.push(selector);
 
-                    cssText = cssText.split(';');
-                    for (var i = 0, item; item = cssText[i++]; ) {
+                    cssText.split(';').forEach(function (item) {
                         item = item.split(':');
                         name = util.toCamelCase(item[0]);
                         keyframe[name] = '"' + item[1] + '"';
                         if (selector && !keyframes[0][name]) {
                             keyframes[0][name] = '"@' + name + '"';
                         }
-                    }
+                    });
                 }
             );
 

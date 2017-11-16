@@ -107,9 +107,9 @@ _aChildren     - 子控件集合
              */
             $cache: function (style, cacheSize) {
                 ui.Control.prototype.$cache.call(this, style, cacheSize);
-                for (var i = 0, item; item = this._aChildren[i++]; ) {
+                this._aChildren.forEach(function (item) {
                     item.cache(true, true);
-                }
+                });
             },
 
             /**
@@ -363,9 +363,9 @@ _aChildren     - 子控件集合
              */
             init: function (options) {
                 ui.Control.prototype.init.call(this, options);
-                for (var i = 0, item; item = this._aChildren[i++]; ) {
+                this._aChildren.forEach(function (item) {
                     item.init(options);
-                }
+                });
             },
 
             /**
