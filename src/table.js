@@ -609,7 +609,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 ui.Control.prototype.$scroll.call(this);
 
                 if (this._bHeadFloat) {
-                    this._uHead.getOuter().style.top = Math.max(0, Math.min(this.getBodyHeight() - this.$$paddingTop, util.getView().top + this.getLayout().scrollTop - dom.getPosition(this.getOuter()).top)) + 'px';
+                    this._uHead.getOuter().style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this.getLayout().scrollTop) + 'px';
                 }
             },
 
