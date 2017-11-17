@@ -221,6 +221,19 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
+            $mousewheel: function () {
+                var leftHeadStyle = this._uLeftHead.getOuter().style,
+                    rightHeadStyle = this._uRightHead.getOuter().style;
+
+                if (this._bHeadFloat) {
+                    leftHeadStyle.position = rightHeadStyle.position = '';
+                    leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
+                }
+            },
+
+            /**
+             * @override
+             */
             $initStructure: function (width, height) {
                 ui.Table.prototype.$initStructure.call(this, width, height);
 
@@ -279,12 +292,18 @@ _eRight      - 右侧乐定行的Element元素
             $scroll: function () {
                 ui.Table.prototype.$scroll.call(this);
 
-                this._uLeftHead.getOuter().style.left = this._uLeftMain.getOuter().style.left = (this.getLayout().scrollLeft - this.$$emptyTDWidth) + 'px';
-                this._uRightHead.getOuter().style.left = this._uRightMain.getOuter().style.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$emptyTDWidth - this.$$scrollFixed) + 'px';
+                var leftHeadStyle = this._uLeftHead.getOuter().style,
+                    rightHeadStyle = this._uRightHead.getOuter().style,
+                    leftMainStyle = this._uLeftMain.getOuter().style,
+                    rightMainStyle = this._uRightMain.getOuter().style;
 
-                this._uLeftMain.getOuter().style.top = this._uRightMain.getOuter().style.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this._uHead.getOuter()).scrollTop) + 'px';
+                leftHeadStyle.left = leftMainStyle.left = (this.getLayout().scrollLeft - this.$$emptyTDWidth) + 'px';
+                rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$emptyTDWidth - this.$$scrollFixed) + 'px';
+
+                leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this._uHead.getOuter()).scrollTop) + 'px';
                 if (this._bHeadFloat) {
-                    this._uLeftHead.getOuter().style.top = this._uRightHead.getOuter().style.top = this.$getSection('Head').getMain().style.top;
+                    leftHeadStyle.position = rightHeadStyle.position = '';
+                    leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
                 }
             },
 

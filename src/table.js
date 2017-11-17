@@ -594,6 +594,18 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             /**
              * @override
              */
+            $mousewheel: function () {
+                if (this._bHeadFloat) {
+                    this._uHead.getOuter().style.position = 'fixed';
+                    var top = dom.getPosition(this.getOuter()).top - util.getView().top;
+                    this._uHead.getOuter().style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
+                    util.timer(this.$scroll, 0, this);
+                }
+            },
+
+            /**
+             * @override
+             */
             $resize: function () {
                 ui.Control.prototype.$resize.call(this);
 
@@ -605,11 +617,13 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             /**
              * @override
              */
-            $scroll: function () {
-                ui.Control.prototype.$scroll.call(this);
+            $scroll: function (event) {
+                ui.Control.prototype.$scroll.call(this, event);
 
                 if (this._bHeadFloat) {
-                    this._uHead.getOuter().style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this.getLayout().scrollTop) + 'px';
+                    var style = this._uHead.getOuter().style;
+                    style.position = '';
+                    style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this.getLayout().scrollTop) + 'px';
                 }
             },
 

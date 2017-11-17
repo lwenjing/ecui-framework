@@ -30,7 +30,7 @@
 		}
     }
 	.ui-table-head {
-	    position: absolute !important;
+	    position: absolute;
 	    overflow: hidden !important;
 	    top: 0px;
 	}
