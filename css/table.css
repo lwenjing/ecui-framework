@@ -2,8 +2,8 @@
 .ui-table {
     overflow: hidden !important;
     .ui-table-layout {
-	    position: relative;
-	    overflow: auto;
+	    position: relative !important;
+	    overflow: auto !important;
 	}
     table {
     	width: 100%;

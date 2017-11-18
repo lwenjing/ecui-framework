@@ -12,10 +12,11 @@ function scandir() {
             scandir .
             cd ..
         else
-            if [ "${file##*.}" = "css" ] && [ ! -f $file".html" ]
+            if [ "${file##*.}" = "css" ]
             then
                 echo $file"->"$file".html"
-                ln -s $file $file".html"
+                rm $file".html"
+                ln $file $file".html"
             fi
         fi
     done

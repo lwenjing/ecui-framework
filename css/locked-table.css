@@ -13,7 +13,7 @@
 		background: transparent !important;
 	}
 	.ui-locked-table-body {
-		position: absolute !important;
+		position: absolute;
 	}
 	td {
 		background-color: #FFF;

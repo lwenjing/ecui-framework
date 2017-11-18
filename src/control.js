@@ -141,6 +141,14 @@ $$padding           - 内填充宽度缓存
             $append: util.blank,
 
             /**
+             * 控件滚动之前事件的默认处理。
+             * @protected
+             *
+             * @param {ECUIEvent} event 事件对象
+             */
+            $beforescroll: util.blank,
+
+            /**
              * 控件失去焦点事件的默认处理。
              * 控件失去焦点时，移除状态样式 -focus。
              * @protected
@@ -417,7 +425,7 @@ $$padding           - 内填充宽度缓存
             },
 
             /**
-             * 控件对滚动事件的默认处理。
+             * 控件滚动事件的默认处理。
              * @protected
              *
              * @param {ECUIEvent} event 事件对象

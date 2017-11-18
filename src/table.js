@@ -145,12 +145,12 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 this._eLayout = dom.create(
                     {
                         className: options.classes.join('-layout '),
-                        innerHTML: '<table cellspacing="0" class="ui-table-head ' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table>'
+                        innerHTML: '<div class="ui-table-head"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
                     }
                 )
             );
             dom.insertBefore(table, this._eLayout.lastChild);
-            dom.addClass('ui-table-body');
+            dom.addClass(table, 'ui-table-body');
 
             var i = 0,
                 list = dom.children(table),
@@ -526,6 +526,37 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             /**
              * @override
              */
+            $beforescroll: function (event) {
+                ui.Control.prototype.$beforescroll.call(this, event);
+
+                if (this._bHeadFloat && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
+                    var style = this._uHead.getOuter().style,
+                        pos = dom.getPosition(this._eLayout),
+                        view = util.getView(),
+                        top = pos.top - view.top,
+                        left = pos.left - view.left - this._eLayout.scrollLeft;
+
+                    top = Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top));
+                    if (!top || dom.contain(this.getMain(), event.target)) {
+                        style.position = 'fixed';
+                        style.top = top + 'px';
+                        style.left = left + 'px';
+                        style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getBodyWidth() - this.$$scrollFixed) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px';
+                    }
+                }
+
+                if (this.$scroll !== util.blank) {
+                    this.$scroll = util.blank;
+                    util.timer(function () {
+                        delete this.$scroll;
+                        this.$scroll();
+                    }, 0, this);
+                }
+            },
+
+            /**
+             * @override
+             */
             $cache: function (style, cacheSize) {
                 ui.Control.prototype.$cache.call(this, style, cacheSize);
                 this._uHead.cache(false, true);
@@ -582,25 +613,15 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
-                dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild);
+                this.$$scrollFixed = this.$$tableHeight > height ? core.getScrollNarrow() : 0;
+
+                dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
                 dom.getParent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
                 if (this.getMain().style.height) {
-                    this.getLayout().style.height = height + 'px';
+                    this._eLayout.style.height = height + 'px';
                 }
 
                 util.timer(this.$scroll, 0, this);
-            },
-
-            /**
-             * @override
-             */
-            $mousewheel: function () {
-                if (this._bHeadFloat) {
-                    this._uHead.getOuter().style.position = 'fixed';
-                    var top = dom.getPosition(this.getOuter()).top - util.getView().top;
-                    this._uHead.getOuter().style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
-                    util.timer(this.$scroll, 0, this);
-                }
             },
 
             /**
@@ -611,7 +632,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
                 dom.getParent(this.getBody()).style.marginTop = '';
-                this.getLayout().style.height = '';
+                this._eLayout.style.height = '';
             },
 
             /**
@@ -623,7 +644,9 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 if (this._bHeadFloat) {
                     var style = this._uHead.getOuter().style;
                     style.position = '';
-                    style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this.getLayout().scrollTop) + 'px';
+                    style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
+                    style.left = '0px';
+                    style.clip = '';
                 }
             },
 

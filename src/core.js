@@ -356,7 +356,7 @@
              * @param {Event} event 事件对象
              */
             DOMMouseScroll: function (event) {
-                onmousewheel(event, event.detail);
+                onmousewheel(event, event.detail, event.detailX, event.detailY);
             },
 
             /**
@@ -366,7 +366,7 @@
              * @param {Event} event 事件对象
              */
             mousewheel: function (event) {
-                onmousewheel(event, event.wheelDelta / -40);
+                onmousewheel(event, event.wheelDelta, event.wheelDeltaX, event.wheelDeltaY);
             }
         },
 
@@ -893,11 +893,15 @@
      * @private
      *
      * @param {ECUIEvent} event 事件对象
-     * @param {number} detail 滚动距离
+     * @param {number} delta 滚动距离
+     * @param {number} delta X轴滚动距离
+     * @param {number} delta Y轴滚动距离
      */
-    function onmousewheel(event, detail) {
+    function onmousewheel(event, delta, deltaX, deltaY) {
         event = core.wrapEvent(event);
-        event.detail = detail;
+        event.delta = delta;
+        event.deltaX = deltaX;
+        event.deltaY = deltaY;
 
         if (ieVersion < 9) {
             util.timer(onscroll, 0, this, event);
@@ -911,12 +915,18 @@
             if (!event.cancelBubble) {
                 bubble(focusedControl, 'mousewheel', event);
             }
+
+            independentControls.forEach(function (item) {
+                core.triggerEvent(item, 'beforescroll', event);
+            });
         }
     }
 
     /**
      * 滚动时的事件处理。
      * @private
+     *
+     * @param {ECUIEvent} event 事件对象
      */
     function onscroll(event) {
         event = core.wrapEvent(event);
