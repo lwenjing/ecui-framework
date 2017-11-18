@@ -190,6 +190,40 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
+            $beforescroll: function (event) {
+                ui.Table.prototype.$beforescroll.call(this, event);
+
+                var layout = this.getLayout(),
+                    pos = dom.getPosition(layout),
+                    view = util.getView(),
+                    top = pos.top - view.top,
+                    left = pos.left - view.left,
+                    leftHeadStyle = this._uLeftHead.getOuter().style,
+                    rightHeadStyle = this._uRightHead.getOuter().style,
+                    leftMainStyle = this._uLeftMain.getOuter().style,
+                    rightMainStyle = this._uRightMain.getOuter().style;
+
+                if (this.$getSection('Head').getMain().style.position === 'fixed' || Math.abs(event.deltaX) >= Math.abs(event.deltaY)) {
+                    leftHeadStyle.position = rightHeadStyle.position = 'fixed';
+                    leftHeadStyle.top = rightHeadStyle.top = (Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
+                    leftHeadStyle.left = (left - this.$$emptyTDWidth) + 'px';
+                    rightHeadStyle.left = (Math.min(this.getBodyWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$emptyTDWidth - this.$$scrollFixed) + 'px';
+                }
+
+                if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) {
+                    leftMainStyle.position = rightMainStyle.position = 'fixed';
+                    leftMainStyle.left = leftHeadStyle.left;
+                    rightMainStyle.left = rightHeadStyle.left;
+                    var scrollTop = layout.scrollTop - this.$$paddingTop;
+                    leftMainStyle.top = rightMainStyle.top = top - scrollTop + 'px';
+                    leftMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingLeft + 'px ' + (scrollTop + this.getBodyHeight()) + 'px 0px)';
+                    rightMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingRight + 'px ' + (scrollTop + this.getBodyHeight()) + 'px 0px)';
+                }
+            },
+
+            /**
+             * @override
+             */
             $cache: function (style, cacheSize) {
                 ui.Table.prototype.$cache.call(this, style, cacheSize);
 
@@ -270,40 +304,6 @@ _eRight      - 右侧乐定行的Element元素
                 leftHead.style.left = leftMain.style.left = '';
                 rightHead.style.left = rightMain.style.left = '';
                 leftMain.style.top = rightMain.style.top = '';
-            },
-
-            /**
-             * @override
-             */
-            $beforescroll: function (event) {
-                ui.Table.prototype.$beforescroll.call(this, event);
-
-                var layout = this.getLayout(),
-                    pos = dom.getPosition(layout),
-                    view = util.getView(),
-                    top = pos.top - view.top,
-                    left = pos.left - view.left,
-                    leftHeadStyle = this._uLeftHead.getOuter().style,
-                    rightHeadStyle = this._uRightHead.getOuter().style,
-                    leftMainStyle = this._uLeftMain.getOuter().style,
-                    rightMainStyle = this._uRightMain.getOuter().style;
-
-                if (this.$getSection('Head').getMain().style.position === 'fixed' || Math.abs(event.deltaX) >= Math.abs(event.deltaY)) {
-                    leftHeadStyle.position = rightHeadStyle.position = 'fixed';
-                    leftHeadStyle.top = rightHeadStyle.top = (Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
-                    leftHeadStyle.left = (left - this.$$emptyTDWidth) + 'px';
-                    rightHeadStyle.left = (Math.min(this.getBodyWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$emptyTDWidth - this.$$scrollFixed) + 'px';
-                }
-
-                if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) {
-                    leftMainStyle.position = rightMainStyle.position = 'fixed';
-                    leftMainStyle.left = leftHeadStyle.left;
-                    rightMainStyle.left = rightHeadStyle.left;
-                    var scrollTop = layout.scrollTop - this.$$paddingTop;
-                    leftMainStyle.top = rightMainStyle.top = top - scrollTop + 'px';
-                    leftMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingLeft + 'px ' + (scrollTop + this.getBodyHeight()) + 'px 0px)';
-                    rightMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingRight + 'px ' + (scrollTop + this.getBodyHeight()) + 'px 0px)';
-                }
             },
 
             /**
