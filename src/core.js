@@ -347,26 +347,6 @@
                     // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
                     keyCode = 0;
                 }
-            },
-
-            /**
-             * 滚轮事件处理(firefox)。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            DOMMouseScroll: function (event) {
-                onmousewheel(event, event.detail, event.detailX, event.detailY);
-            },
-
-            /**
-             * 滚轮事件处理(other)。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            mousewheel: function (event) {
-                onmousewheel(event, event.wheelDelta, event.wheelDeltaX, event.wheelDeltaY);
             }
         },
 
@@ -444,6 +424,32 @@
                 }
             }
         };
+
+    if (ieVersion < 9) {
+        /**
+         * 滚轮事件处理(IE 6/7/8)。
+         * @private
+         *
+         * @param {Event} event 事件对象
+         */
+        currEnv.mousewheel = function (event) {
+            onmousewheel(event, event.wheelDeltaX, event.wheelDeltaY !== undefined ? event.wheelDeltaY : event.wheelDelta);
+        };
+    } else if (firefoxVersion < 17) {
+        /**
+         * 滚轮事件处理(firefox)。
+         * @private
+         *
+         * @param {Event} event 事件对象
+         */
+        currEnv.DOMMouseScroll = function (event) {
+            onmousewheel(event, event.axis === 1 ? event.detail : 0, event.axis === 2 ? event.detail : 0);
+        };
+    } else {
+        currEnv.wheel = function (event) {
+            onmousewheel(event, event.deltaX, event.deltaY);
+        };
+    }
 
     /**
      * 创建 ECUI 事件对象。
@@ -893,13 +899,11 @@
      * @private
      *
      * @param {ECUIEvent} event 事件对象
-     * @param {number} delta 滚动距离
      * @param {number} delta X轴滚动距离
      * @param {number} delta Y轴滚动距离
      */
-    function onmousewheel(event, delta, deltaX, deltaY) {
+    function onmousewheel(event, deltaX, deltaY) {
         event = core.wrapEvent(event);
-        event.delta = delta;
         event.deltaX = deltaX;
         event.deltaY = deltaY;
 

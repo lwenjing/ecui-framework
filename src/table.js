@@ -44,6 +44,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         util = core.util,
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
+        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
 //{/if}//
@@ -528,29 +529,30 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             $beforescroll: function (event) {
                 ui.Control.prototype.$beforescroll.call(this, event);
+                if (!firefoxVersion) {
+                    if (this._bHeadFloat && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
+                        var style = this._uHead.getOuter().style,
+                            pos = dom.getPosition(this._eLayout),
+                            view = util.getView(),
+                            top = pos.top - view.top,
+                            left = pos.left - view.left - this._eLayout.scrollLeft;
 
-                if (this._bHeadFloat && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
-                    var style = this._uHead.getOuter().style,
-                        pos = dom.getPosition(this._eLayout),
-                        view = util.getView(),
-                        top = pos.top - view.top,
-                        left = pos.left - view.left - this._eLayout.scrollLeft;
-
-                    top = Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top));
-                    if (!top || dom.contain(this.getMain(), event.target)) {
-                        style.position = 'fixed';
-                        style.top = top + 'px';
-                        style.left = left + 'px';
-                        style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getBodyWidth() - this.$$scrollFixed) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px';
+                        top = Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top));
+                        if (!top || dom.contain(this.getMain(), event.target)) {
+                            style.position = 'fixed';
+                            style.top = top + 'px';
+                            style.left = left + 'px';
+                            style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getBodyWidth() - this.$$scrollFixed) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px)';
+                        }
                     }
-                }
 
-                if (this.$scroll !== util.blank) {
-                    this.$scroll = util.blank;
-                    util.timer(function () {
-                        delete this.$scroll;
-                        this.$scroll();
-                    }, 0, this);
+                    if (this.$scroll !== util.blank) {
+                        this.$scroll = util.blank;
+                        util.timer(function () {
+                            delete this.$scroll;
+                            this.$scroll();
+                        }, 0, this);
+                    }
                 }
             },
 
