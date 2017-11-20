@@ -13,7 +13,7 @@
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
 //{/if}//
     var isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
-        ieScrollHandler,          // 处理IE的DOM滚动事件
+        scrollHandler,            // 处理IE的DOM滚动事件
         isMobileScroll,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
@@ -150,16 +150,23 @@
                         lastClick = {time: Date.now()};
                     }
 
-                    // IE8以下的版本，需要自己手动触发滚动条事件，不会冒泡
-                    if (ieVersion < 9 && isScrollClick(event)) {
-                        ieScrollHandler = util.timer(onscroll, -20, this, event);
+                    // 为了兼容beforescroll事件，同时考虑到scroll执行效率问题，自己手动触发滚动条事件
+                    if (isScrollClick(event)) {
+                        onbeforescroll(event);
+                        scrollHandler = util.timer(
+                            function () {
+                                onscroll(event);
+                                onbeforescroll(event);
+                            },
+                            -50
+                        );
                     }
 
                     if (control) {
                         // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
                         // 常见的表现是需要点击两次才能进行滚动操作，而且中途不能离开控件区域
                         // 以免触发悬停状态的样式改变。
-                        if (!ieScrollHandler) {
+                        if (!scrollHandler || ieVersion >= 9) {
                             for (; target; target = target.getParent()) {
                                 if (target.isFocusable()) {
                                     if (!(target !== control && target.contain(focusedControl))) {
@@ -201,10 +208,10 @@
             mousemove: function (event) {
                 event = core.wrapEvent(event);
 
-                if (ieScrollHandler) {
-                    ieScrollHandler();
-                    ieScrollHandler = null;
-                    onscroll(event);
+                if (scrollHandler) {
+                    scrollHandler();
+                    scrollHandler = null;
+                    util.timer(onscroll, 500, this, event);
                 }
 
                 var control = event.getControl();
@@ -228,6 +235,12 @@
 
             mouseup: function (event) {
                 event = core.wrapEvent(event);
+
+                if (scrollHandler) {
+                    scrollHandler();
+                    scrollHandler = null;
+                    util.timer(onscroll, 500, this, event);
+                }
 
                 if (isMobile && event.type === 'mouseup') {
                     return;
@@ -809,7 +822,6 @@
                     maskElements = null;
                 }
             );
-            dom.addEventListener(window, 'scroll', onscroll);
 
             core.init(document.body);
 
@@ -841,7 +853,9 @@
             x = event.pageX - pos.left - util.toNumber(style.borderLeftWidth) - target.clientWidth,
             y = event.pageY - pos.top - util.toNumber(style.borderTopWidth) - target.clientHeight;
 
-        return (target.clientWidth && target.clientWidth !== target.scrollWidth && y >= 0 && y < scrollNarrow) !== (target.clientHeight && target.clientHeight !== target.scrollHeight && x >= 0 && x < scrollNarrow);
+        event.deltaX = target.clientWidth && target.clientWidth !== target.scrollWidth && y >= 0 && y < scrollNarrow ? 1 : 0;
+        event.deltaY = target.clientHeight && target.clientHeight !== target.scrollHeight && x >= 0 && x < scrollNarrow ? 1 : 0;
+        return event.deltaX !== event.deltaY;
     }
 
     /**
@@ -857,6 +871,18 @@
         }
         bubble(control, 'mousedown', event);
         onselectstart(control, event);
+    }
+
+    /**
+     * 滚动时的事件处理。
+     * @private
+     *
+     * @param {ECUIEvent} event 事件对象
+     */
+    function onbeforescroll(event) {
+        independentControls.forEach(function (item) {
+            core.triggerEvent(item, 'beforescroll', event);
+        });
     }
 
     /**
@@ -907,10 +933,6 @@
         event.deltaX = deltaX;
         event.deltaY = deltaY;
 
-        if (ieVersion < 9) {
-            util.timer(onscroll, 0, this, event);
-        }
-
         // 拖拽状态下，不允许滚动
         if (currEnv.type === 'drag') {
             event.preventDefault();
@@ -919,10 +941,8 @@
             if (!event.cancelBubble) {
                 bubble(focusedControl, 'mousewheel', event);
             }
-
-            independentControls.forEach(function (item) {
-                core.triggerEvent(item, 'beforescroll', event);
-            });
+            onbeforescroll(event);
+            util.timer(onscroll, 0, this, event);
         }
     }
 

@@ -43,8 +43,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         ui = core.ui,
         util = core.util,
 
-        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
 //{/if}//
@@ -529,29 +529,22 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             $beforescroll: function (event) {
                 ui.Control.prototype.$beforescroll.call(this, event);
-                if (!firefoxVersion) {
-                    if (this._bHeadFloat && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
-                        var style = this._uHead.getOuter().style,
-                            pos = dom.getPosition(this._eLayout),
-                            view = util.getView(),
-                            top = pos.top - view.top,
-                            left = pos.left - view.left - this._eLayout.scrollLeft;
+                if (firefoxVersion || ieVersion < 7) {
+                    return;
+                }
+                if (this._bHeadFloat && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) {
+                    var style = this._uHead.getOuter().style,
+                        pos = dom.getPosition(this._eLayout),
+                        view = util.getView(),
+                        top = pos.top - view.top,
+                        left = pos.left - view.left - this._eLayout.scrollLeft;
 
-                        top = Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top));
-                        if (!top || dom.contain(this.getMain(), event.target)) {
-                            style.position = 'fixed';
-                            style.top = top + 'px';
-                            style.left = left + 'px';
-                            style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getBodyWidth() - this.$$scrollFixed) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px)';
-                        }
-                    }
-
-                    if (this.$scroll !== util.blank) {
-                        this.$scroll = util.blank;
-                        util.timer(function () {
-                            delete this.$scroll;
-                            this.$scroll();
-                        }, 0, this);
+                    top = Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top));
+                    if (!top || dom.contain(this.getMain(), event.target)) {
+                        style.position = 'fixed';
+                        style.top = top + 'px';
+                        style.left = left + 'px';
+                        style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getBodyWidth() - this.$$scrollFixed[0]) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px)';
                     }
                 }
             },
@@ -615,7 +608,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
-                this.$$scrollFixed = this.$$tableHeight > height ? core.getScrollNarrow() : 0;
+                var narrow = core.getScrollNarrow();
+                this.$$scrollFixed = [
+                    this.$$tableHeight - (this.$$tableWidth > width ? narrow : 0) > height ? narrow : 0,
+                    this.$$tableWidth - (this.$$tableHeight > height ? narrow : 0) > width ? narrow : 0
+                ];
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
                 dom.getParent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
@@ -648,7 +645,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                     style.position = '';
                     style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
                     style.left = '0px';
-                    style.clip = '';
+                    style.clip = 'auto';
                 }
             },
 
