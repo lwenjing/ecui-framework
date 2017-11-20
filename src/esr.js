@@ -798,10 +798,15 @@
                                 handle();
                             },
                             onerror: function () {
-                                onerror();
+                                if (onerror(err) === false) {
+                                    return;
+                                }
+                                handle();
                             }
                         }
                     );
+                } else {
+                    handle();
                 }
             };
             onerror = onerror || esr.onrequesterror || util.blank;
