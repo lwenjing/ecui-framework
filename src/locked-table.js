@@ -325,9 +325,7 @@ _eRight      - 右侧乐定行的Element元素
 
                 leftHeadStyle.position = rightHeadStyle.position = leftMainStyle.position = rightMainStyle.position = '';
 
-                if (this._bHeadFloat) {
-                    leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
-                }
+                leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
 
                 leftHeadStyle.left = leftMainStyle.left = (this.getLayout().scrollLeft - this.$$emptyTDWidth) + 'px';
                 rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$emptyTDWidth - this.$$scrollFixed[0]) + 'px';
