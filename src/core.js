@@ -446,7 +446,7 @@
          * @param {Event} event 事件对象
          */
         currEnv.mousewheel = function (event) {
-            onmousewheel(event, event.wheelDeltaX, event.wheelDeltaY !== undefined ? event.wheelDeltaY : event.wheelDelta);
+            onmousewheel(event, 0, 1);
         };
     } else if (firefoxVersion < 17) {
         /**
@@ -805,6 +805,7 @@
             }
 
             dom.addEventListener(window, 'resize', core.repaint);
+            dom.addEventListener(window, 'scroll', onscroll);
             dom.addEventListener(
                 window,
                 'unload',
@@ -942,7 +943,7 @@
                 bubble(focusedControl, 'mousewheel', event);
             }
             onbeforescroll(event);
-            util.timer(onscroll, 0, this, event);
+            util.timer(onscroll, 50, this, event);
         }
     }
 
