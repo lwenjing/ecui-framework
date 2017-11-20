@@ -719,6 +719,7 @@
                             var data = JSON.parse(text),
                                 key;
 
+                            // 枚举常量管理
                             if (data.meta) {
                                 metaUpdate = true;
                             }
@@ -776,10 +777,12 @@
                 handle = onsuccess || util.blank;
 
             onsuccess = function () {
-                if (metaUpdate) {
+                if (metaUpdate && esr.META_URL) {
+                    // 枚举常量管理
                     io.ajax(
-                        'qa/base/' + metaVersion,
+                        esr.META_URL,
                         {
+                            headers: {'x-enum-version': metaVersion},
                             onsuccess: function (text) {
                                 var data = JSON.parse(text);
                                 for (var key in data.meta.record) {
