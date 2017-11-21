@@ -52,22 +52,23 @@ $$padding           - 内填充宽度缓存
      * 设置控件的父对象。
      * @private
      *
+     * @param {ecui.ui.Control} control 需要设置的控件对象
      * @param {ecui.ui.Control} parent 父控件对象
      * @param {HTMLElement} parentElement 父 Element 对象
      */
-    function alterParent(parent, parentElement) {
-        var oldParent = this._cParent,
-            el = this.getOuter();
+    function alterParent(control, parent, parentElement) {
+        var oldParent = control._cParent,
+            el = control.getOuter();
 
         // 触发原来父控件的移除子控件事件
         if (parent !== oldParent) {
             if (oldParent) {
-                if (!core.triggerEvent(oldParent, 'remove', this)) {
+                if (!core.triggerEvent(oldParent, 'remove', control)) {
                     return;
                 }
             }
             if (parent) {
-                if (!core.triggerEvent(parent, 'append', this)) {
+                if (!core.triggerEvent(parent, 'append', control)) {
                     parent = parentElement = null;
                 }
             }
@@ -81,7 +82,7 @@ $$padding           - 内填充宽度缓存
             }
         }
 
-        this.$setParent(parent);
+        control.$setParent(parent);
     }
 
     /**
@@ -559,7 +560,7 @@ $$padding           - 内填充宽度缓存
              * @param {HTMLElement} parentElement 父 Element 对象，忽略参数控件将移出 DOM 树
              */
             appendTo: function (parentElement) {
-                alterParent.call(this, parentElement && core.findControl(parentElement), parentElement);
+                alterParent(this, parentElement && core.findControl(parentElement), parentElement);
             },
 
             /**
@@ -1153,7 +1154,7 @@ $$padding           - 内填充宽度缓存
              * @param {ecui.ui.Control} parent 父控件对象，忽略参数控件将移出 DOM 树
              */
             setParent: function (parent) {
-                alterParent.call(this, parent, parent && parent._eBody);
+                alterParent(this, parent, parent && parent._eBody);
             },
 
             /**

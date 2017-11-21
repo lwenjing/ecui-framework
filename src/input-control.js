@@ -134,14 +134,16 @@ _eInput        - INPUT对象
     /**
      * 为控件的 INPUT 节点绑定事件。
      * @private
+     *
+     * @param {ecui.ui.InputControl} input 输入控件对象
      */
-    function bindEvent() {
-        core.$bind(this._eInput, this);
-        if (this._eInput.type !== 'hidden') {
+    function bindEvent(input) {
+        core.$bind(input._eInput, input);
+        if (input._eInput.type !== 'hidden') {
             // 对于IE或者textarea的变化，需要重新绑定相关的控件事件
             for (var name in events) {
                 if (events.hasOwnProperty(name)) {
-                    dom.addEventListener(this._eInput, name, events[name]);
+                    dom.addEventListener(input._eInput, name, events[name]);
                 }
             }
         }
@@ -228,7 +230,7 @@ _eInput        - INPUT对象
             ui.Control.call(this, el, options);
 
             this._eInput = inputEl;
-            bindEvent.call(this);
+            bindEvent(this);
 
             if (options.valid) {
                 options = options.valid.split(',');
@@ -413,7 +415,7 @@ _eInput        - INPUT对象
                 var el = dom.setInput(this._eInput, name || '');
                 if (this._eInput !== el) {
                     this._eInput = el;
-                    bindEvent.call(this);
+                    bindEvent(this);
                 }
             },
 

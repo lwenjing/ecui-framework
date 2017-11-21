@@ -51,13 +51,16 @@ _uOptions     - 下拉选择框
     function setSelected(select, item) {
         item = item || null;
         if (item !== select._cSelected) {
-            select._uText.setContent(item ? item.getBody().innerHTML : '');
-            ui.InputControl.prototype.setValue.call(select, item ? item._sValue : '');
             if (item) {
+                select._uText.setContent(item.getBody().innerHTML);
+                ui.InputControl.prototype.setValue.call(select, item._sValue);
                 if (select._uOptions.isShow()) {
                     core.setFocused(item);
                 }
+                select.alterClass(item._sValue === '' ? '+prompt' : '-prompt');
             } else {
+                select._uText.setContent('');
+                ui.InputControl.prototype.setValue.call(select, '');
                 core.loseFocus(select._cSelected);
             }
             select._cSelected = item;
