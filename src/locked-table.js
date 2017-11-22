@@ -101,14 +101,14 @@ _eRight      - 右侧乐定行的Element元素
         table.getHCells().forEach(function (item, index) {
             if (item = elements[index]) {
                 if (index < table._nLeft) {
-                    row._eLeft.appendChild(item);
+                    row._eLeft.insertBefore(item, row._eLeft.lastChild);
                 } else if (index >= table._nRight) {
                     row._eRight.appendChild(item);
                 }
             }
         });
 
-        row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
+        row._eLeft.lastChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
     }
 
     /**
@@ -214,8 +214,8 @@ _eRight      - 右侧乐定行的Element元素
                 if (this.$getSection('Head').getMain().style.position === 'fixed' || fixed) {
                     leftHeadStyle.position = rightHeadStyle.position = 'fixed';
                     leftHeadStyle.top = rightHeadStyle.top = (Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
-                    leftHeadStyle.left = (left - this.$$emptyTDWidth) + 'px';
-                    rightHeadStyle.left = (Math.min(this.getBodyWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$emptyTDWidth - this.$$scrollFixed[0]) + 'px';
+                    leftHeadStyle.left = left + 'px';
+                    rightHeadStyle.left = (Math.min(this.getBodyWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                 }
 
                 if (fixed) {
@@ -236,7 +236,6 @@ _eRight      - 右侧乐定行的Element元素
                 ui.Table.prototype.$cache.call(this, style, cacheSize);
 
                 this.$$paddingLeft = 0;
-                this.$$emptyTDWidth = safariVersion ? 1 : 0;
 
                 for (var i = 0, list = this.getHCells(); i < this._nLeft; ) {
                     this.$$paddingLeft += list[i++].getWidth();
@@ -251,6 +250,9 @@ _eRight      - 右侧乐定行的Element元素
                 this._uRightHead.cache(false, true);
                 this._uLeftMain.cache(false, true);
                 this._uRightMain.cache(false, true);
+
+                this.$$leftTDWidth = (safariVersion ? 1 : 0) + this._uLeftHead.$$border[1] + this._uLeftHead.$$border[3];
+                this.$$rightTDWidth = (safariVersion ? 1 : 0) + this._uRightHead.$$border[1] + this._uRightHead.$$border[3];
             },
 
             /**
@@ -278,8 +280,8 @@ _eRight      - 右侧乐定行的Element元素
                     head = this._uHead.getMain().lastChild;
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
-                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (this.$$emptyTDWidth + this.$$paddingLeft) + 'px';
-                this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$emptyTDWidth + this.$$paddingRight) + 'px';
+                this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (this.$$leftTDWidth + this.$$paddingLeft) + 'px';
+                this._uRightHead.getMain().style.width = this._uRightMain.getMain().style.width = (this.$$rightTDWidth + this.$$paddingRight) + 'px';
                 table.style.marginLeft = head.style.marginLeft = this.$$paddingLeft + 'px';
                 table.style.width = head.style.width = (this.$$tableWidth - this.$$paddingLeft - this.$$paddingRight) + 'px';
             },
@@ -329,8 +331,8 @@ _eRight      - 右侧乐定行的Element元素
 
                 leftHeadStyle.top = rightHeadStyle.top = this.$getSection('Head').getOuter().style.top;
 
-                leftHeadStyle.left = leftMainStyle.left = (this.getLayout().scrollLeft - this.$$emptyTDWidth) + 'px';
-                rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$emptyTDWidth - this.$$scrollFixed[0]) + 'px';
+                leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
+                rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                 leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this._uHead.getOuter()).scrollTop) + 'px';
                 leftMainStyle.clip = rightMainStyle.clip = 'auto';
             },
