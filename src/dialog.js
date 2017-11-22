@@ -278,13 +278,13 @@ _uClose     - 关闭按钮
                         modalCount++;
                     }
 
+                    this.center();
                     core.mask(opacity !== undefined ? opacity : 0.5, 32766 + modalCount * 2);
 
                     this._bModal = true;
                     if (!ui.Control.prototype.show.call(this)) {
                         refresh(this);
                     }
-                    this.center();
                 }
             }
         }
