@@ -143,7 +143,7 @@ _eRight      - 右侧乐定行的Element元素
                 list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-height"></td></tr>';
             });
 
-            o = '<table cellspacing="0" class="ui-locked-table-{0}-body ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length - headRows.length).join('') + '</tbody></table><table cellspacing="0" class="ui-locked-table-{0}-head ui-locked-table-head ' + this._uHead.getMain().className + '"><thead>' + list.join('') + '</thead></table>';
+            o = '<table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length - headRows.length).join('') + '</tbody></table><table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-head ' + this._uHead.getMain().className + '"><thead>' + list.join('') + '</thead></table>';
             dom.insertHTML(
                 layout,
                 'beforeEnd',
