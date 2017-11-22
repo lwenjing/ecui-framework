@@ -65,9 +65,10 @@ _eRight      - 右侧乐定行的Element元素
      * 恢复行内的单元格到锁定列或基本列中。
      * @private
      *
+     * @param {ecui.ui.LockedTable} table 锁定表格控件
      * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
      */
-    function restoreRow(row) {
+    function restoreRow(table, row) {
         var elements = row.$getElements(),
             first;
 
@@ -76,35 +77,36 @@ _eRight      - 右侧乐定行的Element元素
         row = row.getMain();
         first = row.firstChild;
 
-        this.getHCells().forEach(function (item, index) {
+        table.getHCells().forEach(function (item, index) {
             if (item = elements[index]) {
-                if (index < this._nLeft) {
+                if (index < table._nLeft) {
                     row.insertBefore(item, first);
-                } else if (index >= this._nRight) {
+                } else if (index >= table._nRight) {
                     row.appendChild(item);
                 }
             }
-        }, this);
+        });
     }
 
     /**
      * 拆分行内的单元格到锁定列或基本列中。
      * @private
      *
+     * @param {ecui.ui.LockedTable} table 锁定表格控件
      * @param {ecui.ui.LockedTable.Row} row 锁定表头控件或者锁定行控件
      */
-    function splitRow(row) {
+    function splitRow(table, row) {
         var elements = row.$getElements();
 
-        this.getHCells().forEach(function (item, index) {
+        table.getHCells().forEach(function (item, index) {
             if (item = elements[index]) {
-                if (index < this._nLeft) {
+                if (index < table._nLeft) {
                     row._eLeft.appendChild(item);
-                } else if (index >= this._nRight) {
+                } else if (index >= table._nRight) {
                     row._eRight.appendChild(item);
                 }
             }
-        }, this);
+        });
 
         row._eLeft.firstChild.style.height = row._eRight.firstChild.style.height = row.getHeight() + 'px';
     }
@@ -266,10 +268,10 @@ _eRight      - 右侧乐定行的Element元素
                 ui.Table.prototype.$initStructure.call(this, width, height);
 
                 this._aHeadRows.forEach(function (item) {
-                    splitRow.call(this, item);
+                    splitRow(this, item);
                 }, this);
                 this._aRows.forEach(function (item) {
-                    splitRow.call(this, item);
+                    splitRow(this, item);
                 }, this);
 
                 var table = dom.getParent(this.getBody()),
@@ -289,10 +291,10 @@ _eRight      - 右侧乐定行的Element元素
                 ui.Table.prototype.$resize.call(this);
 
                 this._aHeadRows.forEach(function (item) {
-                    restoreRow.call(this, item);
+                    restoreRow(this, item);
                 }, this);
                 this._aRows.forEach(function (item) {
-                    restoreRow.call(this, item);
+                    restoreRow(this, item);
                 }, this);
 
                 var leftHead = this._uLeftHead.getMain(),
@@ -368,7 +370,7 @@ _eRight      - 右侧乐定行的Element元素
                 initLockedRow(row, o.firstChild, o.lastChild);
                 leftBody.insertBefore(o.firstChild, dom.children(leftBody)[index]);
                 rightBody.insertBefore(o.firstChild, dom.children(rightBody)[index]);
-                splitRow.call(this, row);
+                splitRow(this, row);
 
                 return row;
             },
@@ -394,7 +396,7 @@ _eRight      - 右侧乐定行的Element元素
             removeRow: function (index) {
                 var row = this.getRow(index);
                 if (row) {
-                    restoreRow.call(this, row);
+                    restoreRow(this, row);
 
                     var leftBody = this._uLeftMain.getBody(),
                         rightBody = this._uRightMain.getBody();

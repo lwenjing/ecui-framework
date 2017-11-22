@@ -1,5 +1,5 @@
 /*
-MonthView - 定义日历显示的基本操作。
+MonthView - 定义日历视图的基本操作。
 日历视图控件，继承自基础控件，不包含年/月/日的快速选择与切换，如果需要实现这些功能，请将下拉框(选择月份)、输入框(输入年份)等组合使用建立新的控件或直接在页面上布局并调用接口。
 
 日历视图控件直接HTML初始化的例子:
@@ -43,18 +43,19 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
      * 选中某个日期单元格。
      * @private
      *
+     * @param {ecui.ui.MonthView} view 日历视图对象
      * @param {ecui.ui.MonthView.Cell} cell 日期单元格对象
      */
-    function setSelected(cell) {
-        if (this._cSelected !== cell) {
-            if (this._cSelected) {
-                this._cSelected.alterClass('-selected');
+    function setSelected(view, cell) {
+        if (view._cSelected !== cell) {
+            if (view._cSelected) {
+                view._cSelected.alterClass('-selected');
             }
 
             if (cell) {
                 cell.alterClass('+selected');
             }
-            this._cSelected = cell;
+            view._cSelected = cell;
         }
     }
 
@@ -124,7 +125,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 
                         if (core.triggerEvent(parent, 'dateclick', event, date = new Date(parent._nYear, parent._nMonth, this._nDay))) {
                             parent._oDate = date;
-                            setSelected.call(parent, this);
+                            setSelected(parent, this);
                         }
                     },
 
@@ -267,7 +268,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 this._nYear = dateYear;
                 this._nMonth = dateMonth;
 
-                setSelected.call(this);
+                setSelected(this);
 
                 this._aCells.forEach(function (item, index) {
                     if (index > 6) {
@@ -279,7 +280,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                             dom.removeClass(el, 'ui-extra');
                             // 恢复选择的日期
                             if (day === selected) {
-                                setSelected.call(this, item);
+                                setSelected(this, item);
                             }
                             item.enable();
                         } else {

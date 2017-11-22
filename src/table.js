@@ -78,10 +78,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
      * 表格控件初始化一行。
      * @private
      *
+     * @param {ecui.ui.Table} table 表格控件
      * @param {ecui.ui.Table.Row} row 行控件
      */
-    function initRow(row) {
-        for (var i = 0, list = this._aHCells, el, item; item = list[i]; ) {
+    function initRow(table, row) {
+        for (var i = 0, list = table._aHCells, el, item; item = list[i]; ) {
             if ((el = row._aElements[i++]) && el !== item.getMain()) {
                 var width = item.getWidth() - item.getMinimumWidth();
                 while (row._aElements[i] === null) {
@@ -890,10 +891,10 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                     item.$setSize(item.getWidth());
                 });
                 this._aHeadRows.forEach(function (item) {
-                    initRow.call(this, item);
+                    initRow(this, item);
                 }, this);
                 this._aRows.forEach(function (item) {
-                    initRow.call(this, item);
+                    initRow(this, item);
                 }, this);
 
                 ui.Control.prototype.init.call(this, options);
