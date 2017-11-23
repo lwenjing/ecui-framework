@@ -56,10 +56,21 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .ui-select-item-hover,
-    .ui-select-item-focus {
+    .ui-select-item-hover
+    {
         background-color: #368cda;
         color: #fff;
         cursor: pointer;
     }
+    .ui-select-item-focus {
+        background-color: #fff;
+        color: #368cda;
+        cursor: pointer; 
+    }
+}
+.ui-select-placeholder{
+    .ui-select-text{
+        color: #c0ccda;
+    }
+    
 }
