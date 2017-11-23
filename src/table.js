@@ -93,6 +93,12 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         }
     }
 
+    function resizeRow(row) {
+        row._aElements.forEach(function (item) {
+            item.style.width = '';
+        });
+    }
+
     /**
      * 在需要时初始化单元格控件。
      * 表格控件的单元格控件不是在初始阶段生成，而是在单元格控件第一次被调用时生成，参见核心的 getControl 方法。
@@ -609,17 +615,27 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
-                var narrow = core.getScrollNarrow();
-                this.$$scrollFixed = [
-                    this.$$tableHeight - (this.$$tableWidth > width ? narrow : 0) > height ? narrow : 0,
-                    this.$$tableWidth - (this.$$tableHeight > height ? narrow : 0) > width ? narrow : 0
-                ];
+                this._aHCells.forEach(function (item) {
+                    item.$setSize(item.getWidth());
+                });
+                this._aHeadRows.forEach(function (item) {
+                    initRow(this, item);
+                }, this);
+                this._aRows.forEach(function (item) {
+                    initRow(this, item);
+                }, this);
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
                 dom.getParent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
                 if (this.getMain().style.height) {
                     this._eLayout.style.height = height + 'px';
                 }
+
+                var narrow = core.getScrollNarrow();
+                this.$$scrollFixed = [
+                    this.$$tableHeight - (this.$$tableWidth > width ? narrow : 0) > height ? narrow : 0,
+                    this.$$tableWidth - (this.$$tableHeight > height ? narrow : 0) > width ? narrow : 0
+                ];
 
                 util.timer(this.$scroll, 0, this);
             },
@@ -629,6 +645,16 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             $resize: function () {
                 ui.Control.prototype.$resize.call(this);
+
+                this._aHeadRows.forEach(function (item) {
+                    resizeRow(item);
+                });
+                this._aRows.forEach(function (item) {
+                    resizeRow(item);
+                });
+                this._aHCells.forEach(function (item) {
+                    item.$resize();
+                });
 
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
                 dom.getParent(this.getBody()).style.marginTop = '';
@@ -881,23 +907,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
              */
             getRows: function () {
                 return this._aRows.slice();
-            },
-
-            /**
-             * @override
-             */
-            init: function (options) {
-                this._aHCells.forEach(function (item) {
-                    item.$setSize(item.getWidth());
-                });
-                this._aHeadRows.forEach(function (item) {
-                    initRow(this, item);
-                }, this);
-                this._aRows.forEach(function (item) {
-                    initRow(this, item);
-                }, this);
-
-                ui.Control.prototype.init.call(this, options);
             },
 
             /**

@@ -57,7 +57,7 @@ _uOptions     - 下拉选择框
                 if (select._uOptions.isShow()) {
                     core.setFocused(item);
                 }
-                select.alterClass(item._sValue === '' ? '+prompt' : '-prompt');
+                select.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
             } else {
                 select._uText.setContent('');
                 ui.InputControl.prototype.setValue.call(select, '');

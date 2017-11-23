@@ -120,6 +120,9 @@ $$padding           - 内填充宽度缓存
 
             this._aStatus = ['', ' '];
             this._sSubType = '';
+
+            this._sWidth = el.style.width;
+            this._sHeight = el.style.height;
         },
         {
             /**
@@ -929,9 +932,6 @@ $$padding           - 内填充宽度缓存
                     } else {
                         this.initStructure();
                     }
-
-                    this._sWidth = el.style.width;
-                    this._sHeight = el.style.height;
 
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
