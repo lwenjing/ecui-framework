@@ -4,7 +4,7 @@
     height: 30px;
     line-height: 30px;
     padding-right: 30px;
-    background: url(images/ecui/arrow.png) no-repeat 120px center;
+    background:#fff url(images/ecui/arrow.png) no-repeat 120px center;
     border: 1px solid #acbaca;
     border-radius: 2px;
     color: #495362;
