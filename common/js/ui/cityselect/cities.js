@@ -118,7 +118,10 @@ cities - 地区联动下拉框控件。
             $ready: function (options) {
                 ui.MultilevelSelect.prototype.$ready.call(this, options);
                 this.setData(getCITYS(options.multi));
-                var value = (options.value && options.value.length === 6) || '000000';
+                var value = options.value + '';
+                if (!options.value || options.value.length !== 6) {
+                    value = '000000';
+                }
 
                 this.getSelect(0).setValue(value.slice(0, 2) + '0000');
                 core.triggerEvent(this.getSelect(0), 'change');
