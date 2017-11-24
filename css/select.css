@@ -67,6 +67,9 @@
         color: #368cda;
         cursor: pointer; 
     }
+    .title{
+        background: #EFF2F7;
+    }
 }
 .ui-select-placeholder{
     .ui-select-text{
