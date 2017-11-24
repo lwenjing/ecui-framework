@@ -65,10 +65,7 @@
     .ui-select-item-focus {
         background-color: #fff;
         color: #368cda;
-        cursor: pointer; 
-    }
-    .title{
-        background: #EFF2F7;
+        cursor: pointer;
     }
 }
 .ui-select-placeholder{
