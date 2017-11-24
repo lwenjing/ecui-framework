@@ -159,7 +159,7 @@ _uOptions     - 下拉选择框
                         var parent = this.getParent();
                         parent._uOptions.hide();
                         setSelected(parent, this);
-                        core.triggerEvent(parent, 'change');
+                        core.triggerEvent(parent, 'change', event);
                     },
 
                     /**
@@ -318,7 +318,7 @@ _uOptions     - 下拉选择框
                                         index = Math.min(Math.max(0, oldIndex + which - 39), list.length - 1);
                                     if (oldIndex !== index) {
                                         this.setSelectedIndex(index);
-                                        core.triggerEvent(this, 'change');
+                                        core.triggerEvent(this, 'change', event);
                                     }
                                 }
                             }
@@ -328,7 +328,7 @@ _uOptions     - 下拉选择框
                             if (which === 13) {
                                 if (focus.getParent() === this && this._cSelected !== focus) {
                                     setSelected(this, focus);
-                                    core.triggerEvent(this, 'change');
+                                    core.triggerEvent(this, 'change', event);
                                 }
                             }
                             this._uOptions.hide();

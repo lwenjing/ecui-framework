@@ -14,7 +14,8 @@ _aSelect - 全部的下拉框控件列表
 //{if 0}//
 (function () {
     var core = ecui,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util;
 //{/if}//
     /**
      * 初始化多级联动下拉框控件。
@@ -77,9 +78,19 @@ _aSelect - 全部的下拉框控件列表
                         for (; item = selects[++index]; ) {
                             item.removeAll();
                         }
+
+                        core.triggerEvent(this.getParent(), 'change', event);
                     }
                 }
             ),
+
+            /**
+             * 数据变化时的默认处理。
+             * @public
+             *
+             * @param {ECUIEvent} event 时间对象
+             */
+            $change: util.blank,
 
             /**
              * 获取指定的下拉框对象。
