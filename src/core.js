@@ -1865,6 +1865,11 @@
          * @public
          */
         repaint: function () {
+            if (isMobile) {
+                // 移动端不需要处理浏览器resize的情况，因为此时一般是输入法触发的
+                return;
+            }
+
             function filter(item) {
                 return item.getParent() === resizeList && item.isShow();
             }
