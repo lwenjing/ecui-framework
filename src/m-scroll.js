@@ -1,20 +1,20 @@
 (function () {
 //{if 0}//
     var core = ecui,
+        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
     function setSelected(select, item) {
-        if (select._cSelected === item) {
-            return;
-        }
-        if (select._cSelected) {
-            select._cSelected.alterClass('-selected');
-            select._cSelected = null;
-        }
-        if (item) {
-            item.alterClass('+selected');
-            select._cSelected = item;
+        if (select._cSelected !== item) {
+            if (select._cSelected) {
+                select._cSelected.alterClass('-selected');
+                select._cSelected = null;
+            }
+            if (item) {
+                item.alterClass('+selected');
+                select._cSelected = item;
+            }
         }
     }
 
@@ -43,8 +43,8 @@
                 el.innerHTML = '<div class="ui-mobile-scroll-mask"></div><div class="ui-mobile-scroll-options">' + ret.join('') + '</div>';
                 optionsEl = el.lastChild;
             } else {
-                el = ecui.dom.insertBefore(
-                    ecui.dom.create(
+                el = dom.insertBefore(
+                    dom.create(
                         {
                             className: el.className,
                             innerHTML: '<div class="ui-mobile-scroll-mask"></div>',
@@ -60,42 +60,17 @@
                 el.appendChild(optionsEl);
             }
 
-            ecui.ui.Control.call(this, el, options);
+            ui.Control.call(this, el, options);
 
             this._nRadius = Math.floor(options.optionSize / 2);
             this.$setBody(optionsEl);
             this.$initItems();
         },
         {
-            Item: ecui.inherits(
-                ecui.ui.Item,
+            Item: core.inherits(
+                ui.Item,
                 'ui-mobile-scroll-item'
             ),
-            $cache: function (style, cacheSize) {
-                ecui.ui.Control.prototype.$cache.call(this, style, cacheSize);
-                this._nItemHeight = this.getItem(0).getMain().offsetHeight;
-                this._nTop = -this._nItemHeight * (this.getLength() - this._nRadius - 1);
-                this._nBottom = this._nItemHeight * this._nRadius;
-                this._nMinTop = this._nTop - this._nItemHeight * 2;
-                this._nMaxBottom = this._nBottom + this._nItemHeight * 2;
-            },
-            $initStructure: function (width, height) {
-                height = this._nItemHeight * (this._nRadius * 2 + 1);
-                var main = this.getMain();
-                main.style.height = height + 'px';
-                main.lastChild.style.top = (this._nBottom + this._nItemHeight) + 'px';
-                ecui.ui.Control.prototype.$initStructure.call(this, width, height);
-            },
-            getX: function () {
-                return 0;
-            },
-            getY: function () {
-                return this.getMain().lastChild.offsetTop;
-            },
-            setPosition: function (x, y) {
-                setSelected(this, this.getItem(Math.round(-y / this._nItemHeight) + this._nRadius));
-                this.getMain().lastChild.style.top = y + 'px';
-            },
             $activate: function (event) {
                 ui.Control.prototype.$activate.call(this, event);
                 if (this._oHandler) {
@@ -103,12 +78,22 @@
                 }
                 core.drag(this, event, {left: 0, right: 0, top: this._nMinTop, bottom: this._nMaxBottom});
             },
+            $alterItems: util.blank,
+            $cache: function (style, cacheSize) {
+                ui.Control.prototype.$cache.call(this, style, cacheSize);
+                this._nItemHeight = this.getItem(0).getMain().offsetHeight;
+                this._nTop = -this._nItemHeight * (this.getLength() - this._nRadius - 1);
+                this._nBottom = this._nItemHeight * this._nRadius;
+                this._nMinTop = this._nTop - this._nItemHeight * 2;
+                this._nMaxBottom = this._nBottom + this._nItemHeight * 2;
+            },
             $deactivate: function (event) {
                 ui.Control.prototype.$deactivate.call(this, event);
 
                 var speed = core.getYSpeed() / 10,
                     control = this,
-                    expectY = Math.round(util.toNumber(control.getMain().lastChild.style.top) + speed),
+                    body = this.getBody(),
+                    expectY = Math.round(util.toNumber(body.style.top) + speed),
                     y;
 
                 if (expectY < this._nTop) {
@@ -123,13 +108,13 @@
                 }
 
                 this._oHandler = util.timer(function () {
-                    this._oHandler = core.effect.grade(
+                    control._oHandler = core.effect.grade(
                         'this.style.top->' + y,
                         1000,
                         {
-                            $: this.getMain().lastChild,
+                            $: body,
                             onstep: function (percent) {
-                                var top = util.toNumber(control.getMain().lastChild.style.top);
+                                var top = util.toNumber(body.style.top);
                                 setSelected(control, control.getItem(Math.round(-top / control._nItemHeight) + control._nRadius));
                                 if (percent === 1 || (expectY !== undefined && Math.abs(top - y) < control._nItemHeight / 2)) {
                                     control._oHandler();
@@ -138,9 +123,9 @@
                                             'this.style.top->' + expectY,
                                             500,
                                             {
-                                                $: control.getMain().lastChild,
+                                                $: body,
                                                 onstep: function () {
-                                                    setSelected(control, control.getItem(Math.round(-util.toNumber(control.getMain().lastChild.style.top) / control._nItemHeight) + control._nRadius));
+                                                    setSelected(control, control.getItem(Math.round(-util.toNumber(body.style.top) / control._nItemHeight) + control._nRadius));
                                                 }
                                             }
                                         );
@@ -152,24 +137,48 @@
                             return 1 - Math.pow(1 - percent, 4);
                         }
                     );
-                }, 0, this);
+                }, 0);
             },
-            setValue: function (value) {
-                value = String(value);
-                for (var i = 0, items = this.getItems(); i < items.length; i++) {
-                    if (items[i].getContent() === value) {
-                        setSelected(this, items[i]);
-                        this.getMain().scrollTop = this._nItemHeight * (i - this._nRadius);
-                        return;
-                    }
-                }
-                setSelected(this, items[this._nRadius]);
-                this.getMain().scrollTop = 0;
+            $dispose: function () {
+                this._oHandler = null;
+                ui.Control.prototype.$dispose.call(this);
+            },
+            $initStructure: function (width, height) {
+                height = this._nItemHeight * (this._nRadius * 2 + 1);
+                this.getMain().style.height = height + 'px';
+                ui.Control.prototype.$initStructure.call(this, width, height);
+            },
+            $ready: function (options) {
+                ui.Control.prototype.$ready.call(this, options);
+                this.setValue(options.value);
             },
             getValue: function () {
-                return this._cSelected ? this._cSelected.getCOntent() : null;
+                return this._cSelected ? this._cSelected.getContent() : null;
             },
-            $alterItems: util.blank
+            getX: function () {
+                return 0;
+            },
+            getY: function () {
+                return this.getBody().offsetTop;
+            },
+            setPosition: function (x, y) {
+                setSelected(this, this.getItem(Math.round(-y / this._nItemHeight) + this._nRadius));
+                this.getBody().style.top = y + 'px';
+            },
+            setValue: function (value) {
+                if (value !== undefined) {
+                    value = String(value);
+                    for (var i = 0, items = this.getItems(); i < items.length; i++) {
+                        if (items[i].getContent() === value) {
+                            setSelected(this, items[i]);
+                            this.getBody().style.top = this._nBottom - this._nItemHeight * i;
+                            return;
+                        }
+                    }
+                }
+                setSelected(this, null);
+                this.getBody().style.top = (this._nBottom + this._nItemHeight) + 'px';
+            }
         },
         ui.Items
     );
