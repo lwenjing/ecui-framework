@@ -1393,9 +1393,10 @@
                 // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
                 activedControl = undefined;
 
-                core.triggerEvent(control, 'dragstart', event);
-                control.setPosition(x, y);
-                el.style.position = 'absolute';
+                if (core.triggerEvent(control, 'dragstart', event)) {
+                    control.setPosition(x, y);
+                    el.style.position = 'absolute';
+                }
 
                 event.exit();
             }

@@ -235,7 +235,7 @@ _eContainer      - 容器 DOM 元素
              */
             setSelected: function (item) {
                 if ('number' === typeof item) {
-                    item = this.getItems()[item];
+                    item = this.getItem(item);
                 }
 
                 if (this._cSelected !== item) {

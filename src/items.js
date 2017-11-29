@@ -170,6 +170,17 @@ Item/Items - 定义选项操作相关的基本操作。
             },
 
             /**
+             * 获取指定的子选项控件。
+             * @public
+             *
+             * @param {Number} index 子选项控件编号
+             * @return {ecui.ui.Item} 子选项控件
+             */
+            getItem: function (index) {
+                return namedMap[this.getUID()][index] || null;
+            },
+
+            /**
              * 获取全部的子选项控件。
              * @public
              *
@@ -177,6 +188,16 @@ Item/Items - 定义选项操作相关的基本操作。
              */
             getItems: function () {
                 return namedMap[this.getUID()].slice();
+            },
+
+            /**
+             * 获取子选项的数量。
+             * @public
+             *
+             * @return {Number} 子选项数量
+             */
+            getLength: function () {
+                return namedMap[this.getUID()].length;
             },
 
             /**
