@@ -234,7 +234,7 @@ a {
 /*提示框样式*/
 #hintContainer {
     position: fixed;
-    z-index: 100;
+    z-index: 32800;
     top: 50%;
     left: 50%;
 }

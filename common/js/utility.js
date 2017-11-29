@@ -87,7 +87,7 @@
             if (code === 300000) {
                 throw data.msg;
             }
-            window.alert(data.msg);
+            daikuan.showHint('error', data.msg);
         }
         return code;
     };
@@ -190,6 +190,7 @@ daikuan.showHint = function (type, msg) {
         warn: 'warnHint'
     }[type];
     var hintContainer = ecui.$('hintContainer') || ecui.dom.create({id: 'hintContainer'});
+    ecui.dom.removeClass(hintContainer, 'ui-hide');
     hintContainer.innerHTML = ecui.util.stringFormat('<div class="{0}">{1}</div>', className, msg);
     ecui.dom.insertAfter(hintContainer, ecui.dom.last(document.body));
     ecui.util.timer(function () {
