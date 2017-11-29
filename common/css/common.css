@@ -234,19 +234,21 @@ a {
 /*提示框样式*/
 #hintContainer {
     position: fixed;
-    z-index: 32800;
+    z-index: 65555;
     top: 50%;
     left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 #hintContainer > div {
+    min-width: 270px;
+    max-width: 522px;
     padding: 55px 35px;
     background: rgba(43,43,59,0.95);
     border-radius: 4px;
     line-height: 30px;
     color: #FFFFFF;
     font-size: 18px;
-    margin-top: -50%;
-    margin-left: -50%;
     text-align: center;
 }
 #hintContainer .successHint {
