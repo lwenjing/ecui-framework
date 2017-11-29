@@ -326,6 +326,64 @@
                 forward: new Function('$', 'p', 'f', 'i', forwardCodes.join('').slice(5)),
                 reverse: new Function('$', 'p', 'f', 'i', reverseCodes.join('').slice(5))
             };
-        }
+        },
+
+        /**
+         * 渐变处理。
+         * @public
+         *
+         * @param {Function|string} fn 处理渐变的函数或函数体
+         * @param {number} duration 渐变的总时长
+         * @param {Object} options 渐变的参数，一般用于描述渐变的信息
+         * @param {Function} transition 时间线函数
+         * @return {Function} 停止渐变或直接执行渐变到最后
+         */
+        grade: function (fn, duration, options, transition) {
+            if ('string' === typeof fn) {
+                var result = [];
+                fn.split(';').forEach(function (item) {
+                    var list = item.split('->'),
+                        values = new Function('$', 'return [' + list.join(',') + ']').call(options.$, options);
+                    if (values[0] !== values[1] && /-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
+                        var currValue = RegExp['$&'];
+                        if (currValue !== values[1]) {
+                            result.push(list[0] + '=' + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + list[1] + '-(' + currValue + '))*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : ''));
+                        }
+                    }
+                });
+                if (!result.length) {
+                    return;
+                }
+                fn = new Function('p', '$', result.join(';'));
+            }
+
+            var startTime = Date.now(),
+                stop = util.timer(function () {
+                    var currTime = Date.now() - startTime,
+                        percent = transition(currTime / duration);
+                    if (currTime >= duration) {
+                        percent = 1;
+                        stop();
+                    }
+                    fn.call(options.$, percent, options);
+                    if (percent === 1) {
+                        fn = options = transition = null;
+                    }
+                }, -20);
+
+            if ('function' !== typeof transition) {
+                transition = effect.FN_CubicBezier.apply(null, __ECUI__CubicBezier[transition || 'ease'] || transition);
+            }
+
+            return function (flag) {
+                if (fn) {
+                    stop();
+                    if (flag) {
+                        fn.call(options.$, 1, options);
+                    }
+                }
+                fn = options = transition = null;
+            };
+        },
     };
 }());

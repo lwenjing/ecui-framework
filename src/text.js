@@ -107,7 +107,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 var body = this.getBody(),
                     input = this.getInput();
 
-                body.removeChild(this._eInput);
+                body.removeChild(input);
                 if (input.type === 'password') {
                     // 如果输入框是密码框需要直接隐藏，不允许将密码显示在浏览器中
                     var value = '';
@@ -116,7 +116,7 @@ _ePlaceHolder - 为空时的提示信息标签
                     }
                     body.innerHTML = value;
                 } else {
-                    body.innerHTML = util.encodeHTML(this._eInput.value);
+                    body.innerHTML = util.encodeHTML(input.value);
                 }
             },
 
@@ -249,10 +249,10 @@ _ePlaceHolder - 为空时的提示信息标签
             getSelectionEnd: ieVersion ? function () {
                 var range = document.selection.createRange().duplicate();
 
-                range.moveStart('character', -this._eInput.value.length);
+                range.moveStart('character', -this.getInput().value.length);
                 return range.text.length;
             } : function () {
-                return this._eInput.selectionEnd;
+                return this.getInput().selectionEnd;
             },
 
             /**
@@ -263,12 +263,12 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             getSelectionStart: ieVersion ? function () {
                 var range = document.selection.createRange().duplicate(),
-                    length = this._eInput.value.length;
+                    length = this.getInput().value.length;
 
                 range.moveEnd('character', length);
                 return length - range.text.length;
             } : function () {
-                return this._eInput.selectionStart;
+                return this.getInput().selectionStart;
             },
 
             /**
@@ -278,14 +278,14 @@ _ePlaceHolder - 为空时的提示信息标签
              * @param {number} pos 位置索引
              */
             setCaret: ieVersion ? function (pos) {
-                var range = this._eInput.createTextRange();
+                var range = this.getInput().createTextRange();
                 range.collapse();
                 range.select();
                 range.moveStart('character', pos);
                 range.collapse();
                 range.select();
             } : function (pos) {
-                this._eInput.setSelectionRange(pos, pos);
+                this.getInput().setSelectionRange(pos, pos);
             }
         }
     );

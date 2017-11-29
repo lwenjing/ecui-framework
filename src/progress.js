@@ -30,10 +30,6 @@ _nMax    - 进度最大值
         function (el, options) {
             ui.Control.call(this, el, options);
 
-            el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div><div class="' + options.classes.join('-mask ') + '"></div>';
-            this._eText = el.firstChild;
-            this._eMask = el.lastChild;
-
             this._sFormat = options.format;
             this._nMax = options.max || 100;
             this._nValue = options.value || 0;
