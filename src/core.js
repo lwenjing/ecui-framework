@@ -6,14 +6,14 @@
         util = core.util,
         ui = core.ui,
 
+        isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
 //{/if}//
-    var isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
-        scrollHandler,            // 处理IE的DOM滚动事件
+    var scrollHandler,            // 处理IE的DOM滚动事件
         isMobileScroll,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
@@ -383,10 +383,6 @@
 
                 currEnv.x = mouseX + currEnv.targetX - expectX;
                 currEnv.y = mouseY + currEnv.targetY - expectY;
-
-                // 增加对drag时控件mouseover行为的处理
-                x = event.pageX;
-                y = event.pageY;
 
                 event.exit();
             },
@@ -1390,10 +1386,6 @@
                 dragEnv.targetX = x;
                 dragEnv.targetY = y;
 
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
-                el.style.position = 'absolute';
-
                 dragEnv.target = control;
                 dragEnv.actived = activedControl;
                 setEnv(dragEnv);
@@ -1402,6 +1394,9 @@
                 activedControl = undefined;
 
                 core.triggerEvent(control, 'dragstart', event);
+                control.setPosition(x, y);
+                el.style.position = 'absolute';
+
                 event.exit();
             }
         },
@@ -1578,11 +1573,11 @@
         },
 
         getXSpeed: function () {
-            return lastMoveTime + 1000 < Date.now() ? 0 : speedX;
+            return speedX;
         },
 
         getYSpeed: function () {
-            return lastMoveTime + 1000 < Date.now() ? 0 : speedY;
+            return speedY;
         },
 
         /**
@@ -2064,7 +2059,9 @@
                 event.which = event.keyCode || (event.button | 1);
             }
 
-            if (event.type === 'mousemove') {
+            event = new ECUIEvent(event.type, event);
+
+            if (event.type === 'mousemove' || event.type === 'touchmove') {
                 lastClick = null;
                 if (currEnv.type === 'drag') {
                     lastMoveTime = 1000 / (Date.now() - lastMoveTime);
@@ -2072,9 +2069,11 @@
                     speedY = (event.pageY - mouseY) * lastMoveTime;
                     lastMoveTime = Date.now();
                 }
+            } else if (event.type !== 'mouseup' && event.type !== 'touchend') {
+                speedX = 0;
+                speedY = 0;
             }
 
-            event = new ECUIEvent(event.type, event);
             mouseX = event.pageX;
             mouseY = event.pageY;
 

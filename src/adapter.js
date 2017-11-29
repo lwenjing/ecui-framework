@@ -5,6 +5,7 @@ var ecui;
     var //{if 1}//undefined,//{/if}//
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
 
+        isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
@@ -24,6 +25,7 @@ var ecui;
             return document.getElementById(id);
         },
 
+        mobile: isMobile,
         strict: isStrict,
         webkit: isWebkit,
         ie: ieVersion,

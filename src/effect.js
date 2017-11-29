@@ -332,7 +332,7 @@
          * 渐变处理。
          * @public
          *
-         * @param {Function|string} fn 处理渐变的函数或函数体
+         * @param {Function|string} fn 处理渐变的函数或函数体，字符串描述的格式this.scrollTop->20或this.scrollTop->+(20)，后者表示相对增加20,前者表示到达20
          * @param {number} duration 渐变的总时长
          * @param {Object} options 渐变的参数，一般用于描述渐变的信息
          * @param {Function} transition 时间线函数
@@ -344,10 +344,10 @@
                 fn.split(';').forEach(function (item) {
                     var list = item.split('->'),
                         values = new Function('$', 'return [' + list.join(',') + ']').call(options.$, options);
-                    if (values[0] !== values[1] && /-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
+                    if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
                         var currValue = RegExp['$&'];
                         if (currValue !== values[1]) {
-                            result.push(list[0] + '=' + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + list[1] + '-(' + currValue + '))*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : ''));
+                            result.push(list[0] + '=' + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + values[1] + (list[1].slice(0, 2) !== '+(' ? '-(' + currValue + ')' : '') + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : ''));
                         }
                     }
                 });
@@ -360,12 +360,17 @@
             var startTime = Date.now(),
                 stop = util.timer(function () {
                     var currTime = Date.now() - startTime,
-                        percent = transition(currTime / duration);
+                        percent;
                     if (currTime >= duration) {
                         percent = 1;
                         stop();
+                    } else {
+                        percent = transition(currTime / duration);
                     }
                     fn.call(options.$, percent, options);
+                    if (options.onstep) {
+                        options.onstep(percent);
+                    }
                     if (percent === 1) {
                         fn = options = transition = null;
                     }
@@ -380,6 +385,9 @@
                     stop();
                     if (flag) {
                         fn.call(options.$, 1, options);
+                        if (options.onstep) {
+                            options.onstep(1);
+                        }
                     }
                 }
                 fn = options = transition = null;

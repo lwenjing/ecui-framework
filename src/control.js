@@ -42,6 +42,7 @@ $$padding           - 内填充宽度缓存
         ui = core.ui,
         util = core.util,
 
+        isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
@@ -133,7 +134,9 @@ $$padding           - 内填充宽度缓存
              * @param {ECUIEvent} event 事件对象
              */
             $activate: function () {
-                this.alterClass('+active');
+                if (!isMobile) {
+                    this.alterClass('+active');
+                }
             },
 
             /**
@@ -202,7 +205,9 @@ $$padding           - 内填充宽度缓存
              * @param {ECUIEvent} event 事件对象
              */
             $deactivate: function () {
-                this.alterClass('-active');
+                if (!isMobile) {
+                    this.alterClass('-active');
+                }
             },
 
             /**
@@ -369,7 +374,9 @@ $$padding           - 内填充宽度缓存
              * @param {ECUIEvent} event 事件对象
              */
             $mouseout: function () {
-                this.alterClass('-hover');
+                if (!isMobile) {
+                    this.alterClass('-hover');
+                }
             },
 
             /**
@@ -380,7 +387,9 @@ $$padding           - 内填充宽度缓存
              * @param {ECUIEvent} event 事件对象
              */
             $mouseover: function () {
-                this.alterClass('+hover');
+                if (!isMobile) {
+                    this.alterClass('+hover');
+                }
             },
 
             /**
