@@ -49,6 +49,7 @@
     document.write('<script type="text/javascript" src="src/esr.js"></script>');
 
     document.write('<script type="text/javascript" src="src/m-scroll.js"></script>');
+    document.write('<script type="text/javascript" src="src/m-calender.js"></script>');
 //{if 0}//
     document.write('<script type="text/javascript" src="tools/debug.js"></script>');
     if (ieVersion < 9) {

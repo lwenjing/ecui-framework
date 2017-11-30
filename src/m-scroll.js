@@ -26,7 +26,9 @@
                 optionsEl = el;
 
             if (values) {
-                values = values.split(',');
+                if ('string' === typeof values) {
+                    values = values.split(',');
+                }
                 values[0] = +values[0];
                 values[1] = +values[1];
                 if (values[2]) {
