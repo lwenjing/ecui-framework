@@ -89,6 +89,7 @@
                 this._nMinTop = this._nTop - this._nItemHeight * 2;
                 this._nMaxBottom = this._nBottom + this._nItemHeight * 2;
             },
+            $change: util.blank,
             $deactivate: function (event) {
                 ui.Control.prototype.$deactivate.call(this, event);
 
@@ -126,11 +127,16 @@
                                             500,
                                             {
                                                 $: body,
-                                                onstep: function () {
+                                                onstep: function (percent) {
                                                     setSelected(control, control.getItem(Math.round(-util.toNumber(body.style.top) / control._nItemHeight) + control._nRadius));
+                                                    if (percent === 1) {
+                                                        core.triggerEvent(control, 'change', event);
+                                                    }
                                                 }
                                             }
                                         );
+                                    } else {
+                                        core.triggerEvent(control, 'change', event);
                                     }
                                 }
                             }
