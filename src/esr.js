@@ -18,7 +18,8 @@
         currLocation = '',
         checkLeave = true,
         pauseStatus,
-        cssload = {},
+        loadStatus = {},
+        engine = etpl,
         localStorage,
         metaVersion,
         meta;
@@ -252,7 +253,7 @@
         });
 
         core.dispose(el);
-        el.innerHTML = etpl.render(route.view || name, context);
+        el.innerHTML = engine.render(route.view || name, context);
         core.init(el);
 
         el.style.visibility = '';
@@ -504,7 +505,8 @@
                 io.ajax(moduleName + '/' + moduleName + '.html', {
                     onsuccess: function (data) {
                         pauseStatus = false;
-                        etpl.compile(data);
+                        engine = loadStatus[moduleName] = new etpl.Engine();
+                        engine.compile(data);
                         render(name, route);
                     },
                     onerror: function () {
@@ -513,34 +515,37 @@
                 });
             }
 
-            if ('function' === typeof route.view) {
-                if (route.onbeforerender) {
-                    route.onbeforerender(context);
+            var moduleName = name.split('.')[0];
+
+            engine = loadStatus[moduleName];
+
+            if (engine === true) {
+                loadTPL();
+            } else if (engine) {
+                if ('function' === typeof route.view) {
+                    if (route.onbeforerender) {
+                        route.onbeforerender(context);
+                    }
+                    route.view(context);
+                    if (route.onafterrender) {
+                        route.onafterrender(context);
+                    }
+                    autoChildRoute(route);
+                } else if (engine.getRenderer(route.view || name)) {
+                    render(name, route);
                 }
-                route.view(context);
-                if (route.onafterrender) {
-                    route.onafterrender(context);
-                }
-                autoChildRoute(route);
-            } else if (etpl.getRenderer(route.view || name)) {
-                render(name, route);
             } else {
                 pauseStatus = true;
-                var moduleName = name.split('.')[0];
-                if (cssload[moduleName]) {
-                    loadTPL();
-                } else {
-                    io.ajax(moduleName + '/' + moduleName + '.css', {
-                        onsuccess: function (data) {
-                            dom.createStyleSheet(data);
-                            cssload[moduleName] = true;
-                            loadTPL();
-                        },
-                        onerror: function () {
-                            pauseStatus = false;
-                        }
-                    });
-                }
+                io.ajax(moduleName + '/' + moduleName + '.css', {
+                    onsuccess: function (data) {
+                        dom.createStyleSheet(data);
+                        loadStatus[moduleName] = true;
+                        loadTPL();
+                    },
+                    onerror: function () {
+                        pauseStatus = false;
+                    }
+                });
             }
         },
 
@@ -850,7 +855,7 @@
                     renderer.call(this, value[2].length > 1 ? context : data);
                 };
             } else {
-                renderer = value[3].length < 2 ? etpl.compile(control.getContent().replace(/\$([\w.]+)/g, '${$1}')) : etpl.getRenderer(value[3].slice(1));
+                renderer = value[3].length < 2 ? engine.compile(control.getContent().replace(/\$([\w.]+)/g, '${$1}')) : engine.getRenderer(value[3].slice(1));
                 setData = function (data) {
                     core.dispose(this.getBody(), true);
                     this.setContent(renderer(value[2].length > 1 ? context : data));
