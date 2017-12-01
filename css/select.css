@@ -24,6 +24,11 @@
         opacity: 0;
     }
 }
+.ui-select-placeholder {
+    .ui-select-text{
+        color:#C0CCDA;
+    }
+}
 .ui-select-hover {
     border:1px solid #8492a6;
 }
