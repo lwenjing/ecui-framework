@@ -207,9 +207,9 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $remove: function (event) {
-                if (this._cSelected === event.target) {
+                if (this._cSelected === event.child) {
                     var list = this.getItems(),
-                        index = list.indexOf(event.target);
+                        index = list.indexOf(event.child);
 
                     // 跳到被删除项的后一项
                     this.setSelected(index === list.length - 1 ? index - 1 : index + 1);

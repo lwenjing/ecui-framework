@@ -44,7 +44,7 @@ _eRight      - 右侧乐定行的Element元素
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         safariVersion = /(\d+\.\d)(\.\d)?\s+safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
 
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
+        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
     /**
      * 建立锁定行控件。
@@ -430,8 +430,8 @@ _eRight      - 右侧乐定行的Element元素
             };
         }
 
-        for (var i = 0; i < 11; ) {
-            build('$' + eventNames[i++]);
-        }
+        eventNames.forEach(function (item) {
+            build('$' + item);
+        });
     }());
 }());

@@ -46,7 +46,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
 
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
+        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
     /**
      * 初始化单元格。
@@ -993,13 +993,13 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
             ui.Table.prototype.Row.prototype[name] = function (event) {
                 ui.Control.prototype[name].call(this, event);
-                event.target = this;
+                event.row = this;
                 core.triggerEvent(this.getParent(), 'row' + type, event);
             };
 
             ui.Table.prototype.Cell.prototype[name] = function (event) {
                 ui.Control.prototype[name].call(this, event);
-                event.target = this;
+                event.cell = this;
                 core.triggerEvent(this.getParent().getParent(), 'cell' + type, event);
             };
         }

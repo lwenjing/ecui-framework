@@ -373,7 +373,7 @@ _uOptions     - 下拉选择框
              * @override
              */
             $remove: function (event) {
-                if (event.target === this._cSelected) {
+                if (event.child === this._cSelected) {
                     setSelected(this);
                 }
                 ui.InputControl.prototype.$remove.call(this, event);

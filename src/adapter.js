@@ -1116,7 +1116,7 @@ var ecui;
         //{if 1}//ui = core.ui,//{/if}//
         util = core.util;
 
-    //{if 1}//var eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];//{/if}//
+    //{if 1}//var eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];//{/if}//
 
     // 读写特殊的 css 属性操作
     var __ECUI__StyleFixer = {

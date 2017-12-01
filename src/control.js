@@ -55,14 +55,14 @@ _aStatus            - 控件当前的状态集合
         if (parent !== oldParent) {
             if (oldParent) {
                 event = core.createEvent('remove');
-                event.target = control;
+                event.child = control;
                 if (!core.triggerEvent(oldParent, 'remove', event)) {
                     return;
                 }
             }
             if (parent) {
                 event = core.createEvent('append');
-                event.target = control;
+                event.child = control;
                 if (!core.triggerEvent(parent, 'append', event)) {
                     parent = parentElement = null;
                 }

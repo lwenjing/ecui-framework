@@ -10,7 +10,7 @@ Item/Items - 定义选项操作相关的基本操作。
         ui = core.ui,
         util = core.util,
 
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate', 'keydown', 'keypress', 'keyup', 'mousewheel'];
+        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
     var namedMap = {};
 
@@ -38,10 +38,10 @@ Item/Items - 定义选项操作相关的基本操作。
              */
             $append: function (event) {
                 // 检查待新增的控件是否为选项控件
-                if (!(event.target instanceof (this.Item || ui.Item)) || this.$Items.$append.call(this, event.target) === false) {
+                if (!(event.child instanceof (this.Item || ui.Item)) || this.$Items.$append.call(this, event) === false) {
                     return false;
                 }
-                namedMap[this.getUID()].push(event.target);
+                namedMap[this.getUID()].push(event.child);
                 this.alterItems();
             },
 
@@ -87,9 +87,9 @@ Item/Items - 定义选项操作相关的基本操作。
              * @override
              */
             $remove: function (event) {
-                core.$clearState(event.target);
-                this.$Items.$remove.call(this, event.target);
-                util.remove(namedMap[this.getUID()], event.target);
+                core.$clearState(event.child);
+                this.$Items.$remove.call(this, event);
+                util.remove(namedMap[this.getUID()], event.child);
                 this.alterItems();
             },
 
@@ -286,7 +286,7 @@ Item/Items - 定义选项操作相关的基本操作。
                 var parent = this.getParent();
 
                 if (parent) {
-                    event.target = this;
+                    event.item = this;
                     core.triggerEvent(parent, 'item' + name.replace('mouse', ''), event);
                 }
             };
