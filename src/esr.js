@@ -515,9 +515,12 @@
                 });
             }
 
-            if (name) {
+            if ('string' === typeof name) {
                 var moduleName = name.split('.')[0];
                 engine = loadStatus[moduleName];
+            } else {
+                moduleName = '';
+                engine = etpl;
             }
 
             if (engine === true) {
