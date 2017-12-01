@@ -18,7 +18,8 @@
         currLocation = '',
         checkLeave = true,
         pauseStatus,
-        cssload = {},
+        loadStatus = {},
+        engine = etpl,
         localStorage,
         metaVersion,
         meta;
@@ -252,7 +253,7 @@
         });
 
         core.dispose(el);
-        el.innerHTML = etpl.render(route.view || name, context);
+        el.innerHTML = engine.render(route.view || name, context);
         core.init(el);
 
         el.style.visibility = '';
@@ -407,7 +408,21 @@
         getData: function (name) {
             return context[name];
         },
-
+//{if 0}//
+        /**
+         * 加载模板数据。
+         * @public
+         *
+         * @param {string} moduleName 模块名称
+         * @param {string} data 模板数据
+         */
+        loadTPL: function (moduleName, data) {
+            if (!loadStatus[moduleName]) {
+                loadStatus[moduleName] = new etpl.Engine();
+            }
+            loadStatus[moduleName].compile(data);
+        },
+//{/if}//
         /**
          * 获取当前地址。
          * @public
@@ -504,7 +519,8 @@
                 io.ajax(moduleName + '/' + moduleName + '.html', {
                     onsuccess: function (data) {
                         pauseStatus = false;
-                        etpl.compile(data);
+                        engine = loadStatus[moduleName] = new etpl.Engine();
+                        engine.compile(data);
                         render(name, route);
                     },
                     onerror: function () {
@@ -522,18 +538,18 @@
                     route.onafterrender(context);
                 }
                 autoChildRoute(route);
-            } else if (etpl.getRenderer(route.view || name)) {
+            } else if (engine.getRenderer(route.view || name)) {
                 render(name, route);
             } else {
-                pauseStatus = true;
                 var moduleName = name.split('.')[0];
-                if (cssload[moduleName]) {
+                if (loadStatus[moduleName] === true) {
                     loadTPL();
                 } else {
+                    pauseStatus = true;
                     io.ajax(moduleName + '/' + moduleName + '.css', {
                         onsuccess: function (data) {
                             dom.createStyleSheet(data);
-                            cssload[moduleName] = true;
+                            loadStatus[moduleName] = true;
                             loadTPL();
                         },
                         onerror: function () {
@@ -542,81 +558,6 @@
                     });
                 }
             }
-        },
-
-        /**
-         * 设置数据。
-         * @public
-         *
-         * @param {string} name 数据名
-         * @param {Object} value 数据值
-         */
-        setData: function (name, value) {
-            context[name] = value;
-            if (autoRender[name]) {
-                autoRender[name].forEach(function (item) {
-                    item[1].call(item[0], context[name]);
-                });
-            }
-        },
-
-        /**
-         * 设置hash，不会进行真正的跳转。
-         * @public
-         *
-         * @param {string} loc hash名
-         */
-        setLocation: function (loc) {
-            if (loc) {
-                loc = loc.replace(/^#/, '');
-            }
-
-            // 存储当前信息
-            // opera下，相同的hash重复写入会在历史堆栈中重复记录
-            // 所以需要ESR_GET_LOCATION来判断
-            if (esr.getLocation() !== loc) {
-                location.hash = loc;
-            }
-            currLocation = loc;
-        },
-
-        /**
-         * 加载ESR框架。
-         * @public
-         */
-        load: function () {
-            if (window.localStorage) {
-                localStorage = window.localStorage;
-            } else {
-                localStorage = dom.setInput(null, null, 'hidden');
-                localStorage.addBehavior('#default#userData');
-                document.body.appendChild(localStorage);
-                localStorage.getItem = function (key) {
-                    localStorage.load('ecui');
-                    return localStorage.getAttribute(key);
-                };
-                localStorage.setItem = function (key, value) {
-                    localStorage.setAttribute(key, value);
-                    localStorage.save('ecui');
-                };
-            }
-
-            metaVersion = localStorage.getItem('esr_meta_version') || '0';
-            meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
-
-            for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
-                if (el.href.slice(-1) === '#') {
-                    el.href = JAVASCRIPT + ':void(0)';
-                }
-            }
-
-            dom.ready(function () {
-                if (esr.onready) {
-                    callRoute(esr.onready());
-                } else {
-                    init();
-                }
-            });
         },
 
         /**
@@ -827,6 +768,81 @@
             } else {
                 onsuccess();
             }
+        },
+
+        /**
+         * 设置数据。
+         * @public
+         *
+         * @param {string} name 数据名
+         * @param {Object} value 数据值
+         */
+        setData: function (name, value) {
+            context[name] = value;
+            if (autoRender[name]) {
+                autoRender[name].forEach(function (item) {
+                    item[1].call(item[0], context[name]);
+                });
+            }
+        },
+
+        /**
+         * 设置hash，不会进行真正的跳转。
+         * @public
+         *
+         * @param {string} loc hash名
+         */
+        setLocation: function (loc) {
+            if (loc) {
+                loc = loc.replace(/^#/, '');
+            }
+
+            // 存储当前信息
+            // opera下，相同的hash重复写入会在历史堆栈中重复记录
+            // 所以需要ESR_GET_LOCATION来判断
+            if (esr.getLocation() !== loc) {
+                location.hash = loc;
+            }
+            currLocation = loc;
+        },
+
+        /**
+         * 加载ESR框架。
+         * @public
+         */
+        load: function () {
+            if (window.localStorage) {
+                localStorage = window.localStorage;
+            } else {
+                localStorage = dom.setInput(null, null, 'hidden');
+                localStorage.addBehavior('#default#userData');
+                document.body.appendChild(localStorage);
+                localStorage.getItem = function (key) {
+                    localStorage.load('ecui');
+                    return localStorage.getAttribute(key);
+                };
+                localStorage.setItem = function (key, value) {
+                    localStorage.setAttribute(key, value);
+                    localStorage.save('ecui');
+                };
+            }
+
+            metaVersion = localStorage.getItem('esr_meta_version') || '0';
+            meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
+
+            for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
+                if (el.href.slice(-1) === '#') {
+                    el.href = JAVASCRIPT + ':void(0)';
+                }
+            }
+
+            dom.ready(function () {
+                if (esr.onready) {
+                    callRoute(esr.onready());
+                } else {
+                    init();
+                }
+            });
         }
     };
 
@@ -850,7 +866,7 @@
                     renderer.call(this, value[2].length > 1 ? context : data);
                 };
             } else {
-                renderer = value[3].length < 2 ? etpl.compile(control.getContent().replace(/\$([\w.]+)/g, '${$1}')) : etpl.getRenderer(value[3].slice(1));
+                renderer = value[3].length < 2 ? engine.compile(control.getContent().replace(/\$([\w.]+)/g, '${$1}')) : engine.getRenderer(value[3].slice(1));
                 setData = function (data) {
                     core.dispose(this.getBody(), true);
                     this.setContent(renderer(value[2].length > 1 ? context : data));
