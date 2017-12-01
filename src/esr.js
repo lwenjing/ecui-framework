@@ -541,8 +541,18 @@
             } else if (engine.getRenderer(route.view || name)) {
                 render(name, route);
             } else {
-                var moduleName = name.split('.')[0];
-                if (loadStatus[moduleName] === true) {
+                // 如果在当前引擎找不到模板，有可能是子路由切换，也可能是主路由不存在
+                var moduleName = name.split('.')[0],
+                    engine = loadStatus[moduleName];
+
+                if (engine instanceof etpl.Engine) {
+                    if (engine.getRenderer(route.view || name)) {
+                        render(name, route);
+                        return;
+                    }
+                }
+
+                if (engine === true) {
                     loadTPL();
                 } else {
                     pauseStatus = true;
