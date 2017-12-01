@@ -408,21 +408,23 @@
         getData: function (name) {
             return context[name];
         },
-//{if 0}//
+
         /**
-         * 加载模板数据。
+         * 获取模板引擎。
          * @public
          *
-         * @param {string} moduleName 模块名称
-         * @param {string} data 模板数据
+         * @param {string} moduleName 模块名称，如果不指定模块名称使用当前模块
          */
-        loadTPL: function (moduleName, data) {
+        getEngine: function (moduleName) {
+            if (!moduleName) {
+                return engine;
+            }
             if (!loadStatus[moduleName]) {
                 loadStatus[moduleName] = new etpl.Engine();
             }
-            loadStatus[moduleName].compile(data);
+            return loadStatus[moduleName];
         },
-//{/if}//
+
         /**
          * 获取当前地址。
          * @public
