@@ -410,13 +410,17 @@
         },
 //{if 0}//
         /**
-         * 获取当前工作的模板引擎。
+         * 加载模板数据。
          * @public
          *
-         * @return {ETPLEngine} etpl引擎
+         * @param {string} moduleName 模块名称
+         * @param {string} data 模板数据
          */
-        getEngine: function () {
-            return engine;
+        loadTPL: function (moduleName, data) {
+            if (!loadStatus[moduleName]) {
+                loadStatus[moduleName] = new etpl.Engine();
+            }
+            loadStatus[moduleName].compile(data);
         },
 //{/if}//
         /**
