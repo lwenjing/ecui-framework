@@ -36,12 +36,12 @@ Item/Items - 定义选项操作相关的基本操作。
              * 选项组只允许添加选项控件，添加成功后会自动调用 alterItems 方法。
              * @override
              */
-            $append: function (child) {
+            $append: function (event) {
                 // 检查待新增的控件是否为选项控件
-                if (!(child instanceof (this.Item || ui.Item)) || this.$Items.$append.call(this, child) === false) {
+                if (!(event.target instanceof (this.Item || ui.Item)) || this.$Items.$append.call(this, event.target) === false) {
                     return false;
                 }
-                namedMap[this.getUID()].push(child);
+                namedMap[this.getUID()].push(event.target);
                 this.alterItems();
             },
 
@@ -86,10 +86,10 @@ Item/Items - 定义选项操作相关的基本操作。
              * 选项组移除子选项后会自动调用 alterItems 方法。
              * @override
              */
-            $remove: function (child) {
-                core.$clearState(child);
-                this.$Items.$remove.call(this, child);
-                util.remove(namedMap[this.getUID()], child);
+            $remove: function (event) {
+                core.$clearState(event.target);
+                this.$Items.$remove.call(this, event.target);
+                util.remove(namedMap[this.getUID()], event.target);
                 this.alterItems();
             },
 
@@ -286,7 +286,8 @@ Item/Items - 定义选项操作相关的基本操作。
                 var parent = this.getParent();
 
                 if (parent) {
-                    core.triggerEvent(parent, 'item' + name.replace('mouse', ''), event, this);
+                    event.target = this;
+                    core.triggerEvent(parent, 'item' + name.replace('mouse', ''), event);
                 }
             };
         }

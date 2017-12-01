@@ -206,16 +206,16 @@ _eContainer      - 容器 DOM 元素
             /**
              * @override
              */
-            $remove: function (child) {
-                if (this._cSelected === child) {
+            $remove: function (event) {
+                if (this._cSelected === event.target) {
                     var list = this.getItems(),
-                        index = list.indexOf(child);
+                        index = list.indexOf(event.target);
 
                     // 跳到被删除项的后一项
                     this.setSelected(index === list.length - 1 ? index - 1 : index + 1);
                 }
 
-                ui.Control.prototype.$remove.call(this, child);
+                ui.Control.prototype.$remove.call(this, event);
             },
 
             /**

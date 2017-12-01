@@ -993,11 +993,13 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
 
             ui.Table.prototype.Row.prototype[name] = function (event) {
                 ui.Control.prototype[name].call(this, event);
+                event.target = this;
                 core.triggerEvent(this.getParent(), 'row' + type, event);
             };
 
             ui.Table.prototype.Cell.prototype[name] = function (event) {
                 ui.Control.prototype[name].call(this, event);
+                event.target = this;
                 core.triggerEvent(this.getParent().getParent(), 'cell' + type, event);
             };
         }

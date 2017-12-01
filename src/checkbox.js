@@ -173,8 +173,8 @@ _aDependents     - 所有的从属复选框
             /**
              * @override
              */
-            $ready: function (options) {
-                ui.InputControl.prototype.$ready.call(this, options);
+            $ready: function (event) {
+                ui.InputControl.prototype.$ready.call(this, event);
                 if (!this._aDependents.length) {
                     // 如果控件是主复选框，应该直接根据从属复选框的状态来显示自己的状态
                     setStatus(this, this.getInput().checked ? 0 : 1);

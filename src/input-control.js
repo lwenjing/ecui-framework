@@ -315,8 +315,8 @@ _eInput        - INPUT对象
              * 输入重置事件的默认处理。
              * @protected
              */
-            $reset: function () {
-                this.$ready();
+            $reset: function (event) {
+                this.$ready(event);
             },
 
             /**

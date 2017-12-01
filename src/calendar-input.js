@@ -23,10 +23,10 @@ _uCalendar     - 日历控件
                 /**
                  * @override
                  */
-                $dateclick: function (event, date) {
-                    ui.Calendar.prototype.$dateclick.call(this, event, date);
+                $dateclick: function (event) {
+                    ui.Calendar.prototype.$dateclick.call(this, event);
                     var parent = this.getParent();
-                    parent.setValue(date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate());
+                    parent.setValue(event.date.getFullYear() + '-' + (event.date.getMonth() + 1) + '-' + event.date.getDate());
                     core.triggerEvent(parent, 'input', event);
                     this.hide();
                 },

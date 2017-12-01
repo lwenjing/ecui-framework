@@ -78,16 +78,21 @@
                 if (this._oHandler) {
                     this._oHandler();
                 }
-                core.drag(this, event, {left: 0, right: 0, top: this._nMinTop, bottom: this._nMaxBottom});
+                core.drag(this, event, {x: 0, y: this.getBody().offsetTop, left: 0, right: 0, top: this._nMinTop, bottom: this._nMaxBottom});
             },
-            $alterItems: util.blank,
-            $cache: function (style, cacheSize) {
-                ui.Control.prototype.$cache.call(this, style, cacheSize);
-                this._nItemHeight = this.getItem(0).getMain().offsetHeight;
+            $alterItems: function () {
                 this._nTop = -this._nItemHeight * (this.getLength() - this._nRadius - 1);
                 this._nBottom = this._nItemHeight * this._nRadius;
                 this._nMinTop = this._nTop - this._nItemHeight * 2;
                 this._nMaxBottom = this._nBottom + this._nItemHeight * 2;
+                if (this._cSelected && !this._cSelected.getParent()) {
+                    this.getBody().style.top = this._nTop + 'px';
+                    setSelected(this, this.getItems().pop());
+                }
+            },
+            $cache: function (style, cacheSize) {
+                ui.Control.prototype.$cache.call(this, style, cacheSize);
+                this._nItemHeight = this.getItem(0).getMain().offsetHeight;
             },
             $change: util.blank,
             $deactivate: function (event) {
@@ -151,27 +156,27 @@
                 this._oHandler = null;
                 ui.Control.prototype.$dispose.call(this);
             },
+            $dragmove: function (event) {
+                ui.Control.prototype.$dragmove.call(this, event);
+                setSelected(this, this.getItem(Math.round(-event.y / this._nItemHeight) + this._nRadius));
+                this.getBody().style.top = event.y + 'px';
+                return false;
+            },
+            $dragstart: function (event) {
+                ui.Control.prototype.$dragstart.call(this, event);
+                return false;
+            },
             $initStructure: function (width, height) {
                 height = this._nItemHeight * (this._nRadius * 2 + 1);
                 this.getMain().style.height = height + 'px';
                 ui.Control.prototype.$initStructure.call(this, width, height);
             },
-            $ready: function (options) {
-                ui.Control.prototype.$ready.call(this, options);
-                this.setValue(options.value);
+            $ready: function (event) {
+                ui.Control.prototype.init.call(this, event);
+                this.setValue(event.options.value);
             },
             getValue: function () {
                 return this._cSelected ? this._cSelected.getContent() : null;
-            },
-            getX: function () {
-                return 0;
-            },
-            getY: function () {
-                return this.getBody().offsetTop;
-            },
-            setPosition: function (x, y) {
-                setSelected(this, this.getItem(Math.round(-y / this._nItemHeight) + this._nRadius));
-                this.getBody().style.top = y + 'px';
             },
             setValue: function (value) {
                 if (value !== undefined) {

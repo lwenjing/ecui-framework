@@ -372,13 +372,14 @@
                 var target = currEnv.target,
                     // 计算期待移到的位置
                     expectX = currEnv.targetX + mouseX - currEnv.x,
-                    expectY = currEnv.targetY + mouseY - currEnv.y,
-                    // 计算实际允许移到的位置
-                    x = Math.min(Math.max(expectX, currEnv.left), currEnv.right),
-                    y = Math.min(Math.max(expectY, currEnv.top), currEnv.bottom);
+                    expectY = currEnv.targetY + mouseY - currEnv.y;
 
-                if (core.triggerEvent(target, 'dragmove', event, x, y)) {
-                    target.setPosition(x, y);
+                // 计算实际允许移到的位置
+                event.x = Math.min(Math.max(expectX, currEnv.left), currEnv.right);
+                event.y = Math.min(Math.max(expectY, currEnv.top), currEnv.bottom);
+
+                if (core.triggerEvent(target, 'dragmove', event)) {
+                    target.setPosition(event.x, event.y);
                 }
 
                 currEnv.x = mouseX + currEnv.targetX - expectX;
@@ -1257,6 +1258,7 @@
          * 创建一个 ECUI 事件对象。
          * @public
          *
+         * @param {String} type 对象类型
          * @return {ECUIEvent} ECUI 事件对象
          */
         createEvent: function (type) {
@@ -1351,6 +1353,8 @@
         /**
          * 将指定的 ECUI 控件 设置为拖拽状态。
          * 只有在鼠标左键按下时，才允许调用 drag 方法设置待拖拽的 {'controls'|menu}，在拖拽操作过程中，将依次触发 ondragstart、ondragmove 与 ondragend 事件。range 参数支持的属性如下：
+         * x      {number} 初始的x坐标
+         * y      {number} 初始的y坐标
          * top    {number} 控件允许拖拽到的最小Y轴坐标
          * right  {number} 控件允许拖拽到的最大X轴坐标
          * bottom {number} 控件允许拖拽到的最大Y轴坐标
@@ -1367,8 +1371,8 @@
                 var el = control.getOuter(),
                     parent = el.offsetParent,
                     style = dom.getStyle(parent),
-                    x = control.getX(),
-                    y = control.getY();
+                    x = options.x !== undefined ? options.x : control.getX(),
+                    y = options.y !== undefined ? options.y : control.getY();
 
                 // 拖拽范围默认不超出上级元素区域
                 util.extend(

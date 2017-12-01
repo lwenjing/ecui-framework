@@ -120,11 +120,11 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                      * @override
                      */
                     $click: function (event) {
-                        var parent = this.getParent(),
-                            date;
+                        var parent = this.getParent();
 
-                        if (core.triggerEvent(parent, 'dateclick', event, date = new Date(parent._nYear, parent._nMonth, this._nDay))) {
-                            parent._oDate = date;
+                        event.date = new Date(parent._nYear, parent._nMonth, this._nDay);
+                        if (core.triggerEvent(parent, 'dateclick', event)) {
+                            parent._oDate = event.date;
                             setSelected(parent, this);
                         }
                     },
@@ -158,8 +158,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             /**
              * @override
              */
-            $ready: function (options) {
-                ui.Control.prototype.$ready.call(this, options);
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event);
                 this.setView(this._oDate.getFullYear(), this._oDate.getMonth() + 1);
             },
 

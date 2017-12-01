@@ -372,11 +372,11 @@ _uOptions     - 下拉选择框
              * 下拉框移除子选项时，如果选项被选中，需要先取消选中。
              * @override
              */
-            $remove: function (item) {
-                if (item === this._cSelected) {
+            $remove: function (event) {
+                if (event.target === this._cSelected) {
                     setSelected(this);
                 }
-                ui.InputControl.prototype.$remove.call(this, item);
+                ui.InputControl.prototype.$remove.call(this, event);
             },
 
             /**

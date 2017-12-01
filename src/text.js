@@ -207,35 +207,29 @@ _ePlaceHolder - 为空时的提示信息标签
             $validate: function () {
                 ui.InputControl.prototype.$validate.call(this);
 
-                var err = {},
-                    value = this.getValue(),
+                var value = this.getValue(),
                     length = value.length,
                     result = true;
 
                 value = +value;
                 if (this._nMinLength > length) {
-                    err.minLength = this._nMinLength;
                     result = false;
                 }
                 if (this._nMaxLength < length) {
-                    err.maxLength = this._nMaxLength;
                     result = false;
                 }
                 if (this._nMinValue > value) {
-                    err.minValue = this._nMinValue;
                     result = false;
                 }
                 if (this._nMaxValue < value) {
-                    err.maxValue = this._nMaxValue;
                     result = false;
                 }
                 if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
-                    err.format = true;
                     result = false;
                 }
 
                 if (!result) {
-                    core.triggerEvent(this, 'error', null, [err]);
+                    core.triggerEvent(this, 'error');
                 }
                 return result;
             },
