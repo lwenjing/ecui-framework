@@ -14,6 +14,7 @@
             this._uYear = core.$fastCreate(this.Scroll, list[0], this, {values: [2000, 2040], optionSize: 7});
             this._uMonth = core.$fastCreate(this.Scroll, list[1], this, {values: [1, 12], optionSize: 7});
             this._uDate = core.$fastCreate(this.Scroll, list[2], this, {values: [1, 31], optionSize: 7});
+            this._aItems = this._uDate.getItems();
         },
         {
             Scroll: core.inherits(
@@ -26,8 +27,20 @@
                             var year = parent._uYear.getValue(),
                                 month = parent._uMonth.getValue();
                             if (year && month) {
-                                var date = new Date(year, month, 0);
-                                
+                                parent._uDate.preventAlterItems();
+                                var days = new Date(year, month, 0).getDate(),
+                                    oldDays = parent._uDate.getLength();
+                                if (days < oldDays) {
+                                    for (; days < oldDays; days++) {
+                                        parent._uDate.remove(parent._aItems[days]);
+                                    }
+                                } else if (days > oldDays) {
+                                    for (; oldDays < days; oldDays++) {
+                                        parent._uDate.add(parent._aItems[oldDays]);
+                                    }
+                                }
+                                parent._uDate.premitAlterItems();
+                                parent._uDate.$alterItems();
                             }
                         }
                     }
