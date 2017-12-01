@@ -408,7 +408,17 @@
         getData: function (name) {
             return context[name];
         },
-
+//{if 0}//
+        /**
+         * 获取当前工作的模板引擎。
+         * @public
+         *
+         * @return {ETPLEngine} etpl引擎
+         */
+        getEngine: function () {
+            return engine;
+        },
+//{/if}//
         /**
          * 获取当前地址。
          * @public
@@ -551,81 +561,6 @@
                     }
                 });
             }
-        },
-
-        /**
-         * 设置数据。
-         * @public
-         *
-         * @param {string} name 数据名
-         * @param {Object} value 数据值
-         */
-        setData: function (name, value) {
-            context[name] = value;
-            if (autoRender[name]) {
-                autoRender[name].forEach(function (item) {
-                    item[1].call(item[0], context[name]);
-                });
-            }
-        },
-
-        /**
-         * 设置hash，不会进行真正的跳转。
-         * @public
-         *
-         * @param {string} loc hash名
-         */
-        setLocation: function (loc) {
-            if (loc) {
-                loc = loc.replace(/^#/, '');
-            }
-
-            // 存储当前信息
-            // opera下，相同的hash重复写入会在历史堆栈中重复记录
-            // 所以需要ESR_GET_LOCATION来判断
-            if (esr.getLocation() !== loc) {
-                location.hash = loc;
-            }
-            currLocation = loc;
-        },
-
-        /**
-         * 加载ESR框架。
-         * @public
-         */
-        load: function () {
-            if (window.localStorage) {
-                localStorage = window.localStorage;
-            } else {
-                localStorage = dom.setInput(null, null, 'hidden');
-                localStorage.addBehavior('#default#userData');
-                document.body.appendChild(localStorage);
-                localStorage.getItem = function (key) {
-                    localStorage.load('ecui');
-                    return localStorage.getAttribute(key);
-                };
-                localStorage.setItem = function (key, value) {
-                    localStorage.setAttribute(key, value);
-                    localStorage.save('ecui');
-                };
-            }
-
-            metaVersion = localStorage.getItem('esr_meta_version') || '0';
-            meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
-
-            for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
-                if (el.href.slice(-1) === '#') {
-                    el.href = JAVASCRIPT + ':void(0)';
-                }
-            }
-
-            dom.ready(function () {
-                if (esr.onready) {
-                    callRoute(esr.onready());
-                } else {
-                    init();
-                }
-            });
         },
 
         /**
@@ -836,6 +771,81 @@
             } else {
                 onsuccess();
             }
+        },
+
+        /**
+         * 设置数据。
+         * @public
+         *
+         * @param {string} name 数据名
+         * @param {Object} value 数据值
+         */
+        setData: function (name, value) {
+            context[name] = value;
+            if (autoRender[name]) {
+                autoRender[name].forEach(function (item) {
+                    item[1].call(item[0], context[name]);
+                });
+            }
+        },
+
+        /**
+         * 设置hash，不会进行真正的跳转。
+         * @public
+         *
+         * @param {string} loc hash名
+         */
+        setLocation: function (loc) {
+            if (loc) {
+                loc = loc.replace(/^#/, '');
+            }
+
+            // 存储当前信息
+            // opera下，相同的hash重复写入会在历史堆栈中重复记录
+            // 所以需要ESR_GET_LOCATION来判断
+            if (esr.getLocation() !== loc) {
+                location.hash = loc;
+            }
+            currLocation = loc;
+        },
+
+        /**
+         * 加载ESR框架。
+         * @public
+         */
+        load: function () {
+            if (window.localStorage) {
+                localStorage = window.localStorage;
+            } else {
+                localStorage = dom.setInput(null, null, 'hidden');
+                localStorage.addBehavior('#default#userData');
+                document.body.appendChild(localStorage);
+                localStorage.getItem = function (key) {
+                    localStorage.load('ecui');
+                    return localStorage.getAttribute(key);
+                };
+                localStorage.setItem = function (key, value) {
+                    localStorage.setAttribute(key, value);
+                    localStorage.save('ecui');
+                };
+            }
+
+            metaVersion = localStorage.getItem('esr_meta_version') || '0';
+            meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
+
+            for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
+                if (el.href.slice(-1) === '#') {
+                    el.href = JAVASCRIPT + ':void(0)';
+                }
+            }
+
+            dom.ready(function () {
+                if (esr.onready) {
+                    callRoute(esr.onready());
+                } else {
+                    init();
+                }
+            });
         }
     };
 
