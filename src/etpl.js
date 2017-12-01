@@ -1219,7 +1219,7 @@
      * @return {function(Object):string} renderer函数
      */
     Engine.prototype.getRenderer = function (name) {
-        var target = this.targets[name];
+        var target = this.targets[name] || etpl.targets[name];
         if (target) {
             return target.getRenderer();
         }
