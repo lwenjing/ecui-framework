@@ -529,41 +529,36 @@
                 });
             }
 
-            if ('string' === typeof name) {
+            if ('function' === typeof route.view) {
+                if (route.onbeforerender) {
+                    route.onbeforerender(context);
+                }
+                route.view(context);
+                if (route.onafterrender) {
+                    route.onafterrender(context);
+                }
+                autoChildRoute(route);
+            } else if (engine.getRenderer(route.view || name)) {
+                render(name, route);
+            } else {
                 var moduleName = name.split('.')[0];
                 engine = loadStatus[moduleName];
-            } else {
-                moduleName = '';
-                engine = etpl;
-            }
 
-            if (engine === true) {
-                loadTPL();
-            } else if (engine) {
-                if ('function' === typeof route.view) {
-                    if (route.onbeforerender) {
-                        route.onbeforerender(context);
-                    }
-                    route.view(context);
-                    if (route.onafterrender) {
-                        route.onafterrender(context);
-                    }
-                    autoChildRoute(route);
-                } else if (engine.getRenderer(route.view || name)) {
-                    render(name, route);
+                if (engine === true) {
+                    loadTPL();
+                } else {
+                    pauseStatus = true;
+                    io.ajax(moduleName + '/' + moduleName + '.css', {
+                        onsuccess: function (data) {
+                            dom.createStyleSheet(data);
+                            loadStatus[moduleName] = true;
+                            loadTPL();
+                        },
+                        onerror: function () {
+                            pauseStatus = false;
+                        }
+                    });
                 }
-            } else {
-                pauseStatus = true;
-                io.ajax(moduleName + '/' + moduleName + '.css', {
-                    onsuccess: function (data) {
-                        dom.createStyleSheet(data);
-                        loadStatus[moduleName] = true;
-                        loadTPL();
-                    },
-                    onerror: function () {
-                        pauseStatus = false;
-                    }
-                });
             }
         },
 
