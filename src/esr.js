@@ -529,6 +529,13 @@
                 });
             }
 
+            if ('string' === typeof name) {
+                var moduleName = name.split('.')[0];
+                engine = loadStatus[moduleName];
+            } else {
+                engine = etpl;
+            }
+
             if ('function' === typeof route.view) {
                 if (route.onbeforerender) {
                     route.onbeforerender(context);
@@ -538,27 +545,22 @@
                     route.onafterrender(context);
                 }
                 autoChildRoute(route);
-            } else if (engine.getRenderer(route.view || name)) {
+            } else if (engine === true) {
+                loadTPL();
+            } else if (engine && engine.getRenderer(route.view || name)) {
                 render(name, route);
             } else {
-                var moduleName = name.split('.')[0];
-                engine = loadStatus[moduleName];
-
-                if (engine === true) {
-                    loadTPL();
-                } else {
-                    pauseStatus = true;
-                    io.ajax(moduleName + '/' + moduleName + '.css', {
-                        onsuccess: function (data) {
-                            dom.createStyleSheet(data);
-                            loadStatus[moduleName] = true;
-                            loadTPL();
-                        },
-                        onerror: function () {
-                            pauseStatus = false;
-                        }
-                    });
-                }
+                pauseStatus = true;
+                io.ajax(moduleName + '/' + moduleName + '.css', {
+                    onsuccess: function (data) {
+                        dom.createStyleSheet(data);
+                        loadStatus[moduleName] = true;
+                        loadTPL();
+                    },
+                    onerror: function () {
+                        pauseStatus = false;
+                    }
+                });
             }
         },
 
