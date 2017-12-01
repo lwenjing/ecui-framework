@@ -515,9 +515,10 @@
                 });
             }
 
-            var moduleName = name.split('.')[0];
-
-            engine = loadStatus[moduleName];
+            if (name) {
+                var moduleName = name.split('.')[0];
+                engine = loadStatus[moduleName];
+            }
 
             if (engine === true) {
                 loadTPL();

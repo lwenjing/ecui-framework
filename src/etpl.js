@@ -1250,7 +1250,9 @@
      * @param {Function} filter 过滤函数
      */
     Engine.prototype.addFilter = function (name, filter) {
-        if ('function' === typeof filter) {
+        if (etpl === this) {
+            DEFAULT_FILTERS[name] = filter;
+        } else {
             this.filters[name] = filter;
         }
     };
