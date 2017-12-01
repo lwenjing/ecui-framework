@@ -125,9 +125,13 @@ cities - 地区联动下拉框控件。
 
                 this.getSelect(0).setValue(value.slice(0, 2) + '0000');
                 core.triggerEvent(this.getSelect(0), 'change');
+
+                if (value.slice(2) === '0000') {
+                    return;
+                }
                 this.getSelect(1).setValue(value.slice(0, 4) + '00');
 
-                if (options.multi === '3') {
+                if (options.multi === '3' && value.slice(4) !== '00') {
                     core.triggerEvent(this.getSelect(1), 'change');
                     this.getSelect(2).setValue(value);
                 }
@@ -146,10 +150,15 @@ cities - 地区联动下拉框控件。
             setValue: function (val) {
                 this.getSelect(0).setValue(val.slice(0, 2) + '0000');
                 core.triggerEvent(this.getSelect(0), 'change');
+                if (val.slice(2) === '0000') {
+                    return;
+                }
                 this.getSelect(1).setValue(val.slice(0, 4) + '00');
                 if (this.getSelect(2)) {
                     core.triggerEvent(this.getSelect(1), 'change');
-                    this.getSelect(2).setValue(val);
+                    if (val.slice(4) !== '00') {
+                        this.getSelect(2).setValue(val);
+                    }
                 }
             }
         }
