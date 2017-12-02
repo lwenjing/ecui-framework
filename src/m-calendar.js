@@ -4,9 +4,9 @@
         dom = core.dom,
         ui = core.ui;
 //{/if}//
-    ui.MCalender = core.inherits(
+    ui.MCalendar = core.inherits(
         ui.Control,
-        'ui-mobile-calender',
+        'ui-mobile-calendar',
         function (el, options) {
             el.innerHTML = '<div class="' + ui.MScroll.CLASS + 'ui-mobile-calender-year"></div><div class="' + ui.MScroll.CLASS + 'ui-mobile-calender-month"></div><div class="' + ui.MScroll.CLASS + 'ui-mobile-calender-date"></div>';
             ui.Control.call(this, el, options);
