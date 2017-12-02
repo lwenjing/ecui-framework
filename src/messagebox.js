@@ -1,5 +1,5 @@
 /*
-MessageBox - 消息框功能。
+模拟系统消息框。
 */
 (function () {
 //{if 0}//

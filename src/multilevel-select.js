@@ -1,14 +1,11 @@
 /*
-multilevel-select - 多级联动下拉框控件。
-多级联动下拉框控件，继承自基础控件，内部包含的下拉框能够对指定的数据集合进行多级联动。
-
-多级联动下拉框控件直接HTML初始化的例子:
+@example
 <div ui="type:multilevel-select">
     <select name="province"></select>
     <select name="city"></select>
 </div>
 
-属性
+@fields
 _aSelect - 全部的下拉框控件列表
 */
 //{if 0}//
@@ -18,10 +15,8 @@ _aSelect - 全部的下拉框控件列表
         util = core.util;
 //{/if}//
     /**
-     * 初始化多级联动下拉框控件。
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 多级联动下拉框控件。
+     * @control
      */
     ui.MultilevelSelect = core.inherits(
         ui.Control,
@@ -36,15 +31,15 @@ _aSelect - 全部的下拉框控件列表
         },
         {
             /**
-             * 控件的下拉框部件。
-             * @public
+             * 下拉框部件。
+             * @unit
              */
             Select: core.inherits(
                 ui.Select,
                 {
                     /**
-                     * 控件的选项部件。
-                     * @public
+                     * 选项部件。
+                     * @unit
                      */
                     Item: core.inherits(
                         ui.Select.prototype.Item,
@@ -85,10 +80,8 @@ _aSelect - 全部的下拉框控件列表
             ),
 
             /**
-             * 数据变化时的默认处理。
-             * @public
-             *
-             * @param {ECUIEvent} event 时间对象
+             * 选项变化事件。
+             * @event
              */
             $change: util.blank,
 

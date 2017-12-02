@@ -1,8 +1,5 @@
 /*
-Text - 定义文本输入数据的基本操作。
-文本输入框控件，继承自输入框控件，允许对输入的数据内容格式进行限制。
-
-文本输入框控件直接HTML初始化的例子:
+@example
 <input ui="type:text" name="test" />
 或:
 <div ui="type:text;name:test;value:test">
@@ -10,7 +7,7 @@ Text - 定义文本输入数据的基本操作。
     <input name="test" value="test" />
 </div>
 
-属性
+@fields
 _bTrim        - 字符串是否需要过滤两端空白
 _nMinLength   - 允许提将近最小长度
 _nMaxLength   - 允许提交的最大长度
@@ -30,15 +27,14 @@ _ePlaceHolder - 为空时的提示信息标签
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
-     * 初始化格式化输入框控件。
-     * options 对象支持的属性如下：
-     * trim 是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
-     * len [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)长度
-     * num [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)值
-     * regexp 正则表达式，自动在两端添加^与$
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * 文本输入框控件。
+     * 扩展 InputELement 标签的功能，提供对低版本 IE 的 placeholder 的兼容。
+     * options 属性：
+     * trim    是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
+     * len     [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)长度
+     * num     [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)值
+     * regexp  正则表达式，自动在两端添加^与$
+     * @control
      */
     ui.Text = core.inherits(
         ui.InputControl,

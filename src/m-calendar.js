@@ -40,7 +40,7 @@
                                     }
                                 }
                                 parent._uDate.premitAlterItems();
-                                parent._uDate.$alterItems();
+                                parent._uDate.alterItems();
                             }
                         }
                     }

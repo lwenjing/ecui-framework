@@ -1,3 +1,6 @@
+/*
+ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功能。
+*/
 (function () {
 //{if 0}//
     var core = ecui,

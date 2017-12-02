@@ -1,11 +1,8 @@
 /*
-MonthView - 定义日历视图的基本操作。
-日历视图控件，继承自基础控件，不包含年/月/日的快速选择与切换，如果需要实现这些功能，请将下拉框(选择月份)、输入框(输入年份)等组合使用建立新的控件或直接在页面上布局并调用接口。
-
-日历视图控件直接HTML初始化的例子:
+@example
 <div ui="type:month-view;year:2009;month:11"></div>
 
-属性
+@fields
 _bExtra     - 扩展的日期是否响应事件
 _nYear      - 年份
 _nMonth     - 月份(0-11)
@@ -14,8 +11,6 @@ _oBegin     - 开始日期
 _oEnd       - 结束日期
 _oDate      - 当前选择日期
 _cSelected  - 当前选择的日历单元格
-
-子控件属性
 _nDay       - 从本月1号开始计算的天数，如果是上个月，是负数，如果是下个月，会大于当月最大的天数
 */
 (function () {
@@ -60,17 +55,16 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
     }
 
     /**
-     * 初始化日历控件。
-     * options 对象支持的属性如下：
-     * year    日历控件的年份
-     * month   日历控件的月份(1-12)
+     * 月视图控件。
+     * 提供指定月份的日历信息。
+     * options 属性：
+     * year    年份
+     * month   月份(1-12)
      * begin   开始日期，小于这个日期的日历单元格会被disabled
      * end     结束日期，大于这个日期的日历单元格会被disabled
      * date    初始选中的日期，默认是今日
      * extra   扩展的日期是否响应事件，默认为enable，如果需要响应事件设置成disable
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * @control
      */
     ui.MonthView = core.inherits(
         ui.Control,
@@ -107,10 +101,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             WEEKNAMES: ['一', '二', '三', '四', '五', '六', '日'],
 
             /**
-             * 初始化日历控件的单元格内容部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 日期部件。
+             * @unit
              */
             Date: core.inherits(
                 ui.Control,
@@ -142,16 +134,16 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             ),
 
             /**
-             * @override
+             * 日期选择改变事件。
+             * @event
              */
             $change: util.blank,
 
             /**
-             * 日期点击事件默认处理。
-             * @public
-             *
-             * @param {Event} event 点击事件
-             * @param {Date} date 日期对象
+             * 日期点击事件。
+             * event 属性
+             * date  点击的日期
+             * @event
              */
             $dateclick: util.blank,
 

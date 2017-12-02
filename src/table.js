@@ -1,6 +1,6 @@
 /*
 Table - 定义由行列构成的表格的基本操作。
-表格控件，继承自截面控件，对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。
+表格控件，继承自截面控件，
 
 表格控件直接HTML初始化的例子:
 <!-- 如果需要滚动条，请设置div的width样式到合适的值，并且在div外部再包一个div显示滚动条 -->
@@ -93,6 +93,12 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         }
     }
 
+    /**
+     * 表格控件恢复一行。
+     * @private
+     *
+     * @param {ecui.ui.Table.Row} row 行控件
+     */
     function resizeRow(row) {
         row._aElements.forEach(function (item) {
             item.style.width = '';
@@ -117,12 +123,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         };
 
     /**
-     * 初始化表格控件。
-     * options 对象支持的属性如下：
+     * 表格控件。
+     * 对基本的 TableElement 功能进行了扩展，表头固定，不会随表格的垂直滚动条滚动而滚动，在行列滚动时，支持整行整列移动，允许直接对表格的数据进行增加/删除/修改操作。
+     * options 属性：
      * head-float     表头允许飘浮，默认不允许
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * @control
      */
     ui.Table = core.inherits(
         ui.Control,
@@ -259,10 +264,8 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
         },
         {
             /**
-             * 初始化表格控件的单元格部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 单元格部件。
+             * @unit
              */
             Cell: core.inherits(
                 ui.Control,
@@ -285,14 +288,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             ),
 
             /**
-             * 初始化表格控件的列部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 列部件。
+             * @unit
              */
             HCell: core.inherits(
                 ui.Control,
-                'ui-table-hcell',
                 {
                     /**
                      * @override
@@ -394,14 +394,11 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             ),
 
             /**
-             * 初始化表格控件的行部件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 行部件。
+             * @unit
              */
             Row: core.inherits(
                 ui.Control,
-                'ui-table-row',
                 {
                     /**
                      * @override
@@ -985,27 +982,21 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
     );
 
     // 初始化事件转发信息
-    (function () {
-        function build(name) {
-            var type = name.replace('mouse', '');
+    eventNames.slice(0, 7).forEach(function (item) {
+        var type = item.replace('mouse', '');
 
-            name = '$' + name;
+        item = '$' + item;
 
-            ui.Table.prototype.Row.prototype[name] = function (event) {
-                ui.Control.prototype[name].call(this, event);
-                event.row = this;
-                core.triggerEvent(this.getParent(), 'row' + type, event);
-            };
+        ui.Table.prototype.Row.prototype[item] = function (event) {
+            ui.Control.prototype[item].call(this, event);
+            event.row = this;
+            core.triggerEvent(this.getParent(), 'row' + type, event);
+        };
 
-            ui.Table.prototype.Cell.prototype[name] = function (event) {
-                ui.Control.prototype[name].call(this, event);
-                event.cell = this;
-                core.triggerEvent(this.getParent().getParent(), 'cell' + type, event);
-            };
-        }
-
-        for (var i = 0; i < 7; ) {
-            build(eventNames[i++]);
-        }
-    }());
+        ui.Table.prototype.Cell.prototype[item] = function (event) {
+            ui.Control.prototype[item].call(this, event);
+            event.cell = this;
+            core.triggerEvent(this.getParent().getParent(), 'cell' + type, event);
+        };
+    });
 }());

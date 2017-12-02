@@ -1,8 +1,5 @@
 /*
-LockedTable - 定义允许左右锁定若干列显示的高级表格的基本操作。
-允许锁定左右两列的高级表格控件，继承自表格控件，内部包含两个部件——锁定的表头区(基础控件)与锁定的行内容区(基础控件)。
-
-锁定列高级表格控件直接HTML初始化的例子:
+@example
 <div ui="type:locked-table;left-lock:2;right-lock:1">
     <table>
         <!-- 当前节点的列定义，如果有特殊格式，需要使用width样式 -->
@@ -23,13 +20,11 @@ LockedTable - 定义允许左右锁定若干列显示的高级表格的基本操
     </table>
 </div>
 
-属性
+@fields
 _nLeft       - 最左部未锁定列的序号
 _nRight      - 最右部未锁定列的后续序号，即未锁定的列序号+1
 _uLockedHead - 锁定的表头区
 _uLockedMain - 锁定的行内容区
-
-表格行与锁定行属性
 _eLeft       - 左侧锁定行的Element元素
 _eRight      - 右侧乐定行的Element元素
 */
@@ -112,13 +107,12 @@ _eRight      - 右侧乐定行的Element元素
     }
 
     /**
-     * 初始化高级表格控件。
-     * options 对象支持的属性如下：
+     * 锁定式表格控件。
+     * 允许锁定左右两列的高级表格控件。
+     * options 属性：
      * left-lock  左边需要锁定的列数
      * right-lock 右边需要锁定的列数
-     * @public
-     *
-     * @param {Object} options 初始化选项
+     * @control
      */
     ui.LockedTable = core.inherits(
         ui.Table,
@@ -177,10 +171,8 @@ _eRight      - 右侧乐定行的Element元素
         },
         {
             /**
-             * 初始化高级表格行控件。
-             * @public
-             *
-             * @param {Object} options 初始化选项
+             * 行部件。
+             * @unit
              */
             Row: core.inherits(
                 ui.Table.prototype.Row,
@@ -419,19 +411,11 @@ _eRight      - 右侧乐定行的Element元素
     /**
      * 初始化需要执行关联控制的行控件鼠标事件的默认处理。
      * 行控件鼠标事件发生时，需要通知关联的行控件也同步产生默认的处理。
-     * @protected
      */
-    (function () {
-        function build(name) {
-            ui.LockedTable.prototype.Row.prototype[name] = function (event) {
-                ui.Table.prototype.Row.prototype[name].call(this, event);
-                dom.getParent(this._eLeft).className = this.getMain().className;
-                dom.getParent(this._eRight).className = this.getMain().className;
-            };
-        }
-
-        eventNames.forEach(function (item) {
-            build('$' + item);
-        });
-    }());
+    eventNames.forEach(function (item) {
+        ui.LockedTable.prototype.Row.prototype['$' + item] = function (event) {
+            ui.Table.prototype.Row.prototype['$' + item].call(this, event);
+            dom.getParent(this._eLeft).className = dom.getParent(this._eRight).className = this.getMain().className;
+        };
+    });
 }());
