@@ -1077,7 +1077,7 @@ abstractFileManager.prototype.extractUrlParts = function extractUrlParts(url, ba
                 }
             }
         }
-        console.log(directories);
+        // console.log(directories);
     }
 
     returner.hostPart = urlParts[1];
