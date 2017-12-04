@@ -1385,9 +1385,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 // 判断鼠标没有mouseup
                 var el = control.getOuter(),
                     parent = el.offsetParent,
-                    style = dom.getStyle(parent),
-                    x = options.x !== undefined ? options.x : control.getX(),
-                    y = options.y !== undefined ? options.y : control.getY();
+                    style = dom.getStyle(parent);
 
                 // 拖拽范围默认不超出上级元素区域
                 util.extend(
@@ -1400,6 +1398,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
                 );
                 util.extend(dragEnv, options);
+
+                var x = dragEnv.x !== undefined ? dragEnv.x : control.getX(),
+                    y = dragEnv.y !== undefined ? dragEnv.y : control.getY();
                 dragEnv.right = Math.max(dragEnv.right - control.getWidth(), dragEnv.left);
                 dragEnv.bottom = Math.max(dragEnv.bottom - control.getHeight(), dragEnv.top);
                 dragEnv.targetX = x;

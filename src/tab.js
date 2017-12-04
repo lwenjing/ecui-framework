@@ -187,11 +187,11 @@ _eContainer      - 容器 DOM 元素
             /**
              * @override
              */
-            $ready: function (options) {
-                ui.Control.prototype.$ready.call(this, options);
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event.options);
 
                 if (!this._cSelected) {
-                    this.setSelected(+(options.selected || 0));
+                    this.setSelected(+(event.options.selected || 0));
                 }
             },
 
