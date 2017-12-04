@@ -16,7 +16,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
-    var scrollHandler,            // 处理IE的DOM滚动事件
+    var scrollHandler,            // DOM滚动事件
         isMobileScroll,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
@@ -158,7 +158,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         onbeforescroll(event);
                         scrollHandler = util.timer(
                             function () {
+                                var handler = scrollHandler;
+                                scrollHandler = null;
                                 onscroll(event);
+                                scrollHandler = handler;
                                 onbeforescroll(event);
                             },
                             -50
@@ -943,7 +946,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 bubble(focusedControl, 'mousewheel', event);
             }
             onbeforescroll(event);
-            util.timer(onscroll, 50, this, event);
+            scrollHandler = util.timer(
+                function () {
+                    scrollHandler = null;
+                    onscroll(event);
+                },
+                50
+            );
         }
     }
 
@@ -954,6 +963,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * @param {ECUIEvent} event 事件对象
      */
     function onscroll(event) {
+        if (scrollHandler) {
+            return;
+        }
         event = core.wrapEvent(event);
         independentControls.forEach(function (item) {
             core.triggerEvent(item, 'scroll', event);

@@ -866,6 +866,16 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             },
 
             /**
+             * 获取全部的表头行控件。
+             * @public
+             *
+             * @return {Array} 表头行控件数组
+             */
+            getHRows: function () {
+                return this._aHeadRows.slice();
+            },
+
+            /**
              * 获取定位的 DOM 元素。
              * @public
              *

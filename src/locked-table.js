@@ -123,8 +123,9 @@ _eRight      - 右侧乐定行的Element元素
             this._sTableWidth = dom.getParent(this.getBody()).style.width;
 
             var i = 0,
-                headRows = this._aHeadRows,
-                rows = headRows.concat(this._aRows),
+                headRows = this.getHRows(),
+                rows = this.getRows(),
+                totalRows = headRows.concat(rows),
                 layout = this.getLayout(),
                 list = [],
                 o;
@@ -132,12 +133,12 @@ _eRight      - 右侧乐定行的Element元素
             this._nLeft = options.leftLock || 0;
             this._nRight = this.getColumnCount() - (options.rightLock || 0);
 
-            rows.forEach(function (item, index) {
+            totalRows.forEach(function (item, index) {
                 item = item.getMain();
                 list[index] = '<tr class="' + item.className + '" style="' + item.style.cssText + '"><td class="ui-locked-table-height"></td></tr>';
             });
 
-            o = '<table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length - headRows.length).join('') + '</tbody></table><table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-head ' + this._uHead.getMain().className + '"><thead>' + list.join('') + '</thead></table>';
+            o = '<table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-body ' + dom.getParent(this.getBody()).className + '"><tbody>' + list.splice(headRows.length, rows.length).join('') + '</tbody></table><table cellspacing="0" class="ui-locked-table-{0} ui-locked-table-head ' + this.$getSection('Head').getMain().className + '"><thead>' + list.join('') + '</thead></table>';
             dom.insertHTML(
                 layout,
                 'beforeEnd',
@@ -166,7 +167,7 @@ _eRight      - 右侧乐定行的Element元素
             right.$setBody(right = right.getMain().lastChild);
 
             for (i = 0, left = dom.children(left), right = dom.children(right); el = left[i]; ) {
-                initLockedRow(this._aRows[i], el, right[i++]);
+                initLockedRow(rows[i], el, right[i++]);
             }
         },
         {
@@ -273,7 +274,7 @@ _eRight      - 右侧乐定行的Element元素
                 }, this);
 
                 var table = dom.getParent(this.getBody()),
-                    head = this._uHead.getMain().lastChild;
+                    head = this.$getSection('Head').getMain().lastChild;
 
                 this._eFill.style.width = this.$$tableWidth + 'px';
                 this._uLeftHead.getMain().style.width = this._uLeftMain.getMain().style.width = (this.$$leftTDWidth + this.$$paddingLeft) + 'px';
@@ -300,7 +301,7 @@ _eRight      - 右侧乐定行的Element元素
                     leftMain = this._uLeftMain.getMain(),
                     rightMain = this._uRightMain.getMain(),
                     table = dom.getParent(this.getBody()),
-                    head = this._uHead.getMain();
+                    head = this.$getSection('Head').getMain();
 
                 this._eFill.style.width = '';
                 leftHead.style.width = leftMain.style.width = '';
@@ -329,7 +330,7 @@ _eRight      - 右侧乐定行的Element元素
 
                 leftHeadStyle.left = leftMainStyle.left = this.getLayout().scrollLeft + 'px';
                 rightHeadStyle.left = rightMainStyle.left = (Math.min(this.getWidth(), this.$$tableWidth) - this.$$paddingRight + this.getLayout().scrollLeft - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
-                leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this._uHead.getOuter()).scrollTop) + 'px';
+                leftMainStyle.top = rightMainStyle.top = (this.$$paddingTop + this.getLayout().scrollTop - dom.getParent(this.$getSection('Head').getOuter()).scrollTop) + 'px';
                 leftMainStyle.clip = rightMainStyle.clip = 'auto';
             },
 
