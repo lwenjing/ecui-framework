@@ -144,7 +144,7 @@ cities - 地区联动下拉框控件。
                 if (select === this.getSelect(0)) {
                     this.getSelect(1).setValue('000000');
                 } else if (select === this.getSelect(1)) {
-                    this.getSelect(2).setValue('000000');
+                    this.getSelect(2) && this.getSelect(2).setValue('000000');
                 }
             },
             setValue: function (val) {
