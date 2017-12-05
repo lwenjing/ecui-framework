@@ -179,8 +179,8 @@ _eContainer      - 容器 DOM 元素
             /**
              * @override
              */
-            $itemclick: function (event, target) {
-                this.setSelected(target);
+            $itemclick: function (event) {
+                this.setSelected(event.item);
                 core.triggerEvent(this, 'change');
             },
 
