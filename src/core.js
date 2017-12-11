@@ -1782,7 +1782,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 unmasks.pop()();
             } else {
                 if (!maskElements.length) {
-                    dom.addClass(el, 'ecui-mask');
+                    dom.addClass(el, 'ui-modal');
                 }
                 maskElements.push(
                     el = el.appendChild(
@@ -1812,7 +1812,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             util.timer(dom.remove, 1000, null, el);
                             el.style.display = 'none';
                             if (!maskElements.length) {
-                                dom.removeClass(document.body, 'ecui-mask');
+                                dom.removeClass(document.body, 'ui-modal');
                             }
                         }
                         el = null;
