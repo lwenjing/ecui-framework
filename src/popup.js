@@ -10,7 +10,7 @@
 //{/if}//
     /**
      * 设置控件的弹出层显示的位置。
-     * @public
+     * @private
      */
     function setPopupPosition() {
         this.cache(true);
