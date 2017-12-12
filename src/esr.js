@@ -736,10 +736,10 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 handle = onsuccess || util.blank;
 
             onsuccess = function () {
-                if (metaUpdate && esr.META_URL) {
+                if (metaUpdate) {
                     // 枚举常量管理
                     io.ajax(
-                        esr.META_URL,
+                        options.meta,
                         {
                             headers: {'x-enum-version': metaVersion},
                             onsuccess: function (text) {
@@ -829,7 +829,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          * @public
          */
         load: function (value) {
-            options = JSON.parse('{' + value.replace(/(\w+)\s*=/g, '"$1":') + '}');
+            options = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([^\s]+)\s*($|,)/g, '"$1":"$2"')) + '}');
 
             if (options.meta) {
                 if (window.localStorage) {
