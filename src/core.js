@@ -799,12 +799,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             isGlobalId = options.globalId;
 
             if (options.load) {
-                options.load.split(',').forEach(function (item) {
+                for (var text = options.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
+                    text = RegExp['$\''];
                     try {
-                        core[item].load();
+                        core[RegExp.$1].load(RegExp.$2 ? RegExp.$2.slice(1, -1) : '');
                     } catch (ignore) {
                     }
-                });
+                }
             }
 
             dom.addEventListener(window, 'resize', core.repaint);
