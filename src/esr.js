@@ -486,8 +486,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          * @param {string} loc location位置
          */
         redirect: function (loc) {
+
             if (pauseStatus) {
-                if (!window.onhashchange) {
+                if (window.onhashchange) {
                     setTimeout(listener, 100);
                 }
             } else {
