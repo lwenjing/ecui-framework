@@ -24,6 +24,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         pauseStatus,
         loadStatus = {},
         engine = etpl,
+        requestVersion,
         localStorage,
         metaVersion,
         meta;
@@ -653,7 +654,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                             count--;
                             err.push({url: varUrl, name: varName});
                         }
-                        pauseStatus = false;
                         return;
                     }
 
@@ -675,56 +675,58 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     headers: headers,
                     data: data,
                     onsuccess: function (text) {
-                        count--;
-                        try {
-                            var data = JSON.parse(text),
-                                key;
+                        if (requestVersion === version) {
+                            count--;
+                            try {
+                                var data = JSON.parse(text),
+                                    key;
 
-                            // 枚举常量管理
-                            if (options.meta) {
-                                if (data.meta) {
-                                    metaUpdate = true;
-                                }
-                            }
-
-                            if (esr.onparsedata) {
-                                data = esr.onparsedata(url, data);
-                            } else {
-                                data = data.data;
-                            }
-
-                            if (varName) {
-                                esr.setData(varName, data);
-                            } else {
-                                for (key in data) {
-                                    if (data.hasOwnProperty(key)) {
-                                        esr.setData(key, data[key]);
+                                // 枚举常量管理
+                                if (options.meta) {
+                                    if (data.meta) {
+                                        metaUpdate = true;
                                     }
                                 }
-                            }
-                        } catch (e) {
-                            err.push({handle: e, url: varUrl, name: varName});
-                        }
 
-                        if (!count) {
-                            pauseStatus = false;
-                            if (err.length > 0) {
-                                if (onerror(err) === false) {
-                                    return;
+                                if (esr.onparsedata) {
+                                    data = esr.onparsedata(url, data);
+                                } else {
+                                    data = data.data;
                                 }
+
+                                if (varName) {
+                                    esr.setData(varName, data);
+                                } else {
+                                    for (key in data) {
+                                        if (data.hasOwnProperty(key)) {
+                                            esr.setData(key, data[key]);
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                err.push({handle: e, url: varUrl, name: varName});
                             }
-                            onsuccess();
+
+                            if (!count) {
+                                if (err.length > 0) {
+                                    if (onerror(err) === false) {
+                                        return;
+                                    }
+                                }
+                                onsuccess();
+                            }
                         }
                     },
                     onerror: function () {
-                        count--;
-                        err.push({url: varUrl, name: varName});
-                        if (!count) {
-                            pauseStatus = false;
-                            if (onerror(err) === false) {
-                                return;
+                        if (requestVersion === version) {
+                            count--;
+                            err.push({url: varUrl, name: varName});
+                            if (!count) {
+                                if (onerror(err) === false) {
+                                    return;
+                                }
+                                onsuccess();
                             }
-                            onsuccess();
                         }
                     }
                 });
@@ -737,7 +739,10 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             var err = [],
                 count = urls.length,
                 metaUpdate,
-                handle = onsuccess || util.blank;
+                handle = onsuccess || util.blank,
+                version = new Date().getTime();
+
+            requestVersion = version;
 
             onsuccess = function () {
                 if (metaUpdate) {
@@ -778,7 +783,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             onerror = onerror || esr.onrequesterror || util.blank;
 
             if (count) {
-                pauseStatus = true;
                 urls.forEach(function (item) {
                     var url = item.split('@');
                     if (url[1]) {
