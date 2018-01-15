@@ -148,6 +148,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     callRoute(name, options);
                 },
                 {
+                    cache: true,
                     onerror: function () {
                         // 其他浏览器失败
                         pauseStatus = false;
@@ -524,6 +525,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         render: function (name, route) {
             function loadTPL() {
                 io.ajax(moduleName + '/' + moduleName + '.html', {
+                    cache: true,
                     onsuccess: function (data) {
                         pauseStatus = false;
                         engine = loadStatus[moduleName] = new etpl.Engine();
@@ -564,6 +566,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 } else {
                     pauseStatus = true;
                     io.ajax(moduleName + '/' + moduleName + '.css', {
+                        cache: true,
                         onsuccess: function (data) {
                             dom.createStyleSheet(data);
                             loadStatus[moduleName] = true;
