@@ -24,7 +24,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         pauseStatus,
         loadStatus = {},
         engine = etpl,
-        requestVersion,
+        requestVersion = 0,
         localStorage,
         metaVersion,
         meta;
@@ -488,7 +488,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          * @param {string} loc location位置
          */
         redirect: function (loc) {
-
             if (pauseStatus) {
                 if (window.onhashchange) {
                     setTimeout(listener, 100);
@@ -506,6 +505,8 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 
                 // 与当前location相同时不进行route
                 if (currLocation !== loc) {
+                    requestVersion++;
+
                     esr.setLocation(loc);
                     // ie下使用中间iframe作为中转控制
                     // 其他浏览器直接调用控制器方法
@@ -736,13 +737,13 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 urls = [urls];
             }
 
+            requestVersion++;
+
             var err = [],
                 count = urls.length,
                 metaUpdate,
                 handle = onsuccess || util.blank,
-                version = new Date().getTime();
-
-            requestVersion = version;
+                version = requestVersion;
 
             onsuccess = function () {
                 if (metaUpdate) {
