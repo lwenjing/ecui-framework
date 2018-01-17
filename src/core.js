@@ -44,7 +44,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         allControls = [],         // 全部生成的控件，供释放控件占用的内存使用
         independentControls = [], // 独立的控件，即使用create($create)方法创建的控件
         namedControls,            // 所有被命名的控件的集合
-        singletons,               // 所有被初始化成单例控件的集合
+        singletons = [],          // 所有被初始化成单例控件的集合
         uniqueIndex = 0,          // 控件的唯一序号
         delegateControls = {},    // 等待关联的控件集合
 
@@ -1294,7 +1294,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         createSingleton: function (UIClass, el, parent, options) {
             var control = core.$fastCreate(UIClass, el, parent, options);
-            singletons[control.getUID()] = true;
+            singletons.push(control);
             return control;
         },
 
@@ -1365,12 +1365,16 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             }
 
+            singletons.forEach(function (item) {
+                if (isControl ? control.contain(item) : !!item.getOuter() && contain(control, item)) {
+                    item.setParent();
+                }
+            });
+
             // 需要删除的控件先放入一个集合中等待遍历结束后再删除，否则控件链将产生变化
             allControls.slice().filter(function (item) {
                 if (isControl ? control.contain(item) : !!item.getOuter() && contain(control, item)) {
-                    if (singletons[item.getUID()]) {
-                        item.setParent();
-                    } else if (!onlyChild || (isControl ? control !== item : control !== item.getOuter())) {
+                    if (!onlyChild || (isControl ? control !== item : control !== item.getOuter())) {
                         util.remove(independentControls, item);
                         util.remove(allControls, item);
                         if (item = namedMap[item.getUID()]) {
