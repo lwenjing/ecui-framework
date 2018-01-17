@@ -44,6 +44,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         allControls = [],         // 全部生成的控件，供释放控件占用的内存使用
         independentControls = [], // 独立的控件，即使用create($create)方法创建的控件
         namedControls,            // 所有被命名的控件的集合
+        singletons,               // 所有被初始化成单例控件的集合
         uniqueIndex = 0,          // 控件的唯一序号
         delegateControls = {},    // 等待关联的控件集合
 
@@ -1282,6 +1283,22 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
+         * 创建一个 ECUI 单例控件，ECUI 并未实现真正意义上的单例，这里只是用于标记该控件不会被 dispose 方法释放。
+         * @public
+         *
+         * @param {Function} UIClass 控件的构造函数
+         * @param {HTMLElement} el 控件对应的 Element 对象
+         * @param {ecui.ui.Control} parent 控件的父控件
+         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @return {ecui.ui.Control} ECUI 控件
+         */
+        createSingleton: function (UIClass, el, parent, options) {
+            var control = core.$fastCreate(UIClass, el, parent, options);
+            singletons[control.getUID()] = true;
+            return control;
+        },
+
+        /**
          * 委托框架在指定的 ECUI 控件 生成时执行某个方法。
          * 使用页面静态初始化或页面动态初始化(参见 ECUI 使用方式)方式，控件创建时，相关联控件也许还未创建。delegate 方法提供将指定的函数滞后到对应的控件创建后才调用的模式。如果 targetId 对应的控件还未创建，则调用会被搁置，直到需要的控件创建成功后，再自动执行(参见 create 方法)。
          * @public
@@ -1351,7 +1368,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             // 需要删除的控件先放入一个集合中等待遍历结束后再删除，否则控件链将产生变化
             allControls.slice().filter(function (item) {
                 if (isControl ? control.contain(item) : !!item.getOuter() && contain(control, item)) {
-                    if (!onlyChild || (isControl ? control !== item : control !== item.getOuter())) {
+                    if (singletons[item.getUID()]) {
+                        item.setParent();
+                    } else if (!onlyChild || (isControl ? control !== item : control !== item.getOuter())) {
                         util.remove(independentControls, item);
                         util.remove(allControls, item);
                         if (item = namedMap[item.getUID()]) {
