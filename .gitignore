@@ -4,3 +4,4 @@ ecui-*
 *.css.html
 index/
 doc/
+src/options.js
