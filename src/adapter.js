@@ -29,8 +29,6 @@ var ecui;
             return document.getElementById(id);
         },
 
-        SINGLETON_1: false, // 保证同一个类只有唯一的单例，如果不存在则创建，存在则返回
-
         mobile: isMobile,
         strict: isStrict,
         webkit: isWebkit,
