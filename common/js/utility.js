@@ -197,3 +197,21 @@ daikuan.showHint = function (type, msg) {
         ecui.dom.addClass(hintContainer, 'ui-hide');
     }, 2000)
 };
+
+daikuan.setFormValue = function (context, form, searchParm) {
+    var elements = form.elements;
+    for (var i = 0, item; item = elements[i++]; ) {
+        var name = item.name;
+        if (name) {
+            if (context[name]) {
+                searchParm[name] = context[name];
+            }
+            var _control = item.getControl && item.getControl();
+            if (_control) {
+                _control.setValue(searchParm[name] || '');
+            } else {
+                form.elements[name].value = searchParm[name] || '';
+            }
+        }
+    }
+};
