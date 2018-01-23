@@ -183,6 +183,7 @@ Date.prototype.pattern = function(fmt) {
     return fmt;
 };
 
+// 弹出提示框
 daikuan.showHint = function (type, msg) {
     var className = {
         success: 'successHint',
@@ -198,6 +199,7 @@ daikuan.showHint = function (type, msg) {
     }, 2000)
 };
 
+// 搜索数据回填表单数据
 daikuan.setFormValue = function (context, form, searchParm) {
     var elements = form.elements;
     for (var i = 0, item; item = elements[i++]; ) {
@@ -215,3 +217,11 @@ daikuan.setFormValue = function (context, form, searchParm) {
         }
     }
 };
+
+// 初始化dialog控件
+daikuan.initDialog = function (container, targetName, options) {
+    ecui.dispose(container);
+    container.innerHTML = ecui.esr.getEngine().render(targetName, options);
+    ecui.init(container);
+    return container.children[0].getControl();
+}
