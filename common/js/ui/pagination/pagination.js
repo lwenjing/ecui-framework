@@ -34,7 +34,6 @@ _nTotalPage       - 总页数
             ui.Control.call(this, el, options);
             if (ECUI_FLAGS.PAGEON_1) {
                 // page值的形式: offset,total,pageSize,totalPage
-                console.log(options.page);
                 var page = options.page.split(',');
                 // 定义当前页数
                 this._nCurrentPage = Math.ceil((+page[0] + 1) / +page[2]);
