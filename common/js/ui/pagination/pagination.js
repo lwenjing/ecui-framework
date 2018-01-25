@@ -32,7 +32,7 @@ _nTotalPage       - 总页数
         'ui-pagination',
         function (el, options) {
             ui.Control.call(this, el, options);
-            if (ECUI_FLAGS.PAGEON_1) {
+            if (FeatureFlags.PAGEON_1) {
                 // page值的形式: offset,total,pageSize,totalPage
                 var page = options.page.split(',');
                 // 定义当前页数
@@ -134,7 +134,7 @@ _nTotalPage       - 总页数
                     html.push(start === currentPage ? '<strong>' + start + '</strong>' : '<span>' + start + '</span>');
                 }
 
-                if (ECUI_FLAGS.PAGEON_1) {
+                if (FeatureFlags.PAGEON_1) {
                     // 填充数字按钮区
                     this.getBody().innerHTML = util.stringFormat('<{0}>&lt;&lt;</{0}><{0}>&lt;</{0}>', currentPage === 1 ? 'font' : 'span') + html.join('') + util.stringFormat('<{0}>&gt;</{0}><{0}>&gt;&gt;</{0}>', currentPage === totalPage ? 'font' : 'span');
                 } else {
