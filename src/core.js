@@ -1293,7 +1293,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @return {ecui.ui.Control} ECUI 控件
          */
         createSingleton: function (UIClass, el, parent, options) {
-            if (ECUI_FLAGS.SINGLETON_1) {
+            if (FeatureFlags.SINGLETON_1) {
                 for (var i = 0, item; item = singletons[i++]; ) {
                     if (item.constructor === UIClass) {
                         return item;

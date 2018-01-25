@@ -7,8 +7,6 @@
     if (ieVersion < 9) {
         document.write('<script src="ie-es5.js"></script>');
     }
-    document.write('<script type="text/javascript" src="src/options.js"></script>');
-
     document.write('<script type="text/javascript" src="src/core.js"></script>');
     document.write('<script type="text/javascript" src="src/control.js"></script>');
     document.write('<script type="text/javascript" src="src/input-control.js"></script>');
