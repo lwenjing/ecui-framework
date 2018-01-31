@@ -243,4 +243,5 @@ daikuan.copy = function (text) {
     textarea.select();
     var flag = document.execCommand('copy');
     document.body.removeChild(textarea);
+    return flag;
 }
