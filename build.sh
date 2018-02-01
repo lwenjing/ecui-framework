@@ -21,7 +21,10 @@ then
     flag=1
     cd ..
 fi
-ln -s ../lib-fe/common $1"/common"
+if [ ! -d $1"/common" ]
+then
+    ln -s ../lib-fe/common $1"/common"
+fi
 
 output="output-"$1
 if [ ! -d $output ]
