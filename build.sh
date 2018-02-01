@@ -113,3 +113,14 @@ cp -R images/* "../"$output"/images/"
 cd ..
 
 rm $1"/common"
+
+cd $output
+tar -zcvf "../"$1".tar.gz" *
+cd ..
+
+rm -rf $output
+
+if [ $flag ]
+then
+    cd lib-fe
+fi
