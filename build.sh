@@ -81,12 +81,23 @@ do
 done
 
 cd lib-fe
-lessc --plugin=less-plugin-clean-css common.css > "../"$output"/common.css"
-lessc --plugin=less-plugin-clean-css ecui.css > "../"$output"/ecui.css"
-sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" common.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/common.js"
-sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/ecui.js"
-java -jar webpacker.jar ie-es5.js --mode 1 --charset utf-8 -o "../"$output"/ie-es5.js"
-java -jar webpacker.jar options.js --mode 1 --charset utf-8 -o "../"$output"/options.js"
+for file in `ls`
+do
+    if [ -f $file ]
+    then
+        if [ "${file##*.}" = "js" ]
+        then
+            echo "process file-"$file
+            sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" $file | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/"$file
+        else
+            if [ "${file##*.}" = "css" ]
+            then
+                echo "process file-"$file
+                lessc --plugin=less-plugin-clean-css $file > "../"$output"/"$file
+            fi
+        fi
+    fi
+done
 if [ ! -d "../"$output"/images/" ]
 then
     mkdir "../"$output"/images/"
@@ -94,14 +105,4 @@ fi
 cp -R images/* "../"$output"/images/"
 cd ..
 
-cd $output
-tar -zcvf "../"$1".tar.gz" *
-cd ..
-
-rm -rf $output
-
 rm $1"/common"
-if [ $flag ]
-then
-    cd lib-fe
-fi
