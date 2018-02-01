@@ -86,6 +86,7 @@ lessc --plugin=less-plugin-clean-css ecui.css > "../"$output"/ecui.css"
 sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" common.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/common.js"
 sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/ecui.js"
 java -jar webpacker.jar ie-es5.js --mode 1 --charset utf-8 -o "../"$output"/ie-es5.js"
+java -jar webpacker.jar options.js --mode 1 --charset utf-8 -o "../"$output"/options.js"
 if [ ! -d "../"$output"/images/" ]
 then
     mkdir "../"$output"/images/"
