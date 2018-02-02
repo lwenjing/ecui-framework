@@ -40,6 +40,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         speedY,                   // 当前鼠标Y轴速度参数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
         lastClick,                // 上一次产生点击事件的信息
+        inertiaHandles = {},      // 惯性处理句柄
 
         allControls = [],         // 全部生成的控件，供释放控件占用的内存使用
         independentControls = [], // 独立的控件，即使用create($create)方法创建的控件
@@ -376,21 +377,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousemove: function (event) {
                 event = core.wrapEvent(event);
 
-                var target = currEnv.target,
-                    // 计算期待移到的位置
-                    expectX = currEnv.targetX + mouseX - currEnv.x,
-                    expectY = currEnv.targetY + mouseY - currEnv.y;
-
-                // 计算实际允许移到的位置
-                event.x = Math.min(Math.max(expectX, currEnv.left), currEnv.right);
-                event.y = Math.min(Math.max(expectY, currEnv.top), currEnv.bottom);
-
-                if (core.triggerEvent(target, 'dragmove', event)) {
-                    target.setPosition(event.x, event.y);
-                }
-
-                currEnv.x = mouseX + currEnv.targetX - expectX;
-                currEnv.y = mouseY + currEnv.targetY - expectY;
+                dragmove(event, currEnv, mouseX, mouseY);
 
                 event.exit();
             },
@@ -398,9 +385,35 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseover: util.blank,
 
             mouseup: function (event) {
-                event = core.wrapEvent(event);
+                if (FeatureFlags.INERTIA_1 && currEnv.inertia) {
+                    var oldEnv = currEnv,
+                        inertia = currEnv.inertia,
+                        mx = mouseX,
+                        my = mouseY,
+                        vx = core.getXSpeed(),
+                        vy = core.getYSpeed(),
+                        ax = vx / inertia,
+                        ay = vy / inertia,
+                        start = Date.now();
 
-                core.triggerEvent(currEnv.target, 'dragend', event);
+                    event = core.wrapEvent(event);
+
+                    var handle = inertiaHandles[oldEnv.target.getUID()] = util.timer(function () {
+                        var event = new ECUIEvent(),
+                            time = (Date.now() - start) / 1000,
+                            t = Math.min(time, inertia);
+
+                        dragmove(event, oldEnv, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                        if (t >= inertia) {
+                            core.triggerEvent(oldEnv.target, 'dragend', event);
+                            handle();
+                            delete inertiaHandles[oldEnv.target.getUID()];
+                        }
+                    }, -20);
+                } else {
+                    event = core.wrapEvent(event);
+                    core.triggerEvent(currEnv.target, 'dragend', event);
+                }
                 activedControl = currEnv.actived;
                 core.restore();
 
@@ -722,6 +735,33 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         } catch (ignore) {
         }
         core.triggerEvent(control, 'dispose');
+    }
+
+    /**
+     * 拖拽移动事件处理。
+     * @private
+     *
+     * @param {ECUIEvent} ECUI 事件对象
+     * @param {Object} ECUI 框架运行环境
+     * @param {number} x 需要移动到的 X 坐标
+     * @param {number} y 需要移动到的 Y 坐标
+     */
+    function dragmove(event, env, x, y) {
+        var target = env.target,
+            // 计算期待移到的位置
+            expectX = env.targetX + x - env.x,
+            expectY = env.targetY + y - env.y;
+
+        // 计算实际允许移到的位置
+        event.x = Math.min(Math.max(expectX, env.left), env.right);
+        event.y = Math.min(Math.max(expectY, env.top), env.bottom);
+
+        if (core.triggerEvent(target, 'dragmove', event)) {
+            target.setPosition(event.x, event.y);
+        }
+
+        env.x = x + env.targetX - expectX;
+        env.y = y + env.targetY - expectY;
     }
 
     /**
@@ -1413,6 +1453,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         drag: function (control, event, options) {
             if (activedControl !== undefined) {
+                if (FeatureFlags.INERTIA_1) {
+                    // 控件之前处于惯性状态必须停止
+                    var uid = control.getUID();
+                    if (inertiaHandles[uid]) {
+                        inertiaHandles[uid]();
+                        delete inertiaHandles[uid];
+                    }
+                }
+
                 // 判断鼠标没有mouseup
                 var el = control.getOuter(),
                     parent = el.offsetParent,
@@ -1625,11 +1674,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         getXSpeed: function () {
-            return speedX;
+            return Date.now() - lastMoveTime > 500 ? 0 : speedX;
         },
 
         getYSpeed: function () {
-            return speedY;
+            return Date.now() - lastMoveTime > 500 ? 0 : speedY;
         },
 
         /**
