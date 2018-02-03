@@ -750,14 +750,19 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     function dragend(event, env, target) {
         var uid = target.getUID();
 
-        if (env.move) {
-            var pos = 'function' === typeof env.move ? env.move.call(target) : env.move,
-                codes = [];
-            if (pos.x !== undefined) {
-                codes.push('this.style.left->' + pos.x);
+        if (env.limit) {
+            var range = 'function' === typeof env.limit ? env.limit.call(target) : env.limit,
+                codes = [],
+                el = env.el || target.getOuter(),
+                x = util.toNumber(el.style.left),
+                y = util.toNumber(el.style.top),
+                expectX = Math.min(range[1], Math.max(range[3], x)),
+                expectY = Math.min(range[2], Math.max(range[0], y));
+            if (x !== expectX) {
+                codes.push('this.style.left->' + expectX);
             }
-            if (pos.y !== undefined) {
-                codes.push('this.style.top->' + pos.y);
+            if (y !== expectY) {
+                codes.push('this.style.top->' + expectY);
             }
 
             if (codes.length) {
@@ -765,7 +770,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     codes.join(';'),
                     500,
                     {
-                        $: target.getBody(),
+                        $: el,
                         onstep: function (percent) {
                             event.x = util.toNumber(this.style.left);
                             event.y = util.toNumber(this.style.top);

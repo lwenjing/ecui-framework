@@ -75,6 +75,9 @@
             ),
             $activate: function (event) {
                 ui.Control.prototype.$activate.call(this, event);
+
+                var body = this.getBody();
+
                 if (this._oHandler) {
                     this._oHandler();
                 }
@@ -82,8 +85,9 @@
                     this,
                     event,
                     {
+                        el: body,
                         x: 0,
-                        y: this.getBody().offsetTop,
+                        y: body.offsetTop,
                         left: 0,
                         right: 0,
                         top: this._nMinTop,
@@ -94,8 +98,7 @@
                                 return 0;
                             }
 
-                            var body = this.getBody(),
-                                y = util.toNumber(body.style.top),
+                            var y = util.toNumber(body.style.top),
                                 sy = speed * 0.5 / 2,
                                 expectY = Math.round(y + sy);
 
@@ -108,16 +111,7 @@
                             }
                             return (expectY - y) * 2 / speed;
                         },
-                        move: function () {
-                            var y = util.toNumber(this.getBody().style.top),
-                                expectY = Math.min(this._nBottom, Math.max(this._nTop, y)),
-                                ret = {};
-
-                            if (y !== expectY) {
-                                ret.y = expectY;
-                            }
-                            return ret;
-                        }
+                        limit: [this._nTop, 0, this._nBottom, 0]
                     }
                 );
             },
