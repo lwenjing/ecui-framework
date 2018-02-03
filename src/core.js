@@ -385,29 +385,30 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseover: util.blank,
 
             mouseup: function (event) {
-                if (FeatureFlags.INERTIA_1 && currEnv.inertia) {
-                    var oldEnv = currEnv,
-                        inertia = currEnv.inertia,
+                var inertia = currEnv.actived.getInertia ? currEnv.actived.getInertia() : currEnv.inertia;
+
+                if (FeatureFlags.INERTIA_1 && inertia) {
+                    var env = currEnv,
                         mx = mouseX,
                         my = mouseY,
+                        start = Date.now(),
                         vx = core.getXSpeed(),
                         vy = core.getYSpeed(),
                         ax = vx / inertia,
-                        ay = vy / inertia,
-                        start = Date.now();
+                        ay = vy / inertia;
 
                     event = core.wrapEvent(event);
 
-                    var handle = inertiaHandles[oldEnv.target.getUID()] = util.timer(function () {
+                    var handle = inertiaHandles[env.target.getUID()] = util.timer(function () {
                         var event = new ECUIEvent(),
                             time = (Date.now() - start) / 1000,
                             t = Math.min(time, inertia);
 
-                        dragmove(event, oldEnv, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                        dragmove(event, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
                         if (t >= inertia) {
-                            core.triggerEvent(oldEnv.target, 'dragend', event);
+                            core.triggerEvent(env.target, 'dragend', event);
                             handle();
-                            delete inertiaHandles[oldEnv.target.getUID()];
+                            delete inertiaHandles[env.target.getUID()];
                         }
                     }, -20);
                 } else {
@@ -2107,6 +2108,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 event.type = name;
             }
 
+            event.returnValue = true;
             if ((control['on' + name] && control['on' + name].apply(control, args) === false) || event.returnValue === false || (control['$' + name] && control['$' + name].apply(control, args) === false)) {
                 event.preventDefault();
             }

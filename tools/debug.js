@@ -92,7 +92,7 @@
         ecui.io.ajax = function (url, options) {
             ecui.dom.ready(function () {
                 if (url.slice(0, 5) !== 'file:') {
-                    url = loc.slice(loc.lastIndexOf('/') + (url.charAt(0) === '/' ? 1 : 0)) + url.slice(1);
+                    url = loc.slice(0, loc.lastIndexOf('/') + (url.charAt(0) === '/' ? 1 : 0)) + url.slice(1);
                 }
 
                 url = url.slice(7).split('?')[0];

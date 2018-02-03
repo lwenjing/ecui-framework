@@ -95,66 +95,52 @@
                 this._nItemHeight = this.getItem(0).getMain().offsetHeight;
             },
             $change: util.blank,
-            $deactivate: function (event) {
-                ui.Control.prototype.$deactivate.call(this, event);
-
-                var speed = core.getYSpeed() / 10,
-                    control = this,
-                    body = this.getBody(),
-                    expectY = Math.round(util.toNumber(body.style.top) + speed),
-                    y;
-
-                if (expectY < this._nTop) {
-                    y = Math.max(this._nMinTop, expectY);
-                    expectY = this._nTop;
-                } else if (expectY > this._nBottom) {
-                    y = Math.min(this._nMaxBottom, expectY);
-                    expectY = this._nBottom;
-                } else {
-                    y = Math.round(expectY / this._nItemHeight) * this._nItemHeight;
-                    expectY = undefined;
+            getInertia: function () {
+                var speed = core.getYSpeed();
+                if (!speed) {
+                    return 0;
                 }
 
-                this._oHandler = util.timer(function () {
-                    control._oHandler = core.effect.grade(
-                        'this.style.top->' + y,
-                        1000,
-                        {
-                            $: body,
-                            onstep: function (percent) {
-                                var top = util.toNumber(body.style.top);
-                                setSelected(control, control.getItem(Math.round(-top / control._nItemHeight) + control._nRadius));
-                                if (percent === 1 || (expectY !== undefined && Math.abs(top - y) < control._nItemHeight / 2)) {
-                                    control._oHandler();
-                                    if (expectY !== undefined) {
-                                        control._oHandler = core.effect.grade(
-                                            'this.style.top->' + expectY,
-                                            500,
-                                            {
-                                                $: body,
-                                                onstep: function (percent) {
-                                                    setSelected(control, control.getItem(Math.round(-util.toNumber(body.style.top) / control._nItemHeight) + control._nRadius));
-                                                    if (percent === 1) {
-                                                        core.triggerEvent(control, 'change', event);
-                                                    }
-                                                }
-                                            }
-                                        );
-                                    } else {
-                                        core.triggerEvent(control, 'change', event);
-                                    }
-                                }
-                            }
-                        },
-                        function (percent) {
-                            return 1 - Math.pow(1 - percent, 4);
-                        }
-                    );
-                }, 0);
+                var body = this.getBody(),
+                    y = util.toNumber(body.style.top),
+                    sy = speed * 0.5 / 2,
+                    expectY = Math.round(y + sy);
+
+                if (expectY < this._nTop) {
+                    expectY = Math.max(this._nMinTop, expectY);
+                } else if (expectY > this._nBottom) {
+                    expectY = Math.min(this._nMaxBottom, expectY);
+                } else {
+                    expectY = Math.round(expectY / this._nItemHeight) * this._nItemHeight;
+                }
+                return (expectY - y) * 2 / speed;
             },
             $dispose: function () {
                 this._oHandler = null;
                 ui.Control.prototype.$dispose.call(this);
+            },
+            $dragend: function (event) {
+                ui.Control.prototype.$dragend.call(this, event);
+                var control = this,
+                    body = this.getBody(),
+                    y = util.toNumber(body.style.top),
+                    expectY = Math.min(this._nBottom, Math.max(this._nTop, y));
+
+                if (y !== expectY) {
+                    this._oHandler = core.effect.grade(
+                        'this.style.top->' + expectY,
+                        500,
+                        {
+                            $: body,
+                            onstep: function (percent) {
+                                setSelected(control, control.getItem(Math.round(-util.toNumber(body.style.top) / control._nItemHeight) + control._nRadius));
+                                if (percent === 1) {
+                                    core.triggerEvent(control, 'change', event);
+                                }
+                            }
+                        }
+                    );
+                }
             },
             $dragmove: function (event) {
                 ui.Control.prototype.$dragmove.call(this, event);
