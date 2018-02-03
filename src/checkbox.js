@@ -27,7 +27,7 @@ _aDependents     - 全部的从属复选框
      */
     function changeHandler(event) {
         var control = core.wrapEvent(event).target.getControl();
-        setStatus(control, control.getInput().checked ? 0 : 1);
+        control.setChecked(control.getInput().checked);
     }
 
     /**
