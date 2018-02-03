@@ -78,7 +78,48 @@
                 if (this._oHandler) {
                     this._oHandler();
                 }
-                core.drag(this, event, {x: 0, y: this.getBody().offsetTop, left: 0, right: 0, top: this._nMinTop, bottom: this._nMaxBottom});
+                core.drag(
+                    this,
+                    event,
+                    {
+                        x: 0,
+                        y: this.getBody().offsetTop,
+                        left: 0,
+                        right: 0,
+                        top: this._nMinTop,
+                        bottom: this._nMaxBottom,
+                        inertia: function () {
+                            var speed = core.getYSpeed();
+                            if (!speed) {
+                                return 0;
+                            }
+
+                            var body = this.getBody(),
+                                y = util.toNumber(body.style.top),
+                                sy = speed * 0.5 / 2,
+                                expectY = Math.round(y + sy);
+
+                            if (expectY < this._nTop) {
+                                expectY = Math.max(this._nMinTop, expectY);
+                            } else if (expectY > this._nBottom) {
+                                expectY = Math.min(this._nMaxBottom, expectY);
+                            } else {
+                                expectY = Math.round(expectY / this._nItemHeight) * this._nItemHeight;
+                            }
+                            return (expectY - y) * 2 / speed;
+                        },
+                        move: function () {
+                            var y = util.toNumber(this.getBody().style.top),
+                                expectY = Math.min(this._nBottom, Math.max(this._nTop, y)),
+                                ret = {};
+
+                            if (y !== expectY) {
+                                ret.y = expectY;
+                            }
+                            return ret;
+                        }
+                    }
+                );
             },
             $alterItems: function () {
                 this._nTop = -this._nItemHeight * (this.getLength() - this._nRadius - 1);
@@ -95,52 +136,9 @@
                 this._nItemHeight = this.getItem(0).getMain().offsetHeight;
             },
             $change: util.blank,
-            getInertia: function () {
-                var speed = core.getYSpeed();
-                if (!speed) {
-                    return 0;
-                }
-
-                var body = this.getBody(),
-                    y = util.toNumber(body.style.top),
-                    sy = speed * 0.5 / 2,
-                    expectY = Math.round(y + sy);
-
-                if (expectY < this._nTop) {
-                    expectY = Math.max(this._nMinTop, expectY);
-                } else if (expectY > this._nBottom) {
-                    expectY = Math.min(this._nMaxBottom, expectY);
-                } else {
-                    expectY = Math.round(expectY / this._nItemHeight) * this._nItemHeight;
-                }
-                return (expectY - y) * 2 / speed;
-            },
             $dispose: function () {
                 this._oHandler = null;
                 ui.Control.prototype.$dispose.call(this);
-            },
-            $dragend: function (event) {
-                ui.Control.prototype.$dragend.call(this, event);
-                var control = this,
-                    body = this.getBody(),
-                    y = util.toNumber(body.style.top),
-                    expectY = Math.min(this._nBottom, Math.max(this._nTop, y));
-
-                if (y !== expectY) {
-                    this._oHandler = core.effect.grade(
-                        'this.style.top->' + expectY,
-                        500,
-                        {
-                            $: body,
-                            onstep: function (percent) {
-                                setSelected(control, control.getItem(Math.round(-util.toNumber(body.style.top) / control._nItemHeight) + control._nRadius));
-                                if (percent === 1) {
-                                    core.triggerEvent(control, 'change', event);
-                                }
-                            }
-                        }
-                    );
-                }
             },
             $dragmove: function (event) {
                 ui.Control.prototype.$dragmove.call(this, event);

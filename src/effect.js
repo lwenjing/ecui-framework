@@ -380,7 +380,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                     }
                     fn.call(options.$, percent, options);
                     if (options.onstep) {
-                        options.onstep(percent);
+                        options.onstep.call(options.$, percent);
                     }
                     if (percent === 1) {
                         fn = options = transition = null;
@@ -397,7 +397,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                     if (flag) {
                         fn.call(options.$, 1, options);
                         if (options.onstep) {
-                            options.onstep(1);
+                            options.onstep.call(options.$, 1);
                         }
                     }
                 }

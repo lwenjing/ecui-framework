@@ -385,10 +385,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseover: util.blank,
 
             mouseup: function (event) {
-                var inertia = currEnv.actived.getInertia ? currEnv.actived.getInertia() : currEnv.inertia;
+                var target = currEnv.target,
+                    inertia = 'function' === typeof currEnv.inertia ? currEnv.inertia.call(target) : currEnv.inertia;
 
                 if (FeatureFlags.INERTIA_1 && inertia) {
-                    var env = currEnv,
+                    var uid = target.getUID(),
+                        env = currEnv,
                         mx = mouseX,
                         my = mouseY,
                         start = Date.now(),
@@ -399,21 +401,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     event = core.wrapEvent(event);
 
-                    var handle = inertiaHandles[env.target.getUID()] = util.timer(function () {
+                    inertiaHandles[uid] = util.timer(function () {
                         var event = new ECUIEvent(),
                             time = (Date.now() - start) / 1000,
                             t = Math.min(time, inertia);
 
                         dragmove(event, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
                         if (t >= inertia) {
-                            core.triggerEvent(env.target, 'dragend', event);
-                            handle();
-                            delete inertiaHandles[env.target.getUID()];
+                            inertiaHandles[uid]();
+                            dragend(event, env, target);
                         }
                     }, -20);
                 } else {
                     event = core.wrapEvent(event);
-                    core.triggerEvent(currEnv.target, 'dragend', event);
+                    dragend(event, currEnv, target);
                 }
                 activedControl = currEnv.actived;
                 core.restore();
@@ -736,6 +737,53 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         } catch (ignore) {
         }
         core.triggerEvent(control, 'dispose');
+    }
+
+    /**
+     * 拖拽结束事件处理。
+     * @private
+     *
+     * @param {ECUIEvent} ECUI 事件对象
+     * @param {Object} ECUI 框架运行环境
+     * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
+     */
+    function dragend(event, env, target) {
+        var uid = target.getUID();
+
+        if (env.move) {
+            var pos = 'function' === typeof env.move ? env.move.call(target) : env.move,
+                codes = [];
+            if (pos.x !== undefined) {
+                codes.push('this.style.left->' + pos.x);
+            }
+            if (pos.y !== undefined) {
+                codes.push('this.style.top->' + pos.y);
+            }
+
+            if (codes.length) {
+                inertiaHandles[uid] = core.effect.grade(
+                    codes.join(';'),
+                    500,
+                    {
+                        $: target.getBody(),
+                        onstep: function (percent) {
+                            event.x = util.toNumber(this.style.left);
+                            event.y = util.toNumber(this.style.top);
+                            core.triggerEvent(target, 'dragmove', event);
+                            if (percent === 1) {
+                                core.triggerEvent(target, 'change', event);
+                                inertiaHandles[uid]();
+                                core.triggerEvent(target, 'dragend', event);
+                                delete inertiaHandles[uid];
+                            }
+                        }
+                    }
+                );
+                return;
+            }
+        }
+        core.triggerEvent(target, 'dragend', event);
+        delete inertiaHandles[uid];
     }
 
     /**
