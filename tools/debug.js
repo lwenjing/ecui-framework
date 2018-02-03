@@ -91,7 +91,7 @@
                     ecui.resume();
                 }
             }
-        }, -100);
+        }, -10);
     }
 
     /**
@@ -182,7 +182,7 @@
                             }
                         });
                     }
-                }, -50);
+                }, -10);
             }
         });
     }
@@ -196,4 +196,19 @@
             load();
         }
     };
+
+    var lastUpdate;
+    ecui.util.timer(function () {
+        ecui.io.ajax('update.html', {
+            onsuccess: function (data) {
+                if (lastUpdate) {
+                    if (lastUpdate !== data) {
+                        location.reload();
+                    }
+                } else {
+                    lastUpdate = data;
+                }
+            }
+        });
+    }, -3000);
 }());
