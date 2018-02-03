@@ -46,31 +46,6 @@
 }());*/
 
 (function () {
-    function doLoad() {
-
-        var path = waits[0][0],
-            callback = waits[0][1];
-
-        location.hash = '';
-        el.src = path.join('?');
-        var stop = ecui.util.timer(function () {
-            if (location.hash && location.hash !== '#') {
-                stop();
-                callback(
-                    decodeURIComponent(location.hash.slice(1)),
-                );
-                waits.splice(0, 1);
-                if (waits.length) {
-                    doLoad();
-                } else {
-                    location.hash = oldLocation;
-                    ecui.esr.redirect = oldRedirectFn;
-                    ecui.resume();
-                }
-            }
-        }, -1);
-    }
-
     /**
      * 动态加载模块，用于测试。
      * @public
@@ -82,9 +57,7 @@
         moduleRoute,
         loc = location.href + '#',
         waits = {},
-        oldRedirectFn = ecui.esr.redirect,
-        oldLoadScriptFn = ecui.io.loadScript,
-        oldLocation;
+        oldLoadScriptFn = ecui.io.loadScript;
 
     loc = loc.slice(0, loc.indexOf('#'));
 
@@ -92,7 +65,7 @@
         ecui.io.ajax = function (url, options) {
             ecui.dom.ready(function () {
                 if (url.slice(0, 5) !== 'file:') {
-                    url = loc.slice(0, loc.lastIndexOf('/') + (url.charAt(0) === '/' ? 1 : 0)) + url.slice(1);
+                    url = loc.slice(0, loc.lastIndexOf('/') + (url.charAt(0) === '/' ? 0 : 1)) + url;
                 }
 
                 url = url.slice(7).split('?')[0];
