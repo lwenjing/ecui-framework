@@ -6,9 +6,13 @@ fi
 
 if [ $1 = 'ecui' ]
 then
+    if [ ! -d release ]
+    then
+        mkdir release
+    fi
     echo "build ecui-2.0.0"
-    lessc --plugin=less-plugin-clean-css ecui.css > ecui-2.0.0.css
-    sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "ecui-2.0.0.js"
+    lessc --plugin=less-plugin-clean-css ecui.css > release/ecui-2.0.0.css
+    sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o release/ecui-2.0.0.js
     exit 0
 fi
 
@@ -17,7 +21,10 @@ then
     flag=1
     cd ..
 fi
-ln -s ../lib-fe/common $1"/common"
+if [ ! -d $1"/common" ]
+then
+    ln -s ../lib-fe/common $1"/common"
+fi
 
 output="output-"$1
 if [ ! -d $output ]
@@ -81,11 +88,23 @@ do
 done
 
 cd lib-fe
-lessc --plugin=less-plugin-clean-css common.css > "../"$output"/common.css"
-lessc --plugin=less-plugin-clean-css ecui.css > "../"$output"/ecui.css"
-sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" common.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/common.js"
-sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/ecui.js"
-java -jar webpacker.jar ie-es5.js --mode 1 --charset utf-8 -o "../"$output"/ie-es5.js"
+for file in `ls`
+do
+    if [ -f $file ]
+    then
+        if [ "${file##*.}" = "js" ]
+        then
+            echo "process file-"$file
+            sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" $file | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/"$file
+        else
+            if [ "${file##*.}" = "css" ]
+            then
+                echo "process file-"$file
+                lessc --plugin=less-plugin-clean-css $file > "../"$output"/"$file
+            fi
+        fi
+    fi
+done
 if [ ! -d "../"$output"/images/" ]
 then
     mkdir "../"$output"/images/"
@@ -93,13 +112,14 @@ fi
 cp -R images/* "../"$output"/images/"
 cd ..
 
+rm $1"/common"
+
 cd $output
 tar -zcvf "../"$1".tar.gz" *
 cd ..
 
 rm -rf $output
 
-rm $1"/common"
 if [ $flag ]
 then
     cd lib-fe

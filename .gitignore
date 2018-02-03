@@ -1,8 +1,8 @@
 .DS_Store
 test.html
 update.html
-src/options.js
 ecui-*
 *.css.html
 index/
 doc/
+release/

@@ -227,6 +227,7 @@ daikuan.initDialog = function (container, targetName, options) {
 }
 
 // 复制text到剪切板中
+// 在异步ajax请求中使用document.execCommand('copy')无效，同步的ajax请求中正常使用
 daikuan.copy = function (text) {
     var textarea = document.createElement("textarea");
     textarea.style.position = 'fixed';
@@ -243,4 +244,5 @@ daikuan.copy = function (text) {
     textarea.select();
     var flag = document.execCommand('copy');
     document.body.removeChild(textarea);
+    return flag;
 }
