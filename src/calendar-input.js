@@ -41,7 +41,7 @@
                 }
             }
         ),
-        singleton = core.createSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'}));
+        singleton;
 
     /**
      * 日历输入框控件。
@@ -53,6 +53,9 @@
         'ui-calendar-input',
         function (el, options) {
             ui.InputControl.call(this, el, options);
+            if (!singleton) {
+                singleton = core.createSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'}));
+            }
             this.getInput().readOnly = true;
             this.setPopup(singleton);
         },
