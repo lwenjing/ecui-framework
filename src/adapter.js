@@ -7,7 +7,7 @@ var ecui;
 //{/if}//
     var //{if 1}//undefined,//{/if}//
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
-
+        patch = ecui,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
@@ -1232,6 +1232,23 @@ var ecui;
         document.execCommand('BackgroundImageCache', false, true);
     } catch (ignore) {
     }
+
+    (function () {
+        function copy(name) {
+            if (patch[name]) {
+                util.extend(ecui[name], patch[name]);
+            }
+        }
+
+        if (patch) {
+            util.extend(ecui, patch);
+            copy('dom');
+            copy('ext');
+            copy('io');
+            copy('ui');
+            copy('util');
+        }
+    }());
 //{if 0}//
 }());
 //{/if}//

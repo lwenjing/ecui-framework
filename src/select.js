@@ -71,7 +71,7 @@ _uOptions     - 下拉选择框
      * optionSize     下拉框最大允许显示的选项数量，默认为5
      * @control
      */
-    ui.Select = core.inherits(
+    ui.Select = ui.Select ? ui.Select() : core.inherits(
         ui.InputControl,
         'ui-select',
         function (el, options) {

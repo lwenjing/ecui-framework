@@ -24,7 +24,7 @@ moduleLink - 无收缩功能树控件（特定需求下使用）。
         ui = core.ui,
         util = core.util;
 
-    ui.ModuleLink = core.inherits(
+    ui.ModuleLink = ui.ModuleLink ? ui.ModuleLink() : core.inherits(
         ui.TreeView,
         '',
         {

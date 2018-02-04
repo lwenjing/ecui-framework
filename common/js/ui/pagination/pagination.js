@@ -27,7 +27,7 @@ _nTotalPage       - 总页数
             this.getParent().go(this.getValue());
         }
     };
-    ui.Pagination = core.inherits(
+    ui.Pagination = ui.Pagination ? ui.Pagination() : core.inherits(
         ui.Control,
         'ui-pagination',
         function (el, options) {

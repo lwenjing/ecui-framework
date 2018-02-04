@@ -21,7 +21,7 @@
      * 高清屏控件。
      * @control
      */
-    ui.Retina = core.inherits(
+    ui.Retina = ui.Retina ? ui.Retina() : core.inherits(
         ui.Control,
         function (el, options) {
             util.setDefault(options, 'capturable', false);

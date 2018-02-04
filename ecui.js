@@ -1,12 +1,7 @@
 //{if 1}//var ecui;//{/if}//
 (function () {
     document.write('<script type="text/javascript" src="src/adapter.js"></script>');
-//{if 1}//
-    var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
-//{/if}//
-    if (ieVersion < 9) {
-        document.write('<script src="ie-es5.js"></script>');
-    }
+
     document.write('<script type="text/javascript" src="src/core.js"></script>');
     document.write('<script type="text/javascript" src="src/control.js"></script>');
     document.write('<script type="text/javascript" src="src/input-control.js"></script>');
@@ -52,6 +47,7 @@
     document.write('<script type="text/javascript" src="src/m-scroll.js"></script>');
     document.write('<script type="text/javascript" src="src/m-calendar.js"></script>');
 //{if 0}//
+    var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
     document.write('<script type="text/javascript" src="tools/debug.js"></script>');
     if (ieVersion < 9) {
         document.write('<script type="text/javascript" src="tools/html5shiv.js"></script>');

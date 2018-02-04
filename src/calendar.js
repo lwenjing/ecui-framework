@@ -20,7 +20,7 @@ _eTitle        - 日历头部信息提示区
      * month   初始的月份
      * @control
      */
-    ui.Calendar = core.inherits(
+    ui.Calendar = ui.Calendar ? ui.Calendar() : core.inherits(
         ui.MonthView,
         'ui-calendar',
         function (el, options) {

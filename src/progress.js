@@ -19,7 +19,7 @@ _nMax    - 进度最大值
      * value 当前值
      * @control
      */
-    ui.Progress = core.inherits(
+    ui.Progress = ui.Progress ? ui.Progress() : core.inherits(
         ui.Control,
         'ui-progress',
         function (el, options) {

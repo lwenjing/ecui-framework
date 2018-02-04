@@ -16,7 +16,7 @@
      * 确认按钮需要置于 Dialog 对话框控件内，用于触发 Dialog 对话框的 submit 事件。
      * @control
      */
-    ui.Submit = core.inherits(
+    ui.Submit = ui.Submit ? ui.Submit() : core.inherits(
         ui.Button,
         'ui-submit',
         {

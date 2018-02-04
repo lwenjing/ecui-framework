@@ -23,7 +23,7 @@ _cFor - 被转发的控件对象
      * for     被转发的控件 id
      * @control
      */
-    ui.Label = core.inherits(
+    ui.Label = ui.Label ? ui.Label() : core.inherits(
         ui.Control,
         'ui-label',
         function (el, options) {

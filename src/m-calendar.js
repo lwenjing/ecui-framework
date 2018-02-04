@@ -4,7 +4,7 @@
         dom = core.dom,
         ui = core.ui;
 //{/if}//
-    ui.MCalendar = core.inherits(
+    ui.MCalendar = ui.MCalendar ? ui.MCalendar() : core.inherits(
         ui.Control,
         'ui-mobile-calendar',
         function (el, options) {

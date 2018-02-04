@@ -18,7 +18,7 @@
         }
     }
 
-    ui.MScroll = core.inherits(
+    ui.MScroll = ui.MScroll ? ui.MScroll() : core.inherits(
         ui.Control,
         'ui-mobile-scroll',
         function (el, options) {
@@ -99,7 +99,7 @@
                             }
 
                             var y = util.toNumber(body.style.top),
-                                sy = speed * 0.5 / 2,
+                                sy = speed * 0.5 / 2,  // 计划0.5秒动画结束
                                 expectY = Math.round(y + sy);
 
                             if (expectY < this._nTop) {

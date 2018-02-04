@@ -21,7 +21,7 @@ _eInput - 选项对应的input，form提交时使用
      * 类似<select>的复选模式，可以选择多项数据。
      * @control
      */
-    ui.Listbox = core.inherits(
+    ui.Listbox = ui.Listbox ? ui.Listbox() : core.inherits(
         ui.Control,
         'ui-listbox',
         function (el, options) {

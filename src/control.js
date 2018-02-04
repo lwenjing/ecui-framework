@@ -95,7 +95,7 @@ _aStatus            - 控件当前的状态集合
      * transparent 是否透明，如果设置透明，控件的交互事件将穿透控件由控件下方的控件处理，缺省值为 false
      * @public
      */
-    ui.Control = core.inherits(
+    ui.Control = ui.Control ? ui.Control() : core.inherits(
         null,
         function (el, options) {
             core.$bind(el, this);

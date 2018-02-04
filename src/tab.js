@@ -48,7 +48,7 @@ _eContainer      - 容器 DOM 元素
      * selected    选中的选项序号，默认为0
      * @control
      */
-    ui.Tab = core.inherits(
+    ui.Tab = ui.Tab ? ui.Tab() : core.inherits(
         ui.Control,
         'ui-tab',
         function (el, options) {

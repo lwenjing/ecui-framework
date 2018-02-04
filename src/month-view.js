@@ -66,7 +66,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
      * extra   扩展的日期是否响应事件，默认为enable，如果需要响应事件设置成disable
      * @control
      */
-    ui.MonthView = core.inherits(
+    ui.MonthView = ui.MonthView ? ui.MonthView() : core.inherits(
         ui.Control,
         'ui-monthview',
         function (el, options) {

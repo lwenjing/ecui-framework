@@ -48,7 +48,7 @@
      * 提供日期的选择输入功能，所有的日历输入框控件共享一个日历选择弹层。
      * @control
      */
-    ui.CalendarInput = core.inherits(
+    ui.CalendarInput = ui.CalendarInput ? ui.CalendarInput() : core.inherits(
         ui.Text,
         'ui-calendar-input',
         function (el, options) {

@@ -37,7 +37,7 @@ _uCheckbox - 复选框控件
      * subject 父复选框的标识符，如果为 true 表示使用上级树节点的复选框作为父复选框，其它等价 false 的值表示不联动
      * @control
      */
-    ui.CheckTree = core.inherits(
+    ui.CheckTree = ui.CheckTree ? ui.CheckTree() : core.inherits(
         ui.TreeView,
         'ui-checktree',
         function (el, options) {

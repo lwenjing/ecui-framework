@@ -36,7 +36,7 @@ _ePlaceHolder - 为空时的提示信息标签
      * regexp  正则表达式，自动在两端添加^与$
      * @control
      */
-    ui.Text = core.inherits(
+    ui.Text = ui.Text ? ui.Text() : core.inherits(
         ui.InputControl,
         'ui-text',
         function (el, options) {

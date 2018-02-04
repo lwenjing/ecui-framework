@@ -24,7 +24,7 @@
      * 组合框可以在下拉选项中选择，也可以输入内容。
      * @control
      */
-    ui.Combox = core.inherits(
+    ui.Combox = ui.Combox ? ui.Combox() : core.inherits(
         ui.Select,
         '*ui-combox',
         function (el, options) {

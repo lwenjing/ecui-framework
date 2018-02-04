@@ -187,7 +187,7 @@ _eInput        - INPUT对象
      * valid        在什么情况下校验，表单提交时一定会校验，blur表示需要在失去焦点时校验
      * @control
      */
-    ui.InputControl = core.inherits(
+    ui.InputControl = ui.InputControl ? ui.InputControl() : core.inherits(
         ui.Control,
         'ui-input',
         function (el, options) {

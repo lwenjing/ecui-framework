@@ -23,7 +23,7 @@
      * 缺省设置不可选中内容。
      * @control
      */
-    ui.Button = core.inherits(
+    ui.Button = ui.Button ? ui.Button() : core.inherits(
         ui.Control,
         'ui-button',
         function (el, options) {
