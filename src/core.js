@@ -199,9 +199,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             onselectstart(control, event);
                             // 检查是否INPUT/SELECT/TEXTAREA/BUTTON标签，需要失去焦点，
                             // 因为ecui不能阻止mousedown focus输入框
-                            if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
-                                if (!isMobile) {
-                                    // 移动端输入框是在mouseup时失去焦点
+                            if (!isMobile) {
+                                // 移动端输入框是在mouseup时失去焦点
+                                if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
                                     util.timer(
                                         function () {
                                             target.blur();
@@ -2176,7 +2176,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             eventStack[uid][name] = true;
 
             if (!(event instanceof ECUIEvent)) {
-                event = new ECUIEvent(name);
+                event = util.extend(new ECUIEvent(name), event);
             } else {
                 event.type = name;
             }
