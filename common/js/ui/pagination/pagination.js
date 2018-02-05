@@ -24,7 +24,17 @@ _nTotalPage       - 总页数
     // 回车跳转到指定页
     var skipTo = function (event) {
         if (event.which === 13) {
-            this.getParent().go(this.getValue());
+            var parent = this.getParent(),
+                pageNo = this.getValue();
+            pageNo = Math.min(Math.max(pageNo, 1), parent._nTotalPage);
+            parent.go(pageNo);
+        }
+    };
+    var validate = function (event) {
+        var val = this.getValue();
+        if (!/^\d*$/.test(val)) {
+            val = val.match(/^\d*/)[0];
+            this.setValue(val);
         }
     };
     ui.Pagination = core.inherits(
@@ -52,6 +62,7 @@ _nTotalPage       - 总页数
                     if (options.skipInput) {
                         this._uSkipInput = core.$fastCreate(ui.Text, el.children[1].firstChild.children[0], this);
                         this._uSkipInput.setValue(this._nCurrentPage);
+                        this._uSkipInput.oninput = validate;
                         this._uSkipInput.onkeydown = skipTo;
                     }
                 }
