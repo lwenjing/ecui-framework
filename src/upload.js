@@ -50,11 +50,11 @@
      * 内部必须包含<input type="file">的标签，可以包含或不包含进度控件，如果包含就会自动设置进度控件参数。
      * @control
      */
-    ui.Upload = ui.Upload ? ui.Upload() : core.inherits(
+    ui.Upload = core.inherits(
         ui.Control,
         'ui-upload',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
             this._sUrl = options.url;
             this._eFile = el.getElementsByTagName('INPUT')[0];
         },

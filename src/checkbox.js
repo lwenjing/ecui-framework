@@ -83,13 +83,13 @@ _aDependents     - 全部的从属复选框
      * subject     主复选框 ID，会自动与主复选框建立关联后，作为主复选框的从属复选框之一
      * @control
      */
-    ui.Checkbox = ui.Checkbox ? ui.Checkbox() : core.inherits(
+    ui.Checkbox = core.inherits(
         ui.InputControl,
         'ui-checkbox',
         function (el, options) {
             util.setDefault(options, 'inputType', 'checkbox');
 
-            ui.InputControl.call(this, el, options);
+            ui.InputControl.constructor.call(this, el, options);
 
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
             this._bDefault = this.getInput().defaultChecked;

@@ -23,12 +23,12 @@
      * 缺省设置不可选中内容。
      * @control
      */
-    ui.Button = ui.Button ? ui.Button() : core.inherits(
+    ui.Button = core.inherits(
         ui.Control,
         'ui-button',
         function (el, options) {
             util.setDefault(options, 'userSelect', false);
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
         }
     );
 //{if 0}//

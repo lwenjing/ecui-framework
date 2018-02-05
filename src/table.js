@@ -129,7 +129,7 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
      * head-float     表头允许飘浮，默认不允许
      * @control
      */
-    ui.Table = ui.Table ? ui.Table() : core.inherits(
+    ui.Table = core.inherits(
         ui.Control,
         'ui-table',
         function (el, options) {

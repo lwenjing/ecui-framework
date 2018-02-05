@@ -17,7 +17,7 @@
      * 用于弹出菜单、下拉框、交换框等控件的单个选项，通常不直接初始化。选项控件必须用在使用选项组接口(Items)的控件中。
      * @control
      */
-    ui.Item = ui.Item ? ui.Item() : core.inherits(
+    ui.Item = core.inherits(
         ui.Control,
         'ui-item'
     );

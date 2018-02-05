@@ -24,12 +24,12 @@
      * 组合框可以在下拉选项中选择，也可以输入内容。
      * @control
      */
-    ui.Combox = ui.Combox ? ui.Combox() : core.inherits(
+    ui.Combox = core.inherits(
         ui.Select,
         '*ui-combox',
         function (el, options) {
             util.setDefault(options, 'readOnly', false);
-            ui.Select.call(this, el, options);
+            ui.Select.constructor.call(this, el, options);
         },
         {
             /**

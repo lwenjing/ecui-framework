@@ -48,11 +48,11 @@
      * 提供日期的选择输入功能，所有的日历输入框控件共享一个日历选择弹层。
      * @control
      */
-    ui.CalendarInput = ui.CalendarInput ? ui.CalendarInput() : core.inherits(
+    ui.CalendarInput = core.inherits(
         ui.Text,
         'ui-calendar-input',
         function (el, options) {
-            ui.InputControl.call(this, el, options);
+            ui.InputControl.constructor.call(this, el, options);
             if (!singleton) {
                 singleton = core.createSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'}));
             }

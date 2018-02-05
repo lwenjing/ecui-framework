@@ -758,6 +758,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 y = util.toNumber(el.style.top),
                 expectX = Math.min(range[1], Math.max(range[3], x)),
                 expectY = Math.min(range[2], Math.max(range[0], y));
+            if (range[5]) {
+                expectX = Math.round(expectX / range[5]) * range[5];
+            }
+            if (range[4]) {
+                expectY = Math.round(expectY / range[4]) * range[4];
+            }
             if (x !== expectX) {
                 codes.push('this.style.left->' + expectX);
             }
@@ -1742,41 +1748,44 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          *
          * @param {Function} superClass 父控件类
          * @param {string} type 子控件的类型样式
-         * @param {Function} subClass 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
+         * @param {Function} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
          * @param {Object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
-        inherits: function (superClass, type, subClass) {
+        inherits: function (superClass, type, constructor) {
             var index = 3,
-                argType = type,
-                argSubClass = subClass;
+                realType = type,
+                realConstructor = constructor,
+                subClass = function (el, options) {
+                    subClass.constructor.call(this, el, options);
+                };
 
-            if ('string' !== typeof argType) {
-                argSubClass = argType;
+            if ('string' !== typeof realType) {
                 index--;
-                argType = '';
+                realType = '';
+                realConstructor = type;
             }
 
-            if ('function' !== typeof argSubClass) {
-                argSubClass = function (el, options) {
-                    superClass.call(this, el, options);
-                };
+            if ('function' !== typeof realConstructor) {
+                subClass.constructor = superClass;
                 index--;
+            } else {
+                subClass.constructor = realConstructor;
             }
 
             if (superClass) {
-                util.inherits(argSubClass, superClass);
+                util.inherits(subClass, superClass);
 
-                if (argType && argType.charAt(0) === '*') {
-                    (argSubClass.TYPES = superClass.TYPES.slice())[0] = argType.slice(1);
+                if (realType && realType.charAt(0) === '*') {
+                    (subClass.TYPES = superClass.TYPES.slice())[0] = realType.slice(1);
                 } else {
-                    argSubClass.TYPES = (argType ? [argType] : []).concat(superClass.TYPES);
+                    subClass.TYPES = (realType ? [realType] : []).concat(superClass.TYPES);
                 }
             } else {
                 // ecui.ui.Control的特殊初始化设置
-                argSubClass.TYPES = [];
+                subClass.TYPES = [];
             }
-            argSubClass.CLASS = argSubClass.TYPES.length ? ' ' + argSubClass.TYPES.join(' ') + ' ' : ' ';
+            subClass.CLASS = subClass.TYPES.length ? ' ' + subClass.TYPES.join(' ') + ' ' : ' ';
 
             Array.prototype.slice.call(arguments, index).forEach(function (item) {
                 if (item.NAME) {
@@ -1784,14 +1793,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;
                     var prototype = new Clazz();
-                    util.extend(prototype, argSubClass.prototype);
-                    argSubClass.prototype[item.NAME] = prototype;
+                    util.extend(prototype, subClass.prototype);
+                    subClass.prototype[item.NAME] = prototype;
                     item = item.Methods;
                 }
-                util.extend(argSubClass.prototype, item);
+                util.extend(subClass.prototype, item);
             });
 
-            return argSubClass;
+            return subClass;
         },
 
         /**

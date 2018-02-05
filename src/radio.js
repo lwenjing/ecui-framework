@@ -63,13 +63,13 @@ _bDefault  - 默认的选中状态
      * 实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件适用所有在一组中只允许选择一个目标的交互，并不局限于此分组的表现形式(文本、图片等)。
      * @control
      */
-    ui.Radio = ui.Radio ? ui.Radio() : core.inherits(
+    ui.Radio = core.inherits(
         ui.InputControl,
         'ui-radio',
         function (el, options) {
             util.setDefault(options, 'inputType', 'radio');
 
-            ui.InputControl.call(this, el, options);
+            ui.InputControl.constructor.call(this, el, options);
 
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
             this._bDefault = this.getInput().defaultChecked;

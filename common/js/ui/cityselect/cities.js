@@ -107,7 +107,7 @@ cities - 地区联动下拉框控件。
      *
      * @param {Object} options 初始化选项
      */
-    ui.Cities = ui.Cities ? ui.Cities() : core.inherits(
+    ui.Cities = core.inherits(
         ui.MultilevelSelect,
         'ui-cities',
         function (el, options) {
@@ -115,7 +115,7 @@ cities - 地区联动下拉框控件。
                 cClass = options.primary ? options.primary + '-city' : 'city',
                 aClass = options.primary ? options.primary + '-area' : 'area';
             el.innerHTML = options.multi === '3' ? '<select class="' + pClass + '"></select><select class="' + cClass + '"></select><select class="' + aClass + '" name="' + options.name + '"></select>' : '<select class="' + pClass + '"></select><select class="' + cClass + '" name="' + options.name + '"></select>';
-            ui.MultilevelSelect.call(this, el, options);
+            ui.MultilevelSelect.constructor.call(this, el, options);
         },
         {
             $ready: function (event) {

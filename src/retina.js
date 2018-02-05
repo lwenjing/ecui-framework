@@ -21,7 +21,7 @@
      * 高清屏控件。
      * @control
      */
-    ui.Retina = ui.Retina ? ui.Retina() : core.inherits(
+    ui.Retina = core.inherits(
         ui.Control,
         function (el, options) {
             util.setDefault(options, 'capturable', false);
@@ -48,7 +48,7 @@
                 el.appendChild(img);
             }
 
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
         }
     );
 }());

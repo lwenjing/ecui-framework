@@ -15,11 +15,11 @@ _eMask   - 完成的进度比例内容区域
      * 使用进度条显示一个任务执行的程度。
      * @control
      */
-    ui.ProgressBar = ui.ProgressBar ? ui.ProgressBar() : core.inherits(
+    ui.ProgressBar = core.inherits(
         ui.Progress,
         'ui-progress-bar',
         function (el, options) {
-            ui.Progress.call(this, el, options);
+            ui.Progress.constructor.call(this, el, options);
 
             el.innerHTML = '<div class="' + options.classes.join('-mask ') + '"></div>';
             this._eMask = el.lastChild;

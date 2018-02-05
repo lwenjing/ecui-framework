@@ -18,10 +18,10 @@ _aSelect - 全部的下拉框控件列表
      * 多级联动下拉框控件。
      * @control
      */
-    ui.MultilevelSelect = ui.MultilevelSelect ? ui.MultilevelSelect() : core.inherits(
+    ui.MultilevelSelect = core.inherits(
         ui.Control,
         function (el, options) {
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._aSelect = [];
             Array.prototype.slice.call(el.getElementsByTagName('SELECT')).forEach(function (item) {

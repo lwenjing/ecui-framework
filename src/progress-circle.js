@@ -13,11 +13,11 @@
      * 使用进度圆显示一个任务执行的程度。
      * @control
      */
-    ui.ProgressCircle = ui.ProgressCircle ? ui.ProgressCircle() : core.inherits(
+    ui.ProgressCircle = core.inherits(
         ui.Progress,
         'ui-progress-circle',
         function (el, options) {
-            ui.Progress.call(this, el, options);
+            ui.Progress.constructor.call(this, el, options);
 
             el.innerHTML = '<svg><path fill="#000"></path></svg>';
             this._ePath = el.lastChild.lastChild;

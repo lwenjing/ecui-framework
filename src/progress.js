@@ -19,11 +19,11 @@ _nMax    - 进度最大值
      * value 当前值
      * @control
      */
-    ui.Progress = ui.Progress ? ui.Progress() : core.inherits(
+    ui.Progress = core.inherits(
         ui.Control,
         'ui-progress',
         function (el, options) {
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._sFormat = options.format;
             this._nMax = options.max || 100;

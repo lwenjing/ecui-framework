@@ -1,4 +1,4 @@
-//{if 1}//var ecui;//{/if}//
+var ecui;
 (function () {
     document.write('<script type="text/javascript" src="src/adapter.js"></script>');
 

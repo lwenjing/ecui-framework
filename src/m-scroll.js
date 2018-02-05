@@ -18,7 +18,7 @@
         }
     }
 
-    ui.MScroll = ui.MScroll ? ui.MScroll() : core.inherits(
+    ui.MScroll = core.inherits(
         ui.Control,
         'ui-mobile-scroll',
         function (el, options) {
@@ -62,7 +62,7 @@
                 el.appendChild(optionsEl);
             }
 
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._nRadius = Math.floor(options.optionSize / 2);
             this.$setBody(optionsEl);
@@ -109,9 +109,10 @@
                             } else {
                                 expectY = Math.round(expectY / this._nItemHeight) * this._nItemHeight;
                             }
+                            //计算实际结束时间
                             return (expectY - y) * 2 / speed;
                         },
-                        limit: [this._nTop, 0, this._nBottom, 0]
+                        limit: [this._nTop, 0, this._nBottom, 0, this._nItemHeight]
                     }
                 );
             },

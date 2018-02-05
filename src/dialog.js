@@ -43,7 +43,7 @@ _uClose     - 关闭按钮
      * 定义独立于文档布局的内容区域，如果在其中包含 iframe 标签，在当前页面打开一个新的页面，可以仿真浏览器的多窗体效果，避免了使用 window.open 在不同浏览器下的兼容性问题。多个窗体控件同时工作时，当前激活的窗体在最上层。窗体控件的标题栏默认可以拖拽，窗体可以设置置顶方式显示，在置顶模式下，只有当前窗体可以响应操作。窗体控件的 z-index 从4096开始，页面开发请不要使用大于或等于4096的 z-index 值。
      * @control
      */
-    ui.Dialog = ui.Dialog ? ui.Dialog() : core.inherits(
+    ui.Dialog = core.inherits(
         ui.Control,
         'ui-dialog',
         function (el, options) {
@@ -79,7 +79,7 @@ _uClose     - 关闭按钮
             bodyEl.style.cssText = '';
             el.appendChild(bodyEl);
 
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._uClose = core.$fastCreate(this.Close, el.firstChild, this);
             this._uTitle = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});

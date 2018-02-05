@@ -71,7 +71,7 @@ _uOptions     - 下拉选择框
      * optionSize     下拉框最大允许显示的选项数量，默认为5
      * @control
      */
-    ui.Select = ui.Select ? ui.Select() : core.inherits(
+    ui.Select = core.inherits(
         ui.InputControl,
         'ui-select',
         function (el, options) {
@@ -117,7 +117,7 @@ _uOptions     - 下拉选择框
 
             el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
 
-            ui.InputControl.call(this, el, options);
+            ui.InputControl.constructor.call(this, el, options);
 
             this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
             this._uOptions = core.$fastCreate(this.Options, optionsEl, this);
@@ -141,7 +141,7 @@ _uOptions     - 下拉选择框
                 ui.Item,
                 'ui-select-item',
                 function (el, options) {
-                    ui.Item.call(this, el, options);
+                    ui.Item.constructor.call(this, el, options);
                     this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
                 },
                 {

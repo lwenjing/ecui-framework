@@ -66,7 +66,7 @@ _aChildren     - 子控件集合
      * expandSelected 是否展开选中的节点，如果不自动展开，需要点击左部的小区域图标才有效，默认自动展开
      * @control
      */
-    ui.TreeView = ui.TreeView ? ui.TreeView() : core.inherits(
+    ui.TreeView = core.inherits(
         ui.Control,
         'ui-treeview',
         function (el, options) {
@@ -83,7 +83,7 @@ _aChildren     - 子控件集合
                 }
             }
 
-            ui.Control.call(this, el, options);
+            ui.Control.constructor.call(this, el, options);
 
             this._bCollapsed = !!options.collapsed;
             this._bAutoType = options.autoType;

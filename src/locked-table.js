@@ -114,7 +114,7 @@ _eRight      - 右侧乐定行的Element元素
      * right-lock 右边需要锁定的列数
      * @control
      */
-    ui.LockedTable = ui.LockedTable ? ui.LockedTable() : core.inherits(
+    ui.LockedTable = core.inherits(
         ui.Table,
         'ui-locked-table',
         function (el, options) {
