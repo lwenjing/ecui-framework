@@ -181,7 +181,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                         // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
                                         // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
                                         // 父控件获得焦点，否则焦点不发生变化
-                                        core.setFocused(target);
+                                        if (!isMobile) {
+                                            // 移动端是在mouseup时获得焦点
+                                            core.setFocused(target);
+                                        }
                                     }
                                     break;
                                 }
@@ -197,16 +200,22 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             // 检查是否INPUT/SELECT/TEXTAREA/BUTTON标签，需要失去焦点，
                             // 因为ecui不能阻止mousedown focus输入框
                             if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
-                                util.timer(
-                                    function () {
-                                        target.blur();
-                                    }
-                                );
-                                event.preventDefault();
+                                if (!isMobile) {
+                                    // 移动端输入框是在mouseup时失去焦点
+                                    util.timer(
+                                        function () {
+                                            target.blur();
+                                        }
+                                    );
+                                    event.preventDefault();
+                                }
                             }
                         }
-                        // 点击到了空白区域，取消控件的焦点
-                        core.setFocused();
+                        if (!isMobile) {
+                            // 移动端输入框是在mouseup时失去焦点
+                            // 点击到了空白区域，取消控件的焦点
+                            core.setFocused();
+                        }
                         // 正常情况下 activedControl 是 undefined，如果是down按下但未点击到控件，此值为null
                         activedControl = null;
                     }
