@@ -1767,7 +1767,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             }
 
             if ('function' !== typeof realConstructor) {
-                subClass.constructor = superClass;
+                subClass.constructor = superClass.constructor;
                 index--;
             } else {
                 subClass.constructor = realConstructor;
@@ -1800,6 +1800,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 util.extend(subClass.prototype, item);
             });
 
+            // 释放闭包占用的资源
+            superClass = type = constructor = realConstructor = null;
             return subClass;
         },
 
