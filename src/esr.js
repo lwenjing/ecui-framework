@@ -258,7 +258,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             }
         });
 
-        core.dispose(el);
+        core.dispose(el, true);
         el.innerHTML = engine.render(route.view || name, context);
         core.init(el);
 
