@@ -17,7 +17,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 //{/if}//
     var historyCache,
         historyIndex = 0,
-        historyData = {},
+        historyData = [],
         cacheList = [],
         options,
         routes = {},
@@ -563,6 +563,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                         if (/~ECUI_CACHE=(\d+)/.test(loc)) {
                             historyIndex = +RegExp.$1;
                         } else {
+                            historyData.splice(historyIndex, historyData.length - historyIndex);
                             loc += '~ECUI_CACHE=' + historyIndex;
                             if (ieVersion < 9) {
                                 pauseStatus = true;
