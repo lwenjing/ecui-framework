@@ -199,7 +199,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * @param {Object} route 路由对象
      */
     function getRouteMains(route) {
-        var el = document.getElementById(route.main || esr.DEFAULT_MAIN);
+        var el = core.$(route.main || esr.DEFAULT_MAIN);
 
         if (el) {
             var items = el.route ? [el] : [];
@@ -282,7 +282,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             route.onbeforerender(context);
         }
 
-        var el = document.getElementById(route.main || esr.DEFAULT_MAIN);
+        var el = core.$(route.main || esr.DEFAULT_MAIN);
         el.style.visibility = 'hidden';
 
         getRouteMains(route).forEach(function (item) {
