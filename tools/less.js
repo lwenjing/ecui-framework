@@ -794,9 +794,9 @@ less.refresh = function (reload, modifyVars, clearFileCache) {
         if (/^stylesheet\/less\.(\d+)$/.test(sheet.rel)) {
             var scale = +RegExp.$1;
             css = css.replace(
-                /([\w-]+)\s*:\s*([0-9]+)px/g,
-                function (match, name, value) {
-                    return name.indexOf('font') < 0 ? name + ':' + (+value / scale) + 'rem' : match;
+                /px2rem\(([0-9]+)px\)/g,
+                function (match, value) {
+                    return (+value / scale) + 'rem';
                 }
             );
         }
