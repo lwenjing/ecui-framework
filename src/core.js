@@ -1381,17 +1381,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
-         * 创建一个 ECUI 事件对象。
-         * @public
-         *
-         * @param {String} type 对象类型
-         * @return {ECUIEvent} ECUI 事件对象
-         */
-        createEvent: function (type) {
-            return new ECUIEvent(type);
-        },
-
-        /**
          * 创建一个 ECUI 单例控件，ECUI 并未实现真正意义上的单例，这里只是用于标记该控件不会被 dispose 方法释放。
          * @public
          *
@@ -2159,7 +2148,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          *
          * @param {ecui.ui.Control} control 控件对象
          * @param {string} name 事件名
-         * @param {ECUIEvent} event 事件对象，可以为 false 表示直接阻止默认事件处理
+         * @param {ECUIEvent|Object} event 事件对象或事件对象参数
          * @param {Object} ... 事件的其它参数
          * @return {boolean} 是否阻止默认事件处理
          */
@@ -2181,7 +2170,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 event.type = name;
             }
 
-            event.returnValue = true;
+            delete event.returnValue;
             if ((control['on' + name] && control['on' + name].apply(control, args) === false) || event.returnValue === false || (control['$' + name] && control['$' + name].apply(control, args) === false)) {
                 event.preventDefault();
             }
