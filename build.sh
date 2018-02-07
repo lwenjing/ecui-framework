@@ -11,7 +11,12 @@ then
         mkdir release
     fi
     echo "build ecui-2.0.0"
-    lessc --plugin=less-plugin-clean-css ecui.css > release/ecui-2.0.0.css
+    if [ $2 ]
+    then
+        lessc --plugin=less-plugin-clean-css ecui.css | awk '{text=$0;while(match(text,/([0-9]+)px/)){printf substr(text,0,RSTART-1);printf (substr(text,RSTART,RSTART+RLENGTH-1)/'$2')"rem";text=substr(text,RSTART+RLENGTH)}print text}' > release/ecui-2.0.0.css
+    else
+        lessc --plugin=less-plugin-clean-css ecui.css > release/ecui-2.0.0.css
+    fi
     sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o release/ecui-2.0.0.js
     exit 0
 fi
@@ -51,7 +56,12 @@ do
 	        fi
 	        cd $1"/"$file
 	        sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass('/\/\/{include file='class./g" -e "s/');/.js'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar ../../lib-fe/webpacker.jar --mode 1 --charset utf-8 -o "../../"$output"/"$file"/"$file".js"
-	        sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass(*//g" -e "s/');/.css'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | lessc - --plugin=less-plugin-clean-css > "../../"$output"/"$file"/"$file".css"
+            if [ $2 ]
+            then
+                sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass(*//g" -e "s/');/.css'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | lessc - --plugin=less-plugin-clean-css | awk '{text=$0;while(match(text,/([0-9]+)px/)){printf substr(text,0,RSTART-1);printf (substr(text,RSTART,RSTART+RLENGTH-1)/'$2')"rem";text=substr(text,RSTART+RLENGTH)}print text}' > "../../"$output"/"$file"/"$file".css"
+            else
+                sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass(*//g" -e "s/');/.css'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | lessc - --plugin=less-plugin-clean-css > "../../"$output"/"$file"/"$file".css"
+            fi
 	        sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass(*//g" -e "s/');/.html'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | sed -e "/<\!--$/{N;s/\n/ /;}" -e "s/  / /g" -e "s/<\!-- *\!-->//g" -e "s/^[ ]*//g" -e "s/[ ]*$//g" -e "/^$/d" -e "/<script>window.onload=/d" > "../../"$output"/"$file"/"$file".html"
 	        cd ../..
 	    else
@@ -74,7 +84,12 @@ do
         else
             if [ "${file##*.}" = "css" ]
             then
-                lessc --plugin=less-plugin-clean-css $1"/"$file > $output"/"$file
+                if [ $2 ]
+                then
+                    lessc --plugin=less-plugin-clean-css $1"/"$file | awk '{text=$0;while(match(text,/([0-9]+)px/)){printf substr(text,0,RSTART-1);printf (substr(text,RSTART,RSTART+RLENGTH-1)/'$2')"rem";text=substr(text,RSTART+RLENGTH)}print text}' > $output"/"$file
+                else
+                    lessc --plugin=less-plugin-clean-css $1"/"$file > $output"/"$file
+                fi
             else
                 if [ "${file##*.}" = "html" ]
                 then
@@ -100,7 +115,12 @@ do
             if [ "${file##*.}" = "css" ]
             then
                 echo "process file-"$file
-                lessc --plugin=less-plugin-clean-css $file > "../"$output"/"$file
+                if [ $2 ]
+                then
+                    lessc --plugin=less-plugin-clean-css $file | awk '{text=$0;while(match(text,/([0-9]+)px/)){printf substr(text,0,RSTART-1);printf (substr(text,RSTART,RSTART+RLENGTH-1)/'$2')"rem";text=substr(text,RSTART+RLENGTH)}print text}' > "../"$output"/"$file
+                else
+                    lessc --plugin=less-plugin-clean-css $file > "../"$output"/"$file
+                fi
             fi
         fi
     fi
