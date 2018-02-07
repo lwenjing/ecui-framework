@@ -18,9 +18,9 @@
         }
     }
 
-    ui.MScroll = core.inherits(
+    ui.MSelect = core.inherits(
         ui.Control,
-        'ui-mobile-scroll',
+        'ui-mobile-select',
         function (el, options) {
             var values = options.values,
                 optionsEl = el;
@@ -42,14 +42,14 @@
                         break;
                     }
                 }
-                el.innerHTML = '<div class="ui-mobile-scroll-mask"></div><div class="ui-mobile-scroll-options">' + ret.join('') + '</div>';
+                el.innerHTML = '<div class="ui-mobile-select-mask"></div><div class="ui-mobile-select-options">' + ret.join('') + '</div>';
                 optionsEl = el.lastChild;
             } else {
                 el = dom.insertBefore(
                     dom.create(
                         {
                             className: el.className,
-                            innerHTML: '<div class="ui-mobile-scroll-mask"></div>',
+                            innerHTML: '<div class="ui-mobile-select-mask"></div>',
                             style: {
                                 cssText: el.style.cssText
                             }
@@ -57,7 +57,7 @@
                     ),
                     el
                 );
-                optionsEl.className = 'ui-mobile-scroll-options';
+                optionsEl.className = 'ui-mobile-select-options';
                 optionsEl.style.cssText = '';
                 el.appendChild(optionsEl);
             }
@@ -71,7 +71,7 @@
         {
             Item: core.inherits(
                 ui.Item,
-                'ui-mobile-scroll-item'
+                'ui-mobile-select-item'
             ),
             $activate: function (event) {
                 ui.Control.prototype.$activate.call(this, event);
