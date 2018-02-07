@@ -93,7 +93,7 @@ do
             else
                 if [ "${file##*.}" = "html" ]
                 then
-                    sed -e "s/stylesheet\/less/stylesheet/g" -e "/<\!--$/{N;s/\n/ /;}" -e "s/  / /g" -e "s/<\!-- *\!-->//g" -e "s/^[ ]*//g" -e "s/[ ]*$//g" -e "/^$/d" -e "/<script>window.onload=/d" $1"/"$file > $output"/"$file
+                    sed -e "s/stylesheet\/less(\.[0-9]+)?/stylesheet/g" -e "/<\!--$/{N;s/\n/ /;}" -e "s/  / /g" -e "s/<\!-- *\!-->//g" -e "s/^[ ]*//g" -e "s/[ ]*$//g" -e "/^$/d" -e "/<script>window.onload=/d" $1"/"$file > $output"/"$file
                 else
                     cp $1"/"$file $output"/"
                 fi
