@@ -37,6 +37,29 @@
     ui.MPopup = {
         NAME: '$MPopup',
 
+        constructor: function (el, options) {
+            var data = namedMap[this.getUID()] = position[options.enter || 'right'] || position.right,
+                scale = options.scale;
+            data[2] = scale ? Math.max(0, 1 - (scale.indexOf('%') > 0 ? +scale.slice(0, -1) / 100 : +scale)) : 0;
+
+            if (!this.constructor.POPUP) {
+                this.constructor.POPUP = core.$fastCreate(
+                    ui.Control,
+                    document.body.appendChild(
+                        dom.create(
+                            'DIV',
+                            {
+                                style: {
+                                    display: 'none'
+                                }
+                            }
+                        )
+                    ),
+                    ''
+                );
+            }
+        },
+
         Methods: {
             /**
              * @override
@@ -72,16 +95,6 @@
             $dispose: function () {
                 delete namedMap[this.getUID()];
                 this.$MPopup.$dispose.call(this);
-            },
-
-            /**
-             * @override
-             */
-            $ready: function (event) {
-                this.$MPopup.$ready.call(this, event);
-                var data = namedMap[this.getUID()] = position[event.options.enter || 'right'] || position.right,
-                    scale = event.options.scale;
-                data[2] = scale ? Math.max(0, 1 - (scale.indexOf('%') > 0 ? +scale.slice(0, -1) / 100 : +scale)) : 0;
             },
 
             /**

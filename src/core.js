@@ -1756,6 +1756,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 realConstructor = constructor,
                 subClass = function (el, options) {
                     subClass.constructor.call(this, el, options);
+                    subClass.interfaces.forEach(function (constructor) {
+                        constructor.call(this, el, options);
+                    }, this);
                 };
 
             if ('string' !== typeof realType) {
@@ -1770,6 +1773,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             } else {
                 subClass.constructor = realConstructor;
             }
+            subClass.interfaces = [];
 
             if (superClass) {
                 util.inherits(subClass, superClass);
@@ -1787,6 +1791,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             Array.prototype.slice.call(arguments, index).forEach(function (item) {
                 if (item.NAME) {
+                    if (item.constructor) {
+                        subClass.interfaces.push(item.constructor);
+                    }
                     // 对接口的处理
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;
