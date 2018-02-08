@@ -21,14 +21,13 @@ def repl(match):
 
 class Funcs(object):
 	def px2rem(self, value):
-		value = value[:-2]
-		return f2s(float(value) / getOption('px2rem', 75)) + 'rem'
+		return f2s(float(value[:-2]) / getOption('px2rem', 75)) + 'rem'
 
 funcs = Funcs()
 pFunc = re.compile(r'(\w+)\(([^)]+)\)')
 pKey = re.compile(r'(\w+):')
 
-if len(sys.argv) > 1:
+if len(sys.argv) > 1 and len(sys.argv[1]) > 0:
 	options = json.loads(pKey.sub(r'"\1":', sys.argv[1]))
 else:
 	options = json.loads("{}")

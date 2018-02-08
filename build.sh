@@ -4,7 +4,7 @@ then
     exit -1
 fi
 
-css_proc='lessc - --plugin=less-plugin-clean-css | python less-funcs.py "$2"'
+css_proc='lessc - --plugin=less-plugin-clean-css | python ${path}less-funcs.py "$2"'
 tpl_proc='java -jar ${path}smarty4j.jar --left //{ --right }// --charset utf-8'
 compress_proc='java -jar ${path}webpacker.jar --mode 1 --charset utf-8'
 reg_load="-e \"s/ecui.esr.loadRoute('/\/\/{include file='route./g\""
@@ -75,10 +75,10 @@ do
 	    fi
     else
         echo "process file-$file"
+        path="../lib-fe/"
         if [ "${file##*.}" = "js" ]
         then
             cd $1
-            path="../lib-fe/"
             eval "sed -e \"/ecui.esr.loadModule/d\" $reg_script $file" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
             cd ..
         else
@@ -90,7 +90,7 @@ do
             else
                 if [ "${file##*.}" = "html" ]
                 then
-                    eval "sed -e \"s/stylesheet\\/less(\\.[0-9]+)?/stylesheet/g\" $reg_comment \"$1/$file\"" > "$output/$file"
+                    eval "sed -e \"s/stylesheet\/less\(\\\\\\\\{\\\\w+\\\\\\\\}\)*/stylesheet/g\" $reg_comment \"$1/$file\"" > "$output/$file"
                 else
                     cp "$1/$file $output/"
                 fi
@@ -104,10 +104,10 @@ for file in `ls`
 do
     if [ -f $file ]
     then
+        path=""
         if [ "${file##*.}" = "js" ]
         then
             echo "process file-$file"
-            path=""
             more $file | eval "sed $reg_script" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
         else
             if [ "${file##*.}" = "css" ]
