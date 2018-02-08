@@ -1,5 +1,9 @@
 import sys,re,json
 
+class Funcs(object):
+	def px2rem(self, value):
+		return f2s(float(value[:-2]) / getOption('px2rem', 75)) + 'rem'
+
 def getOption(name, defValue):
 	if name in options:
 		return options[name]
@@ -18,10 +22,6 @@ def repl(match):
 		return getattr(funcs, match.group(1))(match.group(2))
 	else:
 		return match.group()
-
-class Funcs(object):
-	def px2rem(self, value):
-		return f2s(float(value[:-2]) / getOption('px2rem', 75)) + 'rem'
 
 funcs = Funcs()
 pFunc = re.compile(r'(\w+)\(([^)]+)\)')
