@@ -54,5 +54,6 @@ var ecui;
         document.write('<script type="text/javascript" src="tools/html5shiv.js"></script>');
     }
     document.write('<script type="text/javascript" src="tools/less.js"></script>');
+    document.write('<script type="text/javascript" src="tools/less-funcs.js"></script>');
 //{/if}//
 }());
