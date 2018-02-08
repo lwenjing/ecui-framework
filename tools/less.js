@@ -758,7 +758,7 @@ less.registerStylesheets = function () {
     less.sheets = [];
 
     for (var i = 0; i < links.length; i++) {
-        if (/^stylesheet\/less(\.\d+)?$/.test(links[i].rel) || (links[i].rel.match(/stylesheet/) &&
+        if (/^stylesheet\/less(\{[^}]+\})?$/.test(links[i].rel) || (links[i].rel.match(/stylesheet/) &&
             (links[i].type.match(typePattern)))) {
             less.sheets.push(links[i]);
         }
@@ -791,12 +791,15 @@ less.refresh = function (reload, modifyVars, clearFileCache) {
         } else {
             less.logger.info("rendered " + sheet.href + " successfully.");
         }
-        if (/^stylesheet\/less\.(\d+)$/.test(sheet.rel)) {
-            var scale = +RegExp.$1;
+        if (/^stylesheet\/less(\{[^}]+\})?$/.test(sheet.rel)) {
+            var options = JSON.parse(+RegExp.$1);
             css = css.replace(
-                /px2rem\(([0-9]+)px\)/g,
-                function (match, value) {
-                    return (+value / scale) + 'rem';
+                /(\w+)\(([^)]+)\)/g,
+                function (match, name, value) {
+                    if (less.funcs && less.funcs[name]) {
+                        return less.funcs[name](value, options);
+                    }
+                    return match;
                 }
             );
         }

@@ -4,11 +4,7 @@ then
     exit -1
 fi
 
-css_proc="lessc - --plugin=less-plugin-clean-css"
-if [ $2 ]
-then
-    css_proc=$css_proc" | awk -f px2rem.awk -v div=$2"
-fi
+css_proc='lessc - --plugin=less-plugin-clean-css | python less-funcs.py "$2"'
 tpl_proc='java -jar ${path}smarty4j.jar --left //{ --right }// --charset utf-8'
 compress_proc='java -jar ${path}webpacker.jar --mode 1 --charset utf-8'
 reg_load="-e \"s/ecui.esr.loadRoute('/\/\/{include file='route./g\""
