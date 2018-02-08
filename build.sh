@@ -9,6 +9,11 @@ if [ $2 ]
 then
     css_proc=$css_proc" | awk -f px2rem.awk -v div=$2"
 fi
+tpl_proc='java -jar ${path}smarty4j.jar --left //{ --right }// --charset utf-8'
+compress_proc='java -jar ${path}webpacker.jar --mode 1 --charset utf-8'
+reg_load="-e \"s/ecui.esr.loadRoute('/\/\/{include file='route./g\""
+reg_script="-e \"s/ *document.write('<script type=\\\"text\\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
+reg_comment="-e \"/<\\!--$/{N;s/\\n/ /;}\" -e \"s/  / /g\" -e \"s/<\\!-- *\\!-->//g\" -e \"s/^[ ]*//g\" -e \"s/[ ]*$//g\" -e \"/^$/d\" -e \"/<script>window.onload=/d\""
 
 if [ $1 = 'ecui' ]
 then
@@ -17,8 +22,9 @@ then
         mkdir release
     fi
     echo "build ecui-2.0.0"
+    path=""
     more ecui.css | eval $css_proc > release/ecui-2.0.0.css
-    sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" ecui.js | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o release/ecui-2.0.0.js
+    eval "sed $reg_script ecui.js" | eval $tpl_proc | eval $compress_proc > release/ecui-2.0.0.js
     exit 0
 fi
 
@@ -56,9 +62,10 @@ do
 	            mkdir "$output/$file"
 	        fi
 	        cd "$1/$file"
-	        sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass('/\/\/{include file='class./g" -e "s/');/.js'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar ../../lib-fe/webpacker.jar --mode 1 --charset utf-8 -o "../../$output/$file/$file.js"
-            sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass(*//g" -e "s/');/.css'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | eval $css_proc > "../../$output/$file/$file.css"
-	        sed -e "s/ecui.esr.loadRoute('/\/\/{include file='route./g" -e "s/ecui.esr.loadClass(*//g" -e "s/');/.html'}\/\//g" $file".js" | java -jar ../../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | sed -e "/<\!--$/{N;s/\n/ /;}" -e "s/  / /g" -e "s/<\!-- *\!-->//g" -e "s/^[ ]*//g" -e "s/[ ]*$//g" -e "/^$/d" -e "/<script>window.onload=/d" > "../../$output/$file/$file.html"
+            path="../../lib-fe/"
+	        eval "sed $reg_load -e \"s/ecui.esr.loadClass('/\/\/{include file='class./g\" -e \"s/');/.js'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval $compress_proc > "../../$output/$file/$file.js"
+            eval "sed $reg_load -e \"s/ecui.esr.loadClass(*//g\" -e \"s/');/.css'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval $css_proc > "../../$output/$file/$file.css"
+	        eval "sed $reg_load -e \"s/ecui.esr.loadClass(*//g\" -e \"s/');/.html'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval "sed $reg_comment" > "../../$output/$file/$file.html"
 	        cd ../..
 	    else
 	    	if [ ! -f "$1/$file/.buildignore" ]
@@ -75,7 +82,8 @@ do
         if [ "${file##*.}" = "js" ]
         then
             cd $1
-            sed -e "/ecui.esr.loadModule/d" -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" $file | java -jar ../lib-fe/smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar ../lib-fe/webpacker.jar --mode 1 --charset utf-8 -o "../$output/$file"
+            path="../lib-fe/"
+            eval "sed -e \"/ecui.esr.loadModule/d\" $reg_script $file" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
             cd ..
         else
             if [ "${file##*.}" = "css" ]
@@ -86,7 +94,7 @@ do
             else
                 if [ "${file##*.}" = "html" ]
                 then
-                    sed -e "s/stylesheet\/less(\.[0-9]+)?/stylesheet/g" -e "/<\!--$/{N;s/\n/ /;}" -e "s/  / /g" -e "s/<\!-- *\!-->//g" -e "s/^[ ]*//g" -e "s/[ ]*$//g" -e "/^$/d" -e "/<script>window.onload=/d" "$1/$file" > "$output/$file"
+                    eval "sed -e \"s/stylesheet\\/less(\\.[0-9]+)?/stylesheet/g\" $reg_comment \"$1/$file\"" > "$output/$file"
                 else
                     cp "$1/$file $output/"
                 fi
@@ -103,7 +111,8 @@ do
         if [ "${file##*.}" = "js" ]
         then
             echo "process file-$file"
-            sed -e "s/ *document.write('<script type=\"text\/javascript\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g" $file | java -jar smarty4j.jar --left //{ --right }// --charset utf-8 | java -jar webpacker.jar --mode 1 --charset utf-8 -o "../"$output"/"$file
+            path=""
+            more $file | eval "sed $reg_script" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
         else
             if [ "${file##*.}" = "css" ]
             then
