@@ -8,8 +8,8 @@ css_proc='lessc - --plugin=less-plugin-clean-css | python ${path}less-funcs.py "
 tpl_proc='java -jar ${path}smarty4j.jar --left //{ --right }// --charset utf-8'
 compress_proc='java -jar ${path}webpacker.jar --mode 1 --charset utf-8'
 reg_load="-e \"s/ecui.esr.loadRoute('/\/\/{include file='route./g\""
-reg_script="-e \"s/ *document.write('<script type=\\\"text\\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
-reg_comment="-e \"/<\\!--$/{N;s/\\n/ /;}\" -e \"s/  / /g\" -e \"s/<\\!-- *\\!-->//g\" -e \"s/^[ ]*//g\" -e \"s/[ ]*$//g\" -e \"/^$/d\" -e \"/<script>window.onload=/d\""
+reg_script="-e \"s/ *document.write('<script type=\\\"text\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
+reg_comment="-e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<\!-- *$/{N;s/\\n//;}\" -e \"s/<\!-- *-->//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
 
 if [ $1 = 'ecui' ]
 then
@@ -90,7 +90,7 @@ do
             else
                 if [ "${file##*.}" = "html" ]
                 then
-                    eval "sed -e \"s/stylesheet\/less\(\\\\\\\\{\\\\w+\\\\\\\\}\)*/stylesheet/g\" $reg_comment \"$1/$file\"" > "$output/$file"
+                    eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" $reg_comment \"$1/$file\"" > "$output/$file"
                 else
                     cp "$1/$file $output/"
                 fi
@@ -131,7 +131,7 @@ cd $output
 tar -zcvf "../$1.tar.gz" *
 cd ..
 
-rm -rf $output
+# rm -rf $output
 
 if [ $flag ]
 then
