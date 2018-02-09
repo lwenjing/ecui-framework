@@ -395,6 +395,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mouseup: function (event) {
                 var target = currEnv.target,
+                    speed = core.getSpeed(),
                     inertia = 'function' === typeof currEnv.inertia ? currEnv.inertia.call(target) : currEnv.inertia || (target.$draginertia && target.$draginertia());
 
                 if (FeatureFlags.INERTIA_1 && inertia) {
@@ -403,8 +404,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         mx = mouseX,
                         my = mouseY,
                         start = Date.now(),
-                        vx = core.getXSpeed(),
-                        vy = core.getYSpeed(),
+                        vx = speed.x,
+                        vy = speed.y,
                         ax = vx / inertia,
                         ay = vy / inertia;
 
@@ -1732,12 +1733,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             return item;
         },
 
-        getXSpeed: function () {
-            return Date.now() - lastMoveTime > 500 ? 0 : speedX;
-        },
-
-        getYSpeed: function () {
-            return Date.now() - lastMoveTime > 500 ? 0 : speedY;
+        /**
+         * 获取光标/焦点移动的速度。
+         * @public
+         *
+         * @return {Object} 移动速度，包括两个属性 x,y 分别表示不同坐标轴上的速度
+         */
+        getSpeed: function () {
+            return Date.now() - lastMoveTime > 500 ? {x: 0, y: 0} : {x: speedX, y: speedY};
         },
 
         /**
