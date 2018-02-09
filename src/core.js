@@ -1379,29 +1379,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
-         * 创建一个 ECUI 单例控件，ECUI 并未实现真正意义上的单例，这里只是用于标记该控件不会被 dispose 方法释放。
-         * @public
-         *
-         * @param {Function} UIClass 控件的构造函数
-         * @param {HTMLElement} el 控件对应的 Element 对象
-         * @param {ecui.ui.Control} parent 控件的父控件
-         * @param {Object} options 初始化选项(参见 ECUI 控件)
-         * @return {ecui.ui.Control} ECUI 控件
-         */
-        createSingleton: function (UIClass, el, parent, options) {
-            if (FeatureFlags.SINGLETON_1) {
-                for (var i = 0, item; item = singletons[i++]; ) {
-                    if (item.constructor === UIClass) {
-                        return item;
-                    }
-                }
-            }
-            item = core.$fastCreate(UIClass, el, parent, options);
-            singletons.push(item);
-            return item;
-        },
-
-        /**
          * 委托框架在指定的 ECUI 控件 生成时执行某个方法。
          * 使用页面静态初始化或页面动态初始化(参见 ECUI 使用方式)方式，控件创建时，相关联控件也许还未创建。delegate 方法提供将指定的函数滞后到对应的控件创建后才调用的模式。如果 targetId 对应的控件还未创建，则调用会被搁置，直到需要的控件创建成功后，再自动执行(参见 create 方法)。
          * @public
@@ -1730,6 +1707,29 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         getScrollNarrow: function () {
             return scrollNarrow;
+        },
+
+        /**
+         * 获取一个 ECUI 单例控件，如果不存在则创建，ECUI 并未实现真正意义上的单例，这里只是用于标记该控件不会被 dispose 方法释放。
+         * @public
+         *
+         * @param {Function} UIClass 控件的构造函数
+         * @param {HTMLElement} el 控件对应的 Element 对象
+         * @param {ecui.ui.Control} parent 控件的父控件
+         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @return {ecui.ui.Control} ECUI 控件
+         */
+        getSingleton: function (UIClass, el, parent, options) {
+            if (FeatureFlags.SINGLETON_1) {
+                for (var i = 0, item; item = singletons[i++]; ) {
+                    if (item.constructor === UIClass) {
+                        return item;
+                    }
+                }
+            }
+            item = core.$fastCreate(UIClass, el, parent, options);
+            singletons.push(item);
+            return item;
         },
 
         getXSpeed: function () {
