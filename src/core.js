@@ -395,7 +395,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mouseup: function (event) {
                 var target = currEnv.target,
-                    inertia = 'function' === typeof currEnv.inertia ? currEnv.inertia.call(target) : currEnv.inertia;
+                    inertia = 'function' === typeof currEnv.inertia ? currEnv.inertia.call(target) : currEnv.inertia || (target.$draginertia && target.$draginertia());
 
                 if (FeatureFlags.INERTIA_1 && inertia) {
                     var uid = target.getUID(),
@@ -1539,8 +1539,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 var x = dragEnv.x !== undefined ? dragEnv.x : control.getX(),
                     y = dragEnv.y !== undefined ? dragEnv.y : control.getY();
-                dragEnv.right = Math.max(dragEnv.right - control.getWidth(), dragEnv.left);
-                dragEnv.bottom = Math.max(dragEnv.bottom - control.getHeight(), dragEnv.top);
+
+                if (!dragEnv.absolute) {
+                    dragEnv.right = Math.max(dragEnv.right - control.getWidth(), dragEnv.left);
+                    dragEnv.bottom = Math.max(dragEnv.bottom - control.getHeight(), dragEnv.top);
+                }
                 dragEnv.targetX = x;
                 dragEnv.targetY = y;
 
