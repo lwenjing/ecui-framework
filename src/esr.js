@@ -341,7 +341,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         CreateObject: core.inherits(
             ui.Control,
             function (el, options) {
-                ui.Control.constructor.call(this, el, options);
+                ui.Control.call(this, el, options);
                 dom.addClass(el, 'ui-hide');
             },
             {
@@ -355,7 +355,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         CreateArray: core.inherits(
             ui.Control,
             function (el, options) {
-                ui.Control.constructor.call(this, el, options);
+                ui.Control.call(this, el, options);
                 dom.addClass(el, 'ui-hide');
             },
             {
