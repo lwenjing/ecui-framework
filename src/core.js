@@ -773,10 +773,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 expectY = Math.round(expectY / range[4]) * range[4];
             }
             if (x !== expectX) {
-                codes.push('this.style.left->' + expectX);
+                codes.push('round:this.style.left->' + expectX);
             }
             if (y !== expectY) {
-                codes.push('this.style.top->' + expectY);
+                codes.push('round:this.style.top->' + expectY);
             }
 
             if (codes.length) {

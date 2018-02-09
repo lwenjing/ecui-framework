@@ -347,18 +347,25 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                 var result = [];
                 fn.split(';').forEach(function (item) {
                     var list = item.split('->'),
+                        math = '',
                         name = list[0];
 
+                    var values = list[0].split(':');
+                    if (values.length > 1) {
+                        math = 'Math.' + values[0];
+                        name = values[1];
+                    }
+
                     if (list[0].indexOf('.style.') >= 0) {
-                        var values = list[0].split('.');
+                        values = list[0].split('.');
                         list[0] = 'ecui.dom.getStyle(' + values[0] + ',"' + values[2] + '")';
                     }
 
                     values = new Function('$', 'return [' + list.join(',') + ']').call(options.$, options);
                     if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
                         var currValue = RegExp['$&'];
-                        if (currValue !== values[1]) {
-                            result.push(name + '=' + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + '(' + currValue + '+(' + values[1] + (list[1].slice(0, 2) !== '+(' ? '-(' + currValue + ')' : '') + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : ''));
+                        if (+currValue !== values[1]) {
+                            result.push(name + '=' + (RegExp.leftContext ? '"' + RegExp.leftContext.replace('"', '\\"') + '"+' : '') + math + '(' + currValue + '+(' + values[1] + (list[1].slice(0, 2) !== '+(' ? '-(' + currValue + ')' : '') + ')*p)' + (RegExp.rightContext ? '+"' + RegExp.rightContext.replace('"', '\\"') + '"' : ''));
                         }
                     }
                 });
@@ -382,7 +389,7 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                     if (options.onstep) {
                         options.onstep.call(options.$, percent);
                     }
-                    if (percent === 1) {
+                    if (percent >= 1) {
                         fn = options = transition = null;
                     }
                 }, -20);
