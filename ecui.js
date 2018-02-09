@@ -44,8 +44,10 @@ var ecui;
     document.write('<script type="text/javascript" src="src/etpl.js"></script>');
     document.write('<script type="text/javascript" src="src/esr.js"></script>');
 
+    document.write('<script type="text/javascript" src="src/m-scroll.js"></script>');
     document.write('<script type="text/javascript" src="src/m-select.js"></script>');
     document.write('<script type="text/javascript" src="src/m-calendar.js"></script>');
+    document.write('<script type="text/javascript" src="src/m-list-view.js"></script>');
     document.write('<script type="text/javascript" src="src/m-popup.js"></script>');
 //{if 0}//
     var ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;

@@ -11,13 +11,13 @@
             el.innerHTML = '<div class="' + ui.MSelect.CLASS + 'ui-mobile-calender-year"></div><div class="' + ui.MSelect.CLASS + 'ui-mobile-calender-month"></div><div class="' + ui.MSelect.CLASS + 'ui-mobile-calender-date"></div>';
             ui.Control.constructor.call(this, el, options);
             var list = dom.children(el);
-            this._uYear = core.$fastCreate(this.Scroll, list[0], this, {values: [2000, 2040], optionSize: 7});
-            this._uMonth = core.$fastCreate(this.Scroll, list[1], this, {values: [1, 12], optionSize: 7});
-            this._uDate = core.$fastCreate(this.Scroll, list[2], this, {values: [1, 31], optionSize: 7});
+            this._uYear = core.$fastCreate(this.Select, list[0], this, {values: [2000, 2040], optionSize: 7});
+            this._uMonth = core.$fastCreate(this.Select, list[1], this, {values: [1, 12], optionSize: 7});
+            this._uDate = core.$fastCreate(this.Select, list[2], this, {values: [1, 31], optionSize: 7});
             this._aItems = this._uDate.getItems();
         },
         {
-            Scroll: core.inherits(
+            Select: core.inherits(
                 ui.MSelect,
                 {
                     $change: function (event) {
