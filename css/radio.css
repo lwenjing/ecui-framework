@@ -8,8 +8,8 @@
         position: relative !important;
         width: 10px !important;
         left: -12px !important;
-        outline: none;
         border-radius: 0;
+        opacity: 0;
     }
 }
 .ui-radio-checked {

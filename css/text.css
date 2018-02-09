@@ -2,7 +2,6 @@
 .ui-text {
     width: 135px;
     height: 30px;
-    padding-left: 5px !important;
     line-height: 30px;
     border: 1px solid #acbaca;
     border-radius: 2px;
@@ -11,6 +10,9 @@
     .ui-placeholder {
         position: absolute;
         display: none;
+    }
+    input {
+        padding-left: 5px;
     }
     input,
     textarea {
@@ -31,19 +33,19 @@
     }
 }
 .ui-text-hover {
-    border:1px solid #8492a6;
+    border: 1px solid #8492a6;
     color: #495362;
 }
 .ui-text-active {
-    border:1px  solid #368CDA;
+    border: 1px  solid #368CDA;
 }
 .ui-text-focus {
-    border:1px solid #368CDA;
+    border: 1px solid #368CDA;
 }
 .ui-disabled .ui-text,
 .ui-text-disabled {
     background-color: #EFF2F7;
-    border:1px solid #E0E6ED;
+    border: 1px solid #E0E6ED;
     color: #E0E6ED;
     input{
         color: #8492A6;

@@ -1,20 +1,21 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-combox {
+    position: relative;
     width: 110px;
     height: 28px;
     padding-right: 30px;
     background: url(images/ecui/arrow.png) no-repeat 120px center;
     font-size: 14px;
-    font-family: "宋体";
     border: 1px solid #acbaca;
     color: #8492a6;
     .ui-combox-text {
-        position: absolute;
+        position: absolute !important;
         overflow: hidden !important;
     }
     input {
-        position: absolute;
-    	outline: none;
+        position: absolute !important;
+        padding-left: 5px;
+        outline: none;
     }
 }
 .ui-combox-hover {
@@ -36,25 +37,18 @@
     }
 }
 .ui-combox-options {
-    position: absolute !important;
     overflow: auto !important;
     border: 1px solid #d7d8d9;
     font-size: 12px;
-    font-family: "宋体";
     background: #fff;
-    overflow-x: hidden;
     .ui-combox-item {
-        display: block !important;
         text-indent: 10px;
         line-height: 28px;
-        overflow: hidden;
-        font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
-        text-overflow: ellipsis;
+        cursor: pointer;
     }
     .ui-combox-item-hover,
     .ui-combox-item-focus {
         background-color: #368cda;
         color: #fff;
-        cursor: pointer;
     }
 }

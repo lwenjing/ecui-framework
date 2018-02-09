@@ -5,10 +5,9 @@
 	input,
 	textarea {
 	    border: 0 !important;
-    	padding: 0 !important;
     	margin: 0 !important;
-	    font-family: "'Helvetica Neue', 'Microsoft Yahei','PingFang SC'";
 	    color: #495362;
+	    outline: none;
 	}
 	textarea {
 	    resize: none;

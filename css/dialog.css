@@ -1,11 +1,11 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-dialog {
+    position: absolute;
     background: #fff;
     border: none;
-    position: absolute;
     min-width: 120px;
     .ui-dialog-close {
-        position: absolute !important;
+        position: absolute;
         width: 15px;
         height: 15px;
         background: url(images/ecui/icons.png) no-repeat;
