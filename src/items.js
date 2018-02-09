@@ -80,6 +80,14 @@
             },
 
             /**
+             * @override
+             */
+            $ready: function (event) {
+                this.$Items.$ready.call(this, event);
+                this.alterItems();
+            },
+
+            /**
              * 选项组移除子选项后会自动调用 alterItems 方法。
              * @override
              */
@@ -195,14 +203,6 @@
              */
             getLength: function () {
                 return namedMap[this.getUID()].length;
-            },
-
-            /**
-             * @override
-             */
-            init: function (options) {
-                this.$Items.init.call(this, options);
-                this.alterItems();
             },
 
             /**
