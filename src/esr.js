@@ -688,7 +688,15 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 }
 
                 var method = varUrl.split(' '),
-                    headers = options.meta ? {'x-enum-version': metaVersion} : {};
+                    headers = {};
+
+                if (esr.headers) {
+                    util.extend(headers, esr.headers);
+                }
+
+                if (options.meta) {
+                    headers['x-enum-version'] = metaVersion;
+                }
 
                 if (method[0] === 'JSON' || method[0] === 'FORM') {
                     var url = method[1].split('?'),
