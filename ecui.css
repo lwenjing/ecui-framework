@@ -12,6 +12,8 @@
 @import (less) "css/popup.css";
 
 @import (less) "css/button.css";
+@import (less) "css/submit.css";
+@import (less) "css/cancel.css";
 @import (less) "css/dialog.css";
 @import (less) "css/label.css";
 @import (less) "css/month-view.css";
