@@ -659,7 +659,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         start = start || null;
         end = end || null;
         for (; start !== end; start = start.getParent()) {
-            event.returnValue = undefined;
             core.triggerEvent(start, type, event);
             if (event.cancelBubble) {
                 return;
