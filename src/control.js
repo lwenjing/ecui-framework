@@ -1,11 +1,11 @@
 /*
-示例
+@example
 <div ui="type:control">
     <!-- 这里放控件包含的内容 -->
     ...
 </div>
 
-属性
+@fields
 _bCapturable        - 控件是否响应浏览器事件状态
 _bUserSelect        - 控件是否允许选中内容
 _bFocusable         - 控件是否允许获取焦点

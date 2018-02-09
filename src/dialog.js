@@ -1,12 +1,11 @@
 /*
-窗体控件直接HTML初始化的例子:
+@example
 <div ui="type:dialog">
-  <strong>窗体的标题</strong>
-  <!-- 这里放窗体的内容 -->
+  <!-- 这里放滚动的内容 -->
   ...
 </div>
 
-属性
+@fields
 _bModal      - 是否使用showModal激活
 _uTitle     - 标题栏
 _uClose     - 关闭按钮
@@ -79,7 +78,7 @@ _uClose     - 关闭按钮
             bodyEl.style.cssText = '';
             el.appendChild(bodyEl);
 
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
 
             this._uClose = core.$fastCreate(this.Close, el.firstChild, this);
             this._uTitle = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});

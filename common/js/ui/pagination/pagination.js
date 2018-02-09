@@ -41,7 +41,7 @@ _nTotalPage       - 总页数
         ui.Control,
         'ui-pagination',
         function (el, options) {
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
             if (FeatureFlags.PAGEON_1 && options.route) {
                 // page值的形式: offset,total,pageSize,totalPage
                 var page = options.page.split(',');

@@ -118,7 +118,7 @@ _eRight      - 右侧乐定行的Element元素
         ui.Table,
         'ui-locked-table',
         function (el, options) {
-            ui.Table.prototype.constructor.call(this, el, options);
+            ui.Table.prototype.call(this, el, options);
 
             this._sTableWidth = dom.getParent(this.getBody()).style.width;
 
