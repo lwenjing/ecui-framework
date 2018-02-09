@@ -71,9 +71,8 @@
                     [top, 0, bottom, 0, this._nItemHeight]
                 );
 
-                if (this._cSelected && !this._cSelected.getParent()) {
-                    this.getBody().style.top = top + 'px';
-                    setSelected(this, this.getItems().pop());
+                if (!this.isReady()) {
+                    this.getBody().style.top = (bottom + this._nItemHeight) + 'px';
                 }
             },
             $cache: function (style, cacheSize) {
@@ -126,7 +125,7 @@
                     for (var i = 0, items = this.getItems(); i < items.length; i++) {
                         if (items[i].getContent() === value) {
                             setSelected(this, items[i]);
-                            this.getBody().style.top = this._nNormalBottom - this._nItemHeight * i;
+                            this.getBody().style.top = (this._nNormalBottom - this._nItemHeight * i) + 'px';
                             return;
                         }
                     }

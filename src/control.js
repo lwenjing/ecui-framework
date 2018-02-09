@@ -961,6 +961,7 @@ _aStatus            - 控件当前的状态集合
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
                         core.triggerEvent(this, 'ready', {options: options});
+                        this._bReady = true;
                     } else {
                         if (!waitReadyList) {
                             // 页面未加载完成，首先将 $ready 方法的调用存放在调用序列中
@@ -971,6 +972,7 @@ _aStatus            - 控件当前的状态集合
                                 function () {
                                     waitReadyList.forEach(function (item) {
                                         core.triggerEvent(item.control, 'ready', {options: item.options});
+                                        item.control._bReady = true;
                                     });
                                     waitReadyList = null;
                                 }
@@ -980,7 +982,6 @@ _aStatus            - 控件当前的状态集合
                             waitReadyList.push({control: this, options: options});
                         }
                     }
-                    this._bReady = true;
                 }
             },
 

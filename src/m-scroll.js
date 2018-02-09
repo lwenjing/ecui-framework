@@ -2,7 +2,8 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util;
 //{/if}//
     ui.MScroll = core.inherits(
         ui.Control,
@@ -51,6 +52,7 @@
                     }
                 );
             },
+            $dragend: util.blank,
             $dragmove: function (event) {
                 ui.Control.prototype.$dragmove.call(this, event);
                 var style = this.getBody().style;

@@ -790,8 +790,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             event.x = util.toNumber(this.style.left);
                             event.y = util.toNumber(this.style.top);
                             core.triggerEvent(target, 'dragmove', event);
-                            if (percent === 1) {
-                                core.triggerEvent(target, 'change', event);
+                            if (percent >= 1) {
                                 inertiaHandles[uid]();
                                 core.triggerEvent(target, 'dragend', event);
                                 delete inertiaHandles[uid];

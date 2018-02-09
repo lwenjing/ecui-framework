@@ -20,8 +20,8 @@
             Select: core.inherits(
                 ui.MSelect,
                 {
-                    $change: function (event) {
-                        ui.MSelect.prototype.$change.call(this, event);
+                    $dragend: function (event) {
+                        ui.MSelect.prototype.$dragend.call(this, event);
                         var parent = this.getParent();
                         if (this === parent._uYear || this === parent._uMonth) {
                             var year = parent._uYear.getValue(),
@@ -30,7 +30,11 @@
                                 parent._uDate.preventAlterItems();
                                 var days = new Date(year, month, 0).getDate(),
                                     oldDays = parent._uDate.getLength();
+
                                 if (days < oldDays) {
+                                    if (parent._uDate.getValue() > days) {
+                                        parent._uDate.setValue(days);
+                                    }
                                     for (; days < oldDays; days++) {
                                         parent._uDate.remove(parent._aItems[days]);
                                     }
