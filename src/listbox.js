@@ -26,9 +26,7 @@ _eInput - 选项对应的input，form提交时使用
         'ui-listbox',
         function (el, options) {
             ui.Control.call(this, el, options);
-
             this._sName = options.name || '';
-            this.$initItems();
         },
         {
             /**

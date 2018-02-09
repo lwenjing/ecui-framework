@@ -1,5 +1,5 @@
 /*
-选项组接口，是对选项进行操作的方法的集合，提供了基本的增/删操作，通过将 ecui.ui.Items 对象下的方法复制到类的 prototype 属性下继承接口，最终对象要正常使用还需要在类构造器中调用 $initItems 方法。
+选项组接口，是对选项进行操作的方法的集合，提供了基本的增/删操作，通过将 ecui.ui.Items 对象下的方法复制到类的 prototype 属性下继承接口。
 */
 (function () {
 //{if 0}//
@@ -24,6 +24,17 @@
 
     ui.Items = {
         NAME: '$Items',
+
+        constructor: function () {
+            (namedMap[this.getUID()] = []).preventCount = 0;
+
+            this.preventAlterItems();
+
+            // 初始化选项控件
+            this.add(dom.children(this.getBody()));
+
+            this.premitAlterItems();
+        },
 
         Methods: {
             // 选项控件的文本在 options 中的名称
@@ -59,24 +70,6 @@
             $dispose: function () {
                 delete namedMap[this.getUID()];
                 this.$Items.$dispose.call(this);
-            },
-
-            /**
-             * 初始化选项组对应的内部元素对象。
-             * 选项组假设选项的主元素在内部元素中，因此实现了 Items 接口的类在初始化时需要调用 $initItems 方法自动生成选项控件，$initItems 方法内部保证一个控件对象只允许被调用一次，多次的调用无效。
-             * @protected
-             */
-            $initItems: function () {
-                (namedMap[this.getUID()] = []).preventCount = 0;
-
-                // 防止因为选项变化引起重复刷新，以及防止控件进行多次初始化操作
-                this.$initItems = util.blank;
-                this.preventAlterItems();
-
-                // 初始化选项控件
-                this.add(dom.children(this.getBody()));
-
-                this.premitAlterItems();
             },
 
             /**

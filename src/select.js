@@ -126,8 +126,6 @@ _uOptions     - 下拉选择框
             // 初始化下拉区域最多显示的选项数量
             this._nOptionSize = options.optionSize || 10;
 
-            this.$initItems();
-
             this.setPopup(this._uOptions);
 
             this._cSelected = null;

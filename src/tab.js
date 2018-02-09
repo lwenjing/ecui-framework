@@ -71,7 +71,6 @@ _eContainer      - 容器 DOM 元素
             ui.Control.call(this, el, options);
 
             this.$setBody(titleEl);
-            this.$initItems();
         },
         {
             /**
