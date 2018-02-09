@@ -348,13 +348,14 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                 fn.split(';').forEach(function (item) {
                     var list = item.split('->'),
                         math = '',
-                        name = list[0];
+                        values = list[0].split(':');
 
-                    var values = list[0].split(':');
                     if (values.length > 1) {
                         math = 'Math.' + values[0];
-                        name = values[1];
+                        list[0] = values[1];
                     }
+
+                    var name = list[0];
 
                     if (list[0].indexOf('.style.') >= 0) {
                         values = list[0].split('.');
