@@ -9,7 +9,7 @@
         'ui-mobile-calendar',
         function (el, options) {
             el.innerHTML = '<div class="' + ui.MSelect.CLASS + 'ui-mobile-calender-year"></div><div class="' + ui.MSelect.CLASS + 'ui-mobile-calender-month"></div><div class="' + ui.MSelect.CLASS + 'ui-mobile-calender-date"></div>';
-            ui.Control.constructor.call(this, el, options);
+            ui.Control.call(this, el, options);
             var list = dom.children(el);
             this._uYear = core.$fastCreate(this.Select, list[0], this, {values: [2000, 2040], optionSize: 7});
             this._uMonth = core.$fastCreate(this.Select, list[1], this, {values: [1, 12], optionSize: 7});
