@@ -84,7 +84,7 @@ _uOptions     - 下拉选择框
                     {
                         className: el.className,
                         style: {
-                            cssText: oldEl.style.cssText
+                            cssText: el.style.cssText
                         }
                     }
                 ),
