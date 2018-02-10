@@ -5,6 +5,8 @@
   <li>2</li>
   ...
 </ul>
+或
+<div ui="type:m-select;option-size:7;values:1-12;value:2"></div>
 
 @fields
 _nRadius       - 上下元素数量
@@ -38,6 +40,7 @@ _nMaxBottom    - 滚动时的最大底部坐标
      * 移动端下拉框控件。
      * options 属性：
      * option-size  最大显示的选项数量，需要奇数
+     * values       数值型选项缩写，第1项表示开始的数字，第2项表示结束的数字，第3项表示累计值
      * value        默认选中的值
      * @control
      */
@@ -51,7 +54,7 @@ _nMaxBottom    - 滚动时的最大底部坐标
 
             if (values) {
                 if ('string' === typeof values) {
-                    values = values.split(',');
+                    values = values.split(/[\-,]/);
                 }
                 values[0] = +values[0];
                 values[1] = +values[1];

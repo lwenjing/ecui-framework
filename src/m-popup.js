@@ -1,5 +1,5 @@
 /*
-弹出操作集合，提供了基本的点击显示/关闭操作，通过将 ecui.ui.Popup 对象下的方法复制到类的 prototype 属性下继承接口，最终对象要正常使用需要通过 setPopup 方法设置自己关联的弹出层。
+移动端弹出操作集合，提供了从4个不同的方向飞入界面指定位置的操作，弹出层控件支持 enter 与 scale 初始化选项。
 */
 (function () {
 //{if 0}//
@@ -8,22 +8,27 @@
         ui = core.ui,
         util = core.util;
 //{/if}//
+    /**
+     * 设置弹出层信息。
+     * @private
+     *
+     * @param {ecui.ui.Control} control 弹出层的父控件
+     */
     function setPopup(control) {
         var view = util.getView(),
             data = namedMap[control.getUID()],
-            style = control.constructor.POPUP.getOuter().style,
+            popup = control.constructor.POPUP,
+            el = popup.getOuter(),
+            style = el.style,
             width = view.width * data[1],
             height = view.height * data[0];
 
-        control.constructor.POPUP.setSize(view.width, view.height);
-
-        style.backgroundColor = 'white';
-        style.position = 'fixed';
-        style.overflow = 'auto';
         style.top = height + 'px';
         style.left = width + 'px';
-        style.display = '';
-        ecui.effect.grade('this.style.left->' + (width * data[2]) + ';this.style.top->' + (height * data[2]), 1000, {$: control.constructor.POPUP.getOuter()});
+        popup.setSize(view.width, view.height);
+        popup.show();
+
+        ecui.effect.grade('this.style.left->' + (width * data[2]) + ';this.style.top->' + (height * data[2]), 1000, {$: el});
     }
 
     var namedMap = {},
@@ -47,15 +52,11 @@
                     ui.Control,
                     document.body.appendChild(
                         dom.create(
-                            'DIV',
                             {
-                                style: {
-                                    display: 'none'
-                                }
+                                className: 'ui-mobile-popup ui-hide',
                             }
                         )
-                    ),
-                    ''
+                    )
                 );
             }
         },

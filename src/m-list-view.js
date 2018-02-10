@@ -8,6 +8,7 @@
 @fields
 _eHeader   - 顶部 DOM 元素
 _eFooter   - 底部 DOM 元素
+_sStatus   - 控件当前状态
 */
 //{if 0}//
 (function () {
@@ -38,7 +39,10 @@ _eFooter   - 底部 DOM 元素
              */
             $alterItems: function () {
                 // 第一次进来使用缓存的数据，第二次进来取实际数据
-                var top = this.getHeight() - (this.isReady() ? this.getBody().offsetHeight : this.$$bodyHeight);
+                if (this.isReady()) {
+                    this.$$bodyHeight = this.getBody().offsetHeight;
+                }
+                var top = this.getHeight() - this.$$bodyHeight;
                 this.setRange(
                     {
                         left: 0,
@@ -77,6 +81,74 @@ _eFooter   - 底部 DOM 元素
             $dispose: function () {
                 this._eHeader = this._eFooter = null;
                 ui.MScroll.prototype.$dispose.call(this);
+            },
+
+            /**
+             * 拖拽到最底部事件。
+             * @event
+             */
+            $footercomplete: util.blank,
+
+            /**
+             * 拖拽到达底部区域事件。
+             * @event
+             */
+            $footerenter: util.blank,
+
+            /**
+             * 拖拽离开底部区域事件。
+             * @event
+             */
+            $footerleave: util.blank,
+
+            /**
+             * 拖拽到最顶部事件。
+             * @event
+             */
+            $headercomplete: util.blank,
+
+            /**
+             * 拖拽到达顶部区域事件。
+             * @event
+             */
+            $headerenter: util.blank,
+
+            /**
+             * 拖拽离开顶部区域事件。
+             * @event
+             */
+            $headerleave: util.blank,
+
+            /**
+             * @override
+             */
+            $dragmove: function (event) {
+                ui.MScroll.prototype.$dragmove.call(this, event);
+                var top = this.getHeight() - this.$$bodyHeight;
+                if (event.y < top + this.$$footerHeight) {
+                    var status = event.y > top ? 'footerenter' : 'footercomplete';
+                } else if (event.y > -this.$$headerHeight) {
+                    status = event.y < 0 ? 'headerenter' : 'headercomplete';
+                } else {
+                    status = '';
+                }
+                if (this._sStatus && this._sStatus.slice(0, 1) !== status.slice(0, 1)) {
+                    core.triggerEvent(this, this._sStatus.slice(0, 6) + 'leave');
+                }
+                if (this._sStatus !== status) {
+                    if (status) {
+                        core.triggerEvent(this, status);
+                    }
+                    this._sStatus = status;
+                }
+            },
+
+            /**
+             * @override
+             */
+            $dragstart: function (event) {
+                ui.MScroll.prototype.$dragstart.call(this, event);
+                this._sStatus = '';
             },
 
             /**
@@ -125,6 +197,16 @@ _eFooter   - 底部 DOM 元素
              */
             getHeader: function () {
                 return this._eHeader;
+            },
+
+            /**
+             * 获取当前状态。
+             * @public
+             *
+             * @return {string} 当前状态
+             */
+            getStatus: function () {
+                return this._sStatus;
             }
         },
         ui.Items
