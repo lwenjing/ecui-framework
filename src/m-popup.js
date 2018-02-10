@@ -23,12 +23,11 @@
             width = view.width * data[1],
             height = view.height * data[0];
 
-        style.top = height + 'px';
-        style.left = width + 'px';
+        style.top = (document.body.scrollTop + height) + 'px';
+        style.left = (document.body.scrollLeft + width) + 'px';
         popup.setSize(view.width, view.height);
-        popup.show();
 
-        ecui.effect.grade('this.style.left->' + (width * data[2]) + ';this.style.top->' + (height * data[2]), 1000, {$: el});
+        ecui.effect.grade('round:this.style.left->' + (document.body.scrollLeft + width * data[2]) + ';round:this.style.top->' + (document.body.scrollTop + height * data[2]), 1000, {$: el});
     }
 
     var namedMap = {},
@@ -78,16 +77,27 @@
             $click: function (event) {
                 this.$MPopup.$click.call(this, event);
 
-                var el = this.constructor.POPUP.getOuter();
-                setPopup(this);
+                var view = util.getView(),
+                    data = namedMap[this.getUID()],
+                    popup = this.constructor.POPUP,
+                    el = popup.getOuter(),
+                    style = el.style,
+                    width = view.width * data[1],
+                    height = view.height * data[0];
+
+                style.top = (document.body.scrollTop + height) + 'px';
+                style.left = (document.body.scrollLeft + width) + 'px';
+                popup.setSize(view.width, view.height);
+
+                ecui.effect.grade('round:this.style.left->' + (document.body.scrollLeft + width * data[2]) + ';round:this.style.top->' + (document.body.scrollTop + height * data[2]), 1000, {$: el});
 
                 if (!dom.getParent(el)) {
                     // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
                     document.body.appendChild(el);
-                    this.constructor.POPUP.cache(true, true);
+                    popup.cache(true, true);
                 }
 
-                this.constructor.POPUP.show();
+                popup.show();
             },
 
             /**
@@ -103,7 +113,10 @@
              */
             $repaint: function (event) {
                 this.$MPopup.$repaint.call(this, event);
-                setPopup(this);
+                if (this.constructor.POPUP.isShow()) {
+                    var view = util.getView();
+                    this.constructor.POPUP.setSize(view.width, view.height);
+                }
             }
         }
     };
