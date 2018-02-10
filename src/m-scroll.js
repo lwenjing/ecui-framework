@@ -63,6 +63,7 @@ _oNormal   - 滚动结束后回弹的区域范围，格式为[top, right, bottom
                     event,
                     {
                         el: body,
+                        inertia: 0.5,
                         absolute: true,
                         left: this._nLeft !== undefined ? this._nLeft : body.offsetLeft,
                         right: this._nRight !== undefined ? this._nRight : body.offsetLeft,

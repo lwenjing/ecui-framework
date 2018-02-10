@@ -50,6 +50,7 @@
             this.add(dom.children(this.getBody()));
 
             this.premitAlterItems();
+            this.alterItems();
         },
 
         Methods: {
@@ -156,8 +157,8 @@
                     }
 
                     // 选项控件，直接添加
-                    core.triggerEvent(this, 'append', {child: item});
-                    if (item.getParent()) {
+                    if (core.triggerEvent(this, 'append', {child: item})) {
+                        item.$setParent(this);
                         items.push(item);
                     }
                 }, this);
@@ -246,7 +247,9 @@
                     item = namedMap[this.getUID()][item];
                 }
                 if (item) {
-                    if (!core.triggerEvent(this, 'remove', {child: item})) {
+                    if (core.triggerEvent(this, 'remove', {child: item})) {
+                        item.$setParent();
+                    } else {
                         item = null;
                     }
                 }
