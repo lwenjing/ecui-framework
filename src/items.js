@@ -19,7 +19,23 @@
      */
     ui.Item = core.inherits(
         ui.Control,
-        'ui-item'
+        'ui-item',
+        {
+            /**
+             * 选项控件的父控件必须实现 Items 接口，同时选项控件有父控件时不能设置别的父控件。
+             * @override
+             */
+            setParent: function (parent) {
+                var oldParent = this.getParent();
+                if (parent) {
+                    if (parent.$Items && !oldParent) {
+                        parent.add(this);
+                    }
+                } else if (oldParent) {
+                    oldParent.remove(this);
+                }
+            }
+        }
     );
 
     ui.Items = {
@@ -46,11 +62,13 @@
              */
             $append: function (event) {
                 // 检查待新增的控件是否为选项控件
-                if (!(event.child instanceof (this.Item || ui.Item)) || this.$Items.$append.call(this, event) === false) {
-                    return false;
+                if (event.child instanceof (this.Item || ui.Item)) {
+                    this.$Items.$append.call(this, event);
+                    if (event.returnValue !== false) {
+                        namedMap[this.getUID()].push(event.child);
+                        this.alterItems();
+                    }
                 }
-                namedMap[this.getUID()].push(event.child);
-                this.alterItems();
             },
 
             /**
@@ -87,8 +105,10 @@
             $remove: function (event) {
                 core.$clearState(event.child);
                 this.$Items.$remove.call(this, event);
-                util.remove(namedMap[this.getUID()], event.child);
-                this.alterItems();
+                if (event.returnValue !== false) {
+                    util.remove(namedMap[this.getUID()], event.child);
+                    this.alterItems();
+                }
             },
 
             /**
@@ -136,7 +156,7 @@
                     }
 
                     // 选项控件，直接添加
-                    item.setParent(this);
+                    core.triggerEvent(this, 'append', {child: item});
                     if (item.getParent()) {
                         items.push(item);
                     }
@@ -226,7 +246,9 @@
                     item = namedMap[this.getUID()][item];
                 }
                 if (item) {
-                    item.setParent();
+                    if (!core.triggerEvent(this, 'remove', {child: item})) {
+                        item = null;
+                    }
                 }
                 return item || null;
             },
