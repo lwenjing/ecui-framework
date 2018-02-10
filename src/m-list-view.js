@@ -11,6 +11,8 @@ _eFooter       - 底部 DOM 元素
 _sStatus       - 控件当前状态
 _nTopHidden    - 上部隐藏区域高度
 _nBottomHidden - 下部隐藏区域高度
+_nTopIndex     - 上部隐藏的选项序号
+_nBottomIndex  - 下部隐藏的选项序号
 */
 //{if 0}//
 (function () {
