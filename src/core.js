@@ -9,30 +9,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         util = core.util,
         ui = core.ui,
 
-        devicePixelRatio = window.devicePixelRatio || 1,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
-
-    function adjustFontSize(sheets) {
-        if (isMobile) {
-            var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size')),
-                devicePixelRatio = window.devicePixelRatio || 1;
-
-            sheets.forEach(function (item) {
-                item = item.rules || item.cssRules;
-                for (var i = 0, rule; rule = item[i++]; ) {
-                    var value = rule.style['font-size'];
-                    if (value && value.slice(-3) === 'rem') {
-                        rule.style['font-size'] = (Math.ceil(fontSize * +value.slice(0, -3) / devicePixelRatio) * devicePixelRatio) + 'px';
-                    }
-                }
-            });
-        }
-    }
 //{/if}//
     var scrollHandler,            // DOM滚动事件
         isMobileScroll,
@@ -1841,7 +1823,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         init: function (el) {
             if (!initEnvironment() && el) {
-                adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+                util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
 
                 var list = dom.getAttribute(el, ecuiName) ? [el] : [],
                     controls = [],

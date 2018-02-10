@@ -16,23 +16,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         safariVersion = /(\d+\.\d)(\.\d)?\s+safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 
-    function adjustFontSize(sheets) {
-        if (isMobile) {
-            var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size')),
-                devicePixelRatio = window.devicePixelRatio || 1;
-
-            sheets.forEach(function (item) {
-                item = item.rules || item.cssRules;
-                for (var i = 0, rule; rule = item[i++]; ) {
-                    var value = rule.style['font-size'];
-                    if (value && value.slice(-3) === 'rem') {
-                        rule.style['font-size'] = (Math.ceil(fontSize * +value.slice(0, -3) / devicePixelRatio) * devicePixelRatio) + 'px';
-                    }
-                }
-            });
-        }
-    }
-
     ecui = {
         /**
          * 返回指定id的 DOM 对象。
@@ -172,7 +155,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 document.head.appendChild(el);
 
-                adjustFontSize([document.styleSheets[document.styleSheets.length - 1]]);
+                util.adjustFontSize([document.styleSheets[document.styleSheets.length - 1]]);
             },
 
             /**
@@ -1225,7 +1208,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             list = [];
 
         if (document.addEventListener && !operaVersion) {
-            document.addEventListener('DOMContentLoaded', loadedHandler, false);
+            dom.addEventListener(document, 'DOMContentLoaded', loadedHandler);
         } else if (ieVersion && window === top) {
             checkLoaded();
         }
@@ -1241,6 +1224,38 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
         };
     }());
+
+    /*
+     * 自适应调整字体大小。
+     * @public
+     *
+     * @param {Array} sheets 样式对象列表
+     */
+    util.adjustFontSize = isMobile ? (function () {
+        var fontSizeCache = [];
+
+        dom.addEventListener(window, 'orientationchange', function () {
+            var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+            fontSizeCache.forEach(function (item) {
+                item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
+            });
+        });
+
+        return function (sheets) {
+            var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+            sheets.forEach(function (item) {
+                item = item.rules || item.cssRules;
+                for (var i = 0, rule; rule = item[i++]; ) {
+                    var value = rule.style['font-size'];
+                    if (value && value.slice(-3) === 'rem') {
+                        value = +value.slice(0, -3);
+                        fontSizeCache.push([rule.style, value]);
+                        rule.style['font-size'] = (Math.round(fontSize * value / 2) * 2) + 'px';
+                    }
+                }
+            });
+        };
+    }()) : util.blank;
 
     if (ieVersion < 9) {
         document.head = document.getElementsByTagName('HEAD')[0];
