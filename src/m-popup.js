@@ -8,28 +8,6 @@
         ui = core.ui,
         util = core.util;
 //{/if}//
-    /**
-     * 设置弹出层信息。
-     * @private
-     *
-     * @param {ecui.ui.Control} control 弹出层的父控件
-     */
-    function setPopup(control) {
-        var view = util.getView(),
-            data = namedMap[control.getUID()],
-            popup = control.constructor.POPUP,
-            el = popup.getOuter(),
-            style = el.style,
-            width = view.width * data[1],
-            height = view.height * data[0];
-
-        style.top = (document.body.scrollTop + height) + 'px';
-        style.left = (document.body.scrollLeft + width) + 'px';
-        popup.setSize(view.width, view.height);
-
-        ecui.effect.grade('round:this.style.left->' + (document.body.scrollLeft + width * data[2]) + ';round:this.style.top->' + (document.body.scrollTop + height * data[2]), 1000, {$: el});
-    }
-
     var namedMap = {},
         position = {
             top: [-1, 0],
