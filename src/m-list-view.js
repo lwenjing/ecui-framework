@@ -6,9 +6,11 @@
 </ul>
 
 @fields
-_eHeader   - 顶部 DOM 元素
-_eFooter   - 底部 DOM 元素
-_sStatus   - 控件当前状态
+_eHeader       - 顶部 DOM 元素
+_eFooter       - 底部 DOM 元素
+_sStatus       - 控件当前状态
+_nTopHidden    - 上部隐藏区域高度
+_nBottomHidden - 下部隐藏区域高度
 */
 //{if 0}//
 (function () {
@@ -33,6 +35,7 @@ _sStatus   - 控件当前状态
             this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
             this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
         },
+        ui.Items,
         {
             /**
              * @override
@@ -40,8 +43,30 @@ _sStatus   - 控件当前状态
             $alterItems: function () {
                 // 第一次进来使用缓存的数据，第二次进来取实际数据
                 if (this.isReady()) {
-                    this.$$bodyHeight = this.getBody().offsetHeight;
+                    this.$$bodyHeight = this.getBody().offsetHeight + this._nTopHidden + this._nBottomIndex;
+                    this.getItems().map(function (item) {
+                        item.cache();
+                        return item.getOuter().offsetWidth ? item : null;
+                    }).forEach(function (item, index) {
+                        if (item) {
+                            if (index < this._nTopIndex) {
+                                item.hide();
+                                this._nTopIndex++;
+                                this._nTopHidden += item.getHeight();
+                                this._nBottomIndex++;
+                            } else if (index > this._nBottomIndex) {
+                                item.hide();
+                                this._nBottomIndex++;
+                                this._nBottomHidden += item.getHeight();
+                            }
+                        }
+                    });
+                } else {
+                    this._nTopHidden = this._nBottomHidden = 0;
+                    this._nTopIndex = 0;
+                    this._nBottomIndex = this.getLength();
                 }
+
                 var top = this.getHeight() - this.$$bodyHeight;
                 this.setRange(
                     {
@@ -49,8 +74,8 @@ _sStatus   - 控件当前状态
                         right: 0,
                         top: top,
                         bottom: 0
-                    },
-                    [top + this.$$footerHeight, 0, -this.$$headerHeight, 0]
+                    }/*,
+                    [top + this.$$footerHeight, 0, -this.$$headerHeight, 0]*/
                 );
             },
 
@@ -123,12 +148,59 @@ _sStatus   - 控件当前状态
              * @override
              */
             $dragmove: function (event) {
+                var y = event.y,
+                    top = util.toNumber(this.getBody().style.top);
+
+                if (top < -screen.availHeight * 1.5) {
+                    for (; top < -screen.availHeight * 1.5; ) {
+                        var item = this.getItem(this._nTopIndex++),
+                            height = item.getHeight();
+
+                        item.hide();
+                        this._nTopHidden += height;
+                        top += height;
+                    }
+                } else if (top > -screen.availHeight) {
+                    for (; top > -screen.availHeight && this._nTopIndex; ) {
+                        item = this.getItem(--this._nTopIndex);
+                        height = item.getHeight();
+
+                        item.show();
+                        this._nTopHidden -= height;
+                        top -= height;
+                    }
+                }
+
+                top = this.getHeight() - this.$$bodyHeight - y + this._nBottomHidden;
+                if (top < -screen.availHeight * 1.5) {
+                    for (; top < -screen.availHeight * 1.5; ) {
+                        item = this.getItem(--this._nBottomIndex);
+                        height = item.getHeight();
+
+                        item.hide();
+                        this._nBottomHidden += height;
+                        top += height;
+                    }
+                } else if (top > -screen.availHeight) {
+                    var length = this.getLength();
+                    for (; top > -screen.availHeight && this._nBottomIndex < length; ) {
+                        item = this.getItem(this._nBottomIndex++);
+                        height = item.getHeight();
+
+                        item.show();
+                        this._nBottomHidden -= height;
+                        top -= height;
+                    }
+                }
+                event.y += this._nTopHidden;
+
                 ui.MScroll.prototype.$dragmove.call(this, event);
-                var top = this.getHeight() - this.$$bodyHeight;
-                if (event.y < top + this.$$footerHeight) {
-                    var status = event.y > top ? 'footerenter' : 'footercomplete';
-                } else if (event.y > -this.$$headerHeight) {
-                    status = event.y < 0 ? 'headerenter' : 'headercomplete';
+
+                top = this.getHeight() - this.$$bodyHeight;
+                if (y < top + this.$$footerHeight) {
+                    var status = y > top ? 'footerenter' : 'footercomplete';
+                } else if (y > -this.$$headerHeight) {
+                    status = y < 0 ? 'headerenter' : 'headercomplete';
                 } else {
                     status = '';
                 }
@@ -180,6 +252,16 @@ _sStatus   - 控件当前状态
             },
 
             /**
+             * 本控件新增选项只能从顶部或底部。
+             * @override
+             */
+            add: function (item, index) {
+                if (!index) {
+                    ui.Items.Methods.add.call(this, item, index);
+                }
+            },
+
+            /**
              * 获取底部元素。
              * @public
              *
@@ -207,9 +289,21 @@ _sStatus   - 控件当前状态
              */
             getStatus: function () {
                 return this._sStatus;
-            }
-        },
-        ui.Items
+            },
+
+            /**
+             * @override
+             */
+            getY: function () {
+                return ui.MScroll.prototype.getY.call(this) - this._nTopHidden;
+            },
+
+            /**
+             * 本控件不支持删除选项的操作。
+             * @override
+             */
+            remove: util.blank
+        }
     );
 //{if 0}//
 }());

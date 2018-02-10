@@ -63,8 +63,6 @@ _oNormal   - 滚动结束后回弹的区域范围，格式为[top, right, bottom
                     event,
                     {
                         el: body,
-                        x: body.offsetLeft,
-                        y: body.offsetTop,
                         absolute: true,
                         left: this._nLeft !== undefined ? this._nLeft : body.offsetLeft,
                         right: this._nRight !== undefined ? this._nRight : body.offsetLeft,
@@ -92,6 +90,20 @@ _oNormal   - 滚动结束后回弹的区域范围，格式为[top, right, bottom
             $dragstart: function (event) {
                 ui.Control.prototype.$dragstart.call(this, event);
                 event.preventDefault();
+            },
+
+            /**
+             * @override
+             */
+            getX: function () {
+                return this.getBody().offsetLeft;
+            },
+
+            /**
+             * @override
+             */
+            getY: function () {
+                return this.getBody().offsetTop;
             },
 
             /**
