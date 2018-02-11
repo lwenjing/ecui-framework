@@ -58,11 +58,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
+             * @param {Object|boolean} options 对支持 addEventListener 的浏览器有效，IE9以下无效
              */
             addEventListener: ieVersion < 9 ? function (obj, type, func) {
                 obj.attachEvent('on' + type, func);
-            } : function (obj, type, func) {
-                obj.addEventListener(type, func, true);
+            } : function (obj, type, func, options) {
+                obj.addEventListener(type, func, options !== undefined ? options : true);
             },
 
             /**
@@ -477,11 +478,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
+             * @param {Object|boolean} options 对支持 addEventListener 的浏览器有效，IE9以下无效
              */
             removeEventListener: ieVersion < 9 ? function (obj, type, func) {
                 obj.detachEvent('on' + type, func);
-            } : function (obj, type, func) {
-                obj.removeEventListener(type, func, true);
+            } : function (obj, type, func, options) {
+                obj.removeEventListener(type, func, options !== undefined ? options : true);
             },
 
             /**

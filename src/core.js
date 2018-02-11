@@ -12,9 +12,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
-        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
+        chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var scrollHandler,            // DOM滚动事件
         isMobileScroll,
@@ -57,15 +56,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         eventStack = {},          // 事件调用堆栈记录，防止事件重入
 
         envStack = [],            // 高优先级事件调用时，保存上一个事件环境的栈
-        currEnv = {               // 当前操作的环境
-
+        events = {
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
-            /**
-             * 按压开始事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
             touchstart: function (event) {
                 if (core.isTouch()) {
                     // 屏弊多指操作的ECUI事件响应
@@ -81,24 +73,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             },
 
-            /**
-             * 按压移动事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
             touchmove: function (event) {
                 if (!ieVersion) {
                     currEnv.mousemove(event);
                 }
             },
 
-            /**
-             * 按压结束事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
             touchend: function (event) {
                 touchCount--;
                 if (isMobileScroll) {
@@ -121,16 +101,85 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             },
 
-            /**
-             * 按压取消事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
             touchcancel: function (event) {
                 currEnv.touchend(event);
             },
 
+            mousedown: function (event) {
+                currEnv.mousedown(event);
+            },
+
+            mousemove: function (event) {
+                currEnv.mousemove(event);
+            },
+
+            mouseout: function (event) {
+                currEnv.mouseout(event);
+            },
+
+            mouseover: function (event) {
+                currEnv.mouseover(event);
+            },
+
+            mouseup: function (event) {
+                currEnv.mouseup(event);
+            },
+
+            // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
+            click: function (event) {
+                if (activedControl !== undefined) {
+                    // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
+                    activedControl = undefined;
+                }
+
+                event = core.wrapEvent(event);
+
+                var control = event.getTarget();
+                if (control && control.isDisabled()) {
+                    // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
+                    event.preventDefault();
+                }
+            },
+
+            dblclick: function (event) {
+                if (ieVersion) {
+                    // IE下双击事件不依次产生 mousedown 与 mouseup 事件，需要模拟
+                    currEnv.mousedown(event);
+                    currEnv.mouseup(event);
+                }
+            },
+
+            selectstart: function (event) {
+                // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现
+                event = core.wrapEvent(event);
+                onselectstart(event.getTarget(), event);
+            },
+
+            dragend: function (event) {
+                currEnv.mouseup(event);
+            },
+
+            keydown: function (event) {
+                event = core.wrapEvent(event);
+                keyCode = event.which;
+                bubble(focusedControl, 'keydown', event);
+            },
+
+            keypress: function (event) {
+                event = core.wrapEvent(event);
+                bubble(focusedControl, 'keypress', event);
+            },
+
+            keyup: function (event) {
+                event = core.wrapEvent(event);
+                bubble(focusedControl, 'keyup', event);
+                if (keyCode === event.which) {
+                    // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
+                    keyCode = 0;
+                }
+            }
+        },
+        currEnv = { // 当前操作的环境
             // 鼠标左键按下需要改变框架中拥有焦点的控件
             mousedown: function (event) {
                 event = core.wrapEvent(event);
@@ -291,91 +340,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     // 将 activedControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
-                }
-            },
-
-            // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
-            click: function (event) {
-                if (activedControl !== undefined) {
-                    // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
-                    activedControl = undefined;
-                }
-
-                event = core.wrapEvent(event);
-
-                var control = event.getTarget();
-                if (control && control.isDisabled()) {
-                    // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
-                    event.preventDefault();
-                }
-            },
-
-            /**
-             * 双击事件与选中内容开始事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            dblclick: function (event) {
-                if (ieVersion) {
-                    // IE下双击事件不依次产生 mousedown 与 mouseup 事件，需要模拟
-                    currEnv.mousedown(event);
-                    currEnv.mouseup(event);
-                }
-            },
-
-            /**
-             * IE下选择开始事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            selectstart: function (event) {
-                // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现
-                event = core.wrapEvent(event);
-                onselectstart(event.getTarget(), event);
-            },
-
-            // dragend 实质上也是mouseup的行为
-            dragend: function (event) {
-                currEnv.mouseup(event);
-            },
-
-            /**
-             * 键盘事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            keydown: function (event) {
-                event = core.wrapEvent(event);
-                keyCode = event.which;
-                bubble(focusedControl, 'keydown', event);
-            },
-
-            /**
-             * 键盘事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            keypress: function (event) {
-                event = core.wrapEvent(event);
-                bubble(focusedControl, 'keypress', event);
-            },
-
-            /**
-             * 键盘事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            keyup: function (event) {
-                event = core.wrapEvent(event);
-                bubble(focusedControl, 'keyup', event);
-                if (keyCode === event.which) {
-                    // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
-                    keyCode = 0;
                 }
             }
         },
@@ -882,9 +846,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     function initEnvironment() {
         if (!namedControls) {
             // 设置全局事件处理
-            for (var key in currEnv) {
-                if (currEnv.hasOwnProperty(key)) {
-                    dom.addEventListener(document, key, currEnv[key]);
+            for (var key in events) {
+                if (events.hasOwnProperty(key)) {
+                    dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
                 }
             }
 
@@ -1108,31 +1072,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      */
     function setEnv(env) {
         var newEnv = {};
-        setHandler(currEnv, true);
 
         util.extend(newEnv, currEnv);
         util.extend(newEnv, env);
         newEnv.x = mouseX;
         newEnv.y = mouseY;
-        setHandler(newEnv);
 
         envStack.push(currEnv);
         currEnv = newEnv;
-    }
-
-    /**
-     * 设置document节点上的鼠标事件。
-     * @private
-     *
-     * @param {Object} env 环境描述对象，保存当前的鼠标光标位置与document上的鼠标事件等
-     * @param {boolean} remove 如果为true表示需要移除data上的鼠标事件，否则是添加鼠标事件
-     */
-    function setHandler(env, remove) {
-        for (var i = 0, func = remove ? dom.removeEventListener : dom.addEventListener, name; i < 5; ) {
-            if (env[name = eventNames[i++]]) {
-                func(document, name, env[name]);
-            }
-        }
     }
 
     util.extend(core, {
@@ -1530,6 +1477,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     control.setPosition(x, y);
                     el.style.position = 'absolute';
                 }
+
+                event.preventDefault();
             }
         },
 
@@ -2109,8 +2058,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @public
          */
         restore: function () {
-            setHandler(currEnv, true);
-            setHandler(currEnv = envStack.pop());
+            currEnv = envStack.pop();
         },
 
         /**
