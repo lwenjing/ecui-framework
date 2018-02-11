@@ -7,6 +7,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     var //{if 1}//undefined,//{/if}//
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
         patch = ecui,
+        fontSizeCache = [],
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
@@ -17,6 +18,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         safariVersion = /(\d+\.\d)(\.\d)?\s+safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 
     ecui = {
+//{if 0}//
+        fontSizeCache: fontSizeCache,
+//{/if}//
         /**
          * 返回指定id的 DOM 对象。
          * @public
@@ -850,6 +854,27 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         ui: {},
         util: {
             /*
+             * 自适应调整字体大小。
+             * @public
+             *
+             * @param {Array} sheets 样式对象列表
+             */
+            adjustFontSize: isMobile ? function (sheets) {
+                var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+                sheets.forEach(function (item) {
+                    item = item.rules || item.cssRules;
+                    for (var i = 0, rule; rule = item[i++]; ) {
+                        var value = rule.style['font-size'];
+                        if (value && value.slice(-3) === 'rem') {
+                            value = +value.slice(0, -3);
+                            fontSizeCache.push([rule.style, value]);
+                            rule.style['font-size'] = (Math.round(fontSize * value / 2) * 2) + 'px';
+                        }
+                    }
+                });
+            } : util.blank,
+
+            /*
              * 空函数。
              * blank 方法不应该被执行，也不进行任何处理，它用于提供给不需要执行操作的事件方法进行赋值，与 blank 类似的用于给事件方法进行赋值，而不直接被执行的方法还有 cancel。
              * @public
@@ -1226,38 +1251,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }
         };
     }());
-
-    /*
-     * 自适应调整字体大小。
-     * @public
-     *
-     * @param {Array} sheets 样式对象列表
-     */
-    util.adjustFontSize = isMobile ? (function () {
-        var fontSizeCache = [];
-
-        dom.addEventListener(window, 'orientationchange', function () {
-            var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
-            fontSizeCache.forEach(function (item) {
-                item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
-            });
-        });
-
-        return function (sheets) {
-            var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
-            sheets.forEach(function (item) {
-                item = item.rules || item.cssRules;
-                for (var i = 0, rule; rule = item[i++]; ) {
-                    var value = rule.style['font-size'];
-                    if (value && value.slice(-3) === 'rem') {
-                        value = +value.slice(0, -3);
-                        fontSizeCache.push([rule.style, value]);
-                        rule.style['font-size'] = (Math.round(fontSize * value / 2) * 2) + 'px';
-                    }
-                }
-            });
-        };
-    }()) : util.blank;
 
     if (ieVersion < 9) {
         document.head = document.getElementsByTagName('HEAD')[0];

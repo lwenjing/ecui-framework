@@ -9,6 +9,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         util = core.util,
         ui = core.ui,
 
+        fontSizeCache = core.fontSizeCache,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
@@ -57,6 +58,16 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         envStack = [],            // 高优先级事件调用时，保存上一个事件环境的栈
         events = {
+            // 屏幕旋转
+            orientationchange: function () {
+                document.body.style.height = util.getView().height + 'px';
+
+                var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+                fontSizeCache.forEach(function (item) {
+                    item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
+                });
+            },
+
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
                 isMobileScroll = false;
