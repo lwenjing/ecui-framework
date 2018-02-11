@@ -30,7 +30,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         maskElements = [],        // 遮罩层组
         unmasks = [],             // 用于取消庶罩层的函数列表
 
-        touchCount = 0,           // 触屏的次数(可能多指)
+        touches = [],             // 上一次触屏事件时的数据缓存
         pauseCount = 0,           // 暂停的次数
         mouseX,                   // 当前鼠标光标的X轴坐标
         mouseY,                   // 当前鼠标光标的Y轴坐标
@@ -59,14 +59,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         events = {
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
-                if (core.isTouch()) {
-                    // 屏弊多指操作的ECUI事件响应
-                    activedControl = undefined;
-                    return;
-                }
-
                 isMobileScroll = false;
-                touchCount++;
 
                 if (!ieVersion) {
                     currEnv.mousedown(event);
@@ -80,7 +73,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             touchend: function (event) {
-                touchCount--;
                 if (isMobileScroll) {
                     // 产生了滚屏操作，不响应ECUI事件
                     bubble(activedControl, 'deactivate');
@@ -348,14 +340,39 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             type: 'drag',
 
             mousemove: function (event) {
-                event = core.wrapEvent(event);
-
-                dragmove(currEnv, mouseX, mouseY);
+                core.wrapEvent(event);
+                if (event.type === 'touchmove') {
+                    // touch触发的拖拽，只监听同一个触发点
+                    Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
+                        if (item.identifier === currEnv.touchId) {
+                            dragmove(currEnv, item.pageX, item.pageY);
+                        }
+                    });
+                } else if (currEnv.touchId === undefined) {
+                    // 鼠标触发的拖拽，只监听鼠标的事件
+                    dragmove(currEnv, mouseX, mouseY);
+                }
             },
 
             mouseover: util.blank,
 
             mouseup: function (event) {
+                if (event.type === 'mouseup') {
+                    // 鼠标触发的拖拽，只监听鼠标的事件
+                    if (currEnv.touchId === undefined) {
+                        return;
+                    }
+                } else {
+                    // touch触发的拖拽，只监听同一个触发点
+                    if (!Array.prototype.slice.call(event.changedTouches).filter(
+                            function (item) {
+                                return item.identifier === currEnv.touchId;
+                            }
+                        ).length) {
+                        return;
+                    }
+                }
+
                 var target = currEnv.target,
                     uid = target.getUID(),
                     env = currEnv,
@@ -464,20 +481,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     function ECUIEvent(type, event) {
         this.type = type;
         if (event) {
-            if (event.touches) {
-                if (event.touches[0]) {
-                    this.pageX = event.touches[0].pageX;
-                    this.pageY = event.touches[0].pageY;
-                } else {
-                    this.pageX = mouseX;
-                    this.pageY = mouseY;
-                }
-                this.which = 1;
-            } else {
-                this.pageX = event.pageX;
-                this.pageY = event.pageY;
-                this.which = event.which;
-            }
+            this.pageX = event.pageX;
+            this.pageY = event.pageY;
+            this.which = event.which || 1;
             this.target = event.target;
             this._oNative = event;
         } else {
@@ -1071,15 +1077,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * @param {Object} env 环境描述对象
      */
     function setEnv(env) {
-        var newEnv = {};
-
-        util.extend(newEnv, currEnv);
-        util.extend(newEnv, env);
-        newEnv.x = mouseX;
-        newEnv.y = mouseY;
-
         envStack.push(currEnv);
-        currEnv = newEnv;
+        currEnv = util.extend(util.extend({}, currEnv), env);
+        currEnv.x = mouseX;
+        currEnv.y = mouseY;
     }
 
     util.extend(core, {
@@ -1429,7 +1430,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @param {Object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
-            if (activedControl !== undefined) {
+            if (activedControl !== undefined && !currEnv.type) {
                 if (FeatureFlags.INERTIA_1) {
                     // 控件之前处于惯性状态必须停止
                     var uid = control.getUID();
@@ -1440,8 +1441,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
 
                 // 判断鼠标没有mouseup
-                var el = control.getOuter(),
-                    parent = el.offsetParent,
+                var parent = control.getOuter().offsetParent,
                     style = dom.getStyle(parent);
 
                 // 拖拽范围默认不超出上级元素区域
@@ -1468,6 +1468,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 dragEnv.target = control;
                 dragEnv.actived = activedControl;
+                if (event._oNative.type === 'touchstart') {
+                    dragEnv.touchId = touches[touches.length - 1].identifier;
+                }
                 setEnv(dragEnv);
 
                 // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
@@ -1475,7 +1478,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 if (core.triggerEvent(control, 'dragstart')) {
                     control.setPosition(x, y);
-                    el.style.position = 'absolute';
                 }
 
                 event.preventDefault();
@@ -1837,7 +1839,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @return {boolean} 是否有鼠标左键未释放处于按压状态
          */
         isTouch: function () {
-            return touchCount > 0;
+            return touches.length > 0;
         },
 
         /**
@@ -2176,10 +2178,25 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             if (ieVersion < 9) {
                 event = window.event;
-                event.pageX = html.scrollLeft + body.scrollLeft - html.clientLeft + (event.touches ? event.touches[0].clientX : event.clientX) - body.clientLeft;
-                event.pageY = html.scrollTop + body.scrollTop - html.clientTop + (event.touches ? event.touches[0].clientY : event.clientY) - body.clientTop;
+                event.pageX = html.scrollLeft + body.scrollLeft - html.clientLeft + event.clientX - body.clientLeft;
+                event.pageY = html.scrollTop + body.scrollTop - html.clientTop + event.clientY - body.clientTop;
                 event.target = event.srcElement;
                 event.which = event.keyCode || (event.button | 1);
+            }
+            if (event.touches) {
+                touches = Array.prototype.slice.call(event.touches).map(function (item) {
+                    return {
+                        identifier: item.identifier,
+                        screenX: item.screenX,
+                        screenY: item.screenY,
+                        pageX: item.pageX,
+                        pageY: item.pageY
+                    };
+                });
+                var lastTouch = event.changedTouches[event.changedTouches.length - 1];
+                event.pageX = lastTouch.pageX;
+                event.pageY = lastTouch.pageY;
+                event.target = lastTouch.target;
             }
 
             event = new ECUIEvent(event.type, event);
