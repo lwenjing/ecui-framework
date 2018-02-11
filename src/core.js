@@ -1781,6 +1781,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         init: function (el) {
             if (!initEnvironment() && el) {
+                events.orientationchange();
                 util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
 
                 var list = dom.getAttribute(el, ecuiName) ? [el] : [],
