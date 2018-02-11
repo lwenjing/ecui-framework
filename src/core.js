@@ -59,10 +59,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         events = {
             // 屏幕旋转
             orientationchange: function () {
-                if (document.getElementsByTagName('INPUT')[0]) {
-                    document.getElementsByTagName('INPUT')[0].value = ecui.util.getView().height;
-                }
-
                 var width = document.documentElement.clientWidth,
                     height = document.documentElement.clientHeight,
                     style = document.body.style;
@@ -78,8 +74,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     repaint();
                 } else if (style.height !== height + 'px') {
-                    style.height = height + 'px';
-                    onscroll(new ECUIEvent('scroll'));
+                    if (!isMobile) {
+                        style.height = height + 'px';
+                    }
                 }
             },
 
