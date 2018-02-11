@@ -26,7 +26,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
         initRecursion = 0,        // init 操作的递归次数
-        lastClientWidth,          // 浏览器之前的宽度
 
         maskElements = [],        // 遮罩层组
         unmasks = [],             // 用于取消庶罩层的函数列表
@@ -60,19 +59,28 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         events = {
             // 屏幕旋转
             orientationchange: function () {
+                if (document.getElementsByTagName('INPUT')[0]) {
+                    document.getElementsByTagName('INPUT')[0].value = ecui.util.getView().height;
+                }
+
                 var width = document.documentElement.clientWidth,
                     height = document.documentElement.clientHeight,
                     style = document.body.style;
-                if (style.width === width + 'px') {
-                    return;
-                }
-                style.width = width + 'px';
-                style.height = height + 'px';
 
-                var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
-                fontSizeCache.forEach(function (item) {
-                    item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
-                });
+                if (style.width !== width + 'px') {
+                    style.width = width + 'px';
+                    style.height = height + 'px';
+
+                    var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+                    fontSizeCache.forEach(function (item) {
+                        item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
+                    });
+
+                    repaint();
+                } else if (style.height !== height + 'px') {
+                    style.height = height + 'px';
+                    onscroll(new ECUIEvent('scroll'));
+                }
             },
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
@@ -903,7 +911,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             }
 
-            dom.addEventListener(window, 'resize', core.repaint);
+            dom.addEventListener(window, 'resize', events.orientationchange);
             dom.addEventListener(window, 'scroll', onscroll);
             dom.addEventListener(
                 window,
@@ -1087,6 +1095,67 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     return;
                 }
             }
+        }
+    }
+
+    /**
+     * 重绘浏览器区域的控件。
+     * repaint 方法在页面改变大小时自动触发，一些特殊情况下，例如包含框架的页面，页面变化时不会触发 onresize 事件，需要手工调用 repaint 函数重绘所有的控件。
+     * @public
+     */
+    function repaint() {
+        function filter(item) {
+            return item.getParent() === resizeList && item.isShow();
+        }
+
+        // 隐藏所有遮罩层
+        core.mask(false);
+
+        // 改变窗体大小需要清空拖拽状态
+        if (currEnv.type === 'drag') {
+            currEnv.mouseup(new ECUIEvent('mouseup'));
+        }
+
+        independentControls.forEach(function (item) {
+            core.triggerEvent(item, 'repaint');
+        });
+
+        // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
+        for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
+            Array.prototype.push.apply(list, core.query(filter));
+        }
+
+        resizeList = list.filter(function (item) {
+            core.triggerEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
+            // 这里与Control控件的$resize方法存在强耦合，repaint有值表示在$resize中没有进行针对ie的width值回填
+            if (widthList.repaint) {
+                return item;
+            }
+        });
+
+        if (resizeList.length) {
+            // 由于强制设置了100%，因此改变ie下控件的大小必须从内部向外进行
+            // 为避免多次reflow，增加一次循环
+            widthList = resizeList.map(function (item) {
+                return item.getMain().offsetWidth;
+            });
+            resizeList.forEach(function (item, index) {
+                item.getMain().style.width = widthList[index] - (isStrict ? item.$getBasicWidth() * 2 : 0) + 'px';
+            });
+        }
+
+        list.forEach(function (item) {
+            item.cache(true, true);
+        });
+        list.forEach(function (item) {
+            item.initStructure();
+        });
+
+        if (ieVersion < 8) {
+            // 解决 ie6/7 下直接显示遮罩层，读到的浏览器大小实际未更新的问题
+            util.timer(core.mask, 0, null, true);
+        } else {
+            core.mask(true);
         }
     }
 
@@ -1799,7 +1868,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 if (!initRecursion) {
                     // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
-                    dom.removeEventListener(window, 'resize', core.repaint);
+                    dom.removeEventListener(window, 'resize', events.orientationchange);
                 }
                 initRecursion++;
 
@@ -1830,7 +1899,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 initRecursion--;
                 if (!initRecursion) {
-                    dom.addEventListener(window, 'resize', core.repaint);
+                    dom.addEventListener(window, 'resize', events.orientationchange);
                 }
             }
         },
@@ -1996,84 +2065,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         removeEventListener: function (control, name, func) {
             if (name = eventListeners[control.getUID() + '#' + name]) {
                 util.remove(name, func);
-            }
-        },
-
-        /**
-         * 重绘浏览器区域的控件。
-         * repaint 方法在页面改变大小时自动触发，一些特殊情况下，例如包含框架的页面，页面变化时不会触发 onresize 事件，需要手工调用 repaint 函数重绘所有的控件。
-         * @public
-         */
-        repaint: function () {
-            if (isMobile) {
-                // 移动端不需要处理浏览器resize的情况，因为此时一般是输入法触发的
-                return;
-            }
-
-            function filter(item) {
-                return item.getParent() === resizeList && item.isShow();
-            }
-
-            if (ieVersion) {
-                // 防止 ie6/7 下的多次重入
-                widthList = (isStrict ? document.documentElement : document.body).clientWidth;
-                if (lastClientWidth !== widthList) {
-                    lastClientWidth = widthList;
-                } else {
-                    // 如果高度发生变化，相当于滚动条的信息发生变化，因此需要产生scroll事件进行刷新
-                    onscroll(new ECUIEvent('scroll'));
-                    return;
-                }
-            }
-
-            // 隐藏所有遮罩层
-            core.mask(false);
-
-            // 改变窗体大小需要清空拖拽状态
-            if (currEnv.type === 'drag') {
-                currEnv.mouseup(new ECUIEvent('mouseup'));
-            }
-
-            independentControls.forEach(function (item) {
-                core.triggerEvent(item, 'repaint');
-            });
-
-            // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
-            for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
-                Array.prototype.push.apply(list, core.query(filter));
-            }
-
-            resizeList = list.filter(function (item) {
-                core.triggerEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
-                // 这里与Control控件的$resize方法存在强耦合，repaint有值表示在$resize中没有进行针对ie的width值回填
-                if (widthList.repaint) {
-                    return item;
-                }
-            });
-
-            if (resizeList.length) {
-                // 由于强制设置了100%，因此改变ie下控件的大小必须从内部向外进行
-                // 为避免多次reflow，增加一次循环
-                widthList = resizeList.map(function (item) {
-                    return item.getMain().offsetWidth;
-                });
-                resizeList.forEach(function (item, index) {
-                    item.getMain().style.width = widthList[index] - (isStrict ? item.$getBasicWidth() * 2 : 0) + 'px';
-                });
-            }
-
-            list.forEach(function (item) {
-                item.cache(true, true);
-            });
-            list.forEach(function (item) {
-                item.initStructure();
-            });
-
-            if (ieVersion < 8) {
-                // 解决 ie6/7 下直接显示遮罩层，读到的浏览器大小实际未更新的问题
-                util.timer(core.mask, 0, null, true);
-            } else {
-                core.mask(true);
             }
         },
 
