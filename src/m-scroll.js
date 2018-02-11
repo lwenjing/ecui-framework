@@ -111,15 +111,23 @@ _oNormal   - 滚动结束后回弹的区域范围，格式为[top, right, bottom
              * 设置滚动范围。
              * @public
              *
-             * @param {Object} scroll 允许滚动的范围
-             * @param {Object} normal 滚动结束后自动归位的范围
+             * @param {Object} range 允许滚动的范围
              */
-            setRange: function (scroll, normal) {
-                this._nLeft = scroll.left;
-                this._nTop = scroll.top;
-                this._nRight = scroll.right;
-                this._nBottom = scroll.bottom;
-                this._oNormal = normal;
+            setScrollRange: function (range) {
+                this._nLeft = range.left;
+                this._nTop = range.top;
+                this._nRight = range.right;
+                this._nBottom = range.bottom;
+            },
+
+            /**
+             * 设置正常显示范围，用于拖拽结束后归位。
+             * @public
+             *
+             * @param {Object} range 正常显示范围
+             */
+            setRange: function (range) {
+                this._oNormal = range;
             }
         }
     );

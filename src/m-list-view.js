@@ -70,15 +70,15 @@ _nBottomIndex  - 下部隐藏的选项序号
                 }
 
                 var top = this.getHeight() - this.$$bodyHeight;
-                this.setRange(
+                this.setScrollRange(
                     {
                         left: 0,
                         right: 0,
                         top: top,
                         bottom: 0
-                    }/*,
-                    [top + this.$$footerHeight, 0, -this.$$headerHeight, 0]*/
+                    }
                 );
+//                this.setRange([top + this.$$footerHeight, 0, -this.$$headerHeight, 0]);
             },
 
             /**
@@ -145,6 +145,16 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @event
              */
             $headerleave: util.blank,
+
+            /**
+             * 拖拽的惯性时间计算。
+             * @protected
+             *
+             * @param {Object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
+             */
+            $draginertia: function (speed) {
+                return Math.min(2, Math.abs(speed.y / 400));
+            },
 
             /**
              * @override

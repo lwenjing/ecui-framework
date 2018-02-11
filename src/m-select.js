@@ -94,15 +94,15 @@ _nMaxBottom    - 滚动时的最大底部坐标
                 var top = this._nNormalTop = -this._nItemHeight * (this.getLength() - this._nRadius - 1),
                     bottom = this._nNormalBottom = this._nItemHeight * this._nRadius;
 
-                this.setRange(
+                this.setScrollRange(
                     {
                         top: this._nMinTop = top - this._nItemHeight * 2,
                         right: 0,
                         bottom: this._nMaxBottom = bottom + this._nItemHeight * 2,
                         left: 0
-                    },
-                    [top, 0, bottom, 0, this._nItemHeight]
+                    }
                 );
+                this.setRange([top, 0, bottom, 0, this._nItemHeight]);
 
                 if (!this.isReady()) {
                     // 控件初始化时设置的显示位置
@@ -121,9 +121,11 @@ _nMaxBottom    - 滚动时的最大底部坐标
             /**
              * 拖拽的惯性时间计算。
              * @protected
+             *
+             * @param {Object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
              */
-            $draginertia: function () {
-                var speed = core.getSpeed().y;
+            $draginertia: function (speed) {
+                speed = speed.y;
                 if (!speed) {
                     return 0;
                 }

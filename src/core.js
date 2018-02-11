@@ -9,12 +9,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         util = core.util,
         ui = core.ui,
 
+        fontSizeCache = core.fontSizeCache,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
-        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-
-        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
+        chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var scrollHandler,            // DOM滚动事件
         isMobileScroll,
@@ -26,12 +26,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
         initRecursion = 0,        // init 操作的递归次数
-        lastClientWidth,          // 浏览器之前的宽度
 
         maskElements = [],        // 遮罩层组
         unmasks = [],             // 用于取消庶罩层的函数列表
 
-        touchCount = 0,           // 触屏的次数(可能多指)
+        touches = [],             // 上一次触屏事件时的数据缓存
         pauseCount = 0,           // 暂停的次数
         mouseX,                   // 当前鼠标光标的X轴坐标
         mouseY,                   // 当前鼠标光标的Y轴坐标
@@ -57,50 +56,46 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         eventStack = {},          // 事件调用堆栈记录，防止事件重入
 
         envStack = [],            // 高优先级事件调用时，保存上一个事件环境的栈
-        currEnv = {               // 当前操作的环境
+        events = {
+            // 屏幕旋转
+            orientationchange: function () {
+                var width = document.documentElement.clientWidth,
+                    height = document.documentElement.clientHeight,
+                    style = document.body.style;
+
+                if (style.width !== width + 'px') {
+                    style.width = width + 'px';
+                    style.height = height + 'px';
+
+                    var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+                    fontSizeCache.forEach(function (item) {
+                        item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
+                    });
+
+                    repaint();
+                } else if (style.height !== height + 'px') {
+                    if (!isMobile) {
+                        style.height = height + 'px';
+                    }
+                }
+            },
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
-            /**
-             * 按压开始事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
             touchstart: function (event) {
-                if (core.isTouch()) {
-                    // 屏弊多指操作的ECUI事件响应
-                    activedControl = undefined;
-                    return;
-                }
-
                 isMobileScroll = false;
-                touchCount++;
 
                 if (!ieVersion) {
                     currEnv.mousedown(event);
                 }
             },
 
-            /**
-             * 按压移动事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
             touchmove: function (event) {
                 if (!ieVersion) {
                     currEnv.mousemove(event);
                 }
             },
 
-            /**
-             * 按压结束事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
             touchend: function (event) {
-                touchCount--;
                 if (isMobileScroll) {
                     // 产生了滚屏操作，不响应ECUI事件
                     bubble(activedControl, 'deactivate');
@@ -121,16 +116,85 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             },
 
-            /**
-             * 按压取消事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
             touchcancel: function (event) {
                 currEnv.touchend(event);
             },
 
+            mousedown: function (event) {
+                currEnv.mousedown(event);
+            },
+
+            mousemove: function (event) {
+                currEnv.mousemove(event);
+            },
+
+            mouseout: function (event) {
+                currEnv.mouseout(event);
+            },
+
+            mouseover: function (event) {
+                currEnv.mouseover(event);
+            },
+
+            mouseup: function (event) {
+                currEnv.mouseup(event);
+            },
+
+            // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
+            click: function (event) {
+                if (activedControl !== undefined) {
+                    // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
+                    activedControl = undefined;
+                }
+
+                event = core.wrapEvent(event);
+
+                var control = event.getTarget();
+                if (control && control.isDisabled()) {
+                    // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
+                    event.preventDefault();
+                }
+            },
+
+            dblclick: function (event) {
+                if (ieVersion) {
+                    // IE下双击事件不依次产生 mousedown 与 mouseup 事件，需要模拟
+                    currEnv.mousedown(event);
+                    currEnv.mouseup(event);
+                }
+            },
+
+            selectstart: function (event) {
+                // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现
+                event = core.wrapEvent(event);
+                onselectstart(event.getTarget(), event);
+            },
+
+            dragend: function (event) {
+                currEnv.mouseup(event);
+            },
+
+            keydown: function (event) {
+                event = core.wrapEvent(event);
+                keyCode = event.which;
+                bubble(focusedControl, 'keydown', event);
+            },
+
+            keypress: function (event) {
+                event = core.wrapEvent(event);
+                bubble(focusedControl, 'keypress', event);
+            },
+
+            keyup: function (event) {
+                event = core.wrapEvent(event);
+                bubble(focusedControl, 'keyup', event);
+                if (keyCode === event.which) {
+                    // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
+                    keyCode = 0;
+                }
+            }
+        },
+        currEnv = { // 当前操作的环境
             // 鼠标左键按下需要改变框架中拥有焦点的控件
             mousedown: function (event) {
                 event = core.wrapEvent(event);
@@ -292,123 +356,62 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     // 将 activedControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
                 }
-            },
-
-            // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
-            click: function (event) {
-                if (activedControl !== undefined) {
-                    // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
-                    activedControl = undefined;
-                }
-
-                event = core.wrapEvent(event);
-
-                var control = event.getTarget();
-                if (control && control.isDisabled()) {
-                    // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
-                    event.preventDefault();
-                }
-            },
-
-            /**
-             * 双击事件与选中内容开始事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            dblclick: function (event) {
-                if (ieVersion) {
-                    // IE下双击事件不依次产生 mousedown 与 mouseup 事件，需要模拟
-                    currEnv.mousedown(event);
-                    currEnv.mouseup(event);
-                }
-            },
-
-            /**
-             * IE下选择开始事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            selectstart: function (event) {
-                // IE下取消对文字的选择不能仅通过阻止 mousedown 事件的默认行为实现
-                event = core.wrapEvent(event);
-                onselectstart(event.getTarget(), event);
-            },
-
-            // dragend 实质上也是mouseup的行为
-            dragend: function (event) {
-                currEnv.mouseup(event);
-            },
-
-            /**
-             * 键盘事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            keydown: function (event) {
-                event = core.wrapEvent(event);
-                keyCode = event.which;
-                bubble(focusedControl, 'keydown', event);
-            },
-
-            /**
-             * 键盘事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            keypress: function (event) {
-                event = core.wrapEvent(event);
-                bubble(focusedControl, 'keypress', event);
-            },
-
-            /**
-             * 键盘事件处理。
-             * @private
-             *
-             * @param {Event} event 事件对象
-             */
-            keyup: function (event) {
-                event = core.wrapEvent(event);
-                bubble(focusedControl, 'keyup', event);
-                if (keyCode === event.which) {
-                    // 一次多个键被按下，只有最后一个被按下的键松开时取消键值码
-                    keyCode = 0;
-                }
             }
         },
 
         dragEnv = { // 拖曳操作的环境
             type: 'drag',
 
+            mousedown: util.blank,
+
             mousemove: function (event) {
-                event = core.wrapEvent(event);
-
-                dragmove(event, currEnv, mouseX, mouseY);
-
-                event.exit();
+                core.wrapEvent(event);
+                if (event.type === 'touchmove') {
+                    // touch触发的拖拽，只监听同一个触发点
+                    Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
+                        if (item.identifier === currEnv.touchId) {
+                            dragmove(currEnv, item.pageX, item.pageY);
+                        }
+                    });
+                } else if (currEnv.touchId === undefined) {
+                    // 鼠标触发的拖拽，只监听鼠标的事件
+                    dragmove(currEnv, mouseX, mouseY);
+                }
             },
 
             mouseover: util.blank,
 
             mouseup: function (event) {
+                if (event.type === 'mouseup') {
+                    // 鼠标触发的拖拽，只监听鼠标的事件
+                    if (currEnv.touchId === undefined) {
+                        return;
+                    }
+                } else {
+                    // touch触发的拖拽，只监听同一个触发点
+                    if (!Array.prototype.slice.call(event.changedTouches).filter(
+                            function (item) {
+                                return item.identifier === currEnv.touchId;
+                            }
+                        ).length) {
+                        return;
+                    }
+                }
+
                 var target = currEnv.target,
+                    uid = target.getUID(),
+                    env = currEnv,
                     speed = core.getSpeed(),
-                    inertia = 'function' === typeof currEnv.inertia ? currEnv.inertia.call(target) : currEnv.inertia || (target.$draginertia && target.$draginertia());
+                    mx = mouseX,
+                    my = mouseY,
+                    start = Date.now(),
+                    vx = speed.x,
+                    vy = speed.y,
+                    inertia = target.$draginertia ? target.$draginertia(speed) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0,
+                    ax = vx / inertia,
+                    ay = vy / inertia;
 
                 if (FeatureFlags.INERTIA_1 && inertia) {
-                    var uid = target.getUID(),
-                        env = currEnv,
-                        mx = mouseX,
-                        my = mouseY,
-                        start = Date.now(),
-                        vx = speed.x,
-                        vy = speed.y,
-                        ax = vx / inertia,
-                        ay = vy / inertia;
-
                     event = core.wrapEvent(event);
 
                     inertiaHandles[uid] = util.timer(function () {
@@ -416,7 +419,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             time = (Date.now() - start) / 1000,
                             t = Math.min(time, inertia);
 
-                        dragmove(event, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                        dragmove(env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
                         if (t >= inertia) {
                             inertiaHandles[uid]();
                             dragend(event, env, target);
@@ -503,20 +506,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     function ECUIEvent(type, event) {
         this.type = type;
         if (event) {
-            if (event.touches) {
-                if (event.touches[0]) {
-                    this.pageX = event.touches[0].pageX;
-                    this.pageY = event.touches[0].pageY;
-                } else {
-                    this.pageX = mouseX;
-                    this.pageY = mouseY;
-                }
-                this.which = 1;
-            } else {
-                this.pageX = event.pageX;
-                this.pageY = event.pageY;
-                this.which = event.which;
-            }
+            this.pageX = event.pageX;
+            this.pageY = event.pageY;
+            this.which = event.which || 1;
             this.target = event.target;
             this._oNative = event;
         } else {
@@ -763,8 +755,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             var range = 'function' === typeof env.limit ? env.limit.call(target) : env.limit,
                 codes = [],
                 el = env.el || target.getOuter(),
-                x = util.toNumber(el.style.left),
-                y = util.toNumber(el.style.top),
+                x = target.getX(),
+                y = target.getY(),
                 expectX = Math.min(range[1], Math.max(range[3], x)),
                 expectY = Math.min(range[2], Math.max(range[0], y));
             if (range[5]) {
@@ -809,21 +801,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * 拖拽移动事件处理。
      * @private
      *
-     * @param {ECUIEvent} ECUI 事件对象
      * @param {Object} ECUI 框架运行环境
      * @param {number} x 需要移动到的 X 坐标
      * @param {number} y 需要移动到的 Y 坐标
      */
-    function dragmove(event, env, x, y) {
+    function dragmove(env, x, y) {
         var target = env.target,
             // 计算期待移到的位置
             expectX = env.targetX + x - env.x,
-            expectY = env.targetY + y - env.y;
+            expectY = env.targetY + y - env.y,
+            event = new ECUIEvent();
 
         // 计算实际允许移到的位置
         event.x = Math.min(Math.max(expectX, env.left), env.right);
         event.y = Math.min(Math.max(expectY, env.top), env.bottom);
-
         if (core.triggerEvent(target, 'dragmove', event)) {
             target.setPosition(event.x, event.y);
         }
@@ -886,9 +877,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     function initEnvironment() {
         if (!namedControls) {
             // 设置全局事件处理
-            for (var key in currEnv) {
-                if (currEnv.hasOwnProperty(key)) {
-                    dom.addEventListener(document, key, currEnv[key]);
+            for (var key in events) {
+                if (events.hasOwnProperty(key)) {
+                    dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
                 }
             }
 
@@ -917,7 +908,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             }
 
-            dom.addEventListener(window, 'resize', core.repaint);
+            dom.addEventListener(window, 'resize', events.orientationchange);
             dom.addEventListener(window, 'scroll', onscroll);
             dom.addEventListener(
                 window,
@@ -1105,38 +1096,77 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     }
 
     /**
+     * 重绘浏览器区域的控件。
+     * repaint 方法在页面改变大小时自动触发，一些特殊情况下，例如包含框架的页面，页面变化时不会触发 onresize 事件，需要手工调用 repaint 函数重绘所有的控件。
+     * @public
+     */
+    function repaint() {
+        function filter(item) {
+            return item.getParent() === resizeList && item.isShow();
+        }
+
+        // 隐藏所有遮罩层
+        core.mask(false);
+
+        // 改变窗体大小需要清空拖拽状态
+        if (currEnv.type === 'drag') {
+            currEnv.mouseup(new ECUIEvent('mouseup'));
+        }
+
+        independentControls.forEach(function (item) {
+            core.triggerEvent(item, 'repaint');
+        });
+
+        // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
+        for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
+            Array.prototype.push.apply(list, core.query(filter));
+        }
+
+        resizeList = list.filter(function (item) {
+            core.triggerEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
+            // 这里与Control控件的$resize方法存在强耦合，repaint有值表示在$resize中没有进行针对ie的width值回填
+            if (widthList.repaint) {
+                return item;
+            }
+        });
+
+        if (resizeList.length) {
+            // 由于强制设置了100%，因此改变ie下控件的大小必须从内部向外进行
+            // 为避免多次reflow，增加一次循环
+            widthList = resizeList.map(function (item) {
+                return item.getMain().offsetWidth;
+            });
+            resizeList.forEach(function (item, index) {
+                item.getMain().style.width = widthList[index] - (isStrict ? item.$getBasicWidth() * 2 : 0) + 'px';
+            });
+        }
+
+        list.forEach(function (item) {
+            item.cache(true, true);
+        });
+        list.forEach(function (item) {
+            item.initStructure();
+        });
+
+        if (ieVersion < 8) {
+            // 解决 ie6/7 下直接显示遮罩层，读到的浏览器大小实际未更新的问题
+            util.timer(core.mask, 0, null, true);
+        } else {
+            core.mask(true);
+        }
+    }
+
+    /**
      * 设置 ecui 环境。
      * @private
      *
      * @param {Object} env 环境描述对象
      */
     function setEnv(env) {
-        var newEnv = {};
-        setHandler(currEnv, true);
-
-        util.extend(newEnv, currEnv);
-        util.extend(newEnv, env);
-        newEnv.x = mouseX;
-        newEnv.y = mouseY;
-        setHandler(newEnv);
-
         envStack.push(currEnv);
-        currEnv = newEnv;
-    }
-
-    /**
-     * 设置document节点上的鼠标事件。
-     * @private
-     *
-     * @param {Object} env 环境描述对象，保存当前的鼠标光标位置与document上的鼠标事件等
-     * @param {boolean} remove 如果为true表示需要移除data上的鼠标事件，否则是添加鼠标事件
-     */
-    function setHandler(env, remove) {
-        for (var i = 0, func = remove ? dom.removeEventListener : dom.addEventListener, name; i < 5; ) {
-            if (env[name = eventNames[i++]]) {
-                func(document, name, env[name]);
-            }
-        }
+        currEnv = util.extend(util.extend({}, currEnv), env);
+        currEnv.x = mouseX;
+        currEnv.y = mouseY;
     }
 
     util.extend(core, {
@@ -1497,8 +1527,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
 
                 // 判断鼠标没有mouseup
-                var el = control.getOuter(),
-                    parent = el.offsetParent,
+                var parent = control.getOuter().offsetParent,
                     style = dom.getStyle(parent);
 
                 // 拖拽范围默认不超出上级元素区域
@@ -1525,17 +1554,19 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 dragEnv.target = control;
                 dragEnv.actived = activedControl;
+                if (event._oNative.type === 'touchstart') {
+                    dragEnv.touchId = touches[touches.length - 1].identifier;
+                }
                 setEnv(dragEnv);
 
                 // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
                 activedControl = undefined;
 
-                if (core.triggerEvent(control, 'dragstart', event)) {
+                if (core.triggerEvent(control, 'dragstart')) {
                     control.setPosition(x, y);
-                    el.style.position = 'absolute';
                 }
 
-                event.exit();
+                event.preventDefault();
             }
         },
 
@@ -1772,7 +1803,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             }
 
             if ('function' !== typeof realConstructor) {
-                subClass.constructor = superClass.constructor;
+                subClass.constructor = superClass;
                 index--;
             } else {
                 subClass.constructor = realConstructor;
@@ -1823,7 +1854,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         init: function (el) {
             if (!initEnvironment() && el) {
-                util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+                if (isMobile) {
+                    events.orientationchange();
+                    util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+                }
 
                 var list = dom.getAttribute(el, ecuiName) ? [el] : [],
                     controls = [],
@@ -1831,7 +1865,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 if (!initRecursion) {
                     // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
-                    dom.removeEventListener(window, 'resize', core.repaint);
+                    dom.removeEventListener(window, 'resize', events.orientationchange);
                 }
                 initRecursion++;
 
@@ -1862,7 +1896,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 initRecursion--;
                 if (!initRecursion) {
-                    dom.addEventListener(window, 'resize', core.repaint);
+                    dom.addEventListener(window, 'resize', events.orientationchange);
                 }
             }
         },
@@ -1894,7 +1928,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @return {boolean} 是否有鼠标左键未释放处于按压状态
          */
         isTouch: function () {
-            return touchCount > 0;
+            return touches.length > 0;
         },
 
         /**
@@ -2032,91 +2066,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
-         * 重绘浏览器区域的控件。
-         * repaint 方法在页面改变大小时自动触发，一些特殊情况下，例如包含框架的页面，页面变化时不会触发 onresize 事件，需要手工调用 repaint 函数重绘所有的控件。
-         * @public
-         */
-        repaint: function () {
-            if (isMobile) {
-                // 移动端不需要处理浏览器resize的情况，因为此时一般是输入法触发的
-                return;
-            }
-
-            function filter(item) {
-                return item.getParent() === resizeList && item.isShow();
-            }
-
-            if (ieVersion) {
-                // 防止 ie6/7 下的多次重入
-                widthList = (isStrict ? document.documentElement : document.body).clientWidth;
-                if (lastClientWidth !== widthList) {
-                    lastClientWidth = widthList;
-                } else {
-                    // 如果高度发生变化，相当于滚动条的信息发生变化，因此需要产生scroll事件进行刷新
-                    onscroll(new ECUIEvent('scroll'));
-                    return;
-                }
-            }
-
-            // 隐藏所有遮罩层
-            core.mask(false);
-
-            // 改变窗体大小需要清空拖拽状态
-            if (currEnv.type === 'drag') {
-                currEnv.mouseup(new ECUIEvent('mouseup'));
-            }
-
-            independentControls.forEach(function (item) {
-                core.triggerEvent(item, 'repaint');
-            });
-
-            // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
-            for (var i = 0, list = [], resizeList = null, widthList; resizeList !== undefined; resizeList = list[i++]) {
-                Array.prototype.push.apply(list, core.query(filter));
-            }
-
-            resizeList = list.filter(function (item) {
-                core.triggerEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
-                // 这里与Control控件的$resize方法存在强耦合，repaint有值表示在$resize中没有进行针对ie的width值回填
-                if (widthList.repaint) {
-                    return item;
-                }
-            });
-
-            if (resizeList.length) {
-                // 由于强制设置了100%，因此改变ie下控件的大小必须从内部向外进行
-                // 为避免多次reflow，增加一次循环
-                widthList = resizeList.map(function (item) {
-                    return item.getMain().offsetWidth;
-                });
-                resizeList.forEach(function (item, index) {
-                    item.getMain().style.width = widthList[index] - (isStrict ? item.$getBasicWidth() * 2 : 0) + 'px';
-                });
-            }
-
-            list.forEach(function (item) {
-                item.cache(true, true);
-            });
-            list.forEach(function (item) {
-                item.initStructure();
-            });
-
-            if (ieVersion < 8) {
-                // 解决 ie6/7 下直接显示遮罩层，读到的浏览器大小实际未更新的问题
-                util.timer(core.mask, 0, null, true);
-            } else {
-                core.mask(true);
-            }
-        },
-
-        /**
          * 恢复当前框架的状态到上一个状态。
          * restore 用于恢复调用特殊操作如 drag 与 intercept 后改变的框架环境，包括各框架事件处理函数的恢复、控件的焦点设置等。
          * @public
          */
         restore: function () {
-            setHandler(currEnv, true);
-            setHandler(currEnv = envStack.pop());
+            currEnv = envStack.pop();
         },
 
         /**
@@ -2163,12 +2118,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @param {string} name 事件名
          * @param {ECUIEvent|Object} event 事件对象或事件对象参数
          * @param {Object} ... 事件的其它参数
-         * @return {boolean} 是否阻止默认事件处理
+         * @return {boolean} 是否需要执行默认事件处理
          */
         triggerEvent: function (control, name, event) {
             // 防止事件重入
             var uid = control.getUID(),
-                args = Array.prototype.slice.call(arguments, 2),
                 listeners;
 
             eventStack[uid] = eventStack[uid] || {};
@@ -2177,14 +2131,18 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             }
             eventStack[uid][name] = true;
 
-            if (!(event instanceof ECUIEvent)) {
-                event = util.extend(new ECUIEvent(name), event);
+            if (event) {
+                if (event instanceof ECUIEvent) {
+                    event.type = name;
+                } else {
+                    event = util.extend(new ECUIEvent(name), event);
+                }
             } else {
-                event.type = name;
+                event = new ECUIEvent(name);
             }
 
             delete event.returnValue;
-            if ((control['on' + name] && control['on' + name].apply(control, args) === false) || event.returnValue === false || (control['$' + name] && control['$' + name].apply(control, args) === false)) {
+            if ((control['on' + name] && control['on' + name](event) === false) || event.returnValue === false || (control['$' + name] && control['$' + name](event) === false)) {
                 event.preventDefault();
             }
 
@@ -2192,7 +2150,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             if (listeners = eventListeners[uid + '#' + name]) {
                 listeners.forEach(function (item) {
                     if (item) {
-                        item.apply(control, args);
+                        item.call(control, event);
                     }
                 });
             }
@@ -2231,10 +2189,25 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             if (ieVersion < 9) {
                 event = window.event;
-                event.pageX = html.scrollLeft + body.scrollLeft - html.clientLeft + (event.touches ? event.touches[0].clientX : event.clientX) - body.clientLeft;
-                event.pageY = html.scrollTop + body.scrollTop - html.clientTop + (event.touches ? event.touches[0].clientY : event.clientY) - body.clientTop;
+                event.pageX = html.scrollLeft + body.scrollLeft - html.clientLeft + event.clientX - body.clientLeft;
+                event.pageY = html.scrollTop + body.scrollTop - html.clientTop + event.clientY - body.clientTop;
                 event.target = event.srcElement;
                 event.which = event.keyCode || (event.button | 1);
+            }
+            if (event.touches) {
+                touches = Array.prototype.slice.call(event.touches).map(function (item) {
+                    return {
+                        identifier: item.identifier,
+                        screenX: item.screenX,
+                        screenY: item.screenY,
+                        pageX: item.pageX,
+                        pageY: item.pageY
+                    };
+                });
+                var lastTouch = event.changedTouches[event.changedTouches.length - 1];
+                event.pageX = lastTouch.pageX;
+                event.pageY = lastTouch.pageY;
+                event.target = lastTouch.target;
             }
 
             event = new ECUIEvent(event.type, event);
