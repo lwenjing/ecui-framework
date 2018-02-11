@@ -339,6 +339,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         dragEnv = { // 拖曳操作的环境
             type: 'drag',
 
+            mousedown: util.blank,
+
             mousemove: function (event) {
                 core.wrapEvent(event);
                 if (event.type === 'touchmove') {
@@ -1430,7 +1432,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @param {Object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
-            if (activedControl !== undefined && !currEnv.type) {
+            if (activedControl !== undefined) {
                 if (FeatureFlags.INERTIA_1) {
                     // 控件之前处于惯性状态必须停止
                     var uid = control.getUID();
