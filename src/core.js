@@ -386,9 +386,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousemove: function (event) {
                 event = core.wrapEvent(event);
 
-                dragmove(event, currEnv, mouseX, mouseY);
-
-                event.exit();
+                dragmove(currEnv, mouseX, mouseY);
             },
 
             mouseover: util.blank,
@@ -416,7 +414,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             time = (Date.now() - start) / 1000,
                             t = Math.min(time, inertia);
 
-                        dragmove(event, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                        dragmove(env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
                         if (t >= inertia) {
                             inertiaHandles[uid]();
                             dragend(event, env, target);
@@ -809,21 +807,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * 拖拽移动事件处理。
      * @private
      *
-     * @param {ECUIEvent} ECUI 事件对象
      * @param {Object} ECUI 框架运行环境
      * @param {number} x 需要移动到的 X 坐标
      * @param {number} y 需要移动到的 Y 坐标
      */
-    function dragmove(event, env, x, y) {
+    function dragmove(env, x, y) {
         var target = env.target,
             // 计算期待移到的位置
             expectX = env.targetX + x - env.x,
-            expectY = env.targetY + y - env.y;
+            expectY = env.targetY + y - env.y,
+            event = new ECUIEvent();
 
         // 计算实际允许移到的位置
         event.x = Math.min(Math.max(expectX, env.left), env.right);
         event.y = Math.min(Math.max(expectY, env.top), env.bottom);
-
         if (core.triggerEvent(target, 'dragmove', event)) {
             target.setPosition(event.x, event.y);
         }
@@ -1530,12 +1527,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
                 activedControl = undefined;
 
-                if (core.triggerEvent(control, 'dragstart', event)) {
+                if (core.triggerEvent(control, 'dragstart')) {
                     control.setPosition(x, y);
                     el.style.position = 'absolute';
                 }
-
-                event.exit();
             }
         },
 
@@ -2168,7 +2163,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         triggerEvent: function (control, name, event) {
             // 防止事件重入
             var uid = control.getUID(),
-                args = Array.prototype.slice.call(arguments, 2),
                 listeners;
 
             eventStack[uid] = eventStack[uid] || {};
@@ -2177,14 +2171,18 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             }
             eventStack[uid][name] = true;
 
-            if (!(event instanceof ECUIEvent)) {
-                event = util.extend(new ECUIEvent(name), event);
+            if (event) {
+                if (event instanceof ECUIEvent) {
+                    event.type = name;
+                } else {
+                    event = util.extend(new ECUIEvent(name), event);
+                }
             } else {
-                event.type = name;
+                event = new ECUIEvent(name);
             }
 
             delete event.returnValue;
-            if ((control['on' + name] && control['on' + name].apply(control, args) === false) || event.returnValue === false || (control['$' + name] && control['$' + name].apply(control, args) === false)) {
+            if ((control['on' + name] && control['on' + name](event) === false) || event.returnValue === false || (control['$' + name] && control['$' + name](event) === false)) {
                 event.preventDefault();
             }
 
@@ -2192,7 +2190,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             if (listeners = eventListeners[uid + '#' + name]) {
                 listeners.forEach(function (item) {
                     if (item) {
-                        item.apply(control, args);
+                        item.call(control, event);
                     }
                 });
             }
