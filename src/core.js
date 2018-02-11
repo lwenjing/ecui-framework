@@ -60,7 +60,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         events = {
             // 屏幕旋转
             orientationchange: function () {
-                document.body.style.height = util.getView().height + 'px';
+                var height = document.documentElement.clientHeight;
+                if (document.body.style.height === height + 'px') {
+                    return;
+                }
+                document.body.style.height = height + 'px';
 
                 var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
                 fontSizeCache.forEach(function (item) {
@@ -1781,8 +1785,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         init: function (el) {
             if (!initEnvironment() && el) {
-                events.orientationchange();
-                util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+                if (isMobile) {
+                    events.orientationchange();
+                    util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+                }
 
                 var list = dom.getAttribute(el, ecuiName) ? [el] : [],
                     controls = [],
