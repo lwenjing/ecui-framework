@@ -859,7 +859,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {Array} sheets 样式对象列表
              */
-            adjustFontSize: isMobile ? function (sheets) {
+            adjustFontSize: function (sheets) {
                 var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
                 sheets.forEach(function (item) {
                     item = item.rules || item.cssRules;
@@ -872,7 +872,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         }
                     }
                 });
-            } : util.blank,
+            },
 
             /*
              * 空函数。

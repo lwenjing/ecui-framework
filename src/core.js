@@ -30,15 +30,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         maskElements = [],        // 遮罩层组
         unmasks = [],             // 用于取消庶罩层的函数列表
 
-        touches = [],             // 上一次触屏事件时的数据缓存
+        tracks = {},              // 鼠标/触摸事件对象跟踪
+
         pauseCount = 0,           // 暂停的次数
-        mouseX,                   // 当前鼠标光标的X轴坐标
-        mouseY,                   // 当前鼠标光标的Y轴坐标
-        lastMoveTime,             // 上次移动的时间
-        speedX,                   // 当前鼠标X轴速度参数
-        speedY,                   // 当前鼠标Y轴速度参数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
-        lastClick,                // 上一次产生点击事件的信息
         inertiaHandles = {},      // 惯性处理句柄
 
         allControls = [],         // 全部生成的控件，供释放控件占用的内存使用
@@ -83,16 +78,33 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
                 isMobileScroll = false;
+                event = core.wrapEvent(event);
+                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
+                    var track = tracks[item.identifier] = {id: item.identifier};
 
-                if (!ieVersion) {
+                    track.pageX = event.pageX = item.pageX;
+                    track.pageY = event.pageY = item.pageY;
+                    event.target = item.target;
+
+                    event.track = track;
                     currEnv.mousedown(event);
-                }
+                });
             },
 
             touchmove: function (event) {
-                if (!ieVersion) {
+                event = core.wrapEvent(event);
+                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
+                    var track = tracks[item.identifier];
+
+                    event.pageX = item.pageX;
+                    event.pageY = item.pageY;
+                    event.target = item.target;
+
+                    calcSpeed(track, event);
+
+                    event.track = track;
                     currEnv.mousemove(event);
-                }
+                });
             },
 
             touchend: function (event) {
@@ -102,8 +114,16 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     activedControl = undefined;
                 }
 
-                if (!ieVersion) {
+                event = core.wrapEvent(event);
+                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
+                    event.pageX = item.pageX;
+                    event.pageY = item.pageY;
+                    event.target = item.target;
+
+                    event.track = tracks[item.identifier];
                     currEnv.mouseup(event);
+                    delete tracks[item.identifier];
+                });
                     // 解决非ie浏览器下触屏事件是touchstart/touchend/mouseover的问题，屏弊mouse事件
                     // TODO: 需要判断target与touchstart的target是否为同一个
 //                    for (var el = event.target; el; el = dom.getParent(el)) {
@@ -113,7 +133,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 //                        }
 //                    }
 //                    event.exit();
-                }
             },
 
             touchcancel: function (event) {
@@ -121,23 +140,74 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             mousedown: function (event) {
-                currEnv.mousedown(event);
+                event = core.wrapEvent(event);
+                // 仅监听鼠标左键
+                if (event.which === 1) {
+                    if (activedControl) {
+                        // 如果按下鼠标左键后，使用ALT+TAB使浏览器失去焦点然后松开鼠标左键，
+                        // 需要恢复激活控件状态，第一次点击失效
+                        bubble(activedControl, 'deactivate');
+                        activedControl = undefined;
+                        // 这里不能return，要考虑请求来自于其它环境的情况
+                    }
+
+                    // 为了兼容beforescroll事件，同时考虑到scroll执行效率问题，自己手动触发滚动条事件
+                    if (isScrollClick(event)) {
+                        onbeforescroll(event);
+                        scrollHandler = util.timer(
+                            function () {
+                                var handler = scrollHandler;
+                                scrollHandler = null;
+                                onscroll(event);
+                                scrollHandler = handler;
+                                onbeforescroll(event);
+                            },
+                            -50
+                        );
+                    }
+
+                    event.track = tracks;
+                    currEnv.mousedown(event);
+                }
             },
 
             mousemove: function (event) {
+                event = core.wrapEvent(event);
+
+                if (scrollHandler) {
+                    scrollHandler();
+                    scrollHandler = null;
+                    util.timer(onscroll, 500, this, event);
+                }
+
+                calcSpeed(tracks, event);
+
+                event.track = tracks;
                 currEnv.mousemove(event);
             },
 
             mouseout: function (event) {
-                currEnv.mouseout(event);
+                currEnv.mouseout(core.wrapEvent(event));
             },
 
             mouseover: function (event) {
-                currEnv.mouseover(event);
+                currEnv.mouseover(core.wrapEvent(event));
             },
 
             mouseup: function (event) {
-                currEnv.mouseup(event);
+                event = core.wrapEvent(event);
+
+                if (event.which === 1) {
+                    if (scrollHandler) {
+                        scrollHandler();
+                        scrollHandler = null;
+                        util.timer(onscroll, 500, this, event);
+                    }
+
+                    event.track = tracks;
+                    currEnv.mouseup(event);
+                    tracks = {};
+                }
             },
 
             // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
@@ -197,104 +267,66 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         currEnv = { // 当前操作的环境
             // 鼠标左键按下需要改变框架中拥有焦点的控件
             mousedown: function (event) {
-                event = core.wrapEvent(event);
+                var track = event.track,
+                    control = event.getControl(),
+                    target = control;
 
-                if (isMobile && event.type === 'mousedown') {
-                    return;
+                if (!(track.lastClick && isDblClick(track))) {
+                    track.lastClick = {time: Date.now()};
                 }
 
-                if (event.which === 1) {
-                    if (activedControl) {
-                        // 如果按下鼠标左键后，使用ALT+TAB使浏览器失去焦点然后松开鼠标左键，
-                        // 需要恢复激活控件状态，第一次点击失效
-                        bubble(activedControl, 'deactivate');
-                        activedControl = undefined;
-                        // 这里不能return，要考虑请求来自于其它环境的情况
-                    }
-
-                    var control = event.getControl(),
-                        target = control;
-
-                    if (!(lastClick && isDblClick())) {
-                        lastClick = {time: Date.now()};
-                    }
-
-                    // 为了兼容beforescroll事件，同时考虑到scroll执行效率问题，自己手动触发滚动条事件
-                    if (isScrollClick(event)) {
-                        onbeforescroll(event);
-                        scrollHandler = util.timer(
-                            function () {
-                                var handler = scrollHandler;
-                                scrollHandler = null;
-                                onscroll(event);
-                                scrollHandler = handler;
-                                onbeforescroll(event);
-                            },
-                            -50
-                        );
-                    }
-
-                    if (control) {
-                        // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
-                        // 常见的表现是需要点击两次才能进行滚动操作，而且中途不能离开控件区域
-                        // 以免触发悬停状态的样式改变。
-                        if (!scrollHandler || ieVersion >= 9) {
-                            for (; target; target = target.getParent()) {
-                                if (target.isFocusable()) {
-                                    if (!(target !== control && target.contain(focusedControl))) {
-                                        // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
-                                        // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
-                                        // 父控件获得焦点，否则焦点不发生变化
-                                        if (!isMobile) {
-                                            // 移动端是在mouseup时获得焦点
-                                            core.setFocused(target);
-                                        }
+                if (control) {
+                    // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
+                    // 常见的表现是需要点击两次才能进行滚动操作，而且中途不能离开控件区域
+                    // 以免触发悬停状态的样式改变。
+                    if (!scrollHandler || ieVersion >= 9) {
+                        for (; target; target = target.getParent()) {
+                            if (target.isFocusable()) {
+                                if (!(target !== control && target.contain(focusedControl))) {
+                                    // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
+                                    // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
+                                    // 父控件获得焦点，否则焦点不发生变化
+                                    if (!isMobile) {
+                                        // 移动端是在mouseup时获得焦点
+                                        core.setFocused(target);
                                     }
-                                    break;
                                 }
+                                break;
                             }
                         }
+                    }
 
-                        mousedown(control, event);
-                    } else {
-                        target = event.target;
-                        if (control = event.getTarget()) {
-                            // 如果点击的是失效状态的控件，检查是否需要取消文本选择
-                            onselectstart(control, event);
-                            // 检查是否INPUT/SELECT/TEXTAREA/BUTTON标签，需要失去焦点，
-                            // 因为ecui不能阻止mousedown focus输入框
-                            if (!isMobile) {
-                                // 移动端输入框是在mouseup时失去焦点
-                                if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
-                                    util.timer(
-                                        function () {
-                                            target.blur();
-                                        }
-                                    );
-                                    event.preventDefault();
-                                }
-                            }
-                        }
+                    onmousedown(control, event);
+                } else {
+                    target = event.target;
+                    if (control = event.getTarget()) {
+                        // 如果点击的是失效状态的控件，检查是否需要取消文本选择
+                        onselectstart(control, event);
+                        // 检查是否INPUT/SELECT/TEXTAREA/BUTTON标签，需要失去焦点，
+                        // 因为ecui不能阻止mousedown focus输入框
                         if (!isMobile) {
                             // 移动端输入框是在mouseup时失去焦点
-                            // 点击到了空白区域，取消控件的焦点
-                            core.setFocused();
+                            if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
+                                util.timer(
+                                    function () {
+                                        target.blur();
+                                    }
+                                );
+                                event.preventDefault();
+                            }
                         }
-                        // 正常情况下 activedControl 是 undefined，如果是down按下但未点击到控件，此值为null
-                        activedControl = null;
                     }
+                    if (!isMobile) {
+                        // 移动端输入框是在mouseup时失去焦点
+                        // 点击到了空白区域，取消控件的焦点
+                        core.setFocused();
+                    }
+                    // 正常情况下 activedControl 是 undefined，如果是down按下但未点击到控件，此值为null
+                    activedControl = null;
                 }
             },
 
             mousemove: function (event) {
-                event = core.wrapEvent(event);
-
-                if (scrollHandler) {
-                    scrollHandler();
-                    scrollHandler = null;
-                    util.timer(onscroll, 500, this, event);
-                }
-
                 var control = event.getControl();
                 bubble(control, 'mousemove', event);
                 if (hoveredControl !== control) {
@@ -302,10 +334,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             },
 
+            mouseout: util.blank,
+
             // 鼠标移入的处理，需要计算是不是位于当前移入的控件之外，如果是需要触发移出事件
             mouseover: function (event) {
-                event = core.wrapEvent(event);
-
                 var control = event.getControl(),
                     parent = getCommonParent(control, hoveredControl);
 
@@ -315,19 +347,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             mouseup: function (event) {
-                event = core.wrapEvent(event);
-
-                if (scrollHandler) {
-                    scrollHandler();
-                    scrollHandler = null;
-                    util.timer(onscroll, 500, this, event);
-                }
-
-                if (isMobile && event.type === 'mouseup') {
-                    return;
-                }
-
-                var control = event.getControl(),
+                var track = event.track,
+                    control = event.getControl(),
                     commonParent;
 
                 if (activedControl !== undefined) {
@@ -342,12 +363,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         bubble(commonParent, 'click', event);
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
                         // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题
-                        if (lastClick) {
-                            if (isDblClick() && lastClick.target === control) {
+                        if (track.lastClick) {
+                            if (isDblClick(track) && track.lastClick.target === control) {
                                 bubble(commonParent, 'dblclick', event);
-                                lastClick = null;
+                                track.lastClick = null;
                             } else {
-                                lastClick.target = control;
+                                track.lastClick.target = control;
                             }
                         }
                         bubble(activedControl, 'deactivate', event);
@@ -365,107 +386,46 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                core.wrapEvent(event);
-                if (event.type === 'touchmove') {
-                    // touch触发的拖拽，只监听同一个触发点
-                    Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
-                        if (item.identifier === currEnv.touchId) {
-                            dragmove(currEnv, item.pageX, item.pageY);
-                        }
-                    });
-                } else if (currEnv.touchId === undefined) {
-                    // 鼠标触发的拖拽，只监听鼠标的事件
-                    dragmove(currEnv, mouseX, mouseY);
+                if (event.track.id === currEnv.touchId) {
+                    dragmove(currEnv, event.pageX, event.pageY);
                 }
             },
 
             mouseover: util.blank,
 
             mouseup: function (event) {
-                if (event.type === 'mouseup') {
-                    // 鼠标触发的拖拽，只监听鼠标的事件
-                    if (currEnv.touchId === undefined) {
-                        return;
-                    }
-                } else {
-                    // touch触发的拖拽，只监听同一个触发点
-                    if (!Array.prototype.slice.call(event.changedTouches).filter(
-                            function (item) {
-                                return item.identifier === currEnv.touchId;
+                if (event.track.id === currEnv.touchId) {
+                    var target = currEnv.target,
+                        uid = target.getUID(),
+                        env = currEnv,
+                        mx = event.pageX,
+                        my = event.pageY,
+                        start = Date.now(),
+                        vx = Date.now() - event.track.lastMoveTime > 500 ? 0 : event.track.speedX || 0,
+                        vy = Date.now() - event.track.lastMoveTime > 500 ? 0 : event.track.speedY || 0,
+                        inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0;
+
+                    if (FeatureFlags.INERTIA_1 && inertia) {
+                        var ax = vx / inertia,
+                            ay = vy / inertia;
+                        inertiaHandles[uid] = util.timer(function () {
+                            var event = new ECUIEvent(),
+                                time = (Date.now() - start) / 1000,
+                                t = Math.min(time, inertia);
+
+                            dragmove(env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                            if (t >= inertia) {
+                                inertiaHandles[uid]();
+                                dragend(event, env, target);
                             }
-                        ).length) {
-                        return;
+                        }, -20);
+                    } else {
+                        dragend(event, currEnv, target);
                     }
-                }
+                    activedControl = currEnv.actived;
+                    core.restore();
 
-                var target = currEnv.target,
-                    uid = target.getUID(),
-                    env = currEnv,
-                    speed = core.getSpeed(),
-                    mx = mouseX,
-                    my = mouseY,
-                    start = Date.now(),
-                    vx = speed.x,
-                    vy = speed.y,
-                    inertia = target.$draginertia ? target.$draginertia(speed) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0,
-                    ax = vx / inertia,
-                    ay = vy / inertia;
-
-                if (FeatureFlags.INERTIA_1 && inertia) {
-                    event = core.wrapEvent(event);
-
-                    inertiaHandles[uid] = util.timer(function () {
-                        var event = new ECUIEvent(),
-                            time = (Date.now() - start) / 1000,
-                            t = Math.min(time, inertia);
-
-                        dragmove(env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
-                        if (t >= inertia) {
-                            inertiaHandles[uid]();
-                            dragend(event, env, target);
-                        }
-                    }, -20);
-                } else {
-                    event = core.wrapEvent(event);
-                    dragend(event, currEnv, target);
-                }
-                activedControl = currEnv.actived;
-                core.restore();
-
-                currEnv.mouseup(event);
-            }
-        },
-
-        interceptEnv = { // 强制点击拦截操作的环境，下拉框，弹出菜单等需要拦截第一次的点击调用
-            type: 'intercept',
-
-            mousedown: function (event) {
-                event = core.wrapEvent(event);
-
-                if (isMobile && event.type === 'mousedown') {
-                    return;
-                }
-                if (event.which === 1) {
-                    // 如果需要在intercept中触发click事件，需要设置activedControl的值
-                    activedControl = event.getControl();
-
-                    lastClick = null;
-
-                    if (!isScrollClick(event)) {
-                        if (activedControl && !activedControl.isFocusable()) {
-                            // 需要捕获但不激活的控件是最高优先级处理的控件，例如滚动条
-                            mousedown(activedControl, event);
-                        } else {
-                            // 默认仅拦截一次，框架自动释放环境
-                            if (core.triggerEvent(currEnv.target, 'intercept', event)) {
-                                core.restore();
-                            }
-                            // 取消冒泡，则控件不会触发click
-                            if (event.cancelBubble) {
-                                activedControl = undefined;
-                            }
-                        }
-                    }
+                    currEnv.mouseup(event);
                 }
             }
         };
@@ -477,7 +437,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          *
          * @param {Event} event 事件对象
          */
-        currEnv.mousewheel = function (event) {
+        events.mousewheel = function (event) {
             onmousewheel(event, 0, 1);
         };
     } else if (firefoxVersion < 17) {
@@ -487,11 +447,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          *
          * @param {Event} event 事件对象
          */
-        currEnv.DOMMouseScroll = function (event) {
+        events.DOMMouseScroll = function (event) {
             onmousewheel(event, event.axis === 1 ? event.detail : 0, event.axis === 2 ? event.detail : 0);
         };
     } else {
-        currEnv.wheel = function (event) {
+        events.wheel = function (event) {
             onmousewheel(event, event.deltaX, event.deltaY);
         };
     }
@@ -512,8 +472,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.target = event.target;
             this._oNative = event;
         } else {
-            this.pageX = mouseX;
-            this.pageY = mouseY;
             this.which = keyCode;
             this.target = document;
         }
@@ -536,10 +494,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @return {ecui.ui.Control} 控件对象
          */
         getControl: function () {
-            if (this._cControl !== undefined) {
-                return this._cControl;
-            }
-
             var control = this.getTarget();
 
             if (control && control.isTransparent()) {
@@ -566,11 +520,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             if (control && !control.isDisabled()) {
                 for (; control; control = control.getParent()) {
                     if (control.isCapturable()) {
-                        return this._cControl = control;
+                        return control;
                     }
                 }
             }
-            return this._cControl = null;
+            return null;
         },
 
         /**
@@ -590,10 +544,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @return {ecui.ui.Control} 控件对象
          */
         getTarget: function () {
-            if (this._cTarget !== undefined) {
-                return this._cTarget;
-            }
-            return this._cTarget = core.findControl(this.target);
+            return core.findControl(this.target);
         },
 
         /**
@@ -657,6 +608,16 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 return;
             }
         }
+    }
+
+    function calcSpeed(track, event) {
+        track.lastClick = null;
+        track.lastMoveTime = 1000 / (Date.now() - track.lastMoveTime);
+        track.speedX = (event.pageX - track.pageX) * track.lastMoveTime;
+        track.speedY = (event.pageY - track.pageY) * track.lastMoveTime;
+        track.lastMoveTime = Date.now();
+        track.pageX = event.pageX;
+        track.pageY = event.pageY;
     }
 
     /**
@@ -815,6 +776,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         // 计算实际允许移到的位置
         event.x = Math.min(Math.max(expectX, env.left), env.right);
         event.y = Math.min(Math.max(expectY, env.top), env.bottom);
+
         if (core.triggerEvent(target, 'dragmove', event)) {
             target.setPosition(event.x, event.y);
         }
@@ -879,7 +841,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             // 设置全局事件处理
             for (var key in events) {
                 if (events.hasOwnProperty(key)) {
-                    dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
+                    if ((isMobile && key.slice(0, 5) === 'touch') || (!isMobile && key.slice(0, 5) !== 'touch')) {
+                        dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
+                    }
                 }
             }
 
@@ -938,10 +902,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * 判断是否为允许的双击时间间隔。
      * @private
      *
+     * @param {object} track 事件跟踪对象
      * @return {boolean} 是否为允许的双击时间间隔
      */
-    function isDblClick() {
-        return lastClick.time > Date.now() - 300;
+    function isDblClick(track) {
+        return track.lastClick.time > Date.now() - 300;
     }
 
     /**
@@ -961,21 +926,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         event.deltaX = target.clientWidth && target.clientWidth !== target.scrollWidth && y >= 0 && y < scrollNarrow ? 1 : 0;
         event.deltaY = target.clientHeight && target.clientHeight !== target.scrollHeight && x >= 0 && x < scrollNarrow ? 1 : 0;
         return event.deltaX !== event.deltaY;
-    }
-
-    /**
-     * 处理鼠标点击。
-     * @private
-     *
-     * @param {ecui.ui.Control} control 需要操作的控件
-     * @param {ECUIEvent} event 事件对象
-     */
-    function mousedown(control, event) {
-        if (!isScrollClick(event)) {
-            bubble(activedControl = control, 'activate', event);
-        }
-        bubble(control, 'mousedown', event);
-        onselectstart(control, event);
     }
 
     /**
@@ -1023,6 +973,21 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             }
         }
+    }
+
+    /**
+     * 处理鼠标点击。
+     * @private
+     *
+     * @param {ecui.ui.Control} control 需要操作的控件
+     * @param {ECUIEvent} event 事件对象
+     */
+    function onmousedown(control, event) {
+        if (!isScrollClick(event)) {
+            bubble(activedControl = control, 'activate', event);
+        }
+        bubble(control, 'mousedown', event);
+        onselectstart(control, event);
     }
 
     /**
@@ -1165,8 +1130,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     function setEnv(env) {
         envStack.push(currEnv);
         currEnv = util.extend(util.extend({}, currEnv), env);
-        currEnv.x = mouseX;
-        currEnv.y = mouseY;
     }
 
     util.extend(core, {
@@ -1555,9 +1518,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 dragEnv.target = control;
                 dragEnv.actived = activedControl;
                 if (event._oNative.type === 'touchstart') {
-                    dragEnv.touchId = touches[touches.length - 1].identifier;
+                    dragEnv.touchId = event._oNative.touches[event._oNative.touches.length - 1].identifier;
                 }
                 setEnv(dragEnv);
+                currEnv.x = event.track.pageX;
+                currEnv.y = event.track.pageY;
 
                 // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
                 activedControl = undefined;
@@ -1765,16 +1730,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
-         * 获取光标/焦点移动的速度。
-         * @public
-         *
-         * @return {Object} 移动速度，包括两个属性 x,y 分别表示不同坐标轴上的速度
-         */
-        getSpeed: function () {
-            return Date.now() - lastMoveTime > 500 ? {x: 0, y: 0} : {x: speedX, y: speedY};
-        },
-
-        /**
          * 控件继承。
          * 如果不指定类型样式，表示使用父控件的类型样式，如果指定的类型样式以 * 符号开头，表示移除父控件的类型样式并以之后的类型样式代替。生成的子类构造函数已经使用了 constructor/TYPES/CLASS 三个属性，TYPES 属性是控件的全部类型样式，CLASS 属性是控件的全部类型样式字符串。
          * @public
@@ -1902,33 +1857,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
-         * 设置框架拦截之后的一次点击，并将点击事件发送给指定的 ECUI 控件。
-         * intercept 方法将下一次的鼠标点击事件转给指定控件的 $intercept 方法处理，相当于拦截了一次框架的鼠标事件点击操作，框架其它的状态不会自动改变，例如拥有焦点的控件不会改变。如果 $intercept 方法不阻止冒泡，将自动调用 restore 方法。
-         * @public
-         *
-         * @param {ecui.ui.Control} control ECUI 控件
-         */
-        intercept: function (control) {
-            interceptEnv.target = control;
-            setEnv(interceptEnv);
-        },
-
-        /**
          * 默认的盒子模型是否为ContentBox状态
          * @public
          */
         isContentBox: function () {
             return flgFixedSize;
-        },
-
-        /**
-         * 当前是否处于按压状态
-         * @public
-         *
-         * @return {boolean} 是否有鼠标左键未释放处于按压状态
-         */
-        isTouch: function () {
-            return touches.length > 0;
         },
 
         /**
@@ -2194,41 +2127,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 event.target = event.srcElement;
                 event.which = event.keyCode || (event.button | 1);
             }
-            if (event.touches) {
-                touches = Array.prototype.slice.call(event.touches).map(function (item) {
-                    return {
-                        identifier: item.identifier,
-                        screenX: item.screenX,
-                        screenY: item.screenY,
-                        pageX: item.pageX,
-                        pageY: item.pageY
-                    };
-                });
-                var lastTouch = event.changedTouches[event.changedTouches.length - 1];
-                event.pageX = lastTouch.pageX;
-                event.pageY = lastTouch.pageY;
-                event.target = lastTouch.target;
-            }
 
-            event = new ECUIEvent(event.type, event);
-
-            if (event.type === 'mousemove' || event.type === 'touchmove') {
-                lastClick = null;
-                if (currEnv.type === 'drag') {
-                    lastMoveTime = 1000 / (Date.now() - lastMoveTime);
-                    speedX = (event.pageX - mouseX) * lastMoveTime;
-                    speedY = (event.pageY - mouseY) * lastMoveTime;
-                    lastMoveTime = Date.now();
-                }
-            } else if (event.type !== 'mouseup' && event.type !== 'touchend') {
-                speedX = 0;
-                speedY = 0;
-            }
-
-            mouseX = event.pageX;
-            mouseY = event.pageY;
-
-            return event;
+            return new ECUIEvent(event.type, event);
         }
     });
 
