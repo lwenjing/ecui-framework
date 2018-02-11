@@ -70,15 +70,15 @@ _nBottomIndex  - 下部隐藏的选项序号
                 }
 
                 var top = this.getHeight() - this.$$bodyHeight;
-                this.setRange(
+                this.setScrollRange(
                     {
                         left: 0,
                         right: 0,
                         top: top,
                         bottom: 0
-                    }/*,
-                    [top + this.$$footerHeight, 0, -this.$$headerHeight, 0]*/
+                    }
                 );
+                this.setRange([top + this.$$footerHeight, 0, -this.$$headerHeight, 0]);
             },
 
             /**

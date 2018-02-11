@@ -393,20 +393,19 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mouseup: function (event) {
                 var target = currEnv.target,
+                    uid = target.getUID(),
+                    env = currEnv,
                     speed = core.getSpeed(),
-                    inertia = 'function' === typeof currEnv.inertia ? currEnv.inertia.call(target) : currEnv.inertia || (target.$draginertia && target.$draginertia());
+                    mx = mouseX,
+                    my = mouseY,
+                    start = Date.now(),
+                    vx = speed.x,
+                    vy = speed.y,
+                    inertia = target.$draginertia ? target.$draginertia(speed) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0,
+                    ax = vx / inertia,
+                    ay = vy / inertia;
 
                 if (FeatureFlags.INERTIA_1 && inertia) {
-                    var uid = target.getUID(),
-                        env = currEnv,
-                        mx = mouseX,
-                        my = mouseY,
-                        start = Date.now(),
-                        vx = speed.x,
-                        vy = speed.y,
-                        ax = vx / inertia,
-                        ay = vy / inertia;
-
                     event = core.wrapEvent(event);
 
                     inertiaHandles[uid] = util.timer(function () {
@@ -761,8 +760,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             var range = 'function' === typeof env.limit ? env.limit.call(target) : env.limit,
                 codes = [],
                 el = env.el || target.getOuter(),
-                x = util.toNumber(el.style.left),
-                y = util.toNumber(el.style.top),
+                x = target.getX(),
+                y = target.getY(),
                 expectX = Math.min(range[1], Math.max(range[3], x)),
                 expectY = Math.min(range[2], Math.max(range[0], y));
             if (range[5]) {
@@ -1767,7 +1766,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             }
 
             if ('function' !== typeof realConstructor) {
-                subClass.constructor = superClass.constructor;
+                subClass.constructor = superClass;
                 index--;
             } else {
                 subClass.constructor = realConstructor;
@@ -2158,7 +2157,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @param {string} name 事件名
          * @param {ECUIEvent|Object} event 事件对象或事件对象参数
          * @param {Object} ... 事件的其它参数
-         * @return {boolean} 是否阻止默认事件处理
+         * @return {boolean} 是否需要执行默认事件处理
          */
         triggerEvent: function (control, name, event) {
             // 防止事件重入
