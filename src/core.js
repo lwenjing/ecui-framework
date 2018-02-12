@@ -14,8 +14,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var scrollHandler,            // DOM滚动事件
         isMobileScroll,
@@ -33,6 +32,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         tracks = {},              // 鼠标/触摸事件对象跟踪
         trackId,                  // 当前正在跟踪的id
+        gestureListeners = [],    // 手势监听
 
         pauseCount = 0,           // 暂停的次数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
@@ -124,6 +124,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         // 同向滑动，允许很小角度的误差
                         if (angle < 10) {
                             console.log('同向滑动角度为' + (touch1.angle + touch1.angle) / 2);
+                            gestureListeners.forEach(function (item) {
+                                if (item[1].multimove) {
+                                    event = new ECUIEvent('multimove');
+                                    event.angle = (touch1.angle + touch1.angle) / 2;
+                                    item[1].multimove.call(item[0], event);
+                                }
+                            });
                         } else if (Math.abs(Math.abs(angle) - 180) < 10) {
                             var dist = Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2),
                                 lastDist = Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2);
@@ -132,6 +139,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             } else if (dist < lastDist) {
                                 console.log('缩小');
                             }
+                            gestureListeners.forEach(function (item) {
+                                if (item[1].zoom) {
+                                    event = new ECUIEvent('zoom');
+                                    event.from = lastDist;
+                                    event.to = dist;
+                                    item[1].zoom.call(item[0], event);
+                                }
+                            });
                         }
                     }
                 }
@@ -1390,6 +1405,17 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
+         * 绑定控件的手势监听。
+         * @public
+         *
+         * @param {ecui.ui.Control} control ECUI 控件
+         * @param {Object} options 监听函数列表
+         */
+        bindGestures: function (control, options) {
+            gestureListeners.push([control, options]);
+        },
+
+        /**
          * 获取高度修正值(即计算 padding, border 样式对 height 样式的影响)。
          * IE 的盒子模型不完全遵守 W3C 标准，因此，需要使用 calcHeightRevise 方法计算 offsetHeight 与实际的 height 样式之间的修正值。
          * @public
@@ -2140,6 +2166,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             delete eventStack[uid][name];
             return event.returnValue !== false;
+        },
+
+        /**
+         * 解除控件的手势监听。
+         * @public
+         *
+         * @param {ecui.ui.Control} control ECUI 控件
+         */
+        unbindGestures: function (control) {
+            for (var i = gestureListeners.length; i--; ) {
+                if (gestureListeners[i][0] === control) {
+                    gestureListeners.splice(i, 1);
+                }
+            }
         },
 
         /**
