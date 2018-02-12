@@ -118,13 +118,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (event.getNative().touches.length === 2) {
                     var touch1 = tracks[event.getNative().touches[0].identifier],
                         touch2 = tracks[event.getNative().touches[1].identifier];
-                    if (touch1.angle === undefined || touch2.angle === undefined || Math.abs(touch1.angle - touch2.angle) < 15) {
-                        var dist = Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2),
-                            lastDist = Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2);
-                        if (dist > lastDist) {
-                            console.log('放大');
-                        } else if (dist < lastDist) {
-                            console.log('缩小');
+                    // 两指操作的时间间隔足够小
+                    if (Math.abs(touch1.lastMoveTime - touch1.lastMoveTime) < 50) {
+                        var angle = Math.abs(touch1.angle - touch2.angle);
+                        // 同向滑动，允许很小角度的误差
+                        if (angle < 10) {
+                            console.log('同向滑动角度为' + (touch1.angle + touch1.angle) / 2);
+                        } else if (Math.abs(Math.abs(angle) - 180) < 10) {
+                            var dist = Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2),
+                                lastDist = Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2);
+                            if (dist > lastDist) {
+                                console.log('放大');
+                            } else if (dist < lastDist) {
+                                console.log('缩小');
+                            }
                         }
                     }
                 }
@@ -392,7 +399,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     if (activedControl) {
                         commonParent = getCommonParent(control, activedControl);
-                        if (!isMobile || (track.lastClick && Date.now() - track.lastClick.time < 100)) {
+                        if (!isMobile || (track.lastClick && Date.now() - track.lastClick.time < 300)) {
                             bubble(commonParent, 'click', event);
                             if (isMobile) {
                                 core.setFocused(activedControl);
@@ -653,11 +660,24 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      */
     function calcSpeed(track, event) {
         track.lastClick = null;
-        var delay = Date.now() - track.lastMoveTime > 500;
+        var delay = Date.now() - track.lastMoveTime > 500,
+            offsetX = event.pageX - track.pageX,
+            offsetY = event.pageY - track.pageY;
         track.lastMoveTime = 1000 / (Date.now() - track.lastMoveTime);
-        track.speedX = delay ? 0 : (event.pageX - track.pageX) * track.lastMoveTime;
-        track.speedY = delay ? 0 : (event.pageY - track.pageY) * track.lastMoveTime;
-        track.angle = track.speedX ? Math.atan(track.speedY / track.speedX) / Math.PI * 180 : track.speedY ? undefined : track.speedY > 0 ? 90 : -90;
+        track.speedX = delay ? 0 : offsetX * track.lastMoveTime;
+        track.speedY = delay ? 0 : offsetY * track.lastMoveTime;
+        if (offsetX > 0) {
+            track.angle = Math.atan(offsetY / offsetX) / Math.PI * 180;
+            if (track.angle < 0) {
+                track.angle += 360;
+            }
+        } else if (offsetX < 0) {
+            track.angle = 180 + Math.atan(offsetY / offsetX) / Math.PI * 180;
+        } else if (offsetY > 0) {
+            track.angle = 90;
+        } else if (offsetY < 0) {
+            track.angle = 270;
+        }
         track.lastMoveTime = Date.now();
         track.lastX = track.pageX;
         track.lastY = track.pageY;
@@ -975,7 +995,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * @return {boolean} 是否为允许的双击时间间隔
      */
     function isDblClick(track) {
-        return track.lastClick.time > Date.now() - 300;
+        return Date.now() - track.lastClick.time > 500;
     }
 
     /**
