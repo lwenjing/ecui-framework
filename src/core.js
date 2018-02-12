@@ -123,7 +123,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         var angle = Math.abs(touch1.angle - touch2.angle);
                         // 同向滑动，允许很小角度的误差
                         if (angle < 10) {
-                            console.log('同向滑动角度为' + (touch1.angle + touch1.angle) / 2);
                             gestureListeners.forEach(function (item) {
                                 if (item[1].multimove) {
                                     event = new ECUIEvent('multimove');
@@ -132,18 +131,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 }
                             });
                         } else if (Math.abs(Math.abs(angle) - 180) < 10) {
-                            var dist = Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2),
-                                lastDist = Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2);
-                            if (dist > lastDist) {
-                                console.log('放大');
-                            } else if (dist < lastDist) {
-                                console.log('缩小');
-                            }
                             gestureListeners.forEach(function (item) {
                                 if (item[1].zoom) {
                                     event = new ECUIEvent('zoom');
-                                    event.from = lastDist;
-                                    event.to = dist;
+                                    event.from = Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2);
+                                    event.to = Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2);
                                     item[1].zoom.call(item[0], event);
                                 }
                             });
