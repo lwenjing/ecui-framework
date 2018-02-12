@@ -100,7 +100,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 event = core.wrapEvent(event);
 
-                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
+                var touches = Array.prototype.slice.call(event.getNative().changedTouches).map(function (item) {
                     var track = tracks[item.identifier];
                     event.pageX = item.pageX;
                     event.pageY = item.pageY;
@@ -112,19 +112,24 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.track = track;
                         currEnv.mousemove(event);
                     }
+
+                    return track;
                 });
 
-/*                if (returnValue && trackCount === 2 && touches.length === 2) {
+                console.log(event.getNative().touches.length);
+                if (event.getNative().touches.length === 2) {
+                    console.log(touches[0].angle, touches[1].angle);
                     if (Math.abs(touches[0].angle - touches[1].angle) < 15) {
                         var speedX = Math.abs(touches[0].speedX - touches[1].speedX),
                             speedY = Math.abs(touches[0].speedY - touches[1].speedY);
+                        console.log(speedX, speedY);
                         if (speedX >= speedY) {
-                            document.body.innerHTML = speedX >= Math.abs(touches[0].speedX) ? '放大' : '缩小';
+                            console.log(speedX >= Math.abs(touches[0].speedX) ? '放大' : '缩小');
                         } else if (speedX < speedY) {
-                            document.body.innerHTML = speedY >= Math.abs(touches[0].speedY) ? '放大' : '缩小';
+                            console.log(speedY >= Math.abs(touches[0].speedY) ? '放大' : '缩小');
                         }
                     }
-                }*/
+                }
             },
 
             touchend: function (event) {
@@ -137,10 +142,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 var track = tracks[trackId];
                 initTracks(event);
 
-                event = core.wrapEvent(event);
-
-                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
+                Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
                     if (item.identifier === trackId) {
+                        event = core.wrapEvent(event);
+
                         event.track = track;
                         event.pageX = item.pageX;
                         event.pageY = item.pageY;
