@@ -14,7 +14,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var scrollHandler,            // DOM滚动事件
         isMobileScroll,
@@ -134,12 +135,17 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             gestureListeners.forEach(function (item) {
                                 if (item[1].zoom) {
                                     event = new ECUIEvent('zoom');
+                                    event.pageX = (touch1.pageX + touch2.pageX) / 2;
+                                    event.pageY = (touch1.pageY + touch2.pageY) / 2;
                                     event.from = Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2);
                                     event.to = Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2);
                                     item[1].zoom.call(item[0], event);
                                 }
                             });
                         }
+                    }
+                    if (safariVersion) {
+                        event.preventDefault();
                     }
                 }
             },
