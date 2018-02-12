@@ -940,7 +940,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
             }
 
-            if (FeatureFlags.CACHE_1 && options.cache) {
+            if (options.cache) {
                 historyCache = true;
             }
 

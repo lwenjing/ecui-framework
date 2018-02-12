@@ -440,7 +440,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     vy = track.speedY || 0,
                     inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0;
 
-                if (FeatureFlags.INERTIA_1 && inertia) {
+                if (inertia) {
                     var ax = vx / inertia,
                         ay = vy / inertia;
                     inertiaHandles[uid] = util.timer(function () {
@@ -1549,13 +1549,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         drag: function (control, event, options) {
             if (activedControl !== undefined) {
-                if (FeatureFlags.INERTIA_1) {
-                    // 控件之前处于惯性状态必须停止
-                    var uid = control.getUID();
-                    if (inertiaHandles[uid]) {
-                        inertiaHandles[uid]();
-                        delete inertiaHandles[uid];
-                    }
+                // 控件之前处于惯性状态必须停止
+                var uid = control.getUID();
+                if (inertiaHandles[uid]) {
+                    inertiaHandles[uid]();
+                    delete inertiaHandles[uid];
                 }
 
                 // 判断鼠标没有mouseup
@@ -1751,11 +1749,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @return {ecui.ui.Control} ECUI 控件
          */
         getSingleton: function (UIClass, el, parent, options) {
-            if (FeatureFlags.SINGLETON_1) {
-                for (var i = 0, item; item = singletons[i++]; ) {
-                    if (item.constructor === UIClass) {
-                        return item;
-                    }
+            for (var i = 0, item; item = singletons[i++]; ) {
+                if (item.constructor === UIClass) {
+                    return item;
                 }
             }
             item = core.$fastCreate(UIClass, el, parent, options);

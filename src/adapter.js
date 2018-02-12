@@ -15,7 +15,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        safariVersion = /(\d+\.\d)(\.\d)?\s+(.*)safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 
     ecui = {
 //{if 0}//
@@ -1261,23 +1261,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     } catch (ignore) {
     }
 
-    if (FeatureFlags.SYSTEM_PATCH_1) {
-        (function () {
-            function extend(des, src) {
-                if (src) {
-                    util.extend(des, src);
-                }
+    (function () {
+        function extend(des, src) {
+            if (src) {
+                util.extend(des, src);
             }
+        }
 
-            if (patch) {
-                extend(core.dom, patch.dom);
-                extend(core.ext, patch.ext);
-                extend(core.io, patch.io);
-                extend(core.util, patch.util);
-                patch = null;
-            }
-        }());
-    }
+        if (patch) {
+            extend(core.dom, patch.dom);
+            extend(core.ext, patch.ext);
+            extend(core.io, patch.io);
+            extend(core.util, patch.util);
+            patch = null;
+        }
+    }());
 //{if 0}//
 }());
 //{/if}//
