@@ -14,7 +14,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var scrollHandler,            // DOM滚动事件
         isMobileScroll,
@@ -100,7 +101,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 event = core.wrapEvent(event);
 
-                var touches = Array.prototype.slice.call(event.getNative().changedTouches).map(function (item) {
+                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
                     var track = tracks[item.identifier];
                     event.pageX = item.pageX;
                     event.pageY = item.pageY;
@@ -112,21 +113,18 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.track = track;
                         currEnv.mousemove(event);
                     }
-
-                    return track;
                 });
 
-                console.log(event.getNative().touches.length);
                 if (event.getNative().touches.length === 2) {
-                    console.log(touches[0].angle, touches[1].angle);
-                    if (Math.abs(touches[0].angle - touches[1].angle) < 15) {
-                        var speedX = Math.abs(touches[0].speedX - touches[1].speedX),
-                            speedY = Math.abs(touches[0].speedY - touches[1].speedY);
-                        console.log(speedX, speedY);
-                        if (speedX >= speedY) {
-                            console.log(speedX >= Math.abs(touches[0].speedX) ? '放大' : '缩小');
-                        } else if (speedX < speedY) {
-                            console.log(speedY >= Math.abs(touches[0].speedY) ? '放大' : '缩小');
+                    var touch1 = tracks[event.getNative().touches[0].identifier],
+                        touch2 = tracks[event.getNative().touches[1].identifier];
+                    if (touch1.angle === undefined || touch2.angle === undefined || Math.abs(touch1.angle - touch2.angle) < 15) {
+                        var dist = Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2),
+                            lastDist = Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2);
+                        if (dist > lastDist) {
+                            console.log('放大');
+                        } else if (dist < lastDist) {
+                            console.log('缩小');
                         }
                     }
                 }
@@ -154,6 +152,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         trackId = null;
                     }
                 });
+
+                if (trackId && !tracks[trackId]) {
+                    tracks[trackId] = track;
+                }
                     // 解决非ie浏览器下触屏事件是touchstart/touchend/mouseover的问题，屏弊mouse事件
                     // TODO: 需要判断target与touchstart的target是否为同一个
 //                    for (var el = event.target; el; el = dom.getParent(el)) {
@@ -390,7 +392,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     if (activedControl) {
                         commonParent = getCommonParent(control, activedControl);
-                        bubble(commonParent, 'click', event);
+                        if (!isMobile || (track.lastClick && Date.now() - track.lastClick.time < 100)) {
+                            bubble(commonParent, 'click', event);
+                            if (isMobile) {
+                                core.setFocused(activedControl);
+                            }
+                        }
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
                         // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题
                         if (track.lastClick) {
@@ -429,9 +436,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     mx = event.pageX,
                     my = event.pageY,
                     start = Date.now(),
-                    isDelay = Date.now() - track.lastMoveTime > 500,
-                    vx = isDelay ? 0 : track.speedX || 0,
-                    vy = isDelay ? 0 : track.speedY || 0,
+                    vx = track.speedX || 0,
+                    vy = track.speedY || 0,
                     inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0;
 
                 if (FeatureFlags.INERTIA_1 && inertia) {
@@ -647,11 +653,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      */
     function calcSpeed(track, event) {
         track.lastClick = null;
+        var delay = Date.now() - track.lastMoveTime > 500;
         track.lastMoveTime = 1000 / (Date.now() - track.lastMoveTime);
-        track.speedX = (event.pageX - track.pageX) * track.lastMoveTime;
-        track.speedY = (event.pageY - track.pageY) * track.lastMoveTime;
-        track.angle = track.speedX ? Math.atan(track.speedY / track.speedX) / Math.PI * 180 : track.speedY > 0 ? 90 : -90;
+        track.speedX = delay ? 0 : (event.pageX - track.pageX) * track.lastMoveTime;
+        track.speedY = delay ? 0 : (event.pageY - track.pageY) * track.lastMoveTime;
+        track.angle = track.speedX ? Math.atan(track.speedY / track.speedX) / Math.PI * 180 : track.speedY ? undefined : track.speedY > 0 ? 90 : -90;
         track.lastMoveTime = Date.now();
+        track.lastX = track.pageX;
+        track.lastY = track.pageY;
         track.pageX = event.pageX;
         track.pageY = event.pageY;
     }
@@ -1096,7 +1105,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         independentControls.forEach(function (item) {
             core.triggerEvent(item, 'scroll', event);
         });
-        if (core.isTouch()) {
+        if (tracks.length > 0) {
             isMobileScroll = true;
         }
         core.mask(true);
