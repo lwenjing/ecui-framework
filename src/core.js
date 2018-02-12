@@ -31,6 +31,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         unmasks = [],             // 用于取消庶罩层的函数列表
 
         tracks = {},              // 鼠标/触摸事件对象跟踪
+        trackId,                  // 当前正在跟踪的id
 
         pauseCount = 0,           // 暂停的次数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
@@ -78,33 +79,52 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
                 isMobileScroll = false;
-                event = core.wrapEvent(event);
-                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
-                    var track = tracks[item.identifier] = {id: item.identifier};
 
-                    track.pageX = event.pageX = item.pageX;
-                    track.pageY = event.pageY = item.pageY;
-                    event.target = item.target;
+                initTracks(event);
 
+                if (event.touches.length === 1) {
+                    var track = tracks[trackId = event.touches[0].identifier];
+
+                    event = core.wrapEvent(event);
+
+                    event.pageX = track.pageX;
+                    event.pageY = track.pageY;
+                    event.target = track.target;
                     event.track = track;
                     currEnv.mousedown(event);
-                });
+                }
             },
 
             touchmove: function (event) {
+                initTracks(event);
+
                 event = core.wrapEvent(event);
+
                 Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
                     var track = tracks[item.identifier];
-
                     event.pageX = item.pageX;
                     event.pageY = item.pageY;
                     event.target = item.target;
 
                     calcSpeed(track, event);
 
-                    event.track = track;
-                    currEnv.mousemove(event);
+                    if (item.identifier === trackId) {
+                        event.track = track;
+                        currEnv.mousemove(event);
+                    }
                 });
+
+/*                if (returnValue && trackCount === 2 && touches.length === 2) {
+                    if (Math.abs(touches[0].angle - touches[1].angle) < 15) {
+                        var speedX = Math.abs(touches[0].speedX - touches[1].speedX),
+                            speedY = Math.abs(touches[0].speedY - touches[1].speedY);
+                        if (speedX >= speedY) {
+                            document.body.innerHTML = speedX >= Math.abs(touches[0].speedX) ? '放大' : '缩小';
+                        } else if (speedX < speedY) {
+                            document.body.innerHTML = speedY >= Math.abs(touches[0].speedY) ? '放大' : '缩小';
+                        }
+                    }
+                }*/
             },
 
             touchend: function (event) {
@@ -114,15 +134,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     activedControl = undefined;
                 }
 
-                event = core.wrapEvent(event);
-                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
-                    event.pageX = item.pageX;
-                    event.pageY = item.pageY;
-                    event.target = item.target;
+                var track = tracks[trackId];
+                initTracks(event);
 
-                    event.track = tracks[item.identifier];
-                    currEnv.mouseup(event);
-                    delete tracks[item.identifier];
+                event = core.wrapEvent(event);
+
+                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
+                    if (item.identifier === trackId) {
+                        event.track = track;
+                        event.pageX = item.pageX;
+                        event.pageY = item.pageY;
+                        event.target = item.target;
+                        currEnv.mouseup(event);
+                        trackId = null;
+                    }
                 });
                     // 解决非ie浏览器下触屏事件是touchstart/touchend/mouseover的问题，屏弊mouse事件
                     // TODO: 需要判断target与touchstart的target是否为同一个
@@ -136,7 +161,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             touchcancel: function (event) {
-                currEnv.touchend(event);
+                events.touchend(event);
             },
 
             mousedown: function (event) {
@@ -386,47 +411,45 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                if (event.track.id === currEnv.touchId) {
-                    dragmove(currEnv, event.pageX, event.pageY);
-                }
+                dragmove(event.track, currEnv, event.pageX, event.pageY);
             },
 
             mouseover: util.blank,
 
             mouseup: function (event) {
-                if (event.track.id === currEnv.touchId) {
-                    var target = currEnv.target,
-                        uid = target.getUID(),
-                        env = currEnv,
-                        mx = event.pageX,
-                        my = event.pageY,
-                        start = Date.now(),
-                        vx = Date.now() - event.track.lastMoveTime > 500 ? 0 : event.track.speedX || 0,
-                        vy = Date.now() - event.track.lastMoveTime > 500 ? 0 : event.track.speedY || 0,
-                        inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0;
+                var track = event.track,
+                    target = currEnv.target,
+                    uid = target.getUID(),
+                    env = currEnv,
+                    mx = event.pageX,
+                    my = event.pageY,
+                    start = Date.now(),
+                    isDelay = Date.now() - track.lastMoveTime > 500,
+                    vx = isDelay ? 0 : track.speedX || 0,
+                    vy = isDelay ? 0 : track.speedY || 0,
+                    inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0;
 
-                    if (FeatureFlags.INERTIA_1 && inertia) {
-                        var ax = vx / inertia,
-                            ay = vy / inertia;
-                        inertiaHandles[uid] = util.timer(function () {
-                            var event = new ECUIEvent(),
-                                time = (Date.now() - start) / 1000,
-                                t = Math.min(time, inertia);
+                if (FeatureFlags.INERTIA_1 && inertia) {
+                    var ax = vx / inertia,
+                        ay = vy / inertia;
+                    inertiaHandles[uid] = util.timer(function () {
+                        var event = new ECUIEvent(),
+                            time = (Date.now() - start) / 1000,
+                            t = Math.min(time, inertia);
 
-                            dragmove(env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
-                            if (t >= inertia) {
-                                inertiaHandles[uid]();
-                                dragend(event, env, target);
-                            }
-                        }, -20);
-                    } else {
-                        dragend(event, currEnv, target);
-                    }
-                    activedControl = currEnv.actived;
-                    core.restore();
-
-                    currEnv.mouseup(event);
+                        dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
+                        if (t >= inertia) {
+                            inertiaHandles[uid]();
+                            dragend(event, env, target);
+                        }
+                    }, -20);
+                } else {
+                    dragend(event, currEnv, target);
                 }
+                activedControl = currEnv.actived;
+                core.restore();
+
+                currEnv.mouseup(event);
             }
         };
 
@@ -468,7 +491,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         if (event) {
             this.pageX = event.pageX;
             this.pageY = event.pageY;
-            this.which = event.which || 1;
+            this.which = event.which;
             this.target = event.target;
             this._oNative = event;
         } else {
@@ -504,7 +527,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     var el = item.getOuter();
                     if (item !== target && !item.isTransparent() && !dom.hasClass(el, 'ui-hide') && dom.contain(document.body, el)) {
                         var pos = dom.getPosition(el);
-                        if (pos.top <= mouseY && pos.top + item.getHeight() >= mouseY && pos.left <= mouseX && pos.left + item.getWidth() >= mouseX) {
+                        if (pos.top <= this.pageY && pos.top + item.getHeight() >= this.pageY && pos.left <= this.pageX && pos.left + item.getWidth() >= this.pageX) {
                             if (control) {
                                 if (compareZIndex(control, item) < 0) {
                                     control = item;
@@ -610,11 +633,19 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         }
     }
 
+    /**
+     * 计算单个事件的速度。
+     * @private
+     *
+     * @param {object} track 事件跟踪对象
+     * @param {ECUIEvent} 事件对象
+     */
     function calcSpeed(track, event) {
         track.lastClick = null;
         track.lastMoveTime = 1000 / (Date.now() - track.lastMoveTime);
         track.speedX = (event.pageX - track.pageX) * track.lastMoveTime;
         track.speedY = (event.pageY - track.pageY) * track.lastMoveTime;
+        track.angle = track.speedX ? Math.atan(track.speedY / track.speedX) / Math.PI * 180 : track.speedY > 0 ? 90 : -90;
         track.lastMoveTime = Date.now();
         track.pageX = event.pageX;
         track.pageY = event.pageY;
@@ -762,27 +793,26 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * 拖拽移动事件处理。
      * @private
      *
-     * @param {Object} ECUI 框架运行环境
+     * @param {Event} track 事件跟踪对象
+     * @param {Object} env ECUI 框架运行环境
      * @param {number} x 需要移动到的 X 坐标
      * @param {number} y 需要移动到的 Y 坐标
      */
-    function dragmove(env, x, y) {
+    function dragmove(track, env, x, y) {
         var target = env.target,
             // 计算期待移到的位置
-            expectX = env.targetX + x - env.x,
-            expectY = env.targetY + y - env.y,
-            event = new ECUIEvent();
+            expectX = env.targetX + x - track.x,
+            expectY = env.targetY + y - track.y,
+            // 计算实际允许移到的位置
+            realX = Math.min(Math.max(expectX, env.left), env.right),
+            realY = Math.min(Math.max(expectY, env.top), env.bottom);
 
-        // 计算实际允许移到的位置
-        event.x = Math.min(Math.max(expectX, env.left), env.right);
-        event.y = Math.min(Math.max(expectY, env.top), env.bottom);
-
-        if (core.triggerEvent(target, 'dragmove', event)) {
-            target.setPosition(event.x, event.y);
+        if (core.triggerEvent(target, 'dragmove', {x: realX, y: realY})) {
+            target.setPosition(realX, realY);
         }
 
-        env.x = x + env.targetX - expectX;
-        env.y = y + env.targetY - expectY;
+        track.x = x + env.targetX - expectX;
+        track.y = y + env.targetY - expectY;
     }
 
     /**
@@ -895,6 +925,31 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             core.init(document.body);
 
             return true;
+        }
+    }
+
+    /**
+     * 初始化全部的跟踪对象。
+     * @private
+     *
+     * @return {Event} event 系统事件对象
+     */
+    function initTracks(event) {
+        var caches = {};
+        Array.prototype.slice.call(event.touches).forEach(function (item) {
+            tracks[item.identifier] = tracks[item.identifier] || {
+                pageX: item.pageX,
+                pageY: item.pageY,
+                target: item.target
+            };
+            caches[item.identifier] = true;
+        });
+        for (var key in tracks) {
+            if (tracks.hasOwnProperty(key)) {
+                if (!caches[key]) {
+                    delete tracks[key];
+                }
+            }
         }
     }
 
@@ -1517,12 +1572,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 dragEnv.target = control;
                 dragEnv.actived = activedControl;
-                if (event._oNative.type === 'touchstart') {
-                    dragEnv.touchId = event._oNative.touches[event._oNative.touches.length - 1].identifier;
-                }
                 setEnv(dragEnv);
-                currEnv.x = event.track.pageX;
-                currEnv.y = event.track.pageY;
+                event.track.x = event.pageX;
+                event.track.y = event.pageY;
 
                 // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
                 activedControl = undefined;
@@ -1618,38 +1670,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         getKey: function () {
             return keyCode;
-        },
-
-        /**
-         * 获取当前鼠标光标的页面X轴坐标或相对于控件内部区域的X轴坐标。
-         * getMouseX 方法计算相对于控件内部区域的X轴坐标时，按照浏览器盒子模型的标准，需要减去 Element 对象的 borderLeftWidth 样式的值。
-         * @public
-         *
-         * @param {ecui.ui.Control} control ECUI 控件，如果省略参数，将获取鼠标在页面的X轴坐标，否则获取鼠标相对于控件内部区域的X轴坐标
-         * @return {number} X轴坐标值
-         */
-        getMouseX: function (control) {
-            if (control) {
-                control = control.getBody();
-                return mouseX - dom.getPosition(control).left - util.toNumber(dom.getStyle(control, 'borderLeftWidth'));
-            }
-            return mouseX;
-        },
-
-        /**
-         * 获取当前鼠标光标的页面Y轴坐标或相对于控件内部区域的Y轴坐标。
-         * getMouseY 方法计算相对于控件内部区域的Y轴坐标时，按照浏览器盒子模型的标准，需要减去 Element 对象的 borderTopWidth 样式的值。
-         * @public
-         *
-         * @param {ecui.ui.Control} control ECUI 控件，如果省略参数，将获取鼠标在页面的Y轴坐标，否则获取鼠标相对于控件内部区域的Y轴坐标
-         * @return {number} Y轴坐标值
-         */
-        getMouseY: function (control) {
-            if (control) {
-                control = control.getBody();
-                return mouseY - dom.getPosition(control).top - util.toNumber(dom.getStyle(control, 'borderTopWidth'));
-            }
-            return mouseY;
         },
 
         /**
