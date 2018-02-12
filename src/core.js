@@ -527,7 +527,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this._oNative = event;
         } else {
             this.which = keyCode;
-            this.target = document;
         }
     }
 

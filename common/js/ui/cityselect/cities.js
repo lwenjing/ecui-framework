@@ -140,7 +140,7 @@ cities - 地区联动下拉框控件。
                 }
             },
             onchange: function (event) {
-                if (!event) {
+                if (!event.target) {
                     return;
                 }
                 var select = event.getControl().getParent();
