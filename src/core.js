@@ -116,36 +116,60 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
                 });
 
-                if (event.getNative().touches.length === 2) {
-                    var touch1 = tracks[event.getNative().touches[0].identifier],
-                        touch2 = tracks[event.getNative().touches[1].identifier];
-                    // 两指操作的时间间隔足够小
-                    if (Math.abs(touch1.lastMoveTime - touch1.lastMoveTime) < 50) {
-                        var angle = Math.abs(touch1.angle - touch2.angle);
-                        // 同向滑动，允许很小角度的误差
-                        if (angle < 10) {
-                            gestureListeners.forEach(function (item) {
-                                if (item[1].multimove) {
-                                    event = new ECUIEvent('multimove');
-                                    event.angle = (touch1.angle + touch1.angle) / 2;
-                                    item[1].multimove.call(item[0], event);
+                if (gestureListeners.length) {
+                    if (event.getNative().touches.length === 2) {
+                        var touch1 = tracks[event.getNative().touches[0].identifier],
+                            touch2 = tracks[event.getNative().touches[1].identifier];
+                        // 两指操作的时间间隔足够小
+                        if (Math.abs(touch1.lastMoveTime - touch1.lastMoveTime) < 50) {
+                            var angle = Math.abs(touch1.angle - touch2.angle);
+                            // 同向滑动，允许很小角度的误差，同向运动移动距离接近
+                            if (angle < 10 &&
+                                    Math.sqrt(Math.pow(touch2.pageX - touch2.lastX, 2) + Math.pow(touch2.pageY - touch2.lastY, 2)) -
+                                        Math.sqrt(Math.pow(touch1.pageX - touch1.lastX, 2) + Math.pow(touch1.pageY - touch1.lastY, 2)) < 10) {
+                                event = new ECUIEvent('multimove');
+                                event.angle = (touch1.angle + touch1.angle) / 2;
+                                gestureListeners.forEach(function (item) {
+                                    if (item[1].multimove) {
+                                        item[1].multimove.call(item[0], event);
+                                    }
+                                });
+                            } else {
+                                if (Math.abs(angle - 180) < 10) {
+                                    angle = calcAngle(touch2.lastX - touch1.lastX, touch2.lastY - touch1.lastY);
+                                    if (angle > 180) {
+                                        angle -= 180;
+                                    }
+                                    angle = Math.abs((touch1.angle + touch2.angle - 180) / 2 - angle);
+                                    // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
+                                    if (angle < 10) {
+                                        gestureListeners.forEach(function (item) {
+                                            if (item[1].zoom) {
+                                                event = new ECUIEvent('zoom');
+                                                event.pageX = (touch1.pageX + touch2.pageX) / 2;
+                                                event.pageY = (touch1.pageY + touch2.pageY) / 2;
+                                                event.from = Math.sqrt(Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2));
+                                                event.to = Math.sqrt(Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2));
+                                                item[1].zoom.call(item[0], event);
+                                            }
+                                        });
+                                    } else if (Math.abs(angle - 90) < 10 &&
+                                            Math.sqrt(Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2)) -
+                                                Math.sqrt(Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2)) < 10) {
+                                        gestureListeners.forEach(function (item) {
+                                            if (item[1].rotate) {
+                                                event = new ECUIEvent('rotate');
+                                                event.angle = (touch2.angle + touch1.angle) / 2 - (calcAngle(touch2.lastX, touch2.lastY) + calcAngle(touch1.lastX, touch1.lastY)) / 2;
+                                                item[1].rotate.call(item[0], event);
+                                            }
+                                        });
+                                    }
                                 }
-                            });
-                        } else if (Math.abs(Math.abs(angle) - 180) < 10) {
-                            gestureListeners.forEach(function (item) {
-                                if (item[1].zoom) {
-                                    event = new ECUIEvent('zoom');
-                                    event.pageX = (touch1.pageX + touch2.pageX) / 2;
-                                    event.pageY = (touch1.pageY + touch2.pageY) / 2;
-                                    event.from = Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2);
-                                    event.to = Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2);
-                                    item[1].zoom.call(item[0], event);
-                                }
-                            });
+                            }
                         }
-                    }
-                    if (safariVersion) {
-                        event.preventDefault();
+                        if (safariVersion) {
+                            event.preventDefault();
+                        }
                     }
                 }
             },
@@ -527,7 +551,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this._oNative = event;
         } else {
             this.which = keyCode;
-            this.target = document;
         }
     }
 
@@ -665,6 +688,29 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     }
 
     /**
+     * 计算某个点对应原心的角度。
+     * @private
+     *
+     * @param {number} x x坐标
+     * @param {number} y y坐标
+     */
+    function calcAngle(x, y) {
+        if (x > 0) {
+            var angle = Math.atan(y / x) / Math.PI * 180;
+            if (angle < 0) {
+                angle += 360;
+            }
+        } else if (x < 0) {
+            angle = 180 + Math.atan(y / x) / Math.PI * 180;
+        } else if (y > 0) {
+            angle = 90;
+        } else if (y < 0) {
+            angle = 270;
+        }
+        return angle;
+    }
+
+    /**
      * 计算单个事件的速度。
      * @private
      *
@@ -679,18 +725,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         track.lastMoveTime = 1000 / (Date.now() - track.lastMoveTime);
         track.speedX = delay ? 0 : offsetX * track.lastMoveTime;
         track.speedY = delay ? 0 : offsetY * track.lastMoveTime;
-        if (offsetX > 0) {
-            track.angle = Math.atan(offsetY / offsetX) / Math.PI * 180;
-            if (track.angle < 0) {
-                track.angle += 360;
-            }
-        } else if (offsetX < 0) {
-            track.angle = 180 + Math.atan(offsetY / offsetX) / Math.PI * 180;
-        } else if (offsetY > 0) {
-            track.angle = 90;
-        } else if (offsetY < 0) {
-            track.angle = 270;
-        }
+        track.angle = calcAngle(offsetX, offsetY);
         track.lastMoveTime = Date.now();
         track.lastX = track.pageX;
         track.lastY = track.pageY;
@@ -1403,14 +1438,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
-         * 绑定控件的手势监听。
+         * 添加控件的手势监听。
          * @public
          *
          * @param {ecui.ui.Control} control ECUI 控件
-         * @param {Object} options 监听函数列表
+         * @param {Object} listeners 手势监听函数集合
          */
-        bindGestures: function (control, options) {
-            gestureListeners.push([control, options]);
+        addGestureListeners: function (control, listeners) {
+            gestureListeners.push([control, listeners]);
         },
 
         /**
@@ -1635,7 +1670,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
                 activedControl = undefined;
 
-                if (core.triggerEvent(control, 'dragstart')) {
+                if (core.triggerEvent(control, 'dragstart', event)) {
                     control.setPosition(x, y);
                 }
 
@@ -2056,6 +2091,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
                 }
             }
+            core.removeGestureListeners(control);
         },
 
         /**
@@ -2069,6 +2105,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         removeEventListener: function (control, name, func) {
             if (name = eventListeners[control.getUID() + '#' + name]) {
                 util.remove(name, func);
+            }
+        },
+
+        /**
+         * 移除控件的手势监听。
+         * @public
+         *
+         * @param {ecui.ui.Control} control ECUI 控件
+         */
+        removeGestureListeners: function (control) {
+            for (var i = gestureListeners.length; i--; ) {
+                if (gestureListeners[i][0] === control) {
+                    gestureListeners.splice(i, 1);
+                }
             }
         },
 
@@ -2164,20 +2214,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             delete eventStack[uid][name];
             return event.returnValue !== false;
-        },
-
-        /**
-         * 解除控件的手势监听。
-         * @public
-         *
-         * @param {ecui.ui.Control} control ECUI 控件
-         */
-        unbindGestures: function (control) {
-            for (var i = gestureListeners.length; i--; ) {
-                if (gestureListeners[i][0] === control) {
-                    gestureListeners.splice(i, 1);
-                }
-            }
         },
 
         /**
