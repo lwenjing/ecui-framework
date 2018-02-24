@@ -248,6 +248,7 @@
                 }
                 if (item) {
                     if (core.triggerEvent(this, 'remove', {child: item})) {
+                        dom.remove(item.getOuter());
                         item.$setParent();
                     } else {
                         item = null;
