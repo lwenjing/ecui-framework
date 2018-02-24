@@ -115,7 +115,11 @@ cities - 地区联动下拉框控件。
                 cClass = options.primary ? options.primary + '-city' : 'city',
                 aClass = options.primary ? options.primary + '-area' : 'area';
             el.innerHTML = '<select class="' + pClass + '"></select><select class="' + cClass + '"></select>' + (options.multi === '3' ? '<select class="' + aClass + '"></select>' : '')  + '<input name="' + (options.name || '') + '" class="ui-hide">';
+            var _this = this;
             this._eInput = ecui.dom.last(el);
+            this._eInput.getControl = function () {
+                return _this;
+            };
             this._eInput.value = options.value;
             ui.MultilevelSelect.call(this, el, options);
         },
@@ -157,6 +161,9 @@ cities - 地区联动下拉框控件。
                 return this._eInput.value;
             },
             setValue: function (val) {
+                if (+val < 100000 || +val > 999999) {
+                    return;
+                }
                 this._eInput.value = val;
                 this.getSelect(0).setValue(val.slice(0, 2) + '0000');
                 core.triggerEvent(this.getSelect(0), 'change');
