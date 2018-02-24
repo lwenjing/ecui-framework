@@ -111,6 +111,9 @@ cities - 地区联动下拉框控件。
         ui.MultilevelSelect,
         'ui-cities',
         function (el, options) {
+            if (options.value === null || options.value === undefined) {
+                options.value = '';
+            }
             var pClass = options.primary ? options.primary + '-province' : 'province',
                 cClass = options.primary ? options.primary + '-city' : 'city',
                 aClass = options.primary ? options.primary + '-area' : 'area';
