@@ -114,7 +114,9 @@ cities - 地区联动下拉框控件。
             var pClass = options.primary ? options.primary + '-province' : 'province',
                 cClass = options.primary ? options.primary + '-city' : 'city',
                 aClass = options.primary ? options.primary + '-area' : 'area';
-            el.innerHTML = options.multi === '3' ? '<select class="' + pClass + '"></select><select class="' + cClass + '"></select><select class="' + aClass + '" name="' + options.name + '"></select>' : '<select class="' + pClass + '"></select><select class="' + cClass + '" name="' + options.name + '"></select>';
+            el.innerHTML = '<select class="' + pClass + '"></select><select class="' + cClass + '"></select>' + (options.multi === '3' ? '<select class="' + aClass + '"></select>' : '')  + '<input name="' + (options.name || '') + '" class="ui-hide">';
+            this._eInput = ecui.dom.last(el);
+            this._eInput.value = options.value;
             ui.MultilevelSelect.call(this, el, options);
         },
         {
@@ -144,13 +146,18 @@ cities - 地区联动下拉框控件。
                     return;
                 }
                 var select = event.getControl().getParent();
+                this._eInput.value = select.getValue();
                 if (select === this.getSelect(0)) {
                     this.getSelect(1).setValue('000000');
                 } else if (select === this.getSelect(1)) {
                     this.getSelect(2) && this.getSelect(2).setValue('000000');
                 }
             },
+            getValue: function () {
+                return this._eInput.value;
+            },
             setValue: function (val) {
+                this._eInput.value = val;
                 this.getSelect(0).setValue(val.slice(0, 2) + '0000');
                 core.triggerEvent(this.getSelect(0), 'change');
                 if (val.slice(2) === '0000') {
