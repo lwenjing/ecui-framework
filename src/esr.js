@@ -135,21 +135,21 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 }
 
                 if (!route.model) {
-                    esr.render(name, route);
+                    esr.render(route);
                 } else if ('function' === typeof route.model) {
                     if (route.model(context, function () {
-                            esr.render(name, route);
+                            esr.render(route);
                         }) !== false) {
-                        esr.render(name, route);
+                        esr.render(route);
                     }
                 } else if (!route.model.length) {
-                    esr.render(name, route);
+                    esr.render(route);
                 } else {
                     if (route.onbeforerequest) {
                         route.onbeforerequest(context);
                     }
                     esr.request(route.model, function () {
-                        esr.render(name, route);
+                        esr.render(route);
                     });
                     if (route.onafterrequest) {
                         route.onafterrequest(context);
@@ -258,10 +258,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * 渲染。
      * @private
      *
-     * @param {string} name 路由名称
      * @param {Object} route 路由对象
      */
-    function render(name, route) {
+    function render(route) {
         if (route.onbeforerender) {
             route.onbeforerender(context);
         }
@@ -276,7 +275,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         });
 
         core.dispose(el, true);
-        el.innerHTML = engine.render(route.view || name, context);
+        el.innerHTML = engine.render(route.view, context);
         core.init(el);
 
         afterrender(route);
@@ -284,10 +283,10 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         el.style.visibility = '';
         el.route = route;
 
-        if (name === route) {
-            init();
-        } else {
+        if (route.NAME) {
             autoChildRoute(route);
+        } else {
+            init();
         }
     }
 
@@ -357,8 +356,14 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          * @param {Object} route 路由对象
          */
         addRoute: function (name, route) {
+            if (route) {
+                route.NAME = name;
+            } else {
+                route = name;
+                name = route.NAME;
+            }
+            route.view = route.view || name;
             routes[name] = route;
-            route.NAME = name;
         },
 
         /**
@@ -598,10 +603,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          * 渲染。
          * @public
          *
-         * @param {string} name 路由名
          * @param {Object} route 路由对象
          */
-        render: function (name, route) {
+        render: function (route) {
             function loadTPL() {
                 io.ajax(moduleName + '/' + moduleName + '.html', {
                     cache: true,
@@ -609,7 +613,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                         pauseStatus = false;
                         engine = loadStatus[moduleName] = new etpl.Engine();
                         engine.compile(data);
-                        render(name, route);
+                        render(route);
                     },
                     onerror: function () {
                         pauseStatus = false;
@@ -624,16 +628,16 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 route.view(context);
                 afterrender(route);
                 autoChildRoute(route);
-            } else if (engine.getRenderer(route.view || name)) {
-                render(name, route);
+            } else if (engine.getRenderer(route.view)) {
+                render(route);
             } else {
                 // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
                 var moduleName = name.split('.')[0];
                 engine = loadStatus[moduleName];
 
                 if (engine instanceof etpl.Engine) {
-                    if (engine.getRenderer(route.view || name)) {
-                        render(name, route);
+                    if (engine.getRenderer(route.view)) {
+                        render(route);
                         return;
                     }
                 }
