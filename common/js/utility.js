@@ -283,3 +283,35 @@ daikuan.copy = function (text) {
 	document.body.removeChild(textarea);
 	return flag;
 };
+
+// 设置分页数据
+daikuan.setPageData = function (context, listNmae) {
+	var data = ecui.util.parseValue(listNmae, context);
+
+	context.offset = data.offset;
+	context.total = data.total;
+	context.totalPage = data.totalPage;
+}
+
+/**
+ * 列表路由对象。
+ * @public
+ *
+ * @param {Object} route 路由对象
+ */
+daikuan.TableListRoute = function (route) {
+    this.model = [this.NAME.slice(0, -5) + '@' + this.url];
+    this.main = this.NAME.slice(0, -9) + '_table';
+    ecui.util.extend(this, route);
+}
+daikuan.TableListRoute.prototype.onbeforerequest = function (context) {
+	context.pageNo = context.pageNo || +this.searchParm.pageNo;
+    context.pageSize = +this.searchParm.pageSize;
+    daikuan.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
+};
+daikuan.TableListRoute.prototype.onbeforerender = function (context) {
+	var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
+	context.offset = data.offset;
+	context.total = data.total;
+	context.totalPage = data.totalPage;
+};
