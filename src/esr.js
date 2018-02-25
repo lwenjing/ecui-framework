@@ -108,16 +108,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * @param {Object} options 参数
      */
     function callRoute(name, options) {
-
-        function checkURLChange() {
-            var loc = esr.getLocation();
-            if (currLocation !== loc) {
-                currLocation = loc;
-                pauseStatus = false;
-                item();
-            }
-        }
-
         // 供onready时使用，此时name为route
         var route = options ? routes[name] : name;
 
@@ -126,14 +116,8 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 if (checkLeave) {
                     // 检查是否允许切换到新路由
                     for (var i = 0, items = getRouteMains(route), item; item = items[i++]; ) {
-                        if (item.route.onleave && item.route.onleave() === false) {
-                            if (options !== true) {
-                                // 如果不是子路由，需要回退一步，回滚currLocation的设置防止再次跳转
-                                history.go(-1);
-                                pauseStatus = true;
-                                item = util.timer(checkURLChange, -100);
-                                return;
-                            }
+                        if (item.route.onleave) {
+                            item.route.onleave();
                         }
                     }
                 } else {
@@ -374,6 +358,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          */
         addRoute: function (name, route) {
             routes[name] = route;
+            route.NAME = name;
         },
 
         /**
@@ -433,6 +418,25 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     callRoute(name, oldOptions);
                 }
             }
+        },
+
+        /**
+         * 查找 DOM 元素与控件对应的路由。
+         * @public
+         *
+         * @param {HTMLElement|ecui.ui.Control} el DOM 元素或者控件对象
+         * @return {Route} 通过 addRoute 定义的路由对象
+         */
+        findRoute: function (el) {
+            if (el instanceof ui.Control) {
+                el = el.getMain();
+            }
+            for (; el; el = dom.getParent(el)) {
+                if (el.route) {
+                    return el.route;
+                }
+            }
+            return null;
         },
 
         /**

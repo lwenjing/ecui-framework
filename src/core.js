@@ -1103,9 +1103,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (options.ext.hasOwnProperty(key)) {
                     if (ext[key]) {
                         ext[key](control, options.ext[key], options);
-                        if (key = control['$init' + key.charAt(0).toUpperCase() + util.toCamelCase(key.slice(1))]) {
-                            key.call(control, options);
-                        }
                     }
                 }
             }

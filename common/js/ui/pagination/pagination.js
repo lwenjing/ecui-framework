@@ -22,21 +22,21 @@ _nTotalPage       - 总页数
         util = core.util;
 
     // 回车跳转到指定页
-    var skipTo = function (event) {
+    function skipTo(event) {
         if (event.which === 13) {
             var parent = this.getParent(),
                 pageNo = this.getValue();
             pageNo = Math.min(Math.max(pageNo, 1), parent._nTotalPage);
             parent.go(pageNo);
         }
-    };
-    var validate = function (event) {
+    }
+    function validate() {
         var val = this.getValue();
         if (!/^\d*$/.test(val)) {
             val = val.match(/^\d*/)[0];
             this.setValue(val);
         }
-    };
+    }
     ui.Pagination = core.inherits(
         ui.Control,
         'ui-pagination',
@@ -51,7 +51,6 @@ _nTotalPage       - 总页数
                 this._nTotalPage = +page[3];
 
                 if (options.route) {
-                    this._sRoute = options.route;
                     el.innerHTML = '<div class="pagination"></div>'
                                     + '<div class="pagination-msgBox clearfix">'
                                     + (options.skipInput ? '<div class="pagination-msg">第<input class="ui-text ui-input" />页</div>' : '')
@@ -153,7 +152,7 @@ _nTotalPage       - 总页数
                 }
             },
             go: function (pageNo) {
-                ecui.esr.callRoute(this._sRoute + '~pageNo=' + pageNo, true);
+                ecui.esr.callRoute(ecui.esr.findRoute(this).NAME + '~pageNo=' + pageNo, true);
                 this._nCurrentPage = pageNo;
             }
         }
