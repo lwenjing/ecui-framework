@@ -300,8 +300,8 @@ daikuan.setPageData = function (context, listNmae) {
  * @param {Object} route 路由对象
  */
 daikuan.TableListRoute = function (route) {
-    this.model = [this.NAME.slice(0, -5) + '@FORM ' + this.url];
-    this.main = this.NAME.slice(0, -9) + '_table';
+    this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
+    this.main = route.NAME.slice(0, -9) + '_table';
     ecui.util.extend(this, route);
 }
 daikuan.TableListRoute.prototype.onbeforerequest = function (context) {
