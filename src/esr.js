@@ -24,7 +24,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         autoRender = {},
         context = {},
         currLocation = '',
-        checkLeave = true,
         pauseStatus,
         loadStatus = {},
         engine = etpl,
@@ -113,17 +112,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 
         if (route) {
             if (!route.onrender || route.onrender() !== false) {
-                if (checkLeave) {
-                    // 检查是否允许切换到新路由
-                    for (var i = 0, items = getRouteMains(route), item; item = items[i++]; ) {
-                        if (item.route.onleave) {
-                            item.route.onleave();
-                        }
-                    }
-                } else {
-                    checkLeave = true;
-                }
-
                 if (options !== true) {
                     context = {};
                 }
@@ -269,8 +257,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         el.style.visibility = 'hidden';
 
         getRouteMains(route).forEach(function (item) {
-            if (item.route.ondispose) {
-                item.route.ondispose();
+            item = routes[item.route];
+            if (item.ondispose) {
+                item.ondispose();
             }
         });
 
@@ -281,9 +270,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         afterrender(route);
 
         el.style.visibility = '';
-        el.route = route;
 
         if (route.NAME) {
+            el.route = route.NAME;
             autoChildRoute(route);
         } else {
             init();
@@ -513,7 +502,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          * @param {string} loc 前往的地址，如果省略前往之前被阻止的地址
          */
         go: function (loc) {
-            checkLeave = false;
             if (loc) {
                 esr.redirect(loc);
             } else {
