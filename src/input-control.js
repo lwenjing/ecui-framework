@@ -355,7 +355,6 @@ _eInput        - INPUT对象
              * @event
              */
             $submit: function (event) {
-                ui.Control.prototype.$submit.call(this, event);
                 if (!core.triggerEvent(this, 'validate')) {
                     event.preventDefault();
                 }
