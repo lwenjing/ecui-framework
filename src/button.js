@@ -15,6 +15,7 @@
 //{if 0}//
 (function () {
     var core = ecui,
+        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
@@ -29,6 +30,26 @@
         function (el, options) {
             util.setDefault(options, 'userSelect', false);
             ui.Control.call(this, el, options);
+        },
+        {
+            /**
+             * 获取按钮所处于的表单元素。
+             * @public
+             *
+             * @return {HTMLElement} 表单元素
+             */
+            getForm: function () {
+                var el = this.getMain();
+                if (el.tagName === 'BUTTON' || el.tagName === 'INPUT') {
+                    return el.form;
+                }
+                for (; el; el = dom.getParent(el)) {
+                    if (el.tagName === 'FORM') {
+                        return el;
+                    }
+                }
+                return null;
+            }
         }
     );
 //{if 0}//
