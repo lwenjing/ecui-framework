@@ -165,30 +165,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
     }
 
     /**
-     * 获取所有被路由绑定的 DOM 元素。
-     * @private
-     *
-     * @param {Object} route 路由对象
-     */
-    function getRouteMains(route) {
-        var el = core.$(route.main || esr.DEFAULT_MAIN);
-
-        if (el) {
-            var items = el.route ? [el] : [];
-
-            Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
-                if (item.route) {
-                    items.push(item);
-                }
-            });
-
-            return items;
-        }
-
-        return [];
-    }
-
-    /**
      * 事件监听处理函数。
      * @private
      */
@@ -253,13 +229,18 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             route.onbeforerender(context);
         }
 
-        var el = core.$(route.main || esr.DEFAULT_MAIN);
+        var el = core.$(route.main);
         el.style.visibility = 'hidden';
 
-        getRouteMains(route).forEach(function (item) {
-            item = routes[item.route];
-            if (item.ondispose) {
-                item.ondispose();
+        if (el.route && routes[el.route].ondispose) {
+            routes[el.route].ondispose();
+        }
+        Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
+            if (item.route) {
+                item = routes[item.route];
+                if (item.ondispose) {
+                    item.ondispose();
+                }
             }
         });
 
@@ -351,6 +332,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 route = name;
                 name = route.NAME;
             }
+            route.main = route.main || esr.DEFAULT_MAIN;
             route.view = route.view || name;
             routes[name] = route;
         },
@@ -427,7 +409,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             }
             for (; el; el = dom.getParent(el)) {
                 if (el.route) {
-                    return el.route;
+                    return routes[el.route];
                 }
             }
             return null;
@@ -620,7 +602,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 render(route);
             } else {
                 // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
-                var moduleName = name.split('.')[0];
+                var moduleName = route.NAME.split('.')[0];
                 engine = loadStatus[moduleName];
 
                 if (engine instanceof etpl.Engine) {
