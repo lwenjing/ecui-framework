@@ -14,8 +14,8 @@ _nBottomHidden - 下部隐藏区域高度
 _nTopIndex     - 上部隐藏的选项序号
 _nBottomIndex  - 下部隐藏的选项序号
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
@@ -23,6 +23,20 @@ _nBottomIndex  - 下部隐藏的选项序号
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
+    function setEnterAndLeave() {
+        var range = this.getRange();
+        if (!range[2]) {
+            range[0] = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
+            range[2] = -this.$$headerHeight;
+        }
+    }
+
+    function setComplete() {
+        var range = this.getRange();
+        range[0] = this.getHeight() - this.$$bodyHeight;
+        range[2] = 0;
+    }
+
     /**
      * 移动端列表展示控件。
      * @control
@@ -69,14 +83,16 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this._nBottomIndex = this.getLength();
                 }
 
+                var top = this.getHeight() - this.$$bodyHeight;
                 this.setScrollRange(
                     {
                         left: 0,
                         right: 0,
-                        top: this.getHeight() - this.$$bodyHeight,
+                        top: top,
                         bottom: 0
                     }
                 );
+                this.setRange([top + this.$$footerHeight, 0, -this.$$headerHeight, 0]);
             },
 
             /**
@@ -107,50 +123,6 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this._eHeader = this._eFooter = null;
                 ui.MScroll.prototype.$dispose.call(this);
             },
-
-            /**
-             * 拖拽到最底部事件。
-             * @event
-             */
-            $footercomplete: function () {
-                this.setRange();
-            },
-
-            /**
-             * 拖拽到达底部区域事件。
-             * @event
-             */
-            $footerenter: function () {
-                this.setRange([this.getHeight() - this.$$bodyHeight + this.$$footerHeight, 0, -this.$$headerHeight, 0]);
-            },
-
-            /**
-             * 拖拽离开底部区域事件。
-             * @event
-             */
-            $footerleave: util.blank,
-
-            /**
-             * 拖拽到最顶部事件。
-             * @event
-             */
-            $headercomplete: function () {
-                this.setRange();
-            },
-
-            /**
-             * 拖拽到达顶部区域事件。
-             * @event
-             */
-            $headerenter: function () {
-                this.setRange([this.getHeight() - this.$$bodyHeight + this.$$footerHeight, 0, -this.$$headerHeight, 0]);
-            },
-
-            /**
-             * 拖拽离开顶部区域事件。
-             * @event
-             */
-            $headerleave: util.blank,
 
             /**
              * 拖拽的惯性时间计算。
@@ -222,7 +194,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 } else {
                     status = '';
                 }
-                if (this._sStatus && this._sStatus.slice(0, 1) !== status.slice(0, 1)) {
+                if (this._sStatus && this._sStatus.charAt(0) !== status.charAt(0)) {
                     core.triggerEvent(this, this._sStatus.slice(0, 6) + 'leave');
                 }
                 if (this._sStatus !== status) {
@@ -238,8 +210,47 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $dragstart: function (event) {
                 ui.MScroll.prototype.$dragstart.call(this, event);
+                if (this._oHandle) {
+                    this._oHandle();
+                }
                 this._sStatus = '';
             },
+
+            /**
+             * 拖拽到最底部事件。
+             * @event
+             */
+            $footercomplete: setComplete,
+
+            /**
+             * 拖拽到达底部区域事件。
+             * @event
+             */
+            $footerenter: setEnterAndLeave,
+
+            /**
+             * 拖拽离开底部区域事件。
+             * @event
+             */
+            $footerleave: setEnterAndLeave,
+
+            /**
+             * 拖拽到最顶部事件。
+             * @event
+             */
+            $headercomplete: setComplete,
+
+            /**
+             * 拖拽到达顶部区域事件。
+             * @event
+             */
+            $headerenter: setEnterAndLeave,
+
+            /**
+             * 拖拽离开顶部区域事件。
+             * @event
+             */
+            $headerleave: setEnterAndLeave,
 
             /**
              * @override
@@ -267,6 +278,19 @@ _nBottomIndex  - 下部隐藏的选项序号
                 var style = this.getBody().style;
                 style.paddingTop = '';
                 style.paddingBottom = '';
+            },
+
+            /**
+             * 复位。
+             */
+            $reset: function () {
+                var y = this.getY(),
+                    top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
+                if (y < top) {
+                    this._oHandle = util.grade('this.style.top->' + top, 1000, {$: this.getBody()});
+                } else if (y > -this.$$headerHeight) {
+                    this._oHandle = util.grade('this.style.top->' + -this.$$headerHeight, 1000, {$: this.getBody()});
+                }
             },
 
             /**
@@ -323,6 +347,4 @@ _nBottomIndex  - 下部隐藏的选项序号
             remove: util.blank
         }
     );
-//{if 0}//
 }());
-//{/if}//

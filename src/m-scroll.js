@@ -11,7 +11,7 @@ _nTop      - 允许滚动的顶部范围
 _nRight    - 允许滚动的右部范围
 _nBottom   - 允许滚动的底部范围
 _nLeft     - 允许滚动的左部范围
-_oNormal   - 滚动结束后回弹的区域范围，格式为[top, right, bottom, left, Y轴滚动的最小单位(用于item-scroll), X轴滚动的最小单位(用于item-scroll)]
+_oRange    - 滚动结束后回弹的区域范围，格式为[top, right, bottom, left, Y轴滚动的最小单位(用于item-scroll), X轴滚动的最小单位(用于item-scroll)]
 */
 //{if 0}//
 (function () {
@@ -69,7 +69,7 @@ _oNormal   - 滚动结束后回弹的区域范围，格式为[top, right, bottom
                         right: this._nRight !== undefined ? this._nRight : body.offsetLeft,
                         top: this._nTop !== undefined ? this._nTop : body.offsetTop,
                         bottom: this._nBottom !== undefined ? this._nBottom : body.offsetTop,
-                        limit: this._oNormal
+                        limit: this._oRange
                     }
                 );
             },
@@ -91,6 +91,16 @@ _oNormal   - 滚动结束后回弹的区域范围，格式为[top, right, bottom
             $dragstart: function (event) {
                 ui.Control.prototype.$dragstart.call(this, event);
                 event.preventDefault();
+            },
+
+            /**
+             * 获取正常显示范围，用于拖拽结束后归位设置。
+             * @public
+             *
+             * @return {Array} 正常显示范围
+             */
+            getRange: function () {
+                return this._oRange;
             },
 
             /**
@@ -127,7 +137,7 @@ _oNormal   - 滚动结束后回弹的区域范围，格式为[top, right, bottom
              * @param {Object} range 正常显示范围
              */
             setRange: function (range) {
-                this._oNormal = range;
+                this._oRange = range;
             }
         }
     );
