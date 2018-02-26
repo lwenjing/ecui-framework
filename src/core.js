@@ -476,7 +476,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 var track = event.track,
                     target = currEnv.target,
                     uid = target.getUID(),
-                    env = currEnv,
                     mx = event.pageX,
                     my = event.pageY,
                     start = Date.now(),
@@ -486,14 +485,18 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 if (inertia) {
                     var ax = vx / inertia,
-                        ay = vy / inertia;
+                        ay = vy / inertia,
+                        env = currEnv;
+
                     inertiaHandles[uid] = util.timer(function () {
                         var event = new ECUIEvent(),
                             time = (Date.now() - start) / 1000,
-                            t = Math.min(time, inertia);
+                            t = Math.min(time, inertia),
+                            x = track.x,
+                            y = track.y;
 
                         dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
-                        if (t >= inertia) {
+                        if (t >= inertia || (x === track.x && y === track.y)) {
                             inertiaHandles[uid]();
                             dragend(event, env, target);
                         }
@@ -883,8 +886,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     function dragmove(track, env, x, y) {
         var target = env.target,
             // 计算期待移到的位置
-            expectX = env.targetX + x - track.x,
-            expectY = env.targetY + y - track.y,
+            expectX = env.targetX + x - track.logicX,
+            expectY = env.targetY + y - track.logicY,
             // 计算实际允许移到的位置
             realX = Math.min(Math.max(expectX, env.left), env.right),
             realY = Math.min(Math.max(expectY, env.top), env.bottom);
@@ -893,8 +896,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             target.setPosition(realX, realY);
         }
 
-        track.x = x + env.targetX - expectX;
-        track.y = y + env.targetY - expectY;
+        track.x = realX;
+        track.y = realY;
+        track.logicX = x + env.targetX - expectX;
+        track.logicY = y + env.targetY - expectY;
     }
 
     /**
