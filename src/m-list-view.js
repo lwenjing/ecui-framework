@@ -281,19 +281,6 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
-             * 复位。
-             */
-            $reset: function () {
-                var y = this.getY(),
-                    top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
-                if (y < top) {
-                    this._oHandle = util.grade('this.style.top->' + top, 1000, {$: this.getBody()});
-                } else if (y > -this.$$headerHeight) {
-                    this._oHandle = util.grade('this.style.top->' + -this.$$headerHeight, 1000, {$: this.getBody()});
-                }
-            },
-
-            /**
              * 本控件新增选项只能从顶部或底部。
              * @override
              */
@@ -344,7 +331,20 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 本控件不支持删除选项的操作。
              * @override
              */
-            remove: util.blank
+            remove: util.blank,
+
+            /**
+             * 复位。
+             */
+            reset: function () {
+                var y = this.getY(),
+                    top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
+                if (y < top) {
+                    this._oHandle = util.grade('this.style.top->' + top, 1000, {$: this.getBody()});
+                } else if (y > -this.$$headerHeight) {
+                    this._oHandle = util.grade('this.style.top->' + -this.$$headerHeight, 1000, {$: this.getBody()});
+                }
+            }
         }
     );
 }());
