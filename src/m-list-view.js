@@ -69,16 +69,14 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this._nBottomIndex = this.getLength();
                 }
 
-                var top = this.getHeight() - this.$$bodyHeight;
                 this.setScrollRange(
                     {
                         left: 0,
                         right: 0,
-                        top: top,
+                        top: this.getHeight() - this.$$bodyHeight,
                         bottom: 0
                     }
                 );
-//                this.setRange([top + this.$$footerHeight, 0, -this.$$headerHeight, 0]);
             },
 
             /**
@@ -114,13 +112,17 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到最底部事件。
              * @event
              */
-            $footercomplete: util.blank,
+            $footercomplete: function () {
+                this.setRange();
+            },
 
             /**
              * 拖拽到达底部区域事件。
              * @event
              */
-            $footerenter: util.blank,
+            $footerenter: function () {
+                this.setRange([this.getHeight() - this.$$bodyHeight + this.$$footerHeight, 0, -this.$$headerHeight, 0]);
+            },
 
             /**
              * 拖拽离开底部区域事件。
@@ -132,13 +134,17 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到最顶部事件。
              * @event
              */
-            $headercomplete: util.blank,
+            $headercomplete: function () {
+                this.setRange();
+            },
 
             /**
              * 拖拽到达顶部区域事件。
              * @event
              */
-            $headerenter: util.blank,
+            $headerenter: function () {
+                this.setRange([this.getHeight() - this.$$bodyHeight + this.$$footerHeight, 0, -this.$$headerHeight, 0]);
+            },
 
             /**
              * 拖拽离开顶部区域事件。
