@@ -102,7 +102,11 @@ _nMaxBottom    - 滚动时的最大底部坐标
                         left: 0
                     }
                 );
-                this.setRange([top, 0, bottom, 0, this._nItemHeight]);
+                this.setRange({
+                    top: top,
+                    bottom: bottom,
+                    stepY: this._nItemHeight
+                });
 
                 if (!this.isReady()) {
                     // 控件初始化时设置的显示位置

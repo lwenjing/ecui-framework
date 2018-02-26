@@ -25,16 +25,16 @@ _nBottomIndex  - 下部隐藏的选项序号
 //{/if}//
     function setEnterAndLeave() {
         var range = this.getRange();
-        if (!range[2]) {
-            range[0] = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
-            range[2] = -this.$$headerHeight;
+        if (!range.bottom) {
+            range.top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
+            range.bottom = -this.$$headerHeight;
         }
     }
 
     function setComplete() {
         var range = this.getRange();
-        range[0] = this.getHeight() - this.$$bodyHeight;
-        range[2] = 0;
+        range.top = this.getHeight() - this.$$bodyHeight;
+        range.bottom = 0;
     }
 
     /**
@@ -92,7 +92,12 @@ _nBottomIndex  - 下部隐藏的选项序号
                         bottom: 0
                     }
                 );
-                this.setRange([top + this.$$footerHeight, 0, -this.$$headerHeight, 0]);
+                this.setRange(
+                    {
+                        top: top + this.$$footerHeight,
+                        bottom: -this.$$headerHeight
+                    }
+                );
             },
 
             /**

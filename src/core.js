@@ -834,13 +834,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 el = env.el || target.getOuter(),
                 x = target.getX(),
                 y = target.getY(),
-                expectX = Math.min(range[1], Math.max(range[3], x)),
-                expectY = Math.min(range[2], Math.max(range[0], y));
-            if (range[5]) {
-                expectX = Math.round(expectX / range[5]) * range[5];
+                expectX = Math.min(range.right || x, Math.max(range.left || x, x)),
+                expectY = Math.min(range.bottom || y, Math.max(range.top || y, y));
+            if (range.stepX) {
+                expectX = Math.round(expectX / range.stepX) * range.stepX;
             }
-            if (range[4]) {
-                expectY = Math.round(expectY / range[4]) * range[4];
+            if (range.stepY) {
+                expectY = Math.round(expectY / range.stepY) * range.stepY;
             }
             if (x !== expectX) {
                 codes.push('round:this.style.left->' + expectX);
