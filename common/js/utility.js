@@ -204,7 +204,7 @@ daikuan.setEditFormValue = function (data, form) {
 	var elements = form.elements;
 	for (var i = 0, item; item = elements[i++]; ) {
 		var name = item.name;
-		var value = data[name];
+		var value = data[name] + '';
 		if (name && data[name] !== undefined) {
 			var _control = item.getControl && item.getControl();
 			if (_control) {
