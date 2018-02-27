@@ -886,20 +886,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     function dragmove(track, env, x, y) {
         var target = env.target,
             // 计算期待移到的位置
-            expectX = env.targetX + x - track.logicX,
-            expectY = env.targetY + y - track.logicY,
+            expectX = env.originalX + x - track.logicX,
+            expectY = env.originalY + y - track.logicY,
             // 计算实际允许移到的位置
             realX = Math.min(Math.max(expectX, env.left), env.right),
             realY = Math.min(Math.max(expectY, env.top), env.bottom);
 
-        if (core.triggerEvent(target, 'dragmove', {x: realX, y: realY})) {
+        if (core.triggerEvent(target, 'dragmove', {x: realX, y: realY, inertia: env !== currEnv})) {
             target.setPosition(realX, realY);
         }
 
         track.x = realX;
         track.y = realY;
-        track.logicX = x + env.targetX - expectX;
-        track.logicY = y + env.targetY - expectY;
+        track.logicX = x + env.originalX - expectX;
+        track.logicY = y + env.originalY - expectY;
     }
 
     /**
@@ -1660,8 +1660,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     dragEnv.right = Math.max(dragEnv.right - control.getWidth(), dragEnv.left);
                     dragEnv.bottom = Math.max(dragEnv.bottom - control.getHeight(), dragEnv.top);
                 }
-                dragEnv.targetX = x;
-                dragEnv.targetY = y;
+                dragEnv.originalX = x;
+                dragEnv.originalY = y;
 
                 dragEnv.target = control;
                 dragEnv.actived = activedControl;
