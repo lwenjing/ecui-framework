@@ -26,14 +26,14 @@ _nBottomIndex  - 下部隐藏的选项序号
     function setEnterAndLeave() {
         var range = this.getRange();
         if (!range.bottom) {
-            range.top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
+            range.top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight + this._nTopHidden;
             range.bottom = -this.$$headerHeight;
         }
     }
 
     function setComplete() {
         var range = this.getRange();
-        range.top = this.getHeight() - this.$$bodyHeight;
+        range.top = this.getHeight() - this.$$bodyHeight + this._nTopHidden;
         range.bottom = 0;
     }
 
@@ -345,9 +345,9 @@ _nBottomIndex  - 下部隐藏的选项序号
                 var y = this.getY(),
                     top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
                 if (y < top) {
-                    this._oHandle = util.grade('this.style.top->' + top, 1000, {$: this.getBody()});
+                    this._oHandle = core.effect.grade('this.style.top->' + top, 1000, {$: this.getBody()});
                 } else if (y > -this.$$headerHeight) {
-                    this._oHandle = util.grade('this.style.top->' + -this.$$headerHeight, 1000, {$: this.getBody()});
+                    this._oHandle = core.effect.grade('this.style.top->' + -this.$$headerHeight, 1000, {$: this.getBody()});
                 }
             }
         }

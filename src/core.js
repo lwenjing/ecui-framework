@@ -834,8 +834,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 el = env.el || target.getOuter(),
                 x = target.getX(),
                 y = target.getY(),
-                expectX = Math.min(range.right || x, Math.max(range.left || x, x)),
-                expectY = Math.min(range.bottom || y, Math.max(range.top || y, y));
+                expectX = Math.min(range.right === undefined ? x : range.right, Math.max(range.left === undefined ? x : range.left, x)),
+                expectY = Math.min(range.bottom === undefined ? y : range.bottom, Math.max(range.top === undefined ? y : range.top, y));
             if (range.stepX) {
                 expectX = Math.round(expectX / range.stepX) * range.stepX;
             }
@@ -858,7 +858,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         onstep: function (percent) {
                             event.x = util.toNumber(this.style.left);
                             event.y = util.toNumber(this.style.top);
-                            core.triggerEvent(target, 'dragmove', event);
                             if (percent >= 1) {
                                 inertiaHandles[uid]();
                                 core.triggerEvent(target, 'dragend', event);
