@@ -842,28 +842,24 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             if (range.stepY) {
                 expectY = Math.round(expectY / range.stepY) * range.stepY;
             }
-            if (x !== expectX) {
-                codes.push('round:this.style.left->' + expectX);
-            }
-            if (y !== expectY) {
-                codes.push('round:this.style.top->' + expectY);
-            }
 
-            if (codes.length) {
+            if (x !== expectX || y !== expectY) {
                 inertiaHandles[uid] = core.effect.grade(
-                    codes.join(';'),
+                    function (percent, options) {
+                        event.x = Math.round(options.x + percent * (expectX - options.x));
+                        event.y = Math.round(options.y + percent * (expectY - options.y));
+                        core.triggerEvent(target, 'dragmove', event);
+                        if (percent >= 1) {
+                            inertiaHandles[uid]();
+                            core.triggerEvent(target, 'dragend', event);
+                            delete inertiaHandles[uid];
+                        }
+                    },
                     500,
                     {
                         $: el,
-                        onstep: function (percent) {
-                            event.x = util.toNumber(this.style.left);
-                            event.y = util.toNumber(this.style.top);
-                            if (percent >= 1) {
-                                inertiaHandles[uid]();
-                                core.triggerEvent(target, 'dragend', event);
-                                delete inertiaHandles[uid];
-                            }
-                        }
+                        x: x,
+                        y: y
                     }
                 );
                 return;

@@ -26,14 +26,14 @@ _nBottomIndex  - 下部隐藏的选项序号
     function setEnterAndLeave() {
         var range = this.getRange();
         if (!range.bottom) {
-            range.top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight + this._nTopHidden;
+            range.top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
             range.bottom = -this.$$headerHeight;
         }
     }
 
     function setComplete() {
         var range = this.getRange();
-        range.top = this.getHeight() - this.$$bodyHeight + this._nTopHidden;
+        range.top = this.getHeight() - this.$$bodyHeight;
         range.bottom = 0;
     }
 
