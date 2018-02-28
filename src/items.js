@@ -125,7 +125,8 @@
                 var list = namedMap[this.getUID()],
                     items = [],
                     UIClass = this.Item || ui.Item,
-                    el = list[index] ? list[index].getOuter() : null;
+                    el = list[index] ? list[index].getOuter() : null,
+                    body = this.getBody();
 
                 this.preventAlterItems();
 
@@ -146,7 +147,7 @@
                                 }
                             );
                         }
-                        this.getBody().appendChild(item);
+                        body.appendChild(item);
 
                         item.className += UIClass.CLASS;
 
