@@ -59,7 +59,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             $alterItems: function () {
                 // 第一次进来使用缓存的数据，第二次进来取实际数据
                 if (this.isReady()) {
-                    this.$$bodyHeight = this.getBody().offsetHeight + this._nTopHidden + this._nBottomIndex;
+                    this.$$bodyHeight = this.getBody().offsetHeight + this._nTopHidden + this._nBottomHidden;
                     this.getItems().map(function (item) {
                         item.cache();
                         return item.getOuter().offsetWidth ? item : null;
@@ -72,11 +72,12 @@ _nBottomIndex  - 下部隐藏的选项序号
                                 this._nBottomIndex++;
                             } else if (index > this._nBottomIndex) {
                                 item.hide();
-                                this._nBottomIndex++;
                                 this._nBottomHidden += item.getHeight();
+                            } else if (index === this._nBottomIndex) {
+                                this._nBottomIndex++;
                             }
                         }
-                    });
+                    }, this);
                 } else {
                     this._nTopHidden = this._nBottomHidden = 0;
                     this._nTopIndex = 0;
@@ -340,14 +341,24 @@ _nBottomIndex  - 下部隐藏的选项序号
 
             /**
              * 复位。
+             *
+             * @param {Function} callback 处理完后回调
              */
-            reset: function () {
+            reset: function (callback) {
                 var y = this.getY(),
-                    top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
+                    top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight,
+                    options = {
+                        $: this.getBody(),
+                        onstep: function (percent) {
+                            if (percent >= 1 && callback) {
+                                callback();
+                            }
+                        }
+                    }
                 if (y < top) {
-                    this._oHandle = core.effect.grade('this.style.top->' + top, 1000, {$: this.getBody()});
+                    this._oHandle = core.effect.grade('this.style.top->' + top, 1000, options);
                 } else if (y > -this.$$headerHeight) {
-                    this._oHandle = core.effect.grade('this.style.top->' + -this.$$headerHeight, 1000, {$: this.getBody()});
+                    this._oHandle = core.effect.grade('this.style.top->' + -this.$$headerHeight, 1000, options);
                 }
             }
         }

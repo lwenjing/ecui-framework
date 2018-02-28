@@ -223,8 +223,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * @private
      *
      * @param {Object} route 路由对象
+     * @param {string} name 模板名
      */
-    function render(route) {
+    function render(route, name) {
         if (route.onbeforerender) {
             route.onbeforerender(context);
         }
@@ -245,7 +246,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         });
 
         core.dispose(el, true);
-        el.innerHTML = engine.render(route.view, context);
+        el.innerHTML = engine.render(name || route.view, context);
         core.init(el);
 
         afterrender(route);
@@ -595,9 +596,16 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 if (route.onbeforerender) {
                     route.onbeforerender(context);
                 }
-                route.view(context);
-                afterrender(route);
-                autoChildRoute(route);
+                if (route.view(context, function (name) {
+                    if (name) {
+                        render(route, name);
+                    }
+                    afterrender(route);
+                    autoChildRoute(route);
+                }) !== false) {
+                    afterrender(route);
+                    autoChildRoute(route);
+                }
             } else if (engine.getRenderer(route.view)) {
                 render(route);
             } else {
@@ -682,6 +690,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                         valid = true;
 
                     headers['Content-Type'] = 'application/json;charset=UTF-8';
+                    headers['x-access-token'] = 'e75c06e4-0f72-4d63-8430-ad73d9069025';
                     url[1].split('&').forEach(function (item) {
                         item = item.split('=');
                         if (item.length > 1) {
