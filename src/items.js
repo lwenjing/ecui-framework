@@ -136,19 +136,17 @@
                             var options = core.getOptions(item) || {};
                         } else {
                             if ('string' === typeof item) {
-                                item = {};
-                                item[this.TEXTNAME] = item;
+                                options = {};
+                                options[this.TEXTNAME] = item;
                             }
-                            options = item;
-                            this.getBody().appendChild(
-                                item = dom.create(
-                                    {
-                                        className: options.primary,
-                                        innerHTML: options[this.TEXTNAME]
-                                    }
-                                )
+                            item = dom.create(
+                                {
+                                    className: options.primary,
+                                    innerHTML: options[this.TEXTNAME]
+                                }
                             );
                         }
+                        this.getBody().appendChild(item);
 
                         item.className += UIClass.CLASS;
 
