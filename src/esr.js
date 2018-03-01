@@ -690,7 +690,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                         valid = true;
 
                     headers['Content-Type'] = 'application/json;charset=UTF-8';
-                    headers['x-access-token'] = 'e75c06e4-0f72-4d63-8430-ad73d9069025';
+                    
                     url[1].split('&').forEach(function (item) {
                         item = item.split('=');
                         if (item.length > 1) {
