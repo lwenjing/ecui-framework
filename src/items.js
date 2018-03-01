@@ -139,6 +139,8 @@
                             if ('string' === typeof item) {
                                 options = {};
                                 options[this.TEXTNAME] = item;
+                            } else {
+                                options = item;
                             }
                             item = dom.create(
                                 {
