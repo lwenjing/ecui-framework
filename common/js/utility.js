@@ -202,16 +202,19 @@ daikuan.showHint = function (type, msg) {
 // 录入表单反显数据
 daikuan.setEditFormValue = function (data, form) {
 	var elements = form.elements;
+	var ignore = [];
 	for (var i = 0, item; item = elements[i++]; ) {
 		var name = item.name;
 		var value = data[name] + '';
-		if (name && data[name] !== undefined) {
+		if (name && ignore.indexOf(name) === -1 && data[name] !== undefined) {
 			var _control = item.getControl && item.getControl();
 			if (_control) {
 				if (_control instanceof ecui.ui.Radio) {
 					_control.setChecked(value === _control.getValue());
 				} else if (_control instanceof ecui.ui.Checkbox) {
 					_control.setChecked(value.indexOf(_control.getValue()) !== -1);
+				} else if (_control instanceof ecui.esr.CreateArray) {
+					ignore.push(name);
 				} else {
 					_control.setValue(value);
 				}
@@ -244,6 +247,30 @@ daikuan.setFormValue = function (context, form, searchParm) {
 
 			} else {
 				item.value = searchParm[name] || '';
+			}
+		}
+	}
+};
+
+// 清空表单数据
+daikuan.resetFormValue = function (form) {
+	var elements = form.elements;
+	for (var i = 0, item; item = elements[i++]; ) {
+		var name = item.name;
+		if (name) {
+			var _control = item.getControl && item.getControl();
+			if (_control) {
+				if (_control instanceof ecui.ui.Radio) {
+					_control.setChecked(false);
+				} else if (_control instanceof ecui.ui.Checkbox) {
+					_control.setChecked(false);
+				} else {
+					_control.setValue('');
+				}
+			} else {
+				if (!ecui.dom.hasClass(item, 'ui-hide')) {
+					item.value = '';
+				}
 			}
 		}
 	}
