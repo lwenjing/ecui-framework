@@ -165,8 +165,9 @@ cities - 地区联动下拉框控件。
             },
             setValue: function (val) {
                 if (+val < 100000 || +val > 999999) {
-                    return;
+                    val = '000000';
                 }
+                val = val + '';
                 this._eInput.value = val;
                 this.getSelect(0).setValue(val.slice(0, 2) + '0000');
                 core.triggerEvent(this.getSelect(0), 'change');
