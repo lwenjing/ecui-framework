@@ -19,7 +19,7 @@ then
     fi
     echo "build ecui-2.0.0"
     path=""
-    more ecui.css | eval $css_proc > release/ecui-2.0.0.css
+    cat ecui.css | eval $css_proc > release/ecui-2.0.0.css
     eval "sed $reg_script ecui.js" | eval $tpl_proc | eval $compress_proc > release/ecui-2.0.0.js
     exit 0
 fi
@@ -85,14 +85,14 @@ do
             if [ "${file##*.}" = "css" ]
             then
                 cd $1
-                more "$file" | eval $css_proc > "../$output/$file"
+                cat "$file" | eval $css_proc > "../$output/$file"
                 cd ..
             else
                 if [ "${file##*.}" = "html" ]
                 then
                     eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" $reg_comment \"$1/$file\"" > "$output/$file"
                 else
-                    cp "$1/$file $output/"
+                    cp "$1/$file" "$output/"
                 fi
             fi
         fi
@@ -108,12 +108,12 @@ do
         if [ "${file##*.}" = "js" ]
         then
             echo "process file-$file"
-            more $file | eval "sed $reg_script" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
+            cat $file | eval "sed $reg_script" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
         else
             if [ "${file##*.}" = "css" ]
             then
                 echo "process file-$file"
-                more $file | eval $css_proc > "../$output/$file"
+                cat $file | eval $css_proc > "../$output/$file"
             fi
         fi
     fi
