@@ -131,7 +131,7 @@ cd $output
 tar -zcvf "../$1.tar.gz" *
 cd ..
 
-# rm -rf $output
+rm -rf $output
 
 if [ $flag ]
 then
