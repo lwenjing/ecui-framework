@@ -349,14 +349,14 @@ _nBottomIndex  - 下部隐藏的选项序号
                     top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight,
                     options = {
                         $: this.getBody(),
-                        onstep: function (percent) {
-                            if (percent >= 1 && callback) {
+                        onstep: callback && function (percent) {
+                            if (percent >= 1) {
                                 callback();
                             }
                         }
                     }
                 if (y < top) {
-                    this._oHandle = core.effect.grade('this.style.top->' + top, 1000, options);
+                    this._oHandle = core.effect.grade('this.style.top->' + (top + this._nTopHidden), 1000, options);
                 } else if (y > -this.$$headerHeight) {
                     this._oHandle = core.effect.grade('this.style.top->' + -this.$$headerHeight, 1000, options);
                 }
