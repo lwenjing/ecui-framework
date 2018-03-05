@@ -830,7 +830,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         if (env.limit) {
             var range = 'function' === typeof env.limit ? env.limit.call(target) : env.limit,
-                codes = [],
                 el = env.el || target.getOuter(),
                 x = target.getX(),
                 y = target.getY(),
@@ -848,6 +847,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     function (percent, options) {
                         event.x = Math.round(options.x + percent * (expectX - options.x));
                         event.y = Math.round(options.y + percent * (expectY - options.y));
+                        event.inertia = true;
                         core.triggerEvent(target, 'dragmove', event);
                         if (percent >= 1) {
                             inertiaHandles[uid]();
