@@ -161,7 +161,7 @@ cities - 地区联动下拉框控件。
                 }
             },
             getValue: function () {
-                return this._eInput.value;
+                return this._eInput.value === '000000' ? '' : this._eInput.value;
             },
             setValue: function (val) {
                 if (+val < 100000 || +val > 999999) {
