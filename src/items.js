@@ -155,10 +155,10 @@
                         options.parent = this;
                         item = core.$fastCreate(UIClass, item, null, options);
                     }
-                    body.appendChild(item.getOuter());
 
                     // 选项控件，直接添加
                     if (core.triggerEvent(this, 'append', {child: item})) {
+                        body.appendChild(item.getOuter());
                         item.$setParent(this);
                         items.push(item);
                     }
