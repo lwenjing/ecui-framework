@@ -707,6 +707,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             loadScript: function (url, callback, options) {
                 function removeScriptTag() {
                     loadScriptCount--;
+                    if (stop) {
+                        stop();
+                    }
                     scr.onload = scr.onreadystatechange = scr.onerror = null;
                     if (scr && scr.parentNode) {
                         scr.parentNode.removeChild(scr);
@@ -738,9 +741,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         try {
                             if (callback && loadScriptCount === 1) {
                                 callback();
-                            }
-                            if (stop) {
-                                stop();
                             }
                         } finally {
                             removeScriptTag();
