@@ -623,6 +623,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 beforerender(route);
                 init();
                 afterrender(route);
+                routeRequestCount--;
             } else if ('function' === typeof route.view) {
                 beforerender(route);
                 if (route.view(context, function (name) {
@@ -831,8 +832,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             if ('string' === typeof urls) {
                 urls = [urls];
             }
-
-            requestVersion++;
 
             var err = [],
                 count = urls.length,
