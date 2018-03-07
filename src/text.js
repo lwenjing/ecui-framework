@@ -81,6 +81,7 @@ _ePlaceHolder - 为空时的提示信息标签
                 this._oRegExp = new RegExp('^' + options.regexp + '$');
             }
 
+            el = this.getInput();
             this._sPlaceHolder = dom.getAttribute(el, 'placeholder') || '';
             if (ieVersion < 10) {
                 this._ePlaceHolder = dom.insertBefore(
@@ -90,7 +91,7 @@ _ePlaceHolder - 为空时的提示信息标签
                             innerHTML: this._sPlaceHolder
                         }
                     ),
-                    this.getInput()
+                    el
                 );
             }
         },
