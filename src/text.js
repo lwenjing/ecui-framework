@@ -163,14 +163,17 @@ _ePlaceHolder - 为空时的提示信息标签
              * @protected
              */
             $error: function (event) {
-                this.alterSubType('error');
+                if (this._sErrValue === undefined) {
+                    this.alterSubType('error');
 
-                if (event.text) {
-                    setPlaceHolder(this, event.text);
+                    if (event.text) {
+                        setPlaceHolder(this, event.text);
+                    }
+
+                    var el = this.getInput();
+                    this._sErrValue = el.value;
+                    el.value = '';
                 }
-                var el = this.getInput();
-                this._sErrValue = el.value;
-                el.value = '';
             },
 
             /**
@@ -288,6 +291,13 @@ _ePlaceHolder - 为空时的提示信息标签
                 return length - range.text.length;
             } : function () {
                 return this.getInput().selectionStart;
+            },
+
+            /**
+             * @override
+             */
+            getValue: function () {
+                return this._sErrValue !== undefined ? this._sErrValue : ui.InputControl.prototype.getValue.call(this);
             },
 
             /**
