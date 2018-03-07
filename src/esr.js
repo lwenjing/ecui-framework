@@ -18,6 +18,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
     var historyCache,
         historyIndex = 0,
         historyData = [],
+        routeRequestCount = 0,
         cacheList = [],
         options,
         routes = {},
@@ -92,10 +93,28 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      */
     function autoChildRoute(route) {
         if (route.children) {
-            var children = 'string' === typeof route.children ? [route.children] : route.children;
-            children.forEach(function (item) {
-                esr.callRoute(replace(item), true);
-            });
+            var children = route.children instanceof Array ? route.children : [route.children];
+            if (route.NAME) {
+                children.forEach(function (item) {
+                    esr.callRoute(replace(item), true);
+                });
+            } else {
+                children.forEach(function (item) {
+                    callRoute(item, true);
+                });
+            }
+        }
+    }
+
+    /**
+     * 渲染开始事件的处理。
+     * @private
+     *
+     * @param {Object} route 路由对象
+     */
+    function beforerender(route) {
+        if (route.onbeforerender) {
+            route.onbeforerender(context);
         }
     }
 
@@ -107,8 +126,10 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * @param {Object} options 参数
      */
     function callRoute(name, options) {
+        routeRequestCount++;
+
         // 供onready时使用，此时name为route
-        var route = options ? routes[name] : name;
+        var route = 'string' === typeof name ? routes[name] : name;
 
         if (route) {
             if (!route.onrender || route.onrender() !== false) {
@@ -177,19 +198,21 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * @private
      */
     function init() {
-        if (ieVersion < 8) {
-            var iframe = document.createElement('iframe');
+        if (routeRequestCount <= 1) {
+            if (ieVersion < 8) {
+                var iframe = document.createElement('iframe');
 
-            iframe.id = 'ECUI_LOCATOR';
-            iframe.src = 'about:blank';
+                iframe.id = 'ECUI_LOCATOR';
+                iframe.src = 'about:blank';
 
-            document.body.appendChild(iframe);
-            setInterval(listener, 100);
-        } else if (window.onhashchange === null) {
-            window.onhashchange = listener;
-            listener();
-        } else {
-            setInterval(listener, 100);
+                document.body.appendChild(iframe);
+                setInterval(listener, 100);
+            } else if (window.onhashchange === null) {
+                window.onhashchange = listener;
+                listener();
+            } else {
+                setInterval(listener, 100);
+            }
         }
     }
 
@@ -226,9 +249,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * @param {string} name 模板名
      */
     function render(route, name) {
-        if (route.onbeforerender) {
-            route.onbeforerender(context);
-        }
+        beforerender(route);
 
         var el = core.$(route.main);
         el.style.visibility = 'hidden';
@@ -257,8 +278,10 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             el.route = route.NAME;
             autoChildRoute(route);
         } else {
+            autoChildRoute(route);
             init();
         }
+        routeRequestCount--;
     }
 
     /**
@@ -273,7 +296,11 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 
             rule = rule.replace(/\$\{([^}]+)\}/g, function (match, name) {
                 name = name.split('|');
-                var value = util.parseValue(name[0], context);
+                if (name[0].charAt(0) !== '&') {
+                    var value = util.parseValue(name[0], context);
+                } else {
+                    value = util.parseValue(name[0].slice(1))
+                }
                 value = value === undefined ? (name[1] || '') : value;
                 if (match === rule) {
                     data = value;
@@ -592,10 +619,13 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 });
             }
 
-            if ('function' === typeof route.view) {
-                if (route.onbeforerender) {
-                    route.onbeforerender(context);
-                }
+            if (route.view === undefined) {
+                beforerender(route);
+                init();
+                afterrender(route);
+                routeRequestCount--;
+            } else if ('function' === typeof route.view) {
+                beforerender(route);
                 if (route.view(context, function (name) {
                     if (name) {
                         render(route, name);
@@ -606,6 +636,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     afterrender(route);
                     autoChildRoute(route);
                 }
+                routeRequestCount--;
             } else if (engine.getRenderer(route.view)) {
                 render(route);
             } else {
@@ -690,7 +721,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                         valid = true;
 
                     headers['Content-Type'] = 'application/json;charset=UTF-8';
-                    
                     url[1].split('&').forEach(function (item) {
                         item = item.split('=');
                         if (item.length > 1) {
@@ -802,8 +832,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             if ('string' === typeof urls) {
                 urls = [urls];
             }
-
-            requestVersion++;
 
             var err = [],
                 count = urls.length,
