@@ -31,8 +31,8 @@ queryButton - 查询按钮控件。
                 var route = ecui.esr.findRoute(this);
                 var children = ecui.esr.getRoute(route.children);
 				daikuan.setSearchParam(children.searchParm, this.getForm());
-				children.searchParm.pageNo = 1;
-				ecui.esr.callRoute(route.children, true);
+				// children.searchParm.pageNo = 1;
+				ecui.esr.callRoute(route.children + '~pageNo=1', true);
             },
         }
     );
