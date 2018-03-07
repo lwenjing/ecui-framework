@@ -14,11 +14,12 @@ _nMaxLength   - 允许提交的最大长度
 _nMinValue    - 允许提交的最小值
 _nMaxValue    - 允许提交的最大值
 _sErrValue    - 检验错误的文本值
+_sPlaceHolder - 为空时的提示信息内容
 _oRegExp      - 允许提交的格式正则表达式
 _ePlaceHolder - 为空时的提示信息标签
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
@@ -26,6 +27,21 @@ _ePlaceHolder - 为空时的提示信息标签
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
+    /**
+     * 设置控件提示信息。
+     * @private
+     *
+     * @param {ecui.ui.Control} text 文本控件对象
+     * @param {string} prompt 提示信息的内容
+     */
+    function setPlaceHolder(text, prompt) {
+        if (text._ePlaceHolder) {
+            text._ePlaceHolder.innerHTML = prompt;
+        } else {
+            text.getInput().setAttribute('placeholder', prompt);
+        }
+    }
+
     /**
      * 文本输入框控件。
      * 扩展 InputELement 标签的功能，提供对低版本 IE 的 placeholder 的兼容。
@@ -65,20 +81,17 @@ _ePlaceHolder - 为空时的提示信息标签
                 this._oRegExp = new RegExp('^' + options.regexp + '$');
             }
 
+            this._sPlaceHolder = dom.getAttribute(el, 'placeholder') || '';
             if (ieVersion < 10) {
-                el = this.getInput();
-                options = dom.getAttribute(el, 'placeholder');
-                if (options) {
-                    this._ePlaceHolder = dom.insertBefore(
-                        dom.create(
-                            {
-                                className: 'ui-placeholder',
-                                innerHTML: options
-                            }
-                        ),
-                        el
-                    );
-                }
+                this._ePlaceHolder = dom.insertBefore(
+                    dom.create(
+                        {
+                            className: 'ui-placeholder',
+                            innerHTML: this._sPlaceHolder
+                        }
+                    ),
+                    this.getInput()
+                );
             }
         },
         {
@@ -148,9 +161,12 @@ _ePlaceHolder - 为空时的提示信息标签
              * 控件格式校验错误的默认处理。
              * @protected
              */
-            $error: function () {
+            $error: function (event) {
                 this.alterSubType('error');
 
+                if (event.text) {
+                    setPlaceHolder(this, event.text);
+                }
                 var el = this.getInput();
                 this._sErrValue = el.value;
                 el.value = '';
@@ -162,6 +178,7 @@ _ePlaceHolder - 为空时的提示信息标签
             $focus: function () {
                 ui.InputControl.prototype.$focus.call(this);
                 this.alterSubType('');
+                setPlaceHolder(this, this._sPlaceHolder);
 
                 if (this._sErrValue !== undefined) {
                     var el = this.getInput();
@@ -290,6 +307,4 @@ _ePlaceHolder - 为空时的提示信息标签
             }
         }
     );
-//{if 0}//
 }());
-//{/if}//
