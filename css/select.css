@@ -69,3 +69,11 @@
         color: #368cda;
     }
 }
+.ui-select-error {
+    border-color: #D0021B;
+    background-color: #FFEAD6;
+    .ui-select-text{
+        background-color: #FFEAD6;
+        color: #D0021B;
+    }
+}

@@ -15,6 +15,7 @@ _nOptionSize  - 下接选择框可以用于选择的条目数量
 _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
+_bRequired    - 是否必须选择
 */
 (function () {
 //{if 0}//
@@ -69,6 +70,7 @@ _uOptions     - 下拉选择框
      * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
      * options 属性：
      * optionSize     下拉框最大允许显示的选项数量，默认为5
+     * required       是否必须选择
      * @control
      */
     ui.Select = core.inherits(
@@ -125,6 +127,8 @@ _uOptions     - 下拉选择框
             this.$setBody(optionsEl);
             // 初始化下拉区域最多显示的选项数量
             this._nOptionSize = options.optionSize || 10;
+
+            this._bRequired = options.required;
 
             this.setPopup(this._uOptions);
 
@@ -234,6 +238,22 @@ _uOptions     - 下拉选择框
              * @event
              */
             $change: util.blank,
+
+            /**
+             * 控件格式校验错误的默认处理。
+             * @protected
+             */
+            $error: function (event) {
+                this.alterSubType('error');
+            },
+
+            /**
+             * @override
+             */
+            $focus: function () {
+                ui.InputControl.prototype.$focus.call(this);
+                this.alterSubType('');
+            },
 
             /**
              * 弹出层初始化。
@@ -361,6 +381,25 @@ _uOptions     - 下拉选择框
                     setSelected(this);
                 }
                 ui.InputControl.prototype.$remove.call(this, event);
+            },
+
+            /**
+             * @override
+             */
+            $validate: function () {
+                ui.InputControl.prototype.$validate.call(this);
+
+                var value = this.getValue(),
+                    result = true;
+
+                if (value === '' &&  this._bRequired) {
+                    result = false;
+                }
+
+                if (!result) {
+                    core.triggerEvent(this, 'error');
+                }
+                return result;
             },
 
             /**
