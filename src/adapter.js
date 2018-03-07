@@ -8,6 +8,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
         patch = ecui,
         fontSizeCache = [],
+        loadScriptCount = 0,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
@@ -705,6 +706,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             loadScript: function (url, callback, options) {
                 function removeScriptTag() {
+                    loadScriptCount--;
                     scr.onload = scr.onreadystatechange = scr.onerror = null;
                     if (scr && scr.parentNode) {
                         scr.parentNode.removeChild(scr);
@@ -712,6 +714,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     scr = null;
                 }
 
+                loadScriptCount++;
                 options = options || {};
 
                 if (!options.cache) {
@@ -733,7 +736,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     if (scr.readyState === undefined || scr.readyState === 'loaded' || scr.readyState === 'complete') {
                         scriptLoaded = 1;
                         try {
-                            if (callback) {
+                            if (callback && loadScriptCount === 1) {
                                 callback();
                             }
                             if (stop) {
