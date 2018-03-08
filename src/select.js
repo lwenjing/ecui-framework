@@ -240,22 +240,6 @@ _bRequired    - 是否必须选择
             $change: util.blank,
 
             /**
-             * 控件格式校验错误的默认处理。
-             * @protected
-             */
-            $error: function () {
-                this.alterSubType('error');
-            },
-
-            /**
-             * @override
-             */
-            $focus: function () {
-                ui.InputControl.prototype.$focus.call(this);
-                this.alterSubType('');
-            },
-
-            /**
              * 弹出层初始化。
              * @protected
              */

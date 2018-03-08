@@ -159,20 +159,19 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
-             * 控件格式校验错误的默认处理。
-             * @protected
+             * @override
              */
             $error: function (event) {
                 if (this._sErrValue === undefined) {
-                    this.alterSubType('error');
+                    if (ui.InputControl.prototype.$error.call(this, event) !== false) {
+                        if (event.text) {
+                            setPlaceHolder(this, event.text);
+                        }
 
-                    if (event.text) {
-                        setPlaceHolder(this, event.text);
+                        var el = this.getInput();
+                        this._sErrValue = el.value;
+                        el.value = '';
                     }
-
-                    var el = this.getInput();
-                    this._sErrValue = el.value;
-                    el.value = '';
                 }
             },
 
@@ -183,7 +182,6 @@ _ePlaceHolder - 为空时的提示信息标签
                 ui.InputControl.prototype.$focus.call(this);
 
                 if (this._sErrValue !== undefined) {
-                    this.alterSubType('');
                     setPlaceHolder(this, this._sPlaceHolder);
 
                     var el = this.getInput();
