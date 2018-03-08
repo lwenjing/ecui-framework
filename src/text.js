@@ -181,10 +181,11 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $focus: function () {
                 ui.InputControl.prototype.$focus.call(this);
-                this.alterSubType('');
-                setPlaceHolder(this, this._sPlaceHolder);
 
                 if (this._sErrValue !== undefined) {
+                    this.alterSubType('');
+                    setPlaceHolder(this, this._sPlaceHolder);
+
                     var el = this.getInput();
                     el.value = this._sErrValue;
                     delete this._sErrValue;
