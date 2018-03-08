@@ -128,7 +128,7 @@ _bRequired    - 是否必须选择
             // 初始化下拉区域最多显示的选项数量
             this._nOptionSize = options.optionSize || 10;
 
-            this._bRequired = options.required;
+            this._bRequired = !!options.required;
 
             this.setPopup(this._uOptions);
 
@@ -243,7 +243,7 @@ _bRequired    - 是否必须选择
              * 控件格式校验错误的默认处理。
              * @protected
              */
-            $error: function (event) {
+            $error: function () {
                 this.alterSubType('error');
             },
 
@@ -389,17 +389,10 @@ _bRequired    - 是否必须选择
             $validate: function () {
                 ui.InputControl.prototype.$validate.call(this);
 
-                var value = this.getValue(),
-                    result = true;
-
-                if (value === '' &&  this._bRequired) {
-                    result = false;
-                }
-
-                if (!result) {
+                if (this.getValue() === '' &&  this._bRequired) {
                     core.triggerEvent(this, 'error');
+                    return false;
                 }
-                return result;
             },
 
             /**
