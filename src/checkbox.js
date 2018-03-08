@@ -97,6 +97,8 @@ _aDependents     - 全部的从属复选框
 
             core.delegate(options.subject, this, this.setSubject);
             dom.addEventListener(this.getInput(), 'change', changeHandler);
+
+            this._bRequired = !!options.required;
         },
         {
             /**
@@ -178,6 +180,16 @@ _aDependents     - 全部的从属复选框
                 // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
                 this.getInput().checked = this._bDefault;
                 ui.InputControl.prototype.$reset.call(this);
+            },
+
+            $validate: function (event) {
+                ui.InputControl.prototype.$validate.call(this, event);
+
+                if (this._bRequired) {
+                        if (!this.isChecked()) {
+                            core.triggerEvent(this, 'error');
+                        }
+                }
             },
 
             /**

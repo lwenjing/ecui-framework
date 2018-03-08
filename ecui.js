@@ -9,6 +9,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/items.js"></script>');
     document.write('<script type="text/javascript" src="src/popup.js"></script>');
 
+    document.write('<script type="text/javascript" src="src/input-group.js"></script>');
     document.write('<script type="text/javascript" src="src/button.js"></script>');
     document.write('<script type="text/javascript" src="src/submit.js"></script>');
     document.write('<script type="text/javascript" src="src/cancel.js"></script>');

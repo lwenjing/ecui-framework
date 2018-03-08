@@ -16,6 +16,7 @@
      */
     ui.InputGroup = core.inherits(
         ui.Control,
+        'ui-input-group',
         {
             $error: function () {
                 this.alterSubType('error');

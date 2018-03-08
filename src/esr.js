@@ -727,12 +727,12 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                             setData(item[0], replace(item[1]));
                         } else if (method[0] === 'FORM') {
                             Array.prototype.slice.call(document.forms[item[0]].elements).forEach(function (item) {
-                                if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
-                                    if (item.getControl) {
-                                        if (!core.triggerEvent(item.getControl(), 'validate')) {
-                                            valid = false;
-                                        }
+                                if (item.getControl) {
+                                    if (!core.triggerEvent(item.getControl(), 'validate')) {
+                                        valid = false;
                                     }
+                                }
+                                if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                                     setData(item.name, item.getControl ? item.getControl().getValue() : item.value);
                                 }
                             });
