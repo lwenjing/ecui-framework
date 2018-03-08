@@ -10,6 +10,7 @@
 
 @fields
 _bDefault  - 默认的选中状态
+_bRequired - 是否必须选择
 */
 (function () {
 //{if 0}//
@@ -61,6 +62,8 @@ _bDefault  - 默认的选中状态
     /**
      * 单选框控件。
      * 实现了对原生 InputElement 单选框的功能扩展，支持对选中的图案的选择。单选框控件适用所有在一组中只允许选择一个目标的交互，并不局限于此分组的表现形式(文本、图片等)。
+     * options 属性：
+     * required    是否必须选择
      * @control
      */
     ui.Radio = core.inherits(
@@ -73,6 +76,7 @@ _bDefault  - 默认的选中状态
 
             // 保存节点选中状态，用于修复IE6/7下移动DOM节点时选中状态发生改变的问题
             this._bDefault = this.getInput().defaultChecked;
+            this._bRequired = !!options.required;
             dom.addEventListener(this.getInput(), 'change', change);
         },
         {
@@ -136,6 +140,38 @@ _bDefault  - 默认的选中状态
                 // 修复IE6/7下移动DOM节点时选中状态发生改变的问题
                 this.setChecked(this._bDefault);
                 ui.InputControl.prototype.$reset.call(this);
+            },
+
+            /**
+             * @override
+             */
+            $validate: function (event) {
+                ui.InputControl.prototype.$validate.call(this, event);
+
+                if (this._bRequired) {
+                    var name = this.getName(),
+                        nochecked = true,
+                        group = core.query(function (item) {
+                            if (item instanceof ui.Radio && item.getName() === name) {
+                                if (item.isChecked()) {
+                                    nochecked = false;
+                                }
+                                return true;
+                            }
+                        });
+
+                    if (nochecked) {
+                        for (var control = this; control = control.getParent(); ) {
+                            if (control instanceof ui.InputGroup) {
+                                core.triggerEvent(control, 'error');
+                                return;
+                            }
+                        }
+                        group.forEach(function (item) {
+                            core.triggerEvent(item, 'error');
+                        });
+                    }
+                }
             },
 
             /**

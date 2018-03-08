@@ -13,6 +13,7 @@ _bDefault        - 缺省的选中状态
 _nStatus         - 复选框当前的状态，0--全选，1--未选，2--半选
 _cSubject        - 主复选框
 _aDependents     - 全部的从属复选框
+_bRequired       - 是否必须选择
 */
 (function () {
 //{if 0}//
@@ -81,6 +82,7 @@ _aDependents     - 全部的从属复选框
      * 实现了对原生 InputElement 复选框的功能扩展，支持复选框之间的主从关系定义。当一个复选框的“从复选框”选中一部分时，“主复选框”将处于半选状态，这种状态逻辑意义上等同于未选择状态，但显示效果不同，复选框的主从关系可以有多级。复选框控件适用所有在一组中允许选择多个目标的交互，并不局限于此分组的表现形式(文本、图片等)。
      * options 属性：
      * subject     主复选框 ID，会自动与主复选框建立关联后，作为主复选框的从属复选框之一
+     * required    是否必须选择
      * @control
      */
     ui.Checkbox = core.inherits(
@@ -182,13 +184,35 @@ _aDependents     - 全部的从属复选框
                 ui.InputControl.prototype.$reset.call(this);
             },
 
+            /**
+             * @override
+             */
             $validate: function (event) {
                 ui.InputControl.prototype.$validate.call(this, event);
 
                 if (this._bRequired) {
-                        if (!this.isChecked()) {
-                            core.triggerEvent(this, 'error');
+                    var name = this.getName(),
+                        nochecked = true,
+                        group = core.query(function (item) {
+                            if (item instanceof ui.Checkbox && item.getName() === name) {
+                                if (item.isChecked()) {
+                                    nochecked = false;
+                                }
+                                return true;
+                            }
+                        });
+                        
+                    if (nochecked) {
+                        for (var control = this; control = control.getParent(); ) {
+                            if (control instanceof ui.InputGroup) {
+                                core.triggerEvent(control, 'error');
+                                return;
+                            }
                         }
+                        group.forEach(function (item) {
+                            core.triggerEvent(item, 'error');
+                        });
+                    }
                 }
             },
 
