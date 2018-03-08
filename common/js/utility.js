@@ -283,14 +283,14 @@ daikuan.setSearchParam = function(searchParm, form) {
             var _control = ecui.findControl(item);
             if (_control) {
             	if (_control instanceof ecui.ui.Radio) {
-        			if (Array.prototype.indexOf.call(item, _control.getInput()) === 0) {
+        			if (Array.prototype.indexOf.call(form.elements[item.name], _control.getInput()) === 0) {
         				searchParm[item.name] = '';
         			}
             		if (_control.isChecked()) {
             			searchParm[item.name] = _control.getValue();
             		}
             	} else if (_control instanceof ecui.ui.Checkbox) {
-        			if (Array.prototype.indexOf.call(item, _control.getInput()) === 0) {
+        			if (Array.prototype.indexOf.call(form.elements[item.name], _control.getInput()) === 0) {
         				searchParm[item.name] = [];
         			}
             		if (_control.isChecked()) {
