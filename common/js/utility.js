@@ -214,7 +214,9 @@ daikuan.setEditFormValue = function (data, form) {
 				} else if (_control instanceof ecui.ui.Checkbox) {
 					_control.setChecked(value.indexOf(_control.getValue()) !== -1);
 				} else if (_control instanceof ecui.esr.CreateArray) {
-					ignore.push(name);
+					if (!(elements[name][1].getControl() instanceof ecui.ui.Checkbox)) {
+						ignore.push(name);
+					}
 				} else {
 					_control.setValue(value);
 				}
