@@ -18,10 +18,19 @@
         ui.Control,
         'ui-input-group',
         {
+            /**
+             * 控件组格式校验错误的默认处理。
+             * @event
+             */
             $error: function () {
                 this.alterSubType('error');
             },
-            $focus: function () {
+
+            /**
+             * @override
+             */
+            $focus: function (event) {
+                ui.Control.prototype.$focus.call(this, event);
                 this.alterSubType('');
             }
         }
