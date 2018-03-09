@@ -938,6 +938,21 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 格式化日期对象。
+             * @public
+             *
+             * @param {Date} date 日期对象
+             * @param {string} format 日期格式
+             * @return {string} 格式化日期字符串
+             */
+            formatDate: function (date, format) {
+                if (date) {
+                    return date.getTime();
+                }
+                return '';
+            },
+
+            /**
              * 获取浏览器可视区域的相关信息。
              * getView 方法将返回浏览器可视区域的信息。属性如下：
              * top        {number} 可视区域最小X轴坐标

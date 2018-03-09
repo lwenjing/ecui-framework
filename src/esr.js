@@ -31,7 +31,8 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         requestVersion = 0,
         localStorage,
         metaVersion,
-        meta;
+        meta,
+        dateFormat;
 
     /**
      * 增加IE的history信息。
@@ -733,7 +734,13 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                                     }
                                 }
                                 if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
-                                    setData(item.name, item.getControl ? item.getControl().getValue() : item.value);
+                                    if (item.getControl) {
+                                        var value = item.getControl();
+                                        value = dateFormat && (value instanceof ui.CalendarInput) ? util.formatDate(value.getDate(), dateFormat) : value.getValue();
+                                    } else {
+                                        value = item.value;
+                                    }
+                                    setData(item.name, value);
                                 }
                             });
                         } else {
@@ -959,6 +966,8 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 historyCache = true;
             }
 
+            dateFormat = options.date;
+
             for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
                 if (el.href.slice(-1) === '#') {
                     el.href = JAVASCRIPT + ':void(0)';
@@ -989,6 +998,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     values = value[2].split(',').map(function (item) {
                         return item.charAt(0).toUpperCase() + util.toCamelCase(item.slice(1));
                     });
+
                 cacheList.push({
                     target: control,
                     name: name,

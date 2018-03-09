@@ -36,8 +36,7 @@
                 $show: function (event) {
                     ui.Calendar.prototype.$show.call(this, event);
                     this.$setParent(ui.Popup.getOwner());
-                    var list = this.getParent().getValue().split('-');
-                    this.setDate(list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]));
+                    this.setDate(this.getParent().getDate());
                 }
             }
         );
@@ -54,6 +53,18 @@
             ui.InputControl.call(this, el, options);
             this.getInput().readOnly = true;
             this.setPopup(core.getSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'})));
+        },
+        {
+            /**
+             * 获取日期对象。
+             * @public
+             *
+             * @return {Date} 控件对象
+             */
+            getDate: function () {
+                var list = this.getValue().split('-');
+                return list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]);
+            }
         },
         ui.Popup
     );

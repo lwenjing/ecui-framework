@@ -138,10 +138,20 @@
             },
 
             /**
+             * 获取控件的弹出层。
+             * @public
+             *
+             * @return {ecui.ui.Control} 弹出层控件
+             */
+            getPopup: function () {
+                return namedMap[this.getUID()];
+            },
+
+            /**
              * 设置控件的弹出层。
              * @public
              *
-             * @param {ecui.ui.Control} control
+             * @param {ecui.ui.Control} control 弹出层控件
              */
             setPopup: function (control) {
                 var popup = namedMap[this.getUID()];
