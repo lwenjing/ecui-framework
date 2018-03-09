@@ -201,12 +201,12 @@ _bRequired       - 是否必须选择
                                 return true;
                             }
                         });
-                        
+
                     if (nochecked) {
                         for (var control = this; control = control.getParent(); ) {
                             if (control instanceof ui.InputGroup) {
                                 core.triggerEvent(control, 'error');
-                                return;
+                                return false;
                             }
                         }
                         group.forEach(function (item) {
