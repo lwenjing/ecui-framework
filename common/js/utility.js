@@ -226,7 +226,8 @@ daikuan.setEditFormValue = function (data, form) {
 					item.value = value;
 				}
 			} else {
-				item.value = data[name][Array.prototype.slice.call(elements[name]).indexOf(item)];
+				// ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
+				item.value = data[name][Array.prototype.slice.call(elements[name]).indexOf(item) - 1];
 			}
 		}
 	}
