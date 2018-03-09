@@ -206,23 +206,27 @@ daikuan.setEditFormValue = function (data, form) {
 	for (var i = 0, item; item = elements[i++]; ) {
 		var name = item.name;
 		var value = data[name] + '';
-		if (name && ignore.indexOf(name) === -1 && data[name] !== undefined) {
-			var _control = item.getControl && item.getControl();
-			if (_control) {
-				if (_control instanceof ecui.ui.Radio) {
-					_control.setChecked(value === _control.getValue());
-				} else if (_control instanceof ecui.ui.Checkbox) {
-					_control.setChecked(value.indexOf(_control.getValue()) !== -1);
-				} else if (_control instanceof ecui.esr.CreateArray) {
-					if (!(elements[name][1].getControl() instanceof ecui.ui.Checkbox)) {
-						ignore.push(name);
+		if (name && data[name] !== undefined) {
+			if (ignore.indexOf(name) === -1) {
+				var _control = item.getControl && item.getControl();
+				if (_control) {
+					if (_control instanceof ecui.ui.Radio) {
+						_control.setChecked(value === _control.getValue());
+					} else if (_control instanceof ecui.ui.Checkbox) {
+						_control.setChecked(value.indexOf(_control.getValue()) !== -1);
+					} else if (_control instanceof ecui.esr.CreateArray) {
+						if (!(elements[name][1].getControl() instanceof ecui.ui.Checkbox)) {
+							ignore.push(name);
+						}
+					} else {
+						_control.setValue(value);
 					}
-				} else {
-					_control.setValue(value);
-				}
 
+				} else {
+					item.value = value;
+				}
 			} else {
-				item.value = value;
+				item.value = data[name][Array.prototype.slice.call(elements[name]).indexOf(item)];
 			}
 		}
 	}
