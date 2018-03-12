@@ -1,6 +1,7 @@
 /*
 @example
 <div ui="type:calendar-input"></div>
+_bRequired  是否必填
 */
 (function () {
 //{if 0}//
@@ -51,6 +52,7 @@
         'ui-calendar-input',
         function (el, options) {
             ui.InputControl.call(this, el, options);
+              this._bRequired = !!options.required;
             this.getInput().readOnly = true;
             this.setPopup(core.getSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'})));
         },
@@ -64,7 +66,14 @@
             getDate: function () {
                 var list = this.getValue().split('-');
                 return list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]);
-            }
+            },
+            $validate: function () {
+                ui.InputControl.prototype.$validate.call(this);
+                if (this.getValue() === '' &&  this._bRequired) {
+                    core.triggerEvent(this, 'error');
+                    return false;
+                }
+            },
         },
         ui.Popup
     );
