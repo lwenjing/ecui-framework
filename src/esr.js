@@ -1064,6 +1064,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             if (context[value[1]] !== undefined) {
                 setData.call(control, context[value[1]]);
             } else {
+                core.dispose(control.getBody(), true);
                 control.setContent('');
             }
         }
