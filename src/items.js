@@ -97,6 +97,9 @@
             $ready: function (event) {
                 this.$Items.$ready.call(this, event);
                 this.alterItems();
+                this.getItems().forEach(function (item) {
+                    core.triggerEvent(item, 'ready');
+                });
             },
 
             /**
