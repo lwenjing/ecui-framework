@@ -238,20 +238,19 @@ _ePlaceHolder - 为空时的提示信息标签
                     length = value.length,
                     result = true;
 
-                value = +value;
                 if (this._nMinLength > length) {
                     result = false;
                 }
                 if (this._nMaxLength < length) {
                     result = false;
                 }
-                if (this._nMinValue > value) {
+                if (this._nMinValue > +value) {
                     result = false;
                 }
-                if (this._nMaxValue < value) {
+                if (this._nMaxValue < +value) {
                     result = false;
                 }
-                if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
+                if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(+value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
                     result = false;
                 }
 
