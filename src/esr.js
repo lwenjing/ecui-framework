@@ -755,7 +755,8 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 
                 if (method[0] === 'JSON' || method[0] === 'FORM') {
                     var url = method[1].split('?'),
-                        data = {};
+                        data = {},
+                        valid = true;
 
                     headers['Content-Type'] = 'application/json;charset=UTF-8';
                     url[1].split('&').forEach(function (item) {
@@ -763,19 +764,21 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                         if (item.length > 1) {
                             setCacheData(data, item[0], replace(item[1]));
                         } else if (method[0] === 'FORM') {
-                            if (!esr.parseObject(document.forms[item[0]], data)) {
-                                if (count === 1) {
-                                    onerror();
-                                } else {
-                                    count--;
-                                    err.push({url: varUrl, name: varName});
-                                }
-                                return;
-                            }
+                            valid = esr.parseObject(document.forms[item[0]], data);
                         } else {
                             data = replace(item[0]);
                         }
                     });
+
+                    if (!valid) {
+                        if (count === 1) {
+                            onerror();
+                        } else {
+                            count--;
+                            err.push({url: varUrl, name: varName});
+                        }
+                        return;
+                    }
 
                     method = 'POST';
                     url = url[0];
