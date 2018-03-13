@@ -205,8 +205,8 @@ daikuan.setEditFormValue = function (data, form) {
     var ignore = [];
     for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
-        var value = data[name] + '';
-        if (name && data[name] !== undefined) {
+        var value = ecui.util.parseValue(name, data) + '';
+        if (name && value !== undefined) {
             if (ignore.indexOf(name) === -1) {
                 var _control = item.getControl && item.getControl();
                 if (_control) {
@@ -227,7 +227,7 @@ daikuan.setEditFormValue = function (data, form) {
                 }
             } else {
                 // ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
-                value = data[name][Array.prototype.slice.call(elements[name]).indexOf(item) - 1];
+                value = ecui.util.parseValue(name, data)[Array.prototype.slice.call(elements[name]).indexOf(item) - 1];
                 if (item.getControl) {
                     item.getControl().setValue(value);
                 } else {
