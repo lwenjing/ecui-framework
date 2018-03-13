@@ -17,7 +17,7 @@
                 $dateclick: function (event) {
                     ui.Calendar.prototype.$dateclick.call(this, event);
                     var parent = this.getParent();
-                    parent.setValue(event.date.getFullYear() + '-' + (event.date.getMonth() + 1) + '-' + event.date.getDate());
+                    parent.setValue(event.date);
                     core.triggerEvent(parent, 'input', event);
                     this.hide();
                 },
@@ -64,6 +64,19 @@
             getDate: function () {
                 var list = this.getValue().split('-');
                 return list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]);
+            },
+
+            /**
+             * @override
+             */
+            setValue: function (value) {
+                if ('number' === typeof value) {
+                    value = new Date(value);
+                }
+                if (value instanceof Date) {
+                    value = value.getFullYear() + '-' + (value.getMonth() + 1) + '-' + value.getDate();
+                }
+                ui.Text.prototype.setValue.call(this, value);
             }
         },
         ui.Popup
