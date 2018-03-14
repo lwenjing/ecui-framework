@@ -564,7 +564,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         parseObject: function (form, data, validate) {
             var valid = true;
             Array.prototype.slice.call(form.elements).forEach(function (item) {
-                if (validate && item.getControl) {
+                if (validate !== false && item.getControl) {
                     if (!core.triggerEvent(item.getControl(), 'validate')) {
                         valid = false;
                     }
