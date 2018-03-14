@@ -721,8 +721,8 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     io.ajax(moduleName + '/' + moduleName + '.css', {
                         cache: true,
                         onsuccess: function (data) {
-                            dom.createStyleSheet(data);
                             if (!loadStatus[moduleName]) {
+                                dom.createStyleSheet(data);
                                 loadStatus[moduleName] = true;
                                 loadTPL();
                             }
