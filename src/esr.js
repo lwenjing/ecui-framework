@@ -722,8 +722,10 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                         cache: true,
                         onsuccess: function (data) {
                             dom.createStyleSheet(data);
-                            loadStatus[moduleName] = true;
-                            loadTPL();
+                            if (!loadStatus[moduleName]) {
+                                loadStatus[moduleName] = true;
+                                loadTPL();
+                            }
                         },
                         onerror: function () {
                             pauseStatus = false;
