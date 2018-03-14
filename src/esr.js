@@ -494,11 +494,8 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          * @param {string} moduleName 模块名称，如果不指定模块名称使用当前模块
          */
         getEngine: function (moduleName) {
-            if (!moduleName) {
+            if (!moduleName || !loadStatus[moduleName]) {
                 return engine;
-            }
-            if (!loadStatus[moduleName]) {
-                loadStatus[moduleName] = new etpl.Engine();
             }
             return loadStatus[moduleName];
         },
@@ -716,16 +713,14 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 
                 if (engine === true) {
                     loadTPL();
-                } else {
+                } else if (!engine) {
                     pauseStatus = true;
                     io.ajax(moduleName + '/' + moduleName + '.css', {
                         cache: true,
                         onsuccess: function (data) {
-                            if (!loadStatus[moduleName]) {
-                                dom.createStyleSheet(data);
-                                loadStatus[moduleName] = true;
-                                loadTPL();
-                            }
+                            dom.createStyleSheet(data);
+                            loadStatus[moduleName] = true;
+                            loadTPL();
                         },
                         onerror: function () {
                             pauseStatus = false;
