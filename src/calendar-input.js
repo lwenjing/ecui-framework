@@ -50,7 +50,7 @@
         ui.Text,
         'ui-calendar-input',
         function (el, options) {
-            ui.InputControl.call(this, el, options);
+            ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
             this.setPopup(core.getSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'})));
         },
