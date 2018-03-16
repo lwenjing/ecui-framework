@@ -205,6 +205,7 @@ daikuan.setEditFormValue = function (data, form) {
     var ignore = [];
     for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
+        // 使用ecui.util.parseValue解析数据，处理ecui.esr.CreateObject创建的对象数据的参数回填
         var value = ecui.util.parseValue(name, data) + '';
         if (name && value !== undefined) {
             if (ignore.indexOf(name) === -1) {
@@ -215,8 +216,13 @@ daikuan.setEditFormValue = function (data, form) {
                     } else if (_control instanceof ecui.ui.Checkbox) {
                         _control.setChecked(value.indexOf(_control.getValue()) !== -1);
                     } else if (_control instanceof ecui.esr.CreateArray) {
-                        if (elements[name][1] && !(elements[name][1].getControl() instanceof ecui.ui.Checkbox)) {
-                            ignore.push(name);
+                        if (elements[name][1]) {
+                            // 获取与ecui.esr.CreateArray控件的name相同第一个input元素
+                            var control = elements[name][1] && elements[name][1].getControl && elements[name][1].getControl();
+                            // 忽略Array复杂数据结构处理
+                            if (!(control instanceof ecui.ui.Checkbox)) {
+                                ignore.push(name);
+                            }
                         }
                     } else {
                         _control.setValue(value);
@@ -227,7 +233,8 @@ daikuan.setEditFormValue = function (data, form) {
                 }
             } else {
                 // ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
-                value = ecui.util.parseValue(name, data)[Array.prototype.slice.call(elements[name]).indexOf(item) - 1];
+                value = ecui.util.parseValue(name, data);
+                value = value && value.length ? value[Array.prototype.slice.call(elements[name]).indexOf(item) - 1] : '';
                 if (item.getControl) {
                     item.getControl().setValue(value);
                 } else {
