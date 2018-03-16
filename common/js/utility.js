@@ -208,7 +208,7 @@ daikuan.setEditFormValue = function (data, form) {
         // 使用ecui.util.parseValue解析数据，处理ecui.esr.CreateObject创建的对象数据的参数回填
         var value = ecui.util.parseValue(name, data) + '';
         if (name && value !== undefined) {
-            if (ignore.indexOf(name) === -1) {
+            if (ignore.indexOf(name.split('.')[0]) === -1) {
                 var _control = item.getControl && item.getControl();
                 if (_control) {
                     if (_control instanceof ecui.ui.Radio) {
@@ -236,7 +236,10 @@ daikuan.setEditFormValue = function (data, form) {
                 value = ecui.util.parseValue(name, data);
                 value = value && value.length ? value[Array.prototype.slice.call(elements[name]).indexOf(item) - 1] : '';
                 if (item.getControl) {
-                    item.getControl().setValue(value);
+                    var control = item.getControl();
+                    if (!(control instanceof ecui.esr.CreateObject)) {
+                        item.getControl().setValue(value);
+                    }
                 } else {
                     item.value = value;
                 }
