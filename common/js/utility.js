@@ -202,7 +202,7 @@ daikuan.showHint = function (type, msg) {
 // 录入表单反显数据
 daikuan.setEditFormValue = function (data, form) {
     var elements = form.elements;
-    var ignore = [];
+    var ignore = [], arr_obj_ignore = [];
     for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
         // 使用ecui.util.parseValue解析数据，处理ecui.esr.CreateObject创建的对象数据的参数回填
@@ -224,6 +224,8 @@ daikuan.setEditFormValue = function (data, form) {
                                 ignore.push(name);
                             }
                         }
+                    } else if (_control instanceof ecui.esr.CreateObject) {
+                        ignore.indexOf(name) !== -1 && arr_obj_ignore.push(name);
                     } else {
                         _control.setValue(value);
                     }
@@ -231,6 +233,9 @@ daikuan.setEditFormValue = function (data, form) {
                 } else {
                     item.value = value;
                 }
+            // 对象数组 数据 不做任何处理 ecui.esr.CreateArray 和 ecui.esr.CreateObject 同时使用
+            } else if (arr_obj_ignore.indexOf(name.split('.')[0]) === -1) {
+                return;
             } else {
                 // ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
                 value = ecui.util.parseValue(name, data);
