@@ -24,14 +24,6 @@
              */
             $error: function () {
                 this.alterSubType('error');
-            },
-
-            /**
-             * @override
-             */
-            $focus: function (event) {
-                ui.Control.prototype.$focus.call(this, event);
-                this.alterSubType('');
             }
         }
     );
