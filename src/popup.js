@@ -35,10 +35,10 @@
             height = this.getHeight();
 
         el = this.getOuter();
-        container.appendChild(el);
 
         el.style.left = left + 'px';
         el.style.top = (popupTop + height <= container.scrollHeight ? popupTop : Math.max(top - height, 0)) + 'px';
+        container.appendChild(el);
     }
 
     var namedMap = {},
