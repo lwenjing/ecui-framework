@@ -235,7 +235,7 @@ daikuan.setEditFormValue = function (data, form) {
                 }
             // 对象数组 数据 不做任何处理 ecui.esr.CreateArray 和 ecui.esr.CreateObject 同时使用
             } else if (arr_obj_ignore.indexOf(name.split('.')[0]) === -1) {
-                return;
+                // return;
             } else {
                 // ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
                 value = ecui.util.parseValue(name, data);
