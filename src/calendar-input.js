@@ -1,7 +1,6 @@
 /*
 @example
 <div ui="type:calendar-input"></div>
-_bRequired  是否必填
 */
 (function () {
 //{if 0}//
@@ -18,7 +17,7 @@ _bRequired  是否必填
                 $dateclick: function (event) {
                     ui.Calendar.prototype.$dateclick.call(this, event);
                     var parent = this.getParent();
-                    parent.setValue(event.date.getFullYear() + '-' + (event.date.getMonth() + 1) + '-' + event.date.getDate());
+                    parent.setValue(event.date);
                     core.triggerEvent(parent, 'input', event);
                     this.hide();
                 },
@@ -51,8 +50,7 @@ _bRequired  是否必填
         ui.Text,
         'ui-calendar-input',
         function (el, options) {
-            ui.InputControl.call(this, el, options);
-              this._bRequired = !!options.required;
+            ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
             this.setPopup(core.getSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'})));
         },
@@ -67,13 +65,19 @@ _bRequired  是否必填
                 var list = this.getValue().split('-');
                 return list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]);
             },
-            $validate: function () {
-                ui.InputControl.prototype.$validate.call(this);
-                if (this.getValue() === '' &&  this._bRequired) {
-                    core.triggerEvent(this, 'error');
-                    return false;
+
+            /**
+             * @override
+             */
+            setValue: function (value) {
+                if ('number' === typeof value) {
+                    value = new Date(value);
                 }
-            },
+                if (value instanceof Date) {
+                    value = value.getFullYear() + '-' + (value.getMonth() + 1) + '-' + value.getDate();
+                }
+                ui.Text.prototype.setValue.call(this, value);
+            }
         },
         ui.Popup
     );

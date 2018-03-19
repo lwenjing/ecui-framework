@@ -127,11 +127,11 @@ cities - 地区联动下拉框控件。
             ui.MultilevelSelect.call(this, el, options);
         },
         {
-            $ready: function (event) {
-                ui.MultilevelSelect.prototype.$ready.call(this, event.options);
-                this.setData(getCITYS(event.options.multi));
-                var value = String(event.options.value);
-                if (!event.options.value || event.options.value.length !== 6) {
+            init: function (options) {
+                ui.MultilevelSelect.prototype.init.call(this, options);
+                this.setData(getCITYS(options.multi));
+                var value = String(options.value);
+                if (!options.value || options.value.length !== 6) {
                     value = '000000';
                 }
 
@@ -143,7 +143,7 @@ cities - 地区联动下拉框控件。
                 }
                 this.getSelect(1).setValue(value.slice(0, 4) + '00');
 
-                if (event.options.multi === '3') {
+                if (options.multi === '3') {
                     core.triggerEvent(this.getSelect(1), 'change');
                     this.getSelect(2).setValue(value.slice(4) !== '00' ? value : '000000');
                 }

@@ -41,7 +41,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         allControls = [],         // 全部生成的控件，供释放控件占用的内存使用
         independentControls = [], // 独立的控件，即使用create($create)方法创建的控件
-        namedControls,            // 所有被命名的控件的集合
+        namedControls = {},       // 所有被命名的控件的集合
         singletons = [],          // 所有被初始化成单例控件的集合
         uniqueIndex = 0,          // 控件的唯一序号
         delegateControls = {},    // 等待关联的控件集合
@@ -949,7 +949,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * @return {boolean} 是否执行了初始化操作
      */
     function initEnvironment() {
-        if (!namedControls) {
+        if (scrollNarrow === undefined) {
             // 设置全局事件处理
             for (var key in events) {
                 if (events.hasOwnProperty(key)) {
@@ -958,8 +958,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
                 }
             }
-
-            namedControls = {};
 
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
