@@ -291,6 +291,8 @@ daikuan.resetFormValue = function (form) {
                     _control.setChecked(false);
                 } else if (_control instanceof ecui.ui.Checkbox) {
                     _control.setChecked(false);
+                } else if (_control instanceof ecui.esr.CreateArray || _control instanceof ecui.esr.CreateObject) {
+                    // 如果是ecui.esr.CreateArray 和 ecui.esr.CreateObject元素，不做任何处理
                 } else {
                     _control.setValue('');
                 }
