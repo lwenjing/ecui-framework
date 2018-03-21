@@ -768,7 +768,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     url[1].split('&').forEach(function (item) {
                         item = item.split('=');
                         if (item.length > 1) {
-                            setCacheData(data, item[0], replace(item[1]));
+                            setCacheData(data, item[0], replace(decodeURIComponent(item[1])));
                         } else if (method[0] === 'FORM') {
                             valid = esr.parseObject(document.forms[item[0]], data);
                         } else {
