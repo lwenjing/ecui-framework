@@ -290,8 +290,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * @private
      *
      * @param {string} rule 替换规则
+     * @param {boolean} isUrl 是不是进行url转义
      */
-    function replace(rule) {
+    function replace(rule, isUrl) {
         if (rule) {
             var data;
 
@@ -303,6 +304,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     value = util.parseValue(name[0].slice(1));
                 }
                 value = value === undefined ? (name[1] || '') : value;
+                if (isUrl) {
+                    value = encodeURIComponent(value);
+                }
                 if (match === rule) {
                     data = value;
                     return '';
@@ -795,7 +799,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     method = 'GET';
                 }
 
-                io.ajax(replace(url), {
+                io.ajax(replace(url, true), {
                     method: method,
                     headers: headers,
                     data: data,
