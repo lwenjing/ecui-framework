@@ -302,7 +302,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 } else {
                     value = util.parseValue(name[0].slice(1));
                 }
-                value = encodeURIComponent(value === undefined ? (name[1] || '') : value);
+                value = value === undefined ? (name[1] || '') : value;
                 if (match === rule) {
                     data = value;
                     return '';
