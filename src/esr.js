@@ -302,7 +302,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 } else {
                     value = util.parseValue(name[0].slice(1));
                 }
-                value = value === undefined ? (name[1] || '') : value;
+                value = encodeURIComponent(value === undefined ? (name[1] || '') : value);
                 if (match === rule) {
                     data = value;
                     return '';
@@ -495,7 +495,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          */
         getEngine: function (moduleName) {
             if (!moduleName) {
-                 return engine;
+                return engine;
             }
             if (!loadStatus[moduleName]) {
                 loadStatus[moduleName] = new etpl.Engine();
