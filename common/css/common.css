@@ -240,9 +240,9 @@ a {
     transform: translate(-50%, -50%);
 }
 #hintContainer > div {
-    min-width: 270px;
+    min-width: 210px;
     max-width: 522px;
-    padding: 55px 35px;
+    padding: 35px;
     background: rgba(43,43,59,0.95);
     border-radius: 4px;
     line-height: 30px;
