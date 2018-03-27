@@ -238,6 +238,10 @@ _ePlaceHolder - 为空时的提示信息标签
                     length = value.length,
                     result = true;
 
+                if (this._bTrim) {
+                    value = value.trim();
+                }
+
                 if (this._nMinLength > length) {
                     result = false;
                 }
@@ -295,7 +299,11 @@ _ePlaceHolder - 为空时的提示信息标签
              * @override
              */
             getValue: function () {
-                return this._sErrValue !== undefined ? this._sErrValue : ui.InputControl.prototype.getValue.call(this);
+                var value = this._sErrValue !== undefined ? this._sErrValue : ui.InputControl.prototype.getValue.call(this);
+                if (this._bTrim) {
+                    value = value.trim();
+                }
+                return value;
             },
 
             /**
