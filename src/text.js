@@ -46,10 +46,10 @@ _ePlaceHolder - 为空时的提示信息标签
      * 文本输入框控件。
      * 扩展 InputELement 标签的功能，提供对低版本 IE 的 placeholder 的兼容。
      * options 属性：
-     * trim    是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
-     * len     [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)长度
-     * num     [aaa,bbb]表示数字允许的最小(aaa)/最大(bbb)值
-     * regexp  正则表达式，自动在两端添加^与$
+     * trim     是否进行前后空格过滤，默认为 true (注：粘贴内容也会进行前后空格过滤)
+     * len      aaa-bbb表示数字允许的最小(aaa)/最大(bbb)长度
+     * num      aaa-bbb表示数字允许的最小(aaa)/最大(bbb)值
+     * regexp   正则表达式，自动在两端添加^与$
      * @control
      */
     ui.Text = core.inherits(
