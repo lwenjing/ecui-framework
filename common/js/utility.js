@@ -139,6 +139,18 @@ daikuan.util = {
             }
         }
         return newobj;
+    },
+    unique: function(array) {
+        var ret = [];
+        if (array instanceof Array) {
+            return array;
+        }
+        for (var i = 0; i < array.length; i++) {
+            if (ret.indexOf(array[i]) < 0) {
+                ret.push(array[i]);
+            }
+        }
+        return ret;
     }
 };
 
