@@ -142,7 +142,7 @@ daikuan.util = {
     },
     unique: function(array) {
         var ret = [];
-        if (array instanceof Array) {
+        if (!(array instanceof Array)) {
             return array;
         }
         for (var i = 0; i < array.length; i++) {
