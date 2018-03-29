@@ -73,6 +73,13 @@
             $ready: function (event) {
                 ui.Control.prototype.$ready.call(this, event);
                 dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
+            },
+
+            /**
+             * 修改控件上传文件路径
+             */
+            setUrl: function (url) {
+                this._sUrl = url;
             }
         }
     );
