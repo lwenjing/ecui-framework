@@ -1,29 +1,4 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-input-group {
   position: relative;
-  .ui-tip {
-      width: 260px;
-      left: 80px;
-      color: red;
-      position: absolute;
-      display: none;
-  }
-}
-.ui-input-group-error {
-  .ui-select {
-        border-color: #D0021B;
-        background-color: #FFEAD6;
-  }
-  .ui-select-text{
-      background-color: #FFEAD6!important;
-  }
-  .ui-text{
-    border-color: #D0021B;
-    input{
-      background-color: #FFEAD6!important;
-    }
-  }
-  .ui-tip {
-      display: block;
-  }
 }
