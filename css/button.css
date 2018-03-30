@@ -6,9 +6,9 @@
 .blue-btn {
     width: 80px;
     height: 30px;
+    line-height: 30px;
     text-align: center;
     font-size: 14px;
-    line-height: 30px;
     color: #fff;
     background-color: #368cda;
     border: 1px solid #368cda;
