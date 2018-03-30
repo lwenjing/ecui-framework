@@ -346,9 +346,14 @@ a {
 /* 
  * progress-bar
 */
-
+.ui-progress-bar {
+    .ui-progress-mask {
+        background: blue;
+        color: #fff;
+    }
+}
 /* 
- * progress-circle
+ * progress-circle 无样式
 */
 
 /* 
@@ -358,7 +363,27 @@ a {
 /* 
  * radio
 */
+.ui-radio {
+    width: 17px;
+    height: 17px;
+    background: url('images/ecui/icons.png');
+    background-position: 0 -252px;
+}
 
+.ui-radio-checked {
+    background-image: url('images/ecui/icons.png');
+    background-position: 0 -286px;
+}
+.ui-disabled .ui-radio,
+.ui-radio-disabled {
+    background-image: url('images/ecui/icons.png');
+    background-position: 0 -185px;
+}
+.ui-disabled .ui-radio-checked,
+.ui-radio-checked-disabled {
+    background-image: url('images/ecui/icons.png');
+    background-position: 0 -218px;
+}
 /* 
  * retina
 */
