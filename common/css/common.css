@@ -136,12 +136,12 @@ a {
 .ui-item {
     overflow: hidden !important;
 }
-/* 
- * button 
+/*
+ * button
  */
 .ui-button {
 
-} 
+}
 /*
  * 蓝色按钮
  */
@@ -251,7 +251,7 @@ a {
     font-size: 14px;
 }
 
-/* 
+/*
  * calendar-input
 */
 /*暂无样式*/
@@ -412,15 +412,17 @@ a {
         font-size: 16px;
     }
 }
-/* 
+
+
+/*
  * esr
 */
 
-/* 
+/*
  * input-control
 */
 
-/* 
+/*
  * input-group
 */
 
@@ -452,55 +454,76 @@ a {
   }
 }
 
-/* 
+/*
  * items
 */
 
-/* 
+/*
  * label
 */
 
-/* 
+/*
  * listbox
 */
 
-/* 
+/*
  * locked-table
 */
 
-/* 
+/*
  * m-list-view
 */
 
-/* 
+/*
  * m-popup
 */
 
-/* 
+/*
  * m-scroll
 */
 
-/* 
+/*
  * m-select
 */
 
-/* 
+/*
  * messagebox
 */
 
-/* 
+/*
  * month-view
 */
+.ui-monthview {
+    .inline-block();
+    table {
+        border: 1px solid #ccc;
+        border-top: 0;
+        padding: 0 12px 7px 12px;
+        border-spacing: 8px;
+        td {
+            width: 24px;
+            height: 24px;
+            border: none;
+            line-height: 24px;
+            text-align: center;
+            vertical-align: middle;
+            font: 12px;
+            cursor: pointer;
+            border-radius: 2px;
+            padding: 0px;
+        }
+      }
+    }
 
-/* 
+/*
  * multilevel-select
 */
 
-/* 
+/*
  * popup
 */
 
-/* 
+/*
  * progress-bar
 */
 .ui-progress-bar {
@@ -509,15 +532,15 @@ a {
         color: #fff;
     }
 }
-/* 
+/*
  * progress-circle 无样式
 */
 
-/* 
+/*
  * progress
 */
 
-/* 
+/*
  * radio
 */
 .ui-radio {
@@ -541,11 +564,11 @@ a {
     background-image: url('images/ecui/icons.png');
     background-position: 0 -218px;
 }
-/* 
+/*
  * retina
 */
 
-/* 
+/*
  * select
 */
 .ui-select {
@@ -616,11 +639,11 @@ a {
         color: #D0021B;
     }
 }
-/* 
+/*
  * submit
 */
 
-/* 
+/*
  * tab
 */
 .ui-tab-title {
@@ -649,7 +672,7 @@ a {
     color: #495362;
     border-bottom: 1px solid #fff;
 }
-/* 
+/*
  * table
 */
 .ui-table {
@@ -679,7 +702,7 @@ a {
         }
     }
 }
-/* 
+/*
  * text
 */
 .ui-text {
@@ -735,11 +758,11 @@ a {
         color: #D0021B;
     }
 }
-/* 
+/*
  * tree-view
 */
 
-/* 
+/*
  * upload
 */
 .ui-upload {
@@ -794,4 +817,3 @@ a {
 #hintContainer .warnHint {
     background: rgba(43,43,59,0.95);
 }
-
