@@ -137,7 +137,7 @@ a {
     overflow: hidden !important;
 }
 /* 
- * ui-button 
+ * button 
  */
 .ui-button {
 
@@ -252,7 +252,131 @@ a {
 }
 
 /* 
- * ui-table
+ * calendar-input
+*/
+
+/* 
+ * calendar
+*/
+
+/* 
+ * ui-checktree
+*/
+
+/* 
+ * checkbox
+*/
+
+/* 
+ * combox
+*/
+
+/* 
+ * control
+*/
+
+/* 
+ * core
+*/
+
+/* 
+ * dialog
+*/
+
+/* 
+ * esr
+*/
+
+/* 
+ * input-control
+*/
+
+/* 
+ * input-group
+*/
+
+/* 
+ * items
+*/
+
+/* 
+ * label
+*/
+
+/* 
+ * listbox
+*/
+
+/* 
+ * locked-table
+*/
+
+/* 
+ * m-list-view
+*/
+
+/* 
+ * m-popup
+*/
+
+/* 
+ * m-scroll
+*/
+
+/* 
+ * m-select
+*/
+
+/* 
+ * messagebox
+*/
+
+/* 
+ * month-view
+*/
+
+/* 
+ * multilevel-select
+*/
+
+/* 
+ * popup
+*/
+
+/* 
+ * progress-bar
+*/
+
+/* 
+ * progress-circle
+*/
+
+/* 
+ * progress
+*/
+
+/* 
+ * radio
+*/
+
+/* 
+ * retina
+*/
+
+/* 
+ * select
+*/
+
+/* 
+ * submit
+*/
+
+/* 
+ * tab
+*/
+
+/* 
+ * table
 */
 .ui-table {
     border: none;
@@ -265,12 +389,12 @@ a {
             border-top: 2px solid #a9d3fa;
             border-bottom: 1px solid #a9d3fa;
             font-size: 16px;
-            padding: 0 !important;
+            padding: 0;
             text-align: left;
         }
         td {
             height: 50px;
-            padding: 0 !important;
+            padding: 0;
             text-align: left;
             text-overflow: ellipsis;
             overflow: hidden;
@@ -281,8 +405,20 @@ a {
         }
     }
 }
+/* 
+ * text
+*/
+
+/* 
+ * tree-view
+*/
+
+/* 
+ * upload
+*/
+
 /*
- *提示框样式
+ * 提示框样式
  */
 #hintContainer {
     position: fixed;
