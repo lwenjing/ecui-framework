@@ -136,8 +136,27 @@ a {
 .ui-item {
     overflow: hidden !important;
 }
+/* 
+ * ui-button 
+ */
+.ui-button {
 
-/*蓝色按钮*/
+} 
+/*
+ * 蓝色按钮
+ */
+.blue-btn {
+    width: 80px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 14px;
+    color: #fff;
+    background-color: #368cda;
+    border: 1px solid #368cda;
+    border-radius: 25px;
+    cursor: pointer;
+}
 .blue-btn-hover {
     background-color: #429aeb;
     border: 1px solid #429aeb;
@@ -177,7 +196,9 @@ a {
     cursor: pointer;
     font-size: 14px;
 }
-/*白色按钮*/
+/*
+ * 白色按钮
+ */
 .white-btn {
     background-color: #fff;
     border: 1px solid #acbaca;
@@ -230,7 +251,39 @@ a {
     font-size: 14px;
 }
 
-/*提示框样式*/
+/* 
+ * ui-table
+*/
+.ui-table {
+    border: none;
+    padding: 0px;
+    table {
+        th {
+            height: 50px;
+            line-height: 50px;
+            background: #EDF8FF;
+            border-top: 2px solid #a9d3fa;
+            border-bottom: 1px solid #a9d3fa;
+            font-size: 16px;
+            padding: 0 !important;
+            text-align: left;
+        }
+        td {
+            height: 50px;
+            padding: 0 !important;
+            text-align: left;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            word-break: break-all;
+        }
+        .ui-table-row:nth-child(2n) > td {
+            background: #f7fcff;
+        }
+    }
+}
+/*
+ *提示框样式
+ */
 #hintContainer {
     position: fixed;
     z-index: 65555;
