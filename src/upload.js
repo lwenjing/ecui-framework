@@ -76,7 +76,10 @@
             },
 
             /**
-             * 修改控件上传文件路径
+             * 设置控件上传文件路径。
+             * @public
+             *
+             * @param {string} url 文件上传路径
              */
             setUrl: function (url) {
                 this._sUrl = url;
