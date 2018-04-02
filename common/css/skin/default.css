@@ -23,3 +23,11 @@
 @placeholder: #c0ccda;/* 输入框提示文字 */
 @link: #368cda;/* 链接文字 */
 @warning: #d0021b;/* 警示、出错文字 */
+
+
+/* border-color */
+@border-color-primary: #acbaca;
+@border-color-active: #368cda;
+@border-color-focus: #368cda;
+@border-color-hover: #8492a6;
+@border-color-disabled: #e0e6ed;
