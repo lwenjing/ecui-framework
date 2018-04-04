@@ -1032,14 +1032,14 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 });
 
                 // 除去这里做回填，渲染结束时也会自动回填，是为了处理路由没有刷新的组件
-                var data = historyData[historyIndex] = historyData[historyIndex] || {};
+/*                var data = historyData[historyIndex] = historyData[historyIndex] || {};
                 if (data[name]) {
                     values.forEach(function (value) {
                         if (data[name].hasOwnProperty(value)) {
                             control['set' + value](data[name][value]);
                         }
                     });
-                }
+                }*/
             }
         }
     };
