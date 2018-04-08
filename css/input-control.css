@@ -6,11 +6,5 @@
 	textarea {
 	    border: 0 !important;
     	margin: 0 !important;
-	    color: #495362;
-	    outline: none;
-	}
-	textarea {
-	    resize: none;
-	    word-wrap: break-word;
 	}
 }
