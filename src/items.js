@@ -50,7 +50,6 @@
             this.add(dom.children(this.getBody()));
 
             this.premitAlterItems();
-            this.alterItems();
         },
 
         Methods: {

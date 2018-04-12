@@ -51,7 +51,6 @@ _nBottomIndex  - 下部隐藏的选项序号
             this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
             this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
         },
-        ui.Items,
         {
             /**
              * @override
@@ -83,8 +82,8 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this._nTopIndex = 0;
                     this._nBottomIndex = this.getLength();
                 }
-
-                var top = this.getHeight() - this.$$bodyHeight;
+                // 解决items不够填充整个listview区域
+                var top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight);
                 this.setScrollRange(
                     {
                         left: 0,
@@ -193,10 +192,13 @@ _nBottomIndex  - 下部隐藏的选项序号
                 ui.MScroll.prototype.$dragmove.call(this, event);
 
                 top = this.getHeight() - this.$$bodyHeight;
-                if (y < top + this.$$footerHeight) {
-                    var status = y > top ? 'footerenter' : 'footercomplete';
-                } else if (y > -this.$$headerHeight) {
+                if (y > -this.$$headerHeight) {
                     status = y < 0 ? 'headerenter' : 'headercomplete';
+                } else if (y === -this.$$headerHeight) {
+                    // 解决items不够填充整个listview区域，导致footercomplete的触发
+                    status = '';
+                } else if (y < top + this.$$footerHeight) {
+                    var status = y > top ? 'footerenter' : 'footercomplete';
                 } else {
                     status = '';
                 }
@@ -354,13 +356,15 @@ _nBottomIndex  - 下部隐藏的选项序号
                                 callback();
                             }
                         }
-                    }
-                if (y < top) {
-                    this._oHandle = core.effect.grade('this.style.top->' + (top + this._nTopHidden), 1000, options);
-                } else if (y > -this.$$headerHeight) {
+                    };
+                // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
+                if (y > -this.$$headerHeight) {
                     this._oHandle = core.effect.grade('this.style.top->' + -this.$$headerHeight, 1000, options);
+                } else if (y < top) {
+                    this._oHandle = core.effect.grade('this.style.top->' + (top + this._nTopHidden), 1000, options);
                 }
             }
-        }
+        },
+        ui.Items
     );
 }());
