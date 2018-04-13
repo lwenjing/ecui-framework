@@ -60,8 +60,8 @@ do
 	        cd "$1/$file"
             path="../../lib-fe/"
 	        eval "sed $reg_load -e \"s/^[[:space:]]*ecui.esr.loadClass('/\/\/{include file='class./g\" -e \"s/');/.js'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval $compress_proc > "../../$output/$file/$file.js"
-            eval "sed -e \"s/^[[:space:]]*ecui.esr.loadRoute('/{include file='route./g\" -e \"s/^/\/\//g\" -e \"s/');/.css'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval $css_proc > "../../$output/$file/$file.css"
-	        eval "sed -e \"s/^[[:space:]]*ecui.esr.loadRoute('/{include file='route./g\" -e \"s/^/\/\//g\" -e \"s/');/.html'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval "sed $reg_comment" > "../../$output/$file/$file.html"
+            eval "sed -e \"s/^[[:space:]]*\/\/.*//g\" \"$file.js\"" | grep "ecui.esr.loadRoute" | eval "sed $reg_load -e \"s/');/.css'}\/\//g\"" | eval $tpl_proc | eval $css_proc > "../../$output/$file/$file.css"
+	        eval "sed -e \"s/^[[:space:]]*\/\/.*//g\" \"$file.js\"" | grep "ecui.esr.loadRoute" | eval "sed $reg_load -e \"s/');/.html'}\/\//g\"" | eval $tpl_proc | eval "sed $reg_comment" > "../../$output/$file/$file.html"
 	        cd ../..
 	    else
 	    	if [ ! -f "$1/$file/.buildignore" ]
