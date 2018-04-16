@@ -581,7 +581,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         if (!control.isDisabled()) {
                             setCacheData(data, item.name, dateFormat && (control instanceof ui.CalendarInput) ? util.formatDate(control.getDate(), dateFormat) : control.getValue());
                         }
-                    } else {
+                    } else if (!item.disabled) {
                         setCacheData(data, item.name, item.value);
                     }
                 }
