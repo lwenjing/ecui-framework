@@ -577,12 +577,13 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 }
                 if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                     if (item.getControl) {
-                        var value = item.getControl();
-                        value = dateFormat && (value instanceof ui.CalendarInput) ? util.formatDate(value.getDate(), dateFormat) : value.getValue();
+                        var control = item.getControl();
+                        if (!control.isDisabled()) {
+                            setCacheData(data, item.name, dateFormat && (control instanceof ui.CalendarInput) ? util.formatDate(control.getDate(), dateFormat) : control.getValue());
+                        }
                     } else {
-                        value = item.value;
+                        setCacheData(data, item.name, item.value);
                     }
-                    setCacheData(data, item.name, value);
                 }
             });
             return valid;
