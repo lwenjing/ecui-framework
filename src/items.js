@@ -305,6 +305,7 @@
 
             if (parent) {
                 event.item = this;
+                event.index = namedMap[parent.getUID()].indexOf(this);
                 core.triggerEvent(parent, 'item' + item.replace('mouse', ''), event);
             }
         };
