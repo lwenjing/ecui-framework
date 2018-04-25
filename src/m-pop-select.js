@@ -33,7 +33,11 @@ _bRequired    - 是否必须选择
     function setSelected(select, item) {
         item = item || null;
         if (item !== select._cSelected) {
+            if (select._cSelected) {
+                select._cSelected.alterClass('-selected');
+            }
             if (item) {
+                item.alterClass('+selected');
                 select._uText.setContent(item.getBody().innerHTML);
                 ui.InputControl.prototype.setValue.call(select, item._sValue);
                 if (select._uOptions.isShow()) {
