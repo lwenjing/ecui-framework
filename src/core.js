@@ -2169,7 +2169,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          * @param {ecui.ui.Control} control 控件对象
          * @param {string} name 事件名
          * @param {ECUIEvent|Object} event 事件对象或事件对象参数
-         * @param {Object} ... 事件的其它参数
          * @return {boolean} 是否需要执行默认事件处理
          */
         triggerEvent: function (control, name, event) {
