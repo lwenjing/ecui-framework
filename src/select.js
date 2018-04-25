@@ -154,8 +154,10 @@ _bRequired    - 是否必须选择
                         ui.Item.prototype.$click.call(this, event);
                         var parent = this.getParent();
                         parent._uOptions.hide();
-                        setSelected(parent, this);
-                        core.triggerEvent(parent, 'change', event);
+                        if (this._cSelected !== this) {
+                            setSelected(parent, this);
+                            core.triggerEvent(parent, 'change', event);
+                        }
                     },
 
                     /**
