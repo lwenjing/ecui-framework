@@ -36,7 +36,6 @@ _bRequired    - 是否必须选择
      */
     ui.$select = core.inherits(
         ui.InputControl,
-        'ui-select',
         function (el, options) {
             util.setDefault(options, 'readOnly', true);
             util.setDefault(options, 'inputType', 'text');
