@@ -27,6 +27,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/text.js"></script>');
     document.write('<script type="text/javascript" src="src/checkbox.js"></script>');
     document.write('<script type="text/javascript" src="src/radio.js"></script>');
+    document.write('<script type="text/javascript" src="src/$select.js"></script>');
     document.write('<script type="text/javascript" src="src/select.js"></script>');
     document.write('<script type="text/javascript" src="src/combox.js"></script>');
     document.write('<script type="text/javascript" src="src/listbox.js"></script>');
