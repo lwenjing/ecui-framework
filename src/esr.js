@@ -1002,8 +1002,26 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             }
 
             dom.ready(function () {
+                etpl.config({
+                    commandOpen: '<<<',
+                    commandClose: '>>>'
+                });
+                for (var el = document.body.firstChild; el; el = el.nextSibling) {
+                    if (el.nodeType === 8) {
+                        etpl.compile(el.textContent || el.nodeValue);
+                        ecui.dom.remove(el);
+                    }
+                }
+                etpl.config({
+                    commandOpen: '<!--',
+                    commandClose: '-->'
+                });
+
                 if (esr.onready) {
-                    callRoute(esr.onready());
+                    var defaultRoute = esr.onready();
+                }
+                if (defaultRoute) {
+                    callRoute(defaultRoute);
                 } else {
                     init();
                 }
