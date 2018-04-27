@@ -13,6 +13,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/button.js"></script>');
     document.write('<script type="text/javascript" src="src/submit.js"></script>');
     document.write('<script type="text/javascript" src="src/cancel.js"></script>');
+    document.write('<script type="text/javascript" src="src/layer.js"></script>');
     document.write('<script type="text/javascript" src="src/dialog.js"></script>');
     document.write('<script type="text/javascript" src="src/label.js"></script>');
     document.write('<script type="text/javascript" src="src/month-view.js"></script>');
