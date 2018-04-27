@@ -151,6 +151,29 @@ _uClose     - 关闭按钮
                 }
                 return result;
             },
+
+            /**
+             * 窗体以独占方式显示
+             * showModal 方法将窗体控件以独占方式显示，此时鼠标点击窗体以外的内容无效，关闭窗体后自动恢复。
+             * @public
+             *
+             * @param {number} opacity 遮罩层透明度，默认为0.5
+             */
+            showModal: function (opacity) {
+                if (!this._bModal) {
+                    if (dialogs.indexOf(this) < dialogs.length - modalCount) {
+                        modalCount++;
+                    }
+
+                    this.center();
+                    core.mask(opacity !== undefined ? opacity : 0.5, 32766 + modalCount * 2);
+
+                    this._bModal = true;
+                    if (!ui.Control.prototype.show.call(this)) {
+                        refresh(this);
+                    }
+                }
+            }
         }
     );
 }());
