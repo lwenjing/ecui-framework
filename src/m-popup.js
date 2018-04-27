@@ -14,7 +14,8 @@
             bottom: [1, 0],
             left: [0, -1],
             right: [0, 1]
-        };
+        },
+        locked;
 
     ui.MPopup = {
         NAME: '$MPopup',
@@ -29,32 +30,44 @@
              * @override
              */
             $click: function (event) {
-                console.log('popup click');
+                if (!locked) {
+                    var view = util.getView(),
+                        data = namedMap[this.getUID()],
+                        popup = this.getPopup(),
+                        el = popup.getOuter(),
+                        style = el.style,
+                        width = view.width * data.enter[1],
+                        height = view.height * data.enter[0];
 
-                var view = util.getView(),
-                    data = namedMap[this.getUID()],
-                    popup = this.getPopup(),
-                    el = popup.getOuter(),
-                    style = el.style,
-                    width = view.width * data.enter[1],
-                    height = view.height * data.enter[0];
+                    if (!dom.getParent(el)) {
+                        // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
+                        document.body.appendChild(el);
+                        popup.cache(true, true);
+                    }
 
-                if (!dom.getParent(el)) {
-                    // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
-                    document.body.appendChild(el);
-                    popup.cache(true, true);
-                }
+                    this.$MPopup.$click.call(this, event);
 
-                this.$MPopup.$click.call(this, event);
+                    if (dom.contain(this.getOuter(), event.target)) {
+                        style.top = (document.body.scrollTop + height) + 'px';
+                        style.left = (document.body.scrollLeft + width) + 'px';
+                        popup.setSize(view.width, view.height);
 
-                if (dom.contain(this.getOuter(), event.target)) {
-                    style.top = (document.body.scrollTop + height) + 'px';
-                    style.left = (document.body.scrollLeft + width) + 'px';
-                    popup.setSize(view.width, view.height);
+                        locked = true;
+                        ecui.effect.grade(
+                            'round:this.style.left->' + (document.body.scrollLeft + width * data.enter[2]) + ';round:this.style.top->' + (document.body.scrollTop + height * data.enter[2]),
+                            1000,
+                            {
+                                $: el,
+                                onstep: function (percent) {
+                                    if (percent >= 1) {
+                                        locked = false;
+                                    }
+                                }
+                            }
+                        );
 
-                    ecui.effect.grade('round:this.style.left->' + (document.body.scrollLeft + width * data.enter[2]) + ';round:this.style.top->' + (document.body.scrollTop + height * data.enter[2]), 1000, {$: el});
-
-                    popup.show();
+                        popup.show();
+                    }
                 }
             },
 
