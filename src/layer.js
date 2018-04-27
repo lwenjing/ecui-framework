@@ -45,17 +45,6 @@ _uClose     - 关闭按钮
     ui.Layer = core.inherits(
         ui.Control,
         'ui-layer',
-        function (el, options) {
-            var bodyEl = el;
-
-            bodyEl.className = options.classes.join('-body ');
-            bodyEl.style.cssText = '';
-            el.appendChild(bodyEl);
-
-            ui.Control.call(this, el, options);
-
-            this.$setBody(bodyEl);
-        },
         {
             /**
              * 销毁窗体时需要先关闭窗体，并不再保留窗体的索引。
