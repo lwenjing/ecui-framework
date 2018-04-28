@@ -13,7 +13,6 @@ _uClose     - 关闭按钮
 (function () {
 //{if 0}//
     var core = ecui,
-        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
