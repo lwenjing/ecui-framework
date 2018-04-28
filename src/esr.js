@@ -148,6 +148,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (!route.model) {
                     esr.render(route);
                 } else if ('function' === typeof route.model) {
+                    if (route.onbeforerequest) {
+                        route.onbeforerequest(context);
+                    }
                     if (route.model(context, function () {
                             esr.render(route);
                         }) !== false) {
@@ -162,9 +165,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     esr.request(route.model, function () {
                         esr.render(route);
                     });
-                    if (route.onafterrequest) {
-                        route.onafterrequest(context);
-                    }
                 }
             }
         } else {
@@ -542,20 +542,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
          */
         getRoute: function (name) {
             return routes[name];
-        },
-
-        /**
-         * 用于 onleave 中需要前往的地址设置。
-         * @public
-         *
-         * @param {string} loc 前往的地址，如果省略前往之前被阻止的地址
-         */
-        go: function (loc) {
-            if (loc) {
-                esr.redirect(loc);
-            } else {
-                history.go(1);
-            }
         },
 
         /**
