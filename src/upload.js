@@ -39,8 +39,8 @@
                     progress.setMax(event.total);
                     progress.setValue(event.loaded);
                 } : undefined,
-                onsuccess: this.onupload,
-                onerror: this.onerror
+                onsuccess: this.onupload.bind(this),
+                onerror: this.onerror.bind(this)
             });
         }.bind(this);
     }
@@ -65,6 +65,14 @@
             $dispose: function () {
                 this._eFile = null;
                 ui.Control.prototype.$dispose.call(this);
+            },
+
+            /**
+             * @override
+             *
+             */
+            $click: function (event) {
+                this._eFile.click();
             },
 
             /**
