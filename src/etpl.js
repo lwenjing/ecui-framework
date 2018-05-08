@@ -1251,9 +1251,8 @@
     Engine.prototype.addFilter = function (name, filter) {
         if (etpl === this) {
             DEFAULT_FILTERS[name] = filter;
-        } else {
-            this.filters[name] = filter;
         }
+        this.filters[name] = filter;
     };
 
     /**
