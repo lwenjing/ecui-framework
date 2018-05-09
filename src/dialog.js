@@ -6,7 +6,6 @@
 </div>
 
 @fields
-_bModal      - 是否使用showModal激活
 _uTitle     - 标题栏
 _uClose     - 关闭按钮
 */
@@ -14,8 +13,7 @@ _uClose     - 关闭按钮
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 窗体控件。

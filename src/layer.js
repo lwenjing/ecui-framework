@@ -1,14 +1,12 @@
 /*
 @example
-<div ui="type:dialog">
+<div ui="type:layer">
   <!-- 这里放滚动的内容 -->
   ...
 </div>
 
 @fields
 _bModal      - 是否使用showModal激活
-_uTitle     - 标题栏
-_uClose     - 关闭按钮
 */
 (function () {
 //{if 0}//
@@ -16,22 +14,22 @@ _uClose     - 关闭按钮
         ui = core.ui,
         util = core.util;
 //{/if}//
-    var dialogs = [],    // 当前显示的全部窗体
+    var layers = [],    // 当前显示的全部窗体
         modalCount = 0;  // 当前showModal的窗体数
 
     /**
      * 刷新所有显示的窗体的zIndex属性。
      * @private
      *
-     * @param {ecui.ui.Dialog} dialog 窗体控件
+     * @param {ecui.ui.Layer} layer 窗体控件
      */
-    function refresh(dialog) {
-        util.remove(dialogs, dialog);
-        dialogs.push(dialog);
+    function refresh(layer) {
+        util.remove(layers, layer);
+        layers.push(layer);
 
         // 改变当前窗体之后的全部窗体z轴位置，将当前窗体置顶
-        var num = dialogs.length - modalCount;
-        dialogs.forEach(function (item, index) {
+        var num = layers.length - modalCount;
+        layers.forEach(function (item, index) {
             item.getOuter().style.zIndex = index >= num ? 32769 + (index - num) * 2 : 4095 + index;
         });
     }
@@ -50,7 +48,7 @@ _uClose     - 关闭按钮
              * @override
              */
             $dispose: function () {
-                if (dialogs.indexOf(this) >= 0) {
+                if (layers.indexOf(this) >= 0) {
                     // 窗口处于显示状态，需要强制关闭
                     this.$hide();
                 }
@@ -72,17 +70,17 @@ _uClose     - 关闭按钮
              */
             $hide: function () {
                 // showModal模式下隐藏窗体需要释放遮罩层
-                var i = dialogs.indexOf(this);
+                var i = layers.indexOf(this);
                 if (i >= 0) {
-                    dialogs.splice(i, 1);
+                    layers.splice(i, 1);
 
-                    if (i > dialogs.length - modalCount) {
+                    if (i > layers.length - modalCount) {
                         if (this._bModal) {
-                            if (i === dialogs.length) {
+                            if (i === layers.length) {
                                 core.mask();
                             } else {
                                 // 如果不是最后一个，将遮罩层标记后移
-                                dialogs[i]._bModal = true;
+                                layers[i]._bModal = true;
                             }
                             this._bModal = false;
                         }
@@ -99,7 +97,7 @@ _uClose     - 关闭按钮
              * @override
              */
             $show: function () {
-                dialogs.push(this);
+                layers.push(this);
                 ui.Control.prototype.$show.call(this);
                 core.setFocused(this);
             },
@@ -109,7 +107,7 @@ _uClose     - 关闭按钮
              * @override
              */
             hide: function () {
-                for (var i = dialogs.indexOf(this), item; item = dialogs[++i]; ) {
+                for (var i = layers.indexOf(this), item; item = layers[++i]; ) {
                     if (item._bModal) {
                         return false;
                     }
@@ -123,7 +121,7 @@ _uClose     - 关闭按钮
              */
             isDisabled: function () {
                 if (modalCount > 0) {
-                    return dialogs[dialogs.length - 1] !== this;
+                    return layers[layers.length - 1] !== this;
                 }
                 return ui.Control.prototype.isDisabled.call(this);
             },
@@ -139,7 +137,7 @@ _uClose     - 关闭按钮
              * @override
              */
             show: function () {
-                if (modalCount && dialogs.indexOf(this) < dialogs.length - modalCount) {
+                if (modalCount && layers.indexOf(this) < layers.length - modalCount) {
                     // 如果已经使用showModal，对原来不是showModal的窗体进行处理
                     modalCount++;
                 }
@@ -160,7 +158,7 @@ _uClose     - 关闭按钮
              */
             showModal: function (opacity) {
                 if (!this._bModal) {
-                    if (dialogs.indexOf(this) < dialogs.length - modalCount) {
+                    if (layers.indexOf(this) < layers.length - modalCount) {
                         modalCount++;
                     }
 
