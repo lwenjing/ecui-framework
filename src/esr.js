@@ -136,8 +136,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         if (route) {
             if (route.cache !== undefined) {
                 if (route.cache) {
-                    route.cache = false;
-                } else {
                     var el = core.$(route.main);
                     // TODO，如果没有，是否需要自动生成一个层?
                     if (el) {
@@ -150,6 +148,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             return;
                         }
                     }
+                } else {
+                    route.cache = true;
                 }
             }
             if (!route.onrender || route.onrender() !== false) {
