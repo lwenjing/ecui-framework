@@ -148,8 +148,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             return;
                         }
                     }
-                } else {
-                    route.cache = true;
                 }
             }
             if (!route.onrender || route.onrender() !== false) {
@@ -693,6 +691,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 });
             }
 
+            if (route.cache === false) {
+                route.cache = true;
+            }
             if (route.view === undefined) {
                 beforerender(route);
                 init();
