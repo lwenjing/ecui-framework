@@ -367,7 +367,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             reset: function (callback) {
                 var y = this.getY(),
-                    top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight,
+                    top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight) + this.$$footerHeight,
                     options = {
                         $: this.getBody(),
                         onstep: callback && function (percent) {

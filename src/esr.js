@@ -213,7 +213,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @private
      */
     function listener() {
-        esr.redirect(esr.getLocation());
+        redirect(esr.getLocation());
     }
 
     /**
@@ -230,8 +230,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
                 document.body.appendChild(iframe);
                 setInterval(listener, 100);
-            } else if (window.onhashchange === null) {
-                window.onhashchange = listener;
+            } else if (window.onhashchange !== undefined) {
+                ecui.dom.addEventListener(window, 'hashchange', listener);
                 listener();
             } else {
                 setInterval(listener, 100);
@@ -262,6 +262,83 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         });
 
         return options;
+    }
+
+    /**
+     * 控制定位器转向。
+     * @private
+     *
+     * @param {string} loc location位置
+     */
+    function redirect(loc) {
+        if (pauseStatus) {
+            if (window.onhashchange) {
+                setTimeout(listener, 100);
+            }
+        } else {
+            // 增加location带起始#号的容错性
+            // 可能有人直接读取location.hash，经过string处理后直接传入
+            if (loc) {
+                loc = loc.replace(/^#/, '');
+            }
+
+            if (!loc) {
+                loc = esr.DEFAULT_PAGE;
+                if (historyCache) {
+                    loc += '~ECUI_CACHE=' + historyIndex;
+                    if (!(ieVersion < 9)) {
+                        history.replaceState('', '', '#' + loc);
+                        return;
+                    }
+                }
+            }
+
+            // 与当前location相同时不进行route
+            if (currLocation !== loc) {
+                requestVersion++;
+
+                if (historyCache) {
+                    cacheList = cacheList.filter(function (item) {
+                        return item.target.getMain();
+                    });
+                    historyData[historyIndex] = historyData[historyIndex] || {};
+                    cacheList.forEach(function (item) {
+                        var data = {};
+                        item.values.forEach(function (value) {
+                            data[value] = item.target['get' + value]();
+                        });
+                        historyData[historyIndex][item.name] = data;
+                    });
+                    historyIndex++;
+
+                    if (/~ECUI_CACHE=(\d+)/.test(loc)) {
+                        historyIndex = +RegExp.$1;
+                    } else {
+                        historyData.splice(historyIndex, historyData.length - historyIndex);
+                        loc += '~ECUI_CACHE=' + historyIndex;
+                        if (ieVersion < 9) {
+                            pauseStatus = true;
+                            history.back();
+                            var handle = util.timer(function () {
+                                if (/~ECUI_CACHE=(\d+)/.test(location.href)) {
+                                    esr.setLocation(loc);
+                                    pauseStatus = false;
+                                    handle();
+                                }
+                            }, -10);
+                            return;
+                        }
+                        history.replaceState('', '', '#' + loc);
+                        currLocation = loc;
+                    }
+                }
+                // ie下使用中间iframe作为中转控制
+                // 其他浏览器直接调用控制器方法
+                if (!addIEHistory(loc)) {
+                    esr.callRoute(loc);
+                }
+            }
+        }
     }
 
     /**
@@ -598,80 +675,12 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
         /**
          * 控制定位器转向。
-         * @public
+         * @private
          *
          * @param {string} loc location位置
          */
         redirect: function (loc) {
-            if (pauseStatus) {
-                if (window.onhashchange) {
-                    setTimeout(listener, 100);
-                }
-            } else {
-                // 增加location带起始#号的容错性
-                // 可能有人直接读取location.hash，经过string处理后直接传入
-                if (loc) {
-                    loc = loc.replace(/^#/, '');
-                }
-
-                if (!loc) {
-                    loc = esr.DEFAULT_PAGE;
-                    if (historyCache) {
-                        loc += '~ECUI_CACHE=' + historyIndex;
-                        if (!(ieVersion < 9)) {
-                            history.replaceState('', '', '#' + loc);
-                            return;
-                        }
-                    }
-                }
-
-                // 与当前location相同时不进行route
-                if (currLocation !== loc) {
-                    requestVersion++;
-
-                    esr.setLocation(loc);
-                    if (historyCache) {
-                        cacheList = cacheList.filter(function (item) {
-                            return item.target.getMain();
-                        });
-                        historyData[historyIndex] = historyData[historyIndex] || {};
-                        cacheList.forEach(function (item) {
-                            var data = {};
-                            item.values.forEach(function (value) {
-                                data[value] = item.target['get' + value]();
-                            });
-                            historyData[historyIndex][item.name] = data;
-                        });
-                        historyIndex++;
-
-                        if (/~ECUI_CACHE=(\d+)/.test(loc)) {
-                            historyIndex = +RegExp.$1;
-                        } else {
-                            historyData.splice(historyIndex, historyData.length - historyIndex);
-                            loc += '~ECUI_CACHE=' + historyIndex;
-                            if (ieVersion < 9) {
-                                pauseStatus = true;
-                                history.back();
-                                var handle = util.timer(function () {
-                                    if (/~ECUI_CACHE=(\d+)/.test(location.href)) {
-                                        esr.setLocation(loc);
-                                        pauseStatus = false;
-                                        handle();
-                                    }
-                                }, -10);
-                                return;
-                            }
-                            history.replaceState('', '', '#' + loc);
-                            currLocation = loc;
-                        }
-                    }
-                    // ie下使用中间iframe作为中转控制
-                    // 其他浏览器直接调用控制器方法
-                    if (!addIEHistory(loc)) {
-                        esr.callRoute(loc);
-                    }
-                }
-            }
+            location.hash = loc;
         },
 
         /**
