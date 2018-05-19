@@ -301,8 +301,8 @@ _nBottomIndex  - 下部隐藏的选项序号
             $resize: function () {
                 ui.MScroll.prototype.$resize.call(this);
                 var style = this.getBody().style;
-                style.paddingTop = '';
-                style.paddingBottom = '';
+                style.paddingTop = this.$$bodyPadding[0] + 'px';
+                style.paddingBottom = this.$$bodyPadding[2] + 'px';
             },
 
             /**
