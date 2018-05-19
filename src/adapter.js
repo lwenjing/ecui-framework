@@ -867,7 +867,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Array} sheets 样式对象列表
              */
             adjustFontSize: function (sheets) {
-                var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+                var fontSize = core.fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
                 sheets.forEach(function (item) {
                     item = Array.prototype.slice.call(item.rules || item.cssRules);
                     for (var i = 0, rule; rule = item[i++]; ) {
@@ -1153,7 +1153,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
-             * 将对象转换成数值。
+             * 将对象转换成数值，如果是rem数值统一转换为px数值。
              * toNumber 方法会省略数值的符号，例如字符串 9px 将当成数值的 9，不能识别的数值将默认为 0。
              * @public
              *
@@ -1161,6 +1161,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {number} 对象的数值
              */
             toNumber: function (obj) {
+                if (obj.slice(-3) == 'rem') {
+                    return Math.round(core.fontSize * +obj.slice(0, -3));
+                }
                 return parseInt(obj, 10) || 0;
             }
         }
