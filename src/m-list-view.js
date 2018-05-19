@@ -131,6 +131,17 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
+             * @override
+             */
+            $dragend: function (event) {
+                ui.MScroll.prototype.$dragend.call(this, event);
+                this.reset();
+                if (this._sStatus === 'headercomplete') {
+                    core.triggerEvent(this, 'refresh');
+                }
+            },
+
+            /**
              * 拖拽的惯性时间计算。
              * @protected
              *
@@ -226,7 +237,13 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到最底部事件。
              * @event
              */
-            $footercomplete: setComplete,
+            $footercomplete: function () {
+                setComplete.call(this);
+                if (!this._bLoading) {
+                    this._bLoading = true;
+                    core.triggerEvent(this, 'loaddata');
+                }
+            },
 
             /**
              * 拖拽到达底部区域事件。
@@ -291,8 +308,10 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             add: function (item, index) {
-                if (!index) {
+                this._bLoading = false;
+                if (!index && (!(item instanceof Array) || item.length)) {
                     ui.Items.Methods.add.call(this, item, index);
+                    setEnterAndLeave.call(this);
                 }
             },
 
