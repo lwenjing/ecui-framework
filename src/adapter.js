@@ -849,7 +849,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     },
 
                     send: function (data) {
-                        socket.send(data);
+                        if (socket.readyState !== 1) {
+                            util.timer(this.send, 100, this, data);
+                        } else {
+                            socket.send(data);
+                        }
                     }
                 };
             }
@@ -865,13 +869,17 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             adjustFontSize: function (sheets) {
                 var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
                 sheets.forEach(function (item) {
-                    item = item.rules || item.cssRules;
+                    item = Array.prototype.slice.call(item.rules || item.cssRules);
                     for (var i = 0, rule; rule = item[i++]; ) {
-                        var value = rule.style['font-size'];
-                        if (value && value.slice(-3) === 'rem') {
-                            value = +value.slice(0, -3);
-                            fontSizeCache.push([rule.style, value]);
-                            rule.style['font-size'] = (Math.round(fontSize * value / 2) * 2) + 'px';
+                        if (rule.cssRules && rule.cssRules.length) {
+                            item = item.concat(Array.prototype.slice.call(rule.cssRules));
+                        } else {
+                            var value = rule.style['font-size'];
+                            if (value && value.slice(-3) === 'rem') {
+                                value = +value.slice(0, -3);
+                                fontSizeCache.push([rule.style, value]);
+                                rule.style['font-size'] = (Math.round(fontSize * value / 2) * 2) + 'px';
+                            }
                         }
                     }
                 });

@@ -1,5 +1,6 @@
 /*
 ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由不同的模板引擎处理，因此不同模块可以有同名的模板，可以将模块理解成一个命名空间。
+ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价于<a>标签，callRoute不会记录url信息，等价于传统的ajax调用，change用于参数的部分改变，一般用于翻页操作仅改变少量页码信息。
 */
 (function () {
 //{if 0}//
@@ -133,6 +134,27 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         var route = 'string' === typeof name ? routes[name] : name;
 
         if (route) {
+            if (route.cache !== undefined) {
+                if (route.cache) {
+                    var el = core.$(route.main);
+                    // TODO，如果没有，是否需要自动生成一个层?
+                    if (el) {
+                        el = core.findControl(el);
+                        var layers = ui.Layer.allShown(),
+                            index = layers.indexOf(el);
+                        if (index < 0) {
+                            if (el instanceof ui.Layer) {
+                                el.show();
+                            }
+                        } else {
+                            for (; ++index < layers.length; ) {
+                                layers[index].hide();
+                            }
+                            return;
+                        }
+                    }
+                }
+            }
             if (!route.onrender || route.onrender() !== false) {
                 if (options !== true) {
                     context = {};
@@ -147,6 +169,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 if (!route.model) {
                     esr.render(route);
                 } else if ('function' === typeof route.model) {
+                    if (route.onbeforerequest) {
+                        route.onbeforerequest(context);
+                    }
                     if (route.model(context, function () {
                             esr.render(route);
                         }) !== false) {
@@ -161,9 +186,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     esr.request(route.model, function () {
                         esr.render(route);
                     });
-                    if (route.onafterrequest) {
-                        route.onafterrequest(context);
-                    }
                 }
             }
         } else {
@@ -290,8 +312,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * @private
      *
      * @param {string} rule 替换规则
+     * @param {boolean} isUrl 是不是进行url转义
      */
-    function replace(rule) {
+    function replace(rule, isUrl) {
         if (rule) {
             var data;
 
@@ -300,9 +323,12 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 if (name[0].charAt(0) !== '&') {
                     var value = util.parseValue(name[0], context);
                 } else {
-                    value = util.parseValue(name[0].slice(1))
+                    value = util.parseValue(name[0].slice(1));
                 }
                 value = value === undefined ? (name[1] || '') : value;
+                if (isUrl) {
+                    value = encodeURIComponent(value);
+                }
                 if (match === rule) {
                     data = value;
                     return '';
@@ -313,6 +339,38 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             return data || rule;
         }
         return '';
+    }
+
+    /**
+     * 设置数据到缓存对象中。
+     * @private
+     *
+     * @param {object} cacheData 缓存对象
+     * @param {string} name 对象名称(支持命名空间)
+     * @param {object} value 对象值
+     */
+    function setCacheData(cacheData, name, value) {
+        // 对于FORM表单的对象列表提交，可以通过产生一个特殊的ECUI控件来完成，例如：
+        // <form>
+        //   <input ui="ecui.esr.CreateObject" name="a">
+        //   <input name="a.b">
+        //   <input ui="ecui.esr.CreateObject" name="a">
+        //   <input name="a.b">
+        // </form>
+        for (var i = 0, scope = cacheData, list = name.split('.'); i < list.length - 1; i++) {
+            scope = scope[list[i]] = scope[list[i]] || {};
+            if (scope instanceof Array && scope.length) {
+                scope = scope[scope.length - 1];
+            }
+        }
+        if (scope.hasOwnProperty(list[i])) {
+            if (!(scope[list[i]] instanceof Array)) {
+                scope[list[i]] = [scope[list[i]]];
+            }
+            scope[list[i]].push(value);
+        } else {
+            scope[list[i]] = value;
+        }
     }
 
     var esr = core.esr = {
@@ -468,6 +526,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             if (!loadStatus[moduleName]) {
                 loadStatus[moduleName] = new etpl.Engine();
             }
+
             return loadStatus[moduleName];
         },
 
@@ -507,17 +566,34 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
         },
 
         /**
-         * 用于 onleave 中需要前往的地址设置。
+         * 将一个 Form 表单转换成对象。
          * @public
          *
-         * @param {string} loc 前往的地址，如果省略前往之前被阻止的地址
+         * @param {Form} form Form元素
+         * @param {object} data 数据对象
+         * @param {boolean} validate 是否需要校验，默认不校验
+         * @return {boolean} 校验是否通过
          */
-        go: function (loc) {
-            if (loc) {
-                esr.redirect(loc);
-            } else {
-                history.go(1);
-            }
+        parseObject: function (form, data, validate) {
+            var valid = true;
+            Array.prototype.slice.call(form.elements).forEach(function (item) {
+                if (validate !== false && item.getControl && !item.getControl().isDisabled()) {
+                    if (!core.triggerEvent(item.getControl(), 'validate')) {
+                        valid = false;
+                    }
+                }
+                if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
+                    if (item.getControl) {
+                        var control = item.getControl();
+                        if (!control.isDisabled()) {
+                            setCacheData(data, item.name, dateFormat && (control instanceof ui.CalendarInput) ? util.formatDate(control.getDate(), dateFormat) : control.getValue());
+                        }
+                    } else if (!item.disabled) {
+                        setCacheData(data, item.name, item.value);
+                    }
+                }
+            });
+            return valid;
         },
 
         /**
@@ -620,6 +696,9 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 });
             }
 
+            if (route.cache === false) {
+                route.cache = true;
+            }
             if (route.view === undefined) {
                 beforerender(route);
                 init();
@@ -628,12 +707,12 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             } else if ('function' === typeof route.view) {
                 beforerender(route);
                 if (route.view(context, function (name) {
-                    if (name) {
-                        render(route, name);
-                    }
-                    afterrender(route);
-                    autoChildRoute(route);
-                }) !== false) {
+                        if (name) {
+                            render(route, name);
+                        }
+                        afterrender(route);
+                        autoChildRoute(route);
+                    }) !== false) {
                     afterrender(route);
                     autoChildRoute(route);
                 }
@@ -654,7 +733,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
 
                 if (engine === true) {
                     loadTPL();
-                } else {
+                } else if (!engine) {
                     pauseStatus = true;
                     io.ajax(moduleName + '/' + moduleName + '.css', {
                         cache: true,
@@ -681,30 +760,6 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
          */
         request: function (urls, onsuccess, onerror) {
             function request(varUrl, varName) {
-                // 对于FORM表单的对象列表提交，可以通过产生一个特殊的ECUI控件来完成，例如：
-                // <form>
-                //   <input ui="ecui.esr.CreateObject" name="a">
-                //   <input name="a.b">
-                //   <input ui="ecui.esr.CreateObject" name="a">
-                //   <input name="a.b">
-                // </form>
-                function setData(name, value) {
-                    for (var i = 0, scope = data, list = name.split('.'); i < list.length - 1; i++) {
-                        scope = scope[list[i]] = scope[list[i]] || {};
-                        if (scope instanceof Array && scope.length) {
-                            scope = scope[scope.length - 1];
-                        }
-                    }
-                    if (scope.hasOwnProperty(list[i])) {
-                        if (!(scope[list[i]] instanceof Array)) {
-                            scope[list[i]] = [scope[list[i]]];
-                        }
-                        scope[list[i]].push(value);
-                    } else {
-                        scope[list[i]] = value;
-                    }
-                }
-
                 var method = varUrl.split(' '),
                     headers = {};
 
@@ -725,29 +780,11 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     url[1].split('&').forEach(function (item) {
                         item = item.split('=');
                         if (item.length > 1) {
-                            setData(item[0], replace(item[1]));
+                            setCacheData(data, item[0], replace(decodeURIComponent(item[1])));
                         } else if (method[0] === 'FORM') {
-                            Array.prototype.slice.call(document.forms[item[0]].elements).forEach(function (item) {
-                                if (item.getControl) {
-                                    if (!core.triggerEvent(item.getControl(), 'validate')) {
-                                        valid = false;
-                                    }
-                                }
-                                if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
-                                    if (item.getControl) {
-                                        var value = item.getControl();
-                                        value = dateFormat && (value instanceof ui.CalendarInput) ? util.formatDate(value.getDate(), dateFormat) : value.getValue();
-                                    } else {
-                                        value = item.value;
-                                    }
-                                    setData(item.name, value);
-                                }
-                            });
+                            valid = esr.parseObject(document.forms[item[0]], data);
                         } else {
-                            item = replace(item[1]);
-                            if ('object' === typeof item) {
-                                util.extend(data, item);
-                            }
+                            data = replace(item[0]);
                         }
                     });
 
@@ -774,7 +811,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                     method = 'GET';
                 }
 
-                io.ajax(replace(url), {
+                io.ajax(replace(url, true), {
                     method: method,
                     headers: headers,
                     data: data,
@@ -975,8 +1012,26 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             }
 
             dom.ready(function () {
+                etpl.config({
+                    commandOpen: '<<<',
+                    commandClose: '>>>'
+                });
+                for (var el = document.body.firstChild; el; el = el.nextSibling) {
+                    if (el.nodeType === 8) {
+                        etpl.compile(el.textContent || el.nodeValue);
+                        ecui.dom.remove(el);
+                    }
+                }
+                etpl.config({
+                    commandOpen: '<!--',
+                    commandClose: '-->'
+                });
+
                 if (esr.onready) {
-                    callRoute(esr.onready());
+                    var defaultRoute = esr.onready();
+                }
+                if (defaultRoute) {
+                    callRoute(defaultRoute);
                 } else {
                     init();
                 }
@@ -1006,14 +1061,14 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
                 });
 
                 // 除去这里做回填，渲染结束时也会自动回填，是为了处理路由没有刷新的组件
-                var data = historyData[historyIndex] = historyData[historyIndex] || {};
+/*                var data = historyData[historyIndex] = historyData[historyIndex] || {};
                 if (data[name]) {
                     values.forEach(function (value) {
                         if (data[name].hasOwnProperty(value)) {
                             control['set' + value](data[name][value]);
                         }
                     });
-                }
+                }*/
             }
         }
     };
@@ -1025,7 +1080,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
      * @param {ecui.ui.Control} control 需要应用插件的控件
      * @param {string} value 插件的参数，格式为 变量名@#模板名 或 变量名@js函数名 ，表示指定的变量变化时，需要刷新控件内部HTML
      */
-    ext.esr = function (control, value) {
+    ext.data = function (control, value) {
         if (value = /^(\w+)(\*?@)(#\w*|[\w\.]*\(\))$/.exec(value)) {
             if (value[3].charAt(0) !== '#') {
                 if (value[3].length === 2) {
@@ -1064,6 +1119,7 @@ ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由�
             if (context[value[1]] !== undefined) {
                 setData.call(control, context[value[1]]);
             } else {
+                core.dispose(control.getBody(), true);
                 control.setContent('');
             }
         }

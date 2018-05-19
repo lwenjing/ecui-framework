@@ -192,9 +192,10 @@ _bRequired       - 是否必须选择
 
                 if (this._bRequired) {
                     var name = this.getName(),
+                        form = this.getInput().form,
                         nochecked = true,
                         group = core.query(function (item) {
-                            if (item instanceof ui.Checkbox && item.getName() === name) {
+                            if (item instanceof ui.Checkbox && item.getName() === name && item.getInput().form === form) {
                                 if (item.isChecked()) {
                                     nochecked = false;
                                 }

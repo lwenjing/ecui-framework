@@ -48,7 +48,7 @@ _uCheckbox - 复选框控件
                 core.$fastCreate(
                     ui.Checkbox,
                     el.insertBefore(
-                        dom.create({className: options.classes.join('-checkbox ') + 'ui-checkbox'}),
+                        dom.create({className: options.classes.join('-checkbox ') + 'ui-input ui-checkbox'}),
                         el.firstChild
                     ),
                     this,
@@ -66,6 +66,14 @@ _uCheckbox - 复选框控件
             }, this);
         },
         {
+            /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.TreeView.prototype.$ready.call(this, event);
+                core.triggerEvent(this._uCheckbox, 'ready');
+            },
+
             /**
              * 获取包括当前树控件在内的全部选中的子树控件。
              * @public

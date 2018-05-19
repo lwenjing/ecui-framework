@@ -7,7 +7,7 @@ fi
 css_proc='lessc - --plugin=less-plugin-clean-css | python ${path}less-funcs.py "$2"'
 tpl_proc='java -jar ${path}smarty4j.jar --left //{ --right }// --charset utf-8'
 compress_proc='java -jar ${path}webpacker.jar --mode 1 --charset utf-8'
-reg_load="-e \"s/ecui.esr.loadRoute('/\/\/{include file='route./g\""
+reg_load="-e \"s/^[[:space:]]*ecui.esr.loadRoute('/\/\/{include file='route./g\""
 reg_script="-e \"s/ *document.write('<script type=\\\"text\/javascript\\\" src=\([^>]*\)><\/script>');/\/\/{include file=\1}\/\//g\""
 reg_comment="-e \"s/[[:space:]]/ /g\" -e \"s/^ *//g\" -e \"s/ *$//g\" -e \"/^ *$/d\" -e \"/<\!-- *$/{N;s/\\n//;}\" -e \"s/<\!-- *-->//g\" -e \"/^ *$/d\" -e \"/<script>window.onload=/d\""
 
@@ -59,9 +59,9 @@ do
 	        fi
 	        cd "$1/$file"
             path="../../lib-fe/"
-	        eval "sed $reg_load -e \"s/ecui.esr.loadClass('/\/\/{include file='class./g\" -e \"s/');/.js'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval $compress_proc > "../../$output/$file/$file.js"
-            eval "sed $reg_load -e \"s/ecui.esr.loadClass(*//g\" -e \"s/');/.css'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval $css_proc > "../../$output/$file/$file.css"
-	        eval "sed $reg_load -e \"s/ecui.esr.loadClass(*//g\" -e \"s/');/.html'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval "sed $reg_comment" > "../../$output/$file/$file.html"
+	        eval "sed $reg_load -e \"s/^[[:space:]]*ecui.esr.loadClass('/\/\/{include file='class./g\" -e \"s/');/.js'}\/\//g\" \"$file.js\"" | eval $tpl_proc | eval $compress_proc > "../../$output/$file/$file.js"
+            eval "sed -e \"s/^[[:space:]]*\/\/.*//g\" \"$file.js\"" | grep "ecui.esr.loadRoute" | eval "sed $reg_load -e \"s/');/.css'}\/\//g\"" | eval $tpl_proc | eval $css_proc > "../../$output/$file/$file.css"
+	        eval "sed -e \"s/^[[:space:]]*\/\/.*//g\" \"$file.js\"" | grep "ecui.esr.loadRoute" | eval "sed $reg_load -e \"s/');/.html'}\/\//g\"" | eval $tpl_proc | eval "sed $reg_comment" > "../../$output/$file/$file.html"
 	        cd ../..
 	    else
 	    	if [ ! -f "$1/$file/.buildignore" ]
@@ -78,9 +78,15 @@ do
         path="../lib-fe/"
         if [ "${file##*.}" = "js" ]
         then
-            cd $1
-            eval "sed -e \"/ecui.esr.loadModule/d\" $reg_script $file" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
-            cd ..
+            name="${file%.*}"
+            if [ "${name##*.}" = "min" ]
+            then
+                cp "$1/$file" "$output/"
+            else
+                cd $1
+                eval "sed -e \"/ecui.esr.loadModule/d\" $reg_script $file" | eval $tpl_proc | eval $compress_proc > "../$output/$file"
+                cd ..
+            fi
         else
             if [ "${file##*.}" = "css" ]
             then

@@ -50,7 +50,6 @@
             this.add(dom.children(this.getBody()));
 
             this.premitAlterItems();
-            this.alterItems();
         },
 
         Methods: {
@@ -97,6 +96,9 @@
             $ready: function (event) {
                 this.$Items.$ready.call(this, event);
                 this.alterItems();
+                this.getItems().forEach(function (item) {
+                    core.triggerEvent(item, 'ready');
+                });
             },
 
             /**
@@ -303,6 +305,7 @@
 
             if (parent) {
                 event.item = this;
+                event.index = namedMap[parent.getUID()].indexOf(this);
                 core.triggerEvent(parent, 'item' + item.replace('mouse', ''), event);
             }
         };

@@ -13,6 +13,8 @@
      */
     function setPopupPosition() {
         this.cache(true);
+        var popupEl = this.getOuter();
+        dom.remove(popupEl);
 
         for (var el = owner.getOuter(), container = dom.getParent(el); container !== document.body; container = dom.getParent(container)) {
             if (container.scrollHeight !== container.clientHeight) {
@@ -34,11 +36,9 @@
         var popupTop = top + owner.getHeight(),
             height = this.getHeight();
 
-        el = this.getOuter();
-        container.appendChild(el);
-
-        el.style.left = left + 'px';
-        el.style.top = (popupTop + height <= container.scrollHeight ? popupTop : Math.max(top - height, 0)) + 'px';
+        popupEl.style.left = left + 'px';
+        popupEl.style.top = (popupTop + height <= container.scrollHeight ? popupTop : Math.max(top - height, 0)) + 'px';
+        container.appendChild(popupEl);
     }
 
     var namedMap = {},

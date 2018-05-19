@@ -150,9 +150,10 @@ _bRequired - 是否必须选择
 
                 if (this._bRequired) {
                     var name = this.getName(),
+                        form = this.getInput().form,
                         nochecked = true,
                         group = core.query(function (item) {
-                            if (item instanceof ui.Radio && item.getName() === name) {
+                            if (item instanceof ui.Radio && item.getName() === name && item.getInput().form === form) {
                                 if (item.isChecked()) {
                                     nochecked = false;
                                 }
@@ -164,7 +165,7 @@ _bRequired - 是否必须选择
                         for (var control = this; control = control.getParent(); ) {
                             if (control instanceof ui.InputGroup) {
                                 core.triggerEvent(control, 'error');
-                                return;
+                                return false;
                             }
                         }
                         group.forEach(function (item) {

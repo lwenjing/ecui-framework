@@ -307,6 +307,12 @@ _eInput        - INPUT对象
             $focus: function (event) {
                 ui.Control.prototype.$focus.call(this, event);
 
+                for (var control = this; control = control.getParent(); ) {
+                    if (control instanceof ui.InputGroup) {
+                        control.alterSubType('');
+                        break;
+                    }
+                }
                 if (this._bError) {
                     this.alterSubType('');
                     this._bError = false;

@@ -14,74 +14,68 @@
             bottom: [1, 0],
             left: [0, -1],
             right: [0, 1]
-        };
+        },
+        locked;
 
     ui.MPopup = {
         NAME: '$MPopup',
 
         constructor: function (el, options) {
-            var data = namedMap[this.getUID()] = position[options.enter || 'right'] || position.right,
-                scale = options.scale;
-            data[2] = scale ? Math.max(0, 1 - (scale.indexOf('%') > 0 ? +scale.slice(0, -1) / 100 : +scale)) : 0;
-
-            if (!this.constructor.POPUP) {
-                this.constructor.POPUP = core.$fastCreate(
-                    ui.Control,
-                    document.body.appendChild(
-                        dom.create(
-                            {
-                                className: 'ui-mobile-popup ui-hide',
-                            }
-                        )
-                    )
-                );
-            }
+            namedMap[this.getUID()] = namedMap[this.getUID()] || {};
+            namedMap[this.getUID()].enter = (position[options.enter || 'right'] || position.right).concat([options.scale ? Math.max(0, 1 - (options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale)) : 0]);
         },
 
         Methods: {
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                this.$MPopup.$cache.call(this, style, cacheSize);
-                if (this.constructor.POPUP) {
-                    this.constructor.POPUP.cache(true, true);
-                }
-            },
-
-            /**
-             * @override
-             */
             $click: function (event) {
-                this.$MPopup.$click.call(this, event);
+                if (!locked) {
+                    var view = util.getView(),
+                        data = namedMap[this.getUID()],
+                        popup = this.getPopup(),
+                        el = popup.getOuter(),
+                        style = el.style,
+                        width = view.width * data.enter[1],
+                        height = view.height * data.enter[0];
 
-                var view = util.getView(),
-                    data = namedMap[this.getUID()],
-                    popup = this.constructor.POPUP,
-                    el = popup.getOuter(),
-                    style = el.style,
-                    width = view.width * data[1],
-                    height = view.height * data[0];
+                    if (!dom.getParent(el)) {
+                        // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
+                        document.body.appendChild(el);
+                        popup.cache(true, true);
+                    }
 
-                style.top = (document.body.scrollTop + height) + 'px';
-                style.left = (document.body.scrollLeft + width) + 'px';
-                popup.setSize(view.width, view.height);
+                    this.$MPopup.$click.call(this, event);
 
-                ecui.effect.grade('round:this.style.left->' + (document.body.scrollLeft + width * data[2]) + ';round:this.style.top->' + (document.body.scrollTop + height * data[2]), 1000, {$: el});
+                    if (dom.contain(this.getOuter(), event.target)) {
+                        style.top = (document.body.scrollTop + height) + 'px';
+                        style.left = (document.body.scrollLeft + width) + 'px';
+                        popup.setSize(view.width, view.height);
 
-                if (!dom.getParent(el)) {
-                    // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
-                    document.body.appendChild(el);
-                    popup.cache(true, true);
+                        locked = true;
+                        ecui.effect.grade(
+                            'round:this.style.left->' + (document.body.scrollLeft + width * data.enter[2]) + ';round:this.style.top->' + (document.body.scrollTop + height * data.enter[2]),
+                            1000,
+                            {
+                                $: el,
+                                onstep: function (percent) {
+                                    if (percent >= 1) {
+                                        locked = false;
+                                    }
+                                }
+                            }
+                        );
+
+                        popup.show();
+                    }
                 }
-
-                popup.show();
             },
 
             /**
              * @override
              */
             $dispose: function () {
+                this.setPopup();
                 delete namedMap[this.getUID()];
                 this.$MPopup.$dispose.call(this);
             },
@@ -91,9 +85,36 @@
              */
             $repaint: function (event) {
                 this.$MPopup.$repaint.call(this, event);
-                if (this.constructor.POPUP.isShow()) {
+
+                var popup = this.getPopup();
+                if (popup.isShow()) {
                     var view = util.getView();
-                    this.constructor.POPUP.setSize(view.width, view.height);
+                    popup.setSize(view.width, view.height);
+                }
+            },
+
+            /**
+             * 获取控件的弹出层。
+             * @public
+             *
+             * @return {ecui.ui.Control} 弹出层控件
+             */
+            getPopup: function () {
+                return namedMap[this.getUID()].popup;
+            },
+
+            /**
+             * 设置控件的弹出层。
+             * @public
+             *
+             * @param {ecui.ui.Control} control 弹出层控件
+             */
+            setPopup: function (control) {
+                namedMap[this.getUID()] = namedMap[this.getUID()] || {};
+                if (control) {
+                    namedMap[this.getUID()].popup = control;
+                } else {
+                    delete namedMap[this.getUID()].popup;
                 }
             }
         }
