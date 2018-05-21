@@ -19,6 +19,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     var historyCache,
         historyIndex = 0,
         historyData = [],
+        delegateRoutes = {},
         routeRequestCount = 0,
         cacheList = [],
         options,
@@ -499,6 +500,13 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             route.main = route.main || esr.DEFAULT_MAIN;
             route.view = route.view || name;
             routes[name] = route;
+
+            if (delegateRoutes[name]) {
+                delegateRoutes[name].forEach(function (item) {
+                    route[item.name] = item.value;
+                });
+                delete delegateRoutes[name];
+            }
         },
 
         /**
@@ -557,6 +565,23 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (!addIEHistory(currLocation)) {
                     callRoute(name, oldOptions);
                 }
+            }
+        },
+
+        /**
+         * 委托框架在指定的路由生成时赋值。
+         * 使用框架式结构时，路由被操作，相关路由也许还未创建。delegate 方法提供将指定的赋值滞后到对应的路由创建后才调用的模式。
+         * @public
+         *
+         * @param {string} routeName 被委托的路由名称
+         * @param {string} name 委托的属性名称
+         * @param {Object} value 委托的属性值
+         */
+        delegate: function (routeName, name, value) {
+            if (routes[routeName]) {
+                routes[routeName][name] = value;
+            } else {
+                (delegateRoutes[routeName] = delegateRoutes[routeName] || []).push({name: name, value: value});
             }
         },
 
