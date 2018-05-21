@@ -205,11 +205,13 @@ _nBottomIndex  - 下部隐藏的选项序号
                 top = this.getHeight() - this.$$bodyHeight;
                 if (y > -this.$$headerHeight) {
                     status = y < 0 ? 'headerenter' : 'headercomplete';
+                    this._eHeader.style.top = y + 'px';
                 } else if (y === -this.$$headerHeight) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
                 } else if (y < top + this.$$footerHeight) {
                     var status = y > top ? 'footerenter' : 'footercomplete';
+                    this._eFooter.style.bottom = (top - y) + 'px';
                 } else {
                     status = '';
                 }
