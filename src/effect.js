@@ -386,12 +386,16 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                     } else {
                         percent = transition(currTime / duration);
                     }
+                    // 保存引用防止调用时options对象已经被释放
                     var tmpOptions = options;
-                    fn.call(options.$, percent, options);
+                    fn.call(tmpOptions.$, percent, tmpOptions);
                     if (tmpOptions.onstep) {
-                        tmpOptions.onstep.call(tmpOptions.$, percent);
+                        tmpOptions.onstep.call(tmpOptions.$, percent, tmpOptions);
                     }
                     if (percent >= 1) {
+                        if (tmpOptions.onfinish) {
+                            tmpOptions.onfinish.call(tmpOptions.$, tmpOptions);
+                        }
                         fn = options = transition = null;
                     }
                 }, -20);
@@ -406,7 +410,10 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                     if (flag) {
                         fn.call(options.$, 1, options);
                         if (options.onstep) {
-                            options.onstep.call(options.$, 1);
+                            options.onstep.call(options.$, 1, options);
+                        }
+                        if (options.onfinish) {
+                            options.onfinish.call(options.$, options);
                         }
                     }
                 }
