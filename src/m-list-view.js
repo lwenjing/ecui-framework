@@ -25,7 +25,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 //{/if}//
     function setEnterAndLeave() {
         var range = this.getRange();
-        if (!range.bottom) {
+        if (range && !range.bottom) {
             range.top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
             range.bottom = -this.$$headerHeight;
         }
@@ -308,18 +308,6 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
-             * 本控件新增选项只能从顶部或底部。
-             * @override
-             */
-            add: function (item, index) {
-                this._bLoading = false;
-                if (!index && (!(item instanceof Array) || item.length)) {
-                    ui.Items.Methods.add.call(this, item, index);
-                    setEnterAndLeave.call(this);
-                }
-            },
-
-            /**
              * 获取底部元素。
              * @public
              *
@@ -386,6 +374,19 @@ _nBottomIndex  - 下部隐藏的选项序号
                 }
             }
         },
-        ui.Items
+        ui.Items,
+        {
+            /**
+             * 本控件新增选项只能从顶部或底部。
+             * @override
+             */
+            add: function (item, index) {
+                this._bLoading = false;
+                if (!index && (!(item instanceof Array) || item.length)) {
+                    ui.Items.Methods.add.call(this, item, index);
+                    setEnterAndLeave.call(this);
+                }
+            }
+        }
     );
 }());
