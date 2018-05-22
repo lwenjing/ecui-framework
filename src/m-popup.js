@@ -58,10 +58,8 @@
                             1000,
                             {
                                 $: el,
-                                onstep: function (percent) {
-                                    if (percent >= 1) {
-                                        locked = false;
-                                    }
+                                onfinish: function () {
+                                    locked = false;
                                 }
                             }
                         );
