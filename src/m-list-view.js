@@ -23,6 +23,20 @@ _nBottomIndex  - 下部隐藏的选项序号
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
+    function setEnterAndLeave() {
+        var range = this.getRange();
+        if (range && !range.bottom) {
+            range.top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
+            range.bottom = -this.$$headerHeight;
+        }
+    }
+
+    function setComplete() {
+        var range = this.getRange();
+        range.top = this.getHeight() - this.$$bodyHeight;
+        range.bottom = 0;
+    }
+
     /**
      * 移动端列表展示控件。
      * @control
@@ -120,6 +134,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $dragend: function (event) {
                 ui.MScroll.prototype.$dragend.call(this, event);
+                this.reset();
                 if (this._sStatus === 'headercomplete') {
                     core.triggerEvent(this, 'refresh');
                 }
@@ -227,6 +242,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @event
              */
             $footercomplete: function () {
+                setComplete.call(this);
                 if (!this._bLoading) {
                     this._bLoading = true;
                     core.triggerEvent(this, 'loaddata');
@@ -237,31 +253,31 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到达底部区域事件。
              * @event
              */
-            $footerenter: util.blank,
+            $footerenter: setEnterAndLeave,
 
             /**
              * 拖拽离开底部区域事件。
              * @event
              */
-            $footerleave: util.blank,
+            $footerleave: setEnterAndLeave,
 
             /**
              * 拖拽到最顶部事件。
              * @event
              */
-            $headercomplete: util.blank,
+            $headercomplete: setComplete,
 
             /**
              * 拖拽到达顶部区域事件。
              * @event
              */
-            $headerenter: util.blank,
+            $headerenter: setEnterAndLeave,
 
             /**
              * 拖拽离开顶部区域事件。
              * @event
              */
-            $headerleave: util.blank,
+            $headerleave: setEnterAndLeave,
 
             /**
              * @override
@@ -326,6 +342,32 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             getY: function () {
                 return ui.MScroll.prototype.getY.call(this) - this._nTopHidden;
+            },
+
+            /**
+             * 复位。
+             *
+             * @param {Function} callback 处理完后回调
+             */
+            reset: function (callback) {
+                var y = this.getY(),
+                    top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight) + this.$$footerHeight,
+                    options = {
+                        $: {
+                            body: this.getBody(),
+                            head: this._eHeader,
+                            foot: this._eFooter
+                        },
+                        onfinish: callback && function () {
+                            callback();
+                        }
+                    };
+                // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
+                if (y > -this.$$headerHeight) {
+                    this._oHandle = core.effect.grade('this.body.style.top->' + -this.$$headerHeight + ';this.head.style.top->' + -this.$$headerHeight, 1000, options);
+                } else if (y < top) {
+                    this._oHandle = core.effect.grade('this.body.style.top->' + (top + this._nTopHidden) + ';this.foot.style.bottom->' + (y - top), 1000, options);
+                }
             }
         },
         ui.Items,
@@ -338,6 +380,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this._bLoading = false;
                 if (!index && (!(item instanceof Array) || item.length)) {
                     ui.Items.Methods.add.call(this, item, index);
+                    setEnterAndLeave.call(this);
                 }
             },
 

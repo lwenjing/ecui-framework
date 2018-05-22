@@ -355,13 +355,12 @@ ECUI动画效果库，支持对CSS3动画效果的模拟并扩展了相应的功
                         list[0] = values[1];
                     }
 
-                    var name = list[0];
+                    var name = list[0],
+                        index = list[0].indexOf('.style.');
 
-                    if (list[0].indexOf('.style.') >= 0) {
-                        values = list[0].split('.');
-                        list[0] = 'ecui.dom.getStyle(' + values[0] + ',"' + values[2] + '")';
+                    if (index >= 0) {
+                        list[0] = 'ecui.dom.getStyle(' + list[0].slice(0, index) + ',"' + list[0].slice(index + 7) + '")';
                     }
-
                     values = new Function('$', 'return [' + list.join(',') + ']').call(options.$, options);
                     if (/-?[0-9]+(\.[0-9]+)?/.test(values[0])) {
                         var currValue = RegExp['$&'];
