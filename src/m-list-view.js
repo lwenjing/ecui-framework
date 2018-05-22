@@ -346,6 +346,25 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
+             * 重新加载数据
+             * @public
+             *
+             * @param {Array} data 数据源
+             */
+            reload: function (data) {
+                this._nTopHidden = this._nBottomHidden = 0;
+                this._nTopIndex = this._nBottomIndex = 0;
+                this.preventAlterItems();
+                this.getItems().forEach(function (item) {
+                    ui.Items.Methods.remove.call(this, item);
+                    item.dispose();
+                }, this);
+                this.premitAlterItems();
+                this.add(data);
+                this.reset();
+            },
+
+            /**
              * 复位。
              *
              * @param {Function} callback 处理完后回调
@@ -389,16 +408,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 本控件不支持删除选项的操作。
              * @override
              */
-            remove: util.blank,
-
-            /**
-             * @override
-             */
-            removeAll: function () {
-                this._nTopHidden = this._nBottomHidden = 0;
-                this._nTopIndex = this._nBottomIndex = 0;
-                ui.Items.Methods.removeAll.call(this, true);
-            }
+            remove: util.blank
         }
     );
 }());
