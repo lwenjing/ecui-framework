@@ -153,10 +153,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                                 for (; ++index < layers.length; ) {
                                     layers[index].hide();
                                 }
-                                return;
                             }
                         }
                     }
+                    return;
                 }
             }
             if (!route.onrender || route.onrender() !== false) {
