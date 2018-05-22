@@ -142,25 +142,25 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     if (route.oncached) {
                         var layerStatus = route.oncached();
                     }
-                    if (layerStatus !== false) {
-                        var el = core.$(route.main);
-                        // TODO，如果没有，是否需要自动生成一个层?
-                        if (el) {
-                            el = core.findControl(el);
-                            var layers = ui.Layer.allShown(),
-                                index = layers.indexOf(el);
-                            if (index < 0) {
-                                if (el instanceof ui.Layer) {
-                                    el.show();
-                                }
-                            } else {
+                    var el = core.$(route.main);
+                    // TODO，如果没有，是否需要自动生成一个层?
+                    if (el) {
+                        el = core.findControl(el);
+                        var layers = ui.Layer.allShown(),
+                            index = layers.indexOf(el);
+                        if (index < 0) {
+                            if (el instanceof ui.Layer) {
+                                el.show();
+                            }
+                        } else {
+                            if (layerStatus !== false) {
                                 for (; ++index < layers.length; ) {
                                     layers[index].hide();
                                 }
                             }
+                            return;
                         }
                     }
-                    return;
                 }
             }
             if (!route.onrender || route.onrender() !== false) {
