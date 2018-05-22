@@ -388,7 +388,16 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 本控件不支持删除选项的操作。
              * @override
              */
-            remove: util.blank
+            remove: util.blank,
+
+            /**
+             * @override
+             */
+            removeAll: function () {
+                this._nTopHidden = this._nBottomHidden = 0;
+                this._nTopIndex = this._nBottomIndex = 0;
+                ui.Items.Methods.removeAll.call(this, true);
+            }
         }
     );
 }());
