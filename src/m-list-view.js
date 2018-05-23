@@ -134,7 +134,8 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $dragend: function (event) {
                 ui.MScroll.prototype.$dragend.call(this, event);
-                if (this._sStatus === 'headercomplete') {
+                if (!this._bLoading && this._sStatus === 'headercomplete') {
+                    this._bLoading = true;
                     core.triggerEvent(this, 'refresh');
                 } else {
                     this.reset();
