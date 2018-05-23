@@ -19,18 +19,18 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     var historyCache,
         historyIndex = 0,
         historyData = [],
-        delegateRoutes = {},
-        routeRequestCount = 0,
+        delegateRoutes = {},    // 路由赋值的委托，如果路由不存在，会保存在此处
+        routeRequestCount = 0,  // 记录路由正在加载的数量，用于解决第一次加载时要全部加载完毕才允许init操作
         cacheList = [],
         options,
         routes = {},
-        autoRender = {},
+        autoRender = {},        // 模拟MVVM双向绑定
         context = {},
         currLocation = '',
         pauseStatus,
         loadStatus = {},
         engine = etpl,
-        requestVersion = 0,
+        requestVersion = 0,     // 请求的版本号，主路由切换时会更新，在多次提交时保证只有最后一次提交会触发渲染
         localStorage,
         metaVersion,
         meta,
