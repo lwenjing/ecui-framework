@@ -386,7 +386,8 @@ _nBottomIndex  - 下部隐藏的选项序号
                 // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
                 if (y > -this.$$headerHeight) {
                     this._oHandle = core.effect.grade('this.body.style.top->' + -this.$$headerHeight + ';this.head.style.top->' + -this.$$headerHeight, 1000, options);
-                } else if (y < top) {
+                } else if (y !== -this.$$headerHeight && y < top) {
+                    // y !== -this.$$headerHeight解决items不够填充整个listview区域的问题
                     this._oHandle = core.effect.grade('this.body.style.top->' + (top + this._nTopHidden) + ';this.foot.style.bottom->' + (y - top), 1000, options);
                 }
             }
