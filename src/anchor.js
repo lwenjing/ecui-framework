@@ -6,8 +6,6 @@ anchor - 锚点插件。
     var core = ecui,
         dom = core.dom,
         ext = core.ext,
-        ui = core.ui,
-        util = core.util,
 
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
