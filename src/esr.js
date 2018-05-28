@@ -746,14 +746,16 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (route.view(context, function (name) {
                         if (name) {
                             render(route, name);
+                        } else {
+                            routeRequestCount--;
                         }
                         afterrender(route);
                         autoChildRoute(route);
                     }) !== false) {
+                    routeRequestCount--;
                     afterrender(route);
                     autoChildRoute(route);
                 }
-                routeRequestCount--;
             } else if (engine.getRenderer(route.view)) {
                 render(route);
             } else {
