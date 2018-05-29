@@ -960,6 +960,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             }
 
             if (isMobile) {
+                // 解决移动端点击穿透的问题，原因是mousedown的触发时间会比touchend晚300ms
                 dom.addEventListener(document, 'mousedown', function (event) {
                     event.preventDefault();
                 }, true);
