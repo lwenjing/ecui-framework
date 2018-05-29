@@ -48,13 +48,13 @@
                     this.$MPopup.$click.call(this, event);
 
                     if (dom.contain(this.getOuter(), event.target)) {
-                        style.top = (document.body.scrollTop + height) + 'px';
-                        style.left = (document.body.scrollLeft + width) + 'px';
+                        style.top = height + 'px';
+                        style.left = width + 'px';
                         popup.setSize(view.width, view.height);
 
                         locked = true;
                         ecui.effect.grade(
-                            'round:this.style.left->' + (document.body.scrollLeft + width * data.enter[2]) + ';round:this.style.top->' + (document.body.scrollTop + height * data.enter[2]),
+                            'round:this.style.left->' + (width * data.enter[2]) + ';round:this.style.top->' + (height * data.enter[2]),
                             1000,
                             {
                                 $: el,
