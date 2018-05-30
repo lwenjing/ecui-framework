@@ -93,6 +93,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     event.pageY = track.pageY;
                     event.target = track.target;
                     event.track = track;
+                    track.lastMoveTime = Date.now();
                     currEnv.mousedown(event);
                 }
             },
@@ -243,6 +244,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
 
                     event.track = tracks;
+                    tracks.lastMoveTime = Date.now();
                     currEnv.mousedown(event);
                 }
             },
@@ -722,14 +724,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      */
     function calcSpeed(track, event) {
         track.lastClick = null;
-        var delay = Date.now() - track.lastMoveTime > 500,
+        var time = Date.now(),
+            delay = time - track.lastMoveTime > 500,
             offsetX = event.pageX - track.pageX,
-            offsetY = event.pageY - track.pageY;
-        track.lastMoveTime = 1000 / (Date.now() - track.lastMoveTime);
-        track.speedX = delay ? 0 : offsetX * track.lastMoveTime;
-        track.speedY = delay ? 0 : offsetY * track.lastMoveTime;
+            offsetY = event.pageY - track.pageY,
+            speed = 1000 / delay;
+        track.speedX = delay ? 0 : offsetX * speed;
+        track.speedY = delay ? 0 : offsetY * speed;
         track.angle = calcAngle(offsetX, offsetY);
-        track.lastMoveTime = Date.now();
+        track.lastMoveTime = time;
         track.lastX = track.pageX;
         track.lastY = track.pageY;
         track.pageX = event.pageX;
