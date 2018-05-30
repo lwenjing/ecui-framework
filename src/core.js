@@ -737,7 +737,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         track.lastY = track.pageY;
         track.pageX = event.pageX;
         track.pageY = event.pageY;
-        console.log(delay, track.speedX, track.speedY, track.angle);
     }
 
     /**
