@@ -728,7 +728,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             delay = time - track.lastMoveTime > 500,
             offsetX = event.pageX - track.pageX,
             offsetY = event.pageY - track.pageY,
-            speed = 1000 / delay;
+            speed = delay ? 1000 / delay : 0;
         track.speedX = delay ? 0 : offsetX * speed;
         track.speedY = delay ? 0 : offsetY * speed;
         track.angle = calcAngle(offsetX, offsetY);
