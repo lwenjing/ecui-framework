@@ -11,6 +11,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         fontSizeCache = core.fontSizeCache,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
+        isPadPro = !!window.PointerEvent,
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -32,6 +33,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         unmasks = [],             // 用于取消庶罩层的函数列表
 
         tracks = {},              // 鼠标/触摸事件对象跟踪
+        trackCount = 0,           // 事件对象跟踪的数量
         trackId,                  // 当前正在跟踪的id
         gestureListeners = [],    // 手势监听
 
@@ -78,11 +80,100 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
             },
 
+            // pad pro/surface pro等设备上的事件处理
+            pointerdown: function (event) {
+                trackCount++;
+
+                isMobileScroll = event.pointerType === 'mouse' ? undefined : false;
+
+                tracks[event.pointerId] = {
+                    pageX: event.pageX,
+                    pageY: event.pageY,
+                    target: event.target
+                };
+
+                if (trackCount === 1) {
+                    trackId = event.pointerId;
+
+                    event = core.wrapEvent(event);
+
+                    event.track = tracks[trackId];
+                    event.track.lastMoveTime = Date.now();
+                    currEnv.mousedown(event);
+                }
+            },
+
+            pointermove: function (event) {
+                var track = tracks[event.pointerId];
+                if (!track) {
+                    track = {};
+                }
+                if (track.pageX !== event.pageX || track.pageY !== event.pageY) {
+                    track.pageX = event.pageX;
+                    track.pageY = event.pageY;
+                    track.target = event.target;
+
+                    event = core.wrapEvent(event);
+
+                    calcSpeed(track, event);
+
+                    // 没有trackCount表示是纯粹的鼠标移动行为
+                    if (!trackCount || event.pointerId === trackId) {
+                        event.track = track;
+                        currEnv.mousemove(event);
+                    }
+
+                    if (gestureListeners.length) {
+                        if (trackCount === 2) {
+                            var keys = [];
+                            for (var key in tracks) {
+                                keys.push(key);
+                            }
+                            gesture(tracks[key[0]], tracks[key[1]]);
+                        }
+                    }
+                }
+            },
+
+            pointerout: function (event) {
+                currEnv.mouseout(core.wrapEvent(event));
+            },
+
+            pointerover: function (event) {
+                currEnv.mouseover(core.wrapEvent(event));
+            },
+
+            pointerup: function (event) {
+                trackCount--;
+
+                if (isMobileScroll) {
+                    // 产生了滚屏操作，不响应ECUI事件
+                    bubble(activedControl, 'deactivate');
+                    activedControl = undefined;
+                }
+
+                var track = tracks[event.pointerId];
+                track.pageX = event.pageX;
+                track.pageY = event.pageY;
+                track.target = event.target;
+
+                if (event.pointerId === trackId) {
+                    event = core.wrapEvent(event);
+
+                    event.track = track;
+                    currEnv.mouseup(event);
+
+                    trackId = null;
+                }
+
+                delete tracks[event.pointerId];
+            },
+
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
                 isMobileScroll = false;
 
-                initTracks(event);
+                initTouchTracks(event);
 
                 if (event.touches.length === 1) {
                     var track = tracks[trackId = event.touches[0].identifier];
@@ -99,7 +190,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             touchmove: function (event) {
-                initTracks(event);
+                initTouchTracks(event);
 
                 event = core.wrapEvent(event);
 
@@ -119,58 +210,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 if (gestureListeners.length) {
                     if (event.getNative().touches.length === 2) {
-                        var touch1 = tracks[event.getNative().touches[0].identifier],
-                            touch2 = tracks[event.getNative().touches[1].identifier];
-                        // 两指操作的时间间隔足够小
-                        if (Math.abs(touch1.lastMoveTime - touch1.lastMoveTime) < 50) {
-                            var angle = Math.abs(touch1.angle - touch2.angle);
-                            // 同向滑动，允许很小角度的误差，同向运动移动距离接近
-                            if (angle < 10 &&
-                                    Math.sqrt(Math.pow(touch2.pageX - touch2.lastX, 2) + Math.pow(touch2.pageY - touch2.lastY, 2)) -
-                                        Math.sqrt(Math.pow(touch1.pageX - touch1.lastX, 2) + Math.pow(touch1.pageY - touch1.lastY, 2)) < 10) {
-                                event = new ECUIEvent('multimove');
-                                event.angle = (touch1.angle + touch1.angle) / 2;
-                                gestureListeners.forEach(function (item) {
-                                    if (item[1].multimove) {
-                                        item[1].multimove.call(item[0], event);
-                                    }
-                                });
-                            } else {
-                                if (Math.abs(angle - 180) < 10) {
-                                    angle = calcAngle(touch2.lastX - touch1.lastX, touch2.lastY - touch1.lastY);
-                                    if (angle > 180) {
-                                        angle -= 180;
-                                    }
-                                    angle = Math.abs((touch1.angle + touch2.angle - 180) / 2 - angle);
-                                    // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
-                                    if (angle < 10) {
-                                        gestureListeners.forEach(function (item) {
-                                            if (item[1].zoom) {
-                                                event = new ECUIEvent('zoom');
-                                                event.pageX = (touch1.pageX + touch2.pageX) / 2;
-                                                event.pageY = (touch1.pageY + touch2.pageY) / 2;
-                                                event.from = Math.sqrt(Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2));
-                                                event.to = Math.sqrt(Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2));
-                                                item[1].zoom.call(item[0], event);
-                                            }
-                                        });
-                                    } else if (Math.abs(angle - 90) < 10 &&
-                                            Math.sqrt(Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2)) -
-                                                Math.sqrt(Math.pow(touch2.lastX - touch1.lastX, 2) + Math.pow(touch2.lastY - touch1.lastY, 2)) < 10) {
-                                        gestureListeners.forEach(function (item) {
-                                            if (item[1].rotate) {
-                                                event = new ECUIEvent('rotate');
-                                                event.angle = (touch2.angle + touch1.angle) / 2 - (calcAngle(touch2.lastX, touch2.lastY) + calcAngle(touch1.lastX, touch1.lastY)) / 2;
-                                                item[1].rotate.call(item[0], event);
-                                            }
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                        if (safariVersion) {
-                            event.preventDefault();
-                        }
+                        gesture(tracks[event.getNative().touches[0].identifier], tracks[event.getNative().touches[1].identifier]);
                     }
                 }
             },
@@ -183,7 +223,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
 
                 var track = tracks[trackId];
-                initTracks(event);
+                initTouchTracks(event);
 
                 Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
                     if (item.identifier === trackId) {
@@ -201,15 +241,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (trackId && !tracks[trackId]) {
                     tracks[trackId] = track;
                 }
-                    // 解决非ie浏览器下触屏事件是touchstart/touchend/mouseover的问题，屏弊mouse事件
-                    // TODO: 需要判断target与touchstart的target是否为同一个
-//                    for (var el = event.target; el; el = dom.getParent(el)) {
-//                        if (el.tagName === 'A') {
-//                            el.click();
-//                            break;
-//                        }
-//                    }
-//                    event.exit();
             },
 
             touchcancel: function (event) {
@@ -901,6 +932,66 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     }
 
     /**
+     * 处理手势事件。
+     * @private
+     *
+     * @param {object} track1 事件跟踪对象1
+     * @param {object} track2 事件跟踪对象2
+     */
+    function gesture(track1, track2) {
+        // 两指操作的时间间隔足够小
+        if (Math.abs(track1.lastMoveTime - track1.lastMoveTime) < 50) {
+            var angle = Math.abs(track1.angle - track2.angle);
+            // 同向滑动，允许很小角度的误差，同向运动移动距离接近
+            if (angle < 10 &&
+                    Math.sqrt(Math.pow(track2.pageX - track2.lastX, 2) + Math.pow(track2.pageY - track2.lastY, 2)) -
+                        Math.sqrt(Math.pow(track1.pageX - track1.lastX, 2) + Math.pow(track1.pageY - track1.lastY, 2)) < 10) {
+                event = new ECUIEvent('multimove');
+                event.angle = (track1.angle + track1.angle) / 2;
+                gestureListeners.forEach(function (item) {
+                    if (item[1].multimove) {
+                        item[1].multimove.call(item[0], event);
+                    }
+                });
+            } else {
+                if (Math.abs(angle - 180) < 10) {
+                    angle = calcAngle(track2.lastX - track1.lastX, track2.lastY - track1.lastY);
+                    if (angle > 180) {
+                        angle -= 180;
+                    }
+                    angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
+                    // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
+                    if (angle < 10) {
+                        gestureListeners.forEach(function (item) {
+                            if (item[1].zoom) {
+                                event = new ECUIEvent('zoom');
+                                event.pageX = (track1.pageX + track2.pageX) / 2;
+                                event.pageY = (track1.pageY + track2.pageY) / 2;
+                                event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
+                                event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
+                                item[1].zoom.call(item[0], event);
+                            }
+                        });
+                    } else if (Math.abs(angle - 90) < 10 &&
+                            Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2)) -
+                                Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
+                        gestureListeners.forEach(function (item) {
+                            if (item[1].rotate) {
+                                event = new ECUIEvent('rotate');
+                                event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
+                                item[1].rotate.call(item[0], event);
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        if (safariVersion) {
+            event.preventDefault();
+        }
+    }
+
+    /**
      * 获取两个控件的公共父控件。
      * @private
      *
@@ -956,13 +1047,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             // 设置全局事件处理
             for (var key in events) {
                 if (events.hasOwnProperty(key)) {
-                    if ((isMobile && key.slice(0, 5) === 'touch') || (!isMobile && key.slice(0, 5) !== 'touch')) {
-                        dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
+                    var type = key.slice(0, 5);
+                    if ((type === 'mouse' && !isPadPro && !isMobile) || (type === 'touch' && !isPadPro && isMobile) || (type === 'point' && isPadPro)) {
                     }
+                    dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
                 }
             }
 
-            if (isMobile) {
+            if (isPadPro || isMobile) {
                 // 解决移动端点击穿透的问题，原因是mousedown的触发时间会比touchend晚300ms
                 dom.addEventListener(document, 'mousedown', function (event) {
                     event.preventDefault();
@@ -1024,7 +1116,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      *
      * @return {Event} event 系统事件对象
      */
-    function initTracks(event) {
+    function initTouchTracks(event) {
         var caches = {};
         Array.prototype.slice.call(event.touches).forEach(function (item) {
             tracks[item.identifier] = tracks[item.identifier] || {
@@ -1178,7 +1270,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         independentControls.forEach(function (item) {
             core.triggerEvent(item, 'scroll', event);
         });
-        if (tracks.length > 0) {
+        if (isMobileScroll === false) {
             isMobileScroll = true;
         }
         core.mask(true);
