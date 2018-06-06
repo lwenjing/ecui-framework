@@ -82,24 +82,27 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             // pad pro/surface pro等设备上的事件处理
             pointerdown: function (event) {
-                trackCount++;
-
-                isMobileScroll = event.pointerType === 'mouse' ? undefined : false;
-
-                tracks[event.pointerId] = {
-                    pageX: event.pageX,
-                    pageY: event.pageY,
-                    target: event.target
-                };
-
-                if (trackCount === 1) {
-                    trackId = event.pointerId;
+                if (!trackCount) {
+                    var pointerType = event.pointerType;
 
                     event = core.wrapEvent(event);
 
-                    event.track = tracks[trackId];
-                    event.track.lastMoveTime = Date.now();
-                    currEnv.mousedown(event);
+                    if (pointerType !== 'mouse' || event.which === 1) {
+                        trackCount++;
+
+                        tracks[event.pointerId] = {
+                            pageX: event.pageX,
+                            pageY: event.pageY,
+                            target: event.target
+                        };
+
+                        trackId = event.pointerId;
+                        isMobileScroll = pointerType === 'mouse' ? undefined : false;
+
+                        event.track = tracks[trackId];
+                        event.track.lastMoveTime = Date.now();
+                        currEnv.mousedown(event);
+                    }
                 }
             },
 
@@ -127,7 +130,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         if (trackCount === 2) {
                             var keys = [];
                             for (var key in tracks) {
-                                keys.push(key);
+                                if (tracks.hasOwnProperty(key)) {
+                                    keys.push(key);
+                                }
                             }
                             gesture(tracks[key[0]], tracks[key[1]]);
                         }
@@ -136,46 +141,59 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             pointerout: function (event) {
-                currEnv.mouseout(core.wrapEvent(event));
+                // 没有trackCount表示是纯粹的鼠标移动行为
+                if (!trackCount || event.pointerId === trackId) {
+                    currEnv.mouseout(core.wrapEvent(event));
+                }
             },
 
             pointerover: function (event) {
-                currEnv.mouseover(core.wrapEvent(event));
+                // 没有trackCount表示是纯粹的鼠标移动行为
+                if (!trackCount || event.pointerId === trackId) {
+                    currEnv.mouseover(core.wrapEvent(event));
+                }
             },
 
             pointerup: function (event) {
-                trackCount--;
-
-                if (isMobileScroll) {
-                    // 产生了滚屏操作，不响应ECUI事件
-                    bubble(activedControl, 'deactivate');
-                    activedControl = undefined;
-                }
-
                 var track = tracks[event.pointerId];
-                track.pageX = event.pageX;
-                track.pageY = event.pageY;
-                track.target = event.target;
+                if (track) {
+                    trackCount--;
 
-                if (event.pointerId === trackId) {
-                    event = core.wrapEvent(event);
+                    // 鼠标右键点击不触发事件
+                    track.pageX = event.pageX;
+                    track.pageY = event.pageY;
+                    track.target = event.target;
 
-                    event.track = track;
-                    currEnv.mouseup(event);
+                    if (event.pointerId === trackId) {
+                        if (isMobileScroll) {
+                            // 产生了滚屏操作，不响应ECUI事件
+                            bubble(activedControl, 'deactivate');
+                            activedControl = undefined;
+                        }
 
-                    trackId = null;
+                        event = core.wrapEvent(event);
+
+                        event.track = track;
+                        currEnv.mouseup(event);
+
+                        trackId = null;
+                    }
+
+                    delete tracks[event.pointerId];
                 }
+            },
 
-                delete tracks[event.pointerId];
+            pointercancel: function (event) {
+                events.pointerup(event);
             },
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
-                isMobileScroll = false;
-
                 initTouchTracks(event);
 
                 if (event.touches.length === 1) {
+                    isMobileScroll = false;
+
                     var track = tracks[trackId = event.touches[0].identifier];
 
                     event = core.wrapEvent(event);
@@ -211,22 +229,25 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (gestureListeners.length) {
                     if (event.getNative().touches.length === 2) {
                         gesture(tracks[event.getNative().touches[0].identifier], tracks[event.getNative().touches[1].identifier]);
+                        if (safariVersion) {
+                            event.preventDefault();
+                        }
                     }
                 }
             },
 
             touchend: function (event) {
-                if (isMobileScroll) {
-                    // 产生了滚屏操作，不响应ECUI事件
-                    bubble(activedControl, 'deactivate');
-                    activedControl = undefined;
-                }
-
                 var track = tracks[trackId];
                 initTouchTracks(event);
 
                 Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
                     if (item.identifier === trackId) {
+                        if (isMobileScroll) {
+                            // 产生了滚屏操作，不响应ECUI事件
+                            bubble(activedControl, 'deactivate');
+                            activedControl = undefined;
+                        }
+
                         event = core.wrapEvent(event);
 
                         event.track = track;
@@ -946,7 +967,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             if (angle < 10 &&
                     Math.sqrt(Math.pow(track2.pageX - track2.lastX, 2) + Math.pow(track2.pageY - track2.lastY, 2)) -
                         Math.sqrt(Math.pow(track1.pageX - track1.lastX, 2) + Math.pow(track1.pageY - track1.lastY, 2)) < 10) {
-                event = new ECUIEvent('multimove');
+                var event = new ECUIEvent('multimove');
                 event.angle = (track1.angle + track1.angle) / 2;
                 gestureListeners.forEach(function (item) {
                     if (item[1].multimove) {
@@ -985,9 +1006,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
                 }
             }
-        }
-        if (safariVersion) {
-            event.preventDefault();
         }
     }
 
@@ -1048,9 +1066,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             for (var key in events) {
                 if (events.hasOwnProperty(key)) {
                     var type = key.slice(0, 5);
-                    if ((type === 'mouse' && !isPadPro && !isMobile) || (type === 'touch' && !isPadPro && isMobile) || (type === 'point' && isPadPro)) {
+                    if (!((type === 'mouse' && (isPadPro || isMobile)) || (type === 'touch' && (isPadPro || !isMobile)) || (type === 'point' && !isPadPro))) {
+                        dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
                     }
-                    dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
                 }
             }
 
