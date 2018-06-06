@@ -83,24 +83,23 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             // pad pro/surface pro等设备上的事件处理
             pointerdown: function (event) {
                 if (!trackCount) {
-                    var pointerType = event.pointerType;
+                    var pointerType = event.pointerType,
+                        pointerId = event.pointerId;
 
                     event = core.wrapEvent(event);
 
                     if (pointerType !== 'mouse' || event.which === 1) {
                         trackCount++;
 
-                        tracks[event.pointerId] = {
-                            pageX: event.pageX,
-                            pageY: event.pageY,
-                            target: event.target
-                        };
-
-                        trackId = event.pointerId;
                         isMobileScroll = pointerType === 'mouse' ? undefined : false;
 
-                        event.track = tracks[trackId];
-                        event.track.lastMoveTime = Date.now();
+                        event.track = tracks[trackId = pointerId] = {
+                            pageX: event.pageX,
+                            pageY: event.pageY,
+                            target: event.target,
+                            lastMoveTime: Date.now()
+                        };
+
                         currEnv.mousedown(event);
                     }
                 }
