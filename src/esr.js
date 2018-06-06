@@ -33,8 +33,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         requestVersion = 0,     // 请求的版本号，主路由切换时会更新，在多次提交时保证只有最后一次提交会触发渲染
         localStorage,
         metaVersion,
-        meta,
-        dateFormat;
+        meta;
 
     /**
      * 增加IE的history信息。
@@ -693,7 +692,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     if (item.getControl) {
                         var control = item.getControl();
                         if (!control.isDisabled()) {
-                            setCacheData(data, item.name, dateFormat && (control instanceof ui.CalendarInput) ? util.formatDate(control.getDate(), dateFormat) : control.getValue());
+                            setCacheData(data, item.name, control.getFormValue());
                         }
                     } else if (!item.disabled) {
                         setCacheData(data, item.name, item.value);
@@ -1043,8 +1042,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             if (options.cache) {
                 historyCache = true;
             }
-
-            dateFormat = options.date;
 
             for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
                 if (el.href.slice(-1) === '#') {

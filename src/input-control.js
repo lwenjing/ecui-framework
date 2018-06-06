@@ -417,6 +417,16 @@ _eInput        - INPUT对象
             },
 
             /**
+             * 获取控件进行提交的值，默认使用 getValue 的返回值。
+             * @public
+             *
+             * @return {string} 控件的表单值
+             */
+            getFormValue: function () {
+                return this.getValue();
+            },
+
+            /**
              * 获取控件的值。
              * getValue 方法返回提交时表单项的值，使用 setValue 方法设置。
              * @public
