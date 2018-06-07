@@ -11,7 +11,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         fontSizeCache = core.fontSizeCache,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
-        isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
+        isPointer = !window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -121,6 +121,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 // 没有trackCount表示是纯粹的鼠标移动行为
                 if (!trackCount || event.getNative().pointerId === trackId) {
+                    // Pointer设备上纯点击也可能会触发move
+                    if ((Math.abs(event.track.speedX) >= HIGH_SPEED || Math.abs(event.track.speedY) >= HIGH_SPEED) && isMobileScroll === false) {
+                        isMobileScroll = true;
+                    }
+
                     event.track = track;
                     currEnv.mousemove(event);
                     onpressure(event, event.getNative().pressure >= 0.4);
@@ -207,7 +212,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     track.lastMoveTime = Date.now();
                     currEnv.mouseover(event);
                     currEnv.mousedown(event);
-                    onpressure(event, event.touches[0].force === 1);
+                    onpressure(event, event.getNative().touches[0].force === 1);
                 }
             },
 
@@ -225,6 +230,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     calcSpeed(track, event);
 
                     if (item.identifier === trackId) {
+                        if (isMobileScroll === false) {
+                            isMobileScroll = true;
+                        }
+
                         event.track = track;
                         currEnv.mousemove(event);
                         onpressure(event, item.force === 1);
@@ -530,11 +539,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                // 移动设备上拖拽也需要取消点击
-                if ((Math.abs(event.track.speedX) >= HIGH_SPEED || Math.abs(event.track.speedY) >= HIGH_SPEED) && isMobileScroll === false) {
-                    isMobileScroll = true;
-                }
-
                 dragmove(event.track, currEnv, event.pageX, event.pageY);
             },
 
@@ -1318,9 +1322,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         independentControls.forEach(function (item) {
             core.triggerEvent(item, 'scroll', event);
         });
-        if (isMobileScroll === false) {
-            isMobileScroll = true;
-        }
         core.mask(true);
     }
 
