@@ -415,7 +415,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                     // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
                                     // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
                                     // 父控件获得焦点，否则焦点不发生变化
-                                    if (!isMobile) {
+                                    if (isMobileScroll === undefined) { // MouseEvent
                                         // 移动端是在mouseup时获得焦点
                                         core.setFocused(target);
                                     }
@@ -433,7 +433,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         onselectstart(control, event);
                         // 检查是否INPUT/SELECT/TEXTAREA/BUTTON标签，需要失去焦点，
                         // 因为ecui不能阻止mousedown focus输入框
-                        if (!isMobile) {
+                        if (isMobileScroll === undefined) { // MouseEvent
                             // 移动端输入框是在mouseup时失去焦点
                             if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
                                 util.timer(
@@ -445,7 +445,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             }
                         }
                     }
-                    if (!isMobile) {
+                    if (isMobileScroll === undefined) { // MouseEvent
                         // 移动端输入框是在mouseup时失去焦点
                         // 点击到了空白区域，取消控件的焦点
                         core.setFocused();
@@ -478,9 +478,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseup: function (event) {
                 var track = event.track,
                     control = event.getControl(),
+                    delay = track.lastClick && Date.now() - track.lastClick.time,
                     commonParent;
 
                 if (activedControl !== undefined) {
+                    if (isMobileScroll !== undefined && delay < 300) { // TouchEvent
+                        core.setFocused(activedControl);
+                    }
+
                     // 如果为 undefined 表示之前没有触发 mousedown 事件就触发了 mouseup，
                     // 这种情况出现在鼠标在浏览器外按下了 down 然后回浏览器区域 up，
                     // 或者是 ie 系列浏览器在触发 dblclick 之前会触发一次单独的 mouseup，
@@ -489,10 +494,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     if (activedControl) {
                         commonParent = getCommonParent(control, activedControl);
-                        if (!isMobile || (track.lastClick && Date.now() - track.lastClick.time < 300)) {
-                            if (isMobile) {
-                                core.setFocused(activedControl);
-                            }
+                        if (isMobileScroll === undefined || delay < 300) { // MouseEvent
                             bubble(commonParent, 'click', event);
                         }
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
@@ -1301,7 +1303,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * @param {ECUIEvent} event 事件对象
      */
     function onselectstart(control, event) {
-        if (!isMobile) {
+        if (isMobileScroll === undefined) { // MouseEvent
             for (; control; control = control.getParent()) {
                 if (!control.isUserSelect()) {
                     event.preventDefault();
