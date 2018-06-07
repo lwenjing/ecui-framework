@@ -11,7 +11,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         fontSizeCache = core.fontSizeCache,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
-        isPadPro = !!window.PointerEvent,
+        isPointer = false,//!!window.PointerEvent,
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -183,6 +183,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             pointercancel: function (event) {
+                tracks[event.pointerId].lastClick = undefined;
                 events.pointerup(event);
             },
 
@@ -776,7 +777,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * @param {ECUIEvent} 事件对象
      */
     function calcSpeed(track, event) {
-        track.lastClick = undefined;
         var time = Date.now(),
             delay = time - track.lastMoveTime > 500,
             offsetX = event.pageX - track.pageX,
@@ -1067,13 +1067,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             for (var key in events) {
                 if (events.hasOwnProperty(key)) {
                     var type = key.slice(0, 5);
-                    if (!((type === 'mouse' && (isPadPro || isMobile)) || (type === 'touch' && (isPadPro || !isMobile)) || (type === 'point' && !isPadPro))) {
+                    if (!((type === 'mouse' && (isPointer || isMobile)) || (type === 'touch' && (isPointer || !isMobile)) || (type === 'point' && !isPointer))) {
                         dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
                     }
                 }
             }
 
-            if (isPadPro || isMobile) {
+            if (isPointer || isMobile) {
                 // 解决移动端点击穿透的问题，原因是mousedown的触发时间会比touchend晚300ms
                 dom.addEventListener(document, 'mousedown', function (event) {
                     event.preventDefault();
@@ -1744,6 +1744,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         drag: function (control, event, options) {
             if (activedControl !== undefined) {
+                // 移动设备上拖拽也需要取消点击
+                if (isMobileScroll === false) {
+                    isMobileScroll = true;
+                }
+
                 // 控件之前处于惯性状态必须停止
                 var uid = control.getUID();
                 if (inertiaHandles[uid]) {
