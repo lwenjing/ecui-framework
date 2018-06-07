@@ -11,7 +11,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         fontSizeCache = core.fontSizeCache,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
-        isPointer = false,//!!window.PointerEvent,
+        isPointer = !!window.PointerEvent,
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -110,31 +110,26 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (!track) {
                     track = {};
                 }
-                if (track.pageX !== event.pageX || track.pageY !== event.pageY) {
-                    track.pageX = event.pageX;
-                    track.pageY = event.pageY;
-                    track.target = event.target;
 
-                    event = core.wrapEvent(event);
+                event = core.wrapEvent(event);
 
-                    calcSpeed(track, event);
+                calcSpeed(track, event);
 
-                    // 没有trackCount表示是纯粹的鼠标移动行为
-                    if (!trackCount || event.getNative().pointerId === trackId) {
-                        event.track = track;
-                        currEnv.mousemove(event);
-                    }
+                // 没有trackCount表示是纯粹的鼠标移动行为
+                if (!trackCount || event.getNative().pointerId === trackId) {
+                    event.track = track;
+                    currEnv.mousemove(event);
+                }
 
-                    if (gestureListeners.length) {
-                        if (trackCount === 2) {
-                            var keys = [];
-                            for (var key in tracks) {
-                                if (tracks.hasOwnProperty(key)) {
-                                    keys.push(key);
-                                }
+                if (gestureListeners.length) {
+                    if (trackCount === 2) {
+                        var keys = [];
+                        for (var key in tracks) {
+                            if (tracks.hasOwnProperty(key)) {
+                                keys.push(key);
                             }
-                            gesture(tracks[key[0]], tracks[key[1]]);
                         }
+                        gesture(tracks[key[0]], tracks[key[1]]);
                     }
                 }
             },
@@ -781,6 +776,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             offsetX = event.pageX - track.pageX,
             offsetY = event.pageY - track.pageY,
             speed = 1000 / (time - track.lastMoveTime);
+
         track.speedX = delay ? 0 : offsetX * speed;
         track.speedY = delay ? 0 : offsetY * speed;
         track.angle = calcAngle(offsetX, offsetY);
