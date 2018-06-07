@@ -135,7 +135,7 @@ _bRequired       - 是否必须选择
             $keydown: function (event) {
                 ui.InputControl.prototype.$keydown.call(this, event);
                 if (event.which === 32) {
-                    event.preventDefault();
+                    event.exit();
                 }
             },
 
@@ -146,7 +146,7 @@ _bRequired       - 是否必须选择
             $keypress: function (event) {
                 ui.InputControl.prototype.$keypress.call(this, event);
                 if (event.which === 32) {
-                    event.preventDefault();
+                    event.exit();
                 }
             },
 
@@ -160,7 +160,7 @@ _bRequired       - 是否必须选择
                     if (core.getKey() === 32) {
                         this.setChecked(!!this._nStatus);
                     }
-                    event.preventDefault();
+                    event.exit();
                 }
             },
 
