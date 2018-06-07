@@ -468,9 +468,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             },
             {
                 getFormValue: function () {
-                    return this.getValue();
-                },
-                getValue: function () {
                     return {};
                 }
             }
@@ -485,9 +482,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             },
             {
                 getFormValue: function () {
-                    return this.getValue();
-                },
-                getValue: function () {
                     return [];
                 }
             }
