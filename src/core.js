@@ -36,6 +36,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         trackCount = 0,           // 事件对象跟踪的数量
         trackId,                  // 当前正在跟踪的id
         gestureListeners = [],    // 手势监听
+        touchForceList = [],      // 当前被重压的控件
 
         pauseCount = 0,           // 暂停的次数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
@@ -119,6 +120,18 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (!trackCount || event.getNative().pointerId === trackId) {
                     event.track = track;
                     currEnv.mousemove(event);
+                }
+
+                if (activedControl) {
+                    var index = touchForceList.indexOf(activedControl),
+                        pressure = event.getNative().pressure;
+                    if (pressure >= 0.4 && index < 0) {
+                        touchForceList.push(activedControl);
+                        bubble(activedControl, 'touchforcepeek', event);
+                    } else if (pressure < 0.4 && index >= 0) {
+                        util.remove(touchForceList, activedControl);
+                        bubble(activedControl, 'touchforcepop', event);
+                    }
                 }
 
                 if (gestureListeners.length) {
@@ -218,6 +231,18 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     if (item.identifier === trackId) {
                         event.track = track;
                         currEnv.mousemove(event);
+
+                        if (activedControl) {
+                            var index = touchForceList.indexOf(activedControl),
+                                pressure = item.force;
+                            if (pressure === 1 && index < 0) {
+                                touchForceList.push(activedControl);
+                                bubble(activedControl, 'touchforcepeek', event);
+                            } else if (pressure < 1 && index >= 0) {
+                                util.remove(touchForceList, activedControl);
+                                bubble(activedControl, 'touchforcepop', event);
+                            }
+                        }
                     }
                 });
 
