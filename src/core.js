@@ -560,7 +560,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 } else {
                     dragend(event, currEnv, target);
                 }
-                activedControl = currEnv.actived;
                 core.restore();
 
                 currEnv.mouseup(event);
@@ -1783,13 +1782,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 dragEnv.originalY = y;
 
                 dragEnv.target = control;
-                dragEnv.actived = activedControl;
                 setEnv(dragEnv);
                 event.track.logicX = event.pageX;
                 event.track.logicY = event.pageY;
-
-                // 清除激活的控件，在drag中不需要针对激活控件移入移出的处理
-                activedControl = undefined;
 
                 if (core.triggerEvent(control, 'dragstart', event)) {
                     control.setPosition(x, y);
