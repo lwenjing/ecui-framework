@@ -120,7 +120,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     calcSpeed(track, event);
 
                     // 没有trackCount表示是纯粹的鼠标移动行为
-                    if (!trackCount || event.pointerId === trackId) {
+                    if (!trackCount || event.getNative().pointerId === trackId) {
                         event.track = track;
                         currEnv.mousemove(event);
                     }
@@ -502,7 +502,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         if (track.lastClick) {
                             if (isDblClick(track) && track.lastClick.target === control) {
                                 bubble(commonParent, 'dblclick', event);
-                                track.lastClick = null;
+                                track.lastClick = undefined;
                             } else {
                                 track.lastClick.target = control;
                             }
@@ -776,7 +776,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * @param {ECUIEvent} 事件对象
      */
     function calcSpeed(track, event) {
-        track.lastClick = null;
+        track.lastClick = undefined;
         var time = Date.now(),
             delay = time - track.lastMoveTime > 500,
             offsetX = event.pageX - track.pageX,
