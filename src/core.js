@@ -18,7 +18,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
-    var scrollHandler,            // DOM滚动事件
+    var HIGH_SPEED = 100,         // 对高速的定义
+        scrollHandler,            // DOM滚动事件
         isMobileScroll,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
@@ -36,7 +37,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         trackCount = 0,           // 事件对象跟踪的数量
         trackId,                  // 当前正在跟踪的id
         gestureListeners = [],    // 手势监听
-        touchForceList = [],      // 当前被重压的控件
+        forcedControl = null,     // 当前被重压的控件
 
         pauseCount = 0,           // 暂停的次数
         keyCode = 0,              // 当前键盘按下的键值，解决keypress与keyup中得不到特殊按键的keyCode的问题
@@ -102,12 +103,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         };
 
                         currEnv.mousedown(event);
+                        onpressure(event, event.getNative().pressure >= 0.4);
                     }
                 }
             },
 
             pointermove: function (event) {
                 var track = tracks[event.pointerId];
+
                 if (!track) {
                     track = {};
                 }
@@ -120,18 +123,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (!trackCount || event.getNative().pointerId === trackId) {
                     event.track = track;
                     currEnv.mousemove(event);
-                }
-
-                if (activedControl) {
-                    var index = touchForceList.indexOf(activedControl),
-                        pressure = event.getNative().pressure;
-                    if (pressure >= 0.4 && index < 0) {
-                        touchForceList.push(activedControl);
-                        bubble(activedControl, 'touchforcepeek', event);
-                    } else if (pressure < 0.4 && index >= 0) {
-                        util.remove(touchForceList, activedControl);
-                        bubble(activedControl, 'touchforcepop', event);
-                    }
+                    onpressure(event, event.getNative().pressure >= 0.4);
                 }
 
                 if (gestureListeners.length) {
@@ -142,15 +134,17 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 keys.push(key);
                             }
                         }
-                        gesture(tracks[key[0]], tracks[key[1]]);
+                        ongesture(tracks[key[0]], tracks[key[1]]);
                     }
                 }
             },
 
             pointerout: function (event) {
                 // 没有trackCount表示是纯粹的鼠标移动行为
-                if (!trackCount || event.pointerId === trackId) {
+                if (!trackCount) {
                     currEnv.mouseout(core.wrapEvent(event));
+                } else if (event.pointerId === trackId) {
+                    bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
                 }
             },
 
@@ -182,8 +176,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         event.track = track;
                         currEnv.mouseup(event);
-
                         trackId = null;
+                        onpressure(event, false);
                     }
 
                     delete tracks[event.pointerId];
@@ -211,7 +205,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     event.target = track.target;
                     event.track = track;
                     track.lastMoveTime = Date.now();
+                    currEnv.mouseover(event);
                     currEnv.mousedown(event);
+                    onpressure(event, event.touches[0].force === 1);
                 }
             },
 
@@ -231,24 +227,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     if (item.identifier === trackId) {
                         event.track = track;
                         currEnv.mousemove(event);
-
-                        if (activedControl) {
-                            var index = touchForceList.indexOf(activedControl),
-                                pressure = item.force;
-                            if (pressure === 1 && index < 0) {
-                                touchForceList.push(activedControl);
-                                bubble(activedControl, 'touchforcepeek', event);
-                            } else if (pressure < 1 && index >= 0) {
-                                util.remove(touchForceList, activedControl);
-                                bubble(activedControl, 'touchforcepop', event);
-                            }
-                        }
+                        onpressure(event, item.force === 1);
                     }
                 });
 
                 if (gestureListeners.length) {
                     if (event.getNative().touches.length === 2) {
-                        gesture(tracks[event.getNative().touches[0].identifier], tracks[event.getNative().touches[1].identifier]);
+                        ongesture(tracks[event.getNative().touches[0].identifier], tracks[event.getNative().touches[1].identifier]);
                         if (safariVersion) {
                             event.preventDefault();
                         }
@@ -275,7 +260,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.pageY = item.pageY;
                         event.target = item.target;
                         currEnv.mouseup(event);
+                        bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
                         trackId = null;
+                        onpressure(event, false);
                     }
                 });
 
@@ -543,6 +530,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
+                // 移动设备上拖拽也需要取消点击
+                if ((Math.abs(event.track.speedX) >= HIGH_SPEED || Math.abs(event.track.speedY) >= HIGH_SPEED) && isMobileScroll === false) {
+                    isMobileScroll = true;
+                }
+
                 dragmove(event.track, currEnv, event.pageX, event.pageY);
             },
 
@@ -974,63 +966,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     }
 
     /**
-     * 处理手势事件。
-     * @private
-     *
-     * @param {object} track1 事件跟踪对象1
-     * @param {object} track2 事件跟踪对象2
-     */
-    function gesture(track1, track2) {
-        // 两指操作的时间间隔足够小
-        if (Math.abs(track1.lastMoveTime - track1.lastMoveTime) < 50) {
-            var angle = Math.abs(track1.angle - track2.angle);
-            // 同向滑动，允许很小角度的误差，同向运动移动距离接近
-            if (angle < 10 &&
-                    Math.sqrt(Math.pow(track2.pageX - track2.lastX, 2) + Math.pow(track2.pageY - track2.lastY, 2)) -
-                        Math.sqrt(Math.pow(track1.pageX - track1.lastX, 2) + Math.pow(track1.pageY - track1.lastY, 2)) < 10) {
-                var event = new ECUIEvent('multimove');
-                event.angle = (track1.angle + track1.angle) / 2;
-                gestureListeners.forEach(function (item) {
-                    if (item[1].multimove) {
-                        item[1].multimove.call(item[0], event);
-                    }
-                });
-            } else {
-                if (Math.abs(angle - 180) < 10) {
-                    angle = calcAngle(track2.lastX - track1.lastX, track2.lastY - track1.lastY);
-                    if (angle > 180) {
-                        angle -= 180;
-                    }
-                    angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
-                    // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
-                    if (angle < 10) {
-                        gestureListeners.forEach(function (item) {
-                            if (item[1].zoom) {
-                                event = new ECUIEvent('zoom');
-                                event.pageX = (track1.pageX + track2.pageX) / 2;
-                                event.pageY = (track1.pageY + track2.pageY) / 2;
-                                event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
-                                event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
-                                item[1].zoom.call(item[0], event);
-                            }
-                        });
-                    } else if (Math.abs(angle - 90) < 10 &&
-                            Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2)) -
-                                Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
-                        gestureListeners.forEach(function (item) {
-                            if (item[1].rotate) {
-                                event = new ECUIEvent('rotate');
-                                event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
-                                item[1].rotate.call(item[0], event);
-                            }
-                        });
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * 获取两个控件的公共父控件。
      * @private
      *
@@ -1249,6 +1184,63 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     }
 
     /**
+     * 处理手势事件。
+     * @private
+     *
+     * @param {object} track1 事件跟踪对象1
+     * @param {object} track2 事件跟踪对象2
+     */
+    function ongesture(track1, track2) {
+        // 两指操作的时间间隔足够小
+        if (Math.abs(track1.lastMoveTime - track1.lastMoveTime) < 50) {
+            var angle = Math.abs(track1.angle - track2.angle);
+            // 同向滑动，允许很小角度的误差，同向运动移动距离接近
+            if (angle < 10 &&
+                    Math.sqrt(Math.pow(track2.pageX - track2.lastX, 2) + Math.pow(track2.pageY - track2.lastY, 2)) -
+                        Math.sqrt(Math.pow(track1.pageX - track1.lastX, 2) + Math.pow(track1.pageY - track1.lastY, 2)) < 10) {
+                var event = new ECUIEvent('multimove');
+                event.angle = (track1.angle + track1.angle) / 2;
+                gestureListeners.forEach(function (item) {
+                    if (item[1].multimove) {
+                        item[1].multimove.call(item[0], event);
+                    }
+                });
+            } else {
+                if (Math.abs(angle - 180) < 10) {
+                    angle = calcAngle(track2.lastX - track1.lastX, track2.lastY - track1.lastY);
+                    if (angle > 180) {
+                        angle -= 180;
+                    }
+                    angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
+                    // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
+                    if (angle < 10) {
+                        gestureListeners.forEach(function (item) {
+                            if (item[1].zoom) {
+                                event = new ECUIEvent('zoom');
+                                event.pageX = (track1.pageX + track2.pageX) / 2;
+                                event.pageY = (track1.pageY + track2.pageY) / 2;
+                                event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
+                                event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
+                                item[1].zoom.call(item[0], event);
+                            }
+                        });
+                    } else if (Math.abs(angle - 90) < 10 &&
+                            Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2)) -
+                                Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
+                        gestureListeners.forEach(function (item) {
+                            if (item[1].rotate) {
+                                event = new ECUIEvent('rotate');
+                                event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
+                                item[1].rotate.call(item[0], event);
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * 处理鼠标点击。
      * @private
      *
@@ -1292,6 +1284,23 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 },
                 50
             );
+        }
+    }
+
+    /**
+     * 压力变化的事件处理。
+     * @private
+     *
+     * @param {ECUIEvent} event 事件对象
+     * @param {boolean} isForce 是否重压
+     */
+    function onpressure(event, isForce) {
+        if (isForce && hoveredControl && !forcedControl) {
+            forcedControl = hoveredControl;
+            bubble(forcedControl, 'forcedown', event);
+        } else if (!isForce && forcedControl) {
+            bubble(forcedControl, 'forceup', event);
+            forcedControl = null;
         }
     }
 
@@ -1764,11 +1773,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         drag: function (control, event, options) {
             if (activedControl !== undefined) {
-                // 移动设备上拖拽也需要取消点击
-                if (isMobileScroll === false) {
-                    isMobileScroll = true;
-                }
-
                 // 控件之前处于惯性状态必须停止
                 var uid = control.getUID();
                 if (inertiaHandles[uid]) {
