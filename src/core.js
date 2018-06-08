@@ -122,7 +122,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 // 没有trackCount表示是纯粹的鼠标移动行为
                 if (!trackCount || event.getNative().pointerId === trackId) {
                     // Pointer设备上纯点击也可能会触发move
-                    if ((Math.abs(event.track.speedX) >= HIGH_SPEED || Math.abs(event.track.speedY) >= HIGH_SPEED) && isMobileMoved === false) {
+                    if ((Math.abs(track.speedX) >= HIGH_SPEED || Math.abs(track.speedY) >= HIGH_SPEED) && isMobileMoved === false) {
                         isMobileMoved = true;
                     }
 
