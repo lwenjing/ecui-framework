@@ -639,11 +639,19 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.pageY = event.pageY;
             this.which = event.which;
             if (ieVersion <= 10) {
-                for (var caches = [], el = event.target; el && el.currentStyle.filter.indexOf('pointer-events:none') >= 0; el = getElementFromEvent(event)) {
-                    caches.push([el, el.style.display]);
-                    el.style.display = 'none';
+outer:          for (var caches = [], target = event.target, el; target !== document.body; target = getElementFromEvent(event)) {
+                    for (el = target;; el = dom.getParent(el)) {
+                        if (el === document.body) {
+                            break outer;
+                        }
+                        if (el.currentStyle.filter.indexOf('pointer-events:none') >= 0) {
+                            caches.push([el, el.style.display]);
+                            el.style.display = 'none';
+                            continue outer;
+                        }
+                    }
                 }
-                this.target = el;
+                this.target = target;
                 caches.forEach(function (item) {
                     item[0].style.display = item[1];
                 });
