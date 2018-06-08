@@ -368,7 +368,16 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 event = core.wrapEvent(event);
 
-                var control = event.getTarget();
+                if (isMobile) {
+                    for (var control = event.target; control; control = dom.getParent(control)) {
+                        if (control.tagName === 'A') {
+                            event.preventDefault();
+                            break;
+                        }
+                    }
+                }
+
+                control = event.getTarget();
                 if (control && control.isDisabled()) {
                     // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
                     event.preventDefault();
@@ -528,6 +537,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     // 将 activedControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
+
+                    if (isMobile) {
+                        for (control = event.target; control; control = dom.getParent(control)) {
+                            if (control.tagName === 'A' && control.href) {
+                                location.href = control.href;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         },
