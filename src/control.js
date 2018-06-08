@@ -12,7 +12,6 @@ _bFocusable         - 控件是否允许获取焦点
 _bDisabled          - 控件的状态，为true时控件不处理任何事件
 _bCached            - 控件是否已经读入缓存
 _bReady             - 控件是否已经完全生成
-_bTransparent       - 控件是否透明，在这种状态下，事件可以穿透控件到达控件下方的控件，但会影响效率，请谨慎使用
 _sUID               - 控件的内部ID
 _sPrimary           - 控件定义时的基本样式
 _sClass             - 控件的当前样式
@@ -31,7 +30,6 @@ _aStatus            - 控件当前的状态集合
         ui = core.ui,
         util = core.util,
 
-        isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
@@ -105,7 +103,6 @@ _aStatus            - 控件当前的状态集合
             this._bCapturable = options.capturable !== false;
             this._bUserSelect = options.userSelect !== false;
             this._bFocusable = options.focusable !== false;
-            this._bTransparent = !!options.transparent;
 
             this._aStatus = ['', ' '];
             this._sSubType = '';
@@ -120,9 +117,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $activate: function () {
-                if (!isMobile) {
-                    this.alterClass('+active');
-                }
+                this.alterClass('+active');
             },
 
             /**
@@ -195,9 +190,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $deactivate: function () {
-                if (!isMobile) {
-                    this.alterClass('-active');
-                }
+                this.alterClass('-active');
             },
 
             /**
@@ -385,9 +378,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $mouseout: function () {
-                if (!isMobile) {
-                    this.alterClass('-hover');
-                }
+                this.alterClass('-hover');
             },
 
             /**
@@ -396,9 +387,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $mouseover: function () {
-                if (!isMobile) {
-                    this.alterClass('+hover');
-                }
+                this.alterClass('+hover');
             },
 //{if 0}//
             /**
@@ -1077,16 +1066,6 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
-             * 判断是否处于透明状态。
-             * @public
-             *
-             * @return {boolean} 控件是否透明
-             */
-            isTransparent: function () {
-                return this._bTransparent;
-            },
-
-            /**
              * 判断是否允许选中内容。
              * @public
              *
@@ -1214,16 +1193,6 @@ _aStatus            - 控件当前的状态集合
                 if (height) {
                     this._sHeight = this._eMain.style.height;
                 }
-            },
-
-            /**
-             * 设置控件是否处于透明状态。
-             * @public
-             *
-             * @param {boolean} transparent 控件是否透明
-             */
-            setTransparent: function (transparent) {
-                this._bTransparent = transparent;
             },
 
             /**
