@@ -538,7 +538,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     // 将 activedControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
 
-                    if (isMobile) {
+                    if (isMobileMoved !== undefined && delay < 300) {
                         for (control = event.target; control; control = dom.getParent(control)) {
                             if (control.tagName === 'A' && control.href) {
                                 location.href = control.href;
