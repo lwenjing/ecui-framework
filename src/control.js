@@ -51,12 +51,12 @@ _aStatus            - 控件当前的状态集合
         // 触发原来父控件的移除子控件事件
         if (parent !== oldParent) {
             if (oldParent) {
-                if (!core.triggerEvent(oldParent, 'remove', {child: control})) {
+                if (!core.dispatchEvent(oldParent, 'remove', {child: control})) {
                     return;
                 }
             }
             if (parent) {
-                if (!core.triggerEvent(parent, 'append', {child: control})) {
+                if (!core.dispatchEvent(parent, 'append', {child: control})) {
                     parent = parentElement = null;
                 }
             }
@@ -918,7 +918,7 @@ _aStatus            - 控件当前的状态集合
              */
             hide: function () {
                 if (this.isShow()) {
-                    core.triggerEvent(this, 'hide');
+                    core.dispatchEvent(this, 'hide');
                     return true;
                 }
                 return false;
@@ -949,7 +949,7 @@ _aStatus            - 控件当前的状态集合
 
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
-                        core.triggerEvent(this, 'ready', {options: options});
+                        core.dispatchEvent(this, 'ready', {options: options});
                         this._bReady = true;
                     } else {
                         if (!waitReadyList) {
@@ -960,7 +960,7 @@ _aStatus            - 控件当前的状态集合
                             util.timer(
                                 function () {
                                     waitReadyList.forEach(function (item) {
-                                        core.triggerEvent(item.control, 'ready', {options: item.options});
+                                        core.dispatchEvent(item.control, 'ready', {options: item.options});
                                         item.control._bReady = true;
                                     });
                                     waitReadyList = null;
@@ -1204,7 +1204,7 @@ _aStatus            - 控件当前的状态集合
              */
             show: function () {
                 if (!this.isShow()) {
-                    core.triggerEvent(this, 'show');
+                    core.dispatchEvent(this, 'show');
                     return true;
                 }
                 return false;

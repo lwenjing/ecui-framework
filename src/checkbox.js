@@ -73,7 +73,7 @@ _bRequired       - 是否必须选择
             if (checkbox._cSubject) {
                 refresh(checkbox._cSubject);
             }
-            core.triggerEvent(checkbox, 'change');
+            core.dispatchEvent(checkbox, 'change');
         }
     }
 
@@ -206,12 +206,12 @@ _bRequired       - 是否必须选择
                     if (nochecked) {
                         for (var control = this; control = control.getParent(); ) {
                             if (control instanceof ui.InputGroup) {
-                                core.triggerEvent(control, 'error');
+                                core.dispatchEvent(control, 'error');
                                 return false;
                             }
                         }
                         group.forEach(function (item) {
-                            core.triggerEvent(item, 'error');
+                            core.dispatchEvent(item, 'error');
                         });
                     }
                 }

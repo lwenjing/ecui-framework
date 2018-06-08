@@ -684,7 +684,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             var valid = true;
             Array.prototype.slice.call(form.elements).forEach(function (item) {
                 if (validate !== false && item.getControl && !item.getControl().isDisabled()) {
-                    if (!core.triggerEvent(item.getControl(), 'validate')) {
+                    if (!core.dispatchEvent(item.getControl(), 'validate')) {
                         valid = false;
                     }
                 }

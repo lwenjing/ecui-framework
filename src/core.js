@@ -1,5 +1,5 @@
 /*
-ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交互处理的不同，保存控制的状态及进行事件的分发处理。ECUI核心的事件分发实现了浏览器原生的防止事件重入功能，因此请使用 triggerEvent 方法来请求事件。
+ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交互处理的不同，保存控制的状态及进行事件的分发处理。ECUI核心的事件分发实现了浏览器原生的防止事件重入功能，因此请使用 dispatchEvent 方法来请求事件。
 */
 (function () {
 //{if 0}//
@@ -638,7 +638,18 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.pageX = event.pageX;
             this.pageY = event.pageY;
             this.which = event.which;
-            this.target = event.target;
+            if (ieVersion <= 10) {
+                for (var caches = [], el = event.target; el && el.currentStyle.filter.indexOf('pointer-events:none') >= 0; el = getElementFromEvent(event)) {
+                    caches.push([el, el.style.display]);
+                    el.style.display = 'none';
+                }
+                this.target = el;
+                caches.forEach(function (item) {
+                    item[0].style.display = item[1];
+                });
+            } else {
+                this.target = event.target;
+            }
             this._oNative = event;
         } else {
             this.which = keyCode;
@@ -739,7 +750,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         start = start || null;
         end = end || null;
         for (; start !== end; start = start.getParent()) {
-            core.triggerEvent(start, type, event);
+            core.dispatchEvent(start, type, event);
             if (event.cancelBubble) {
                 return;
             }
@@ -808,7 +819,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             }
         } catch (ignore) {
         }
-        core.triggerEvent(control, 'dispose');
+        core.dispatchEvent(control, 'dispose');
     }
 
     /**
@@ -842,10 +853,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.x = Math.round(options.x + percent * (expectX - options.x));
                         event.y = Math.round(options.y + percent * (expectY - options.y));
                         event.inertia = true;
-                        core.triggerEvent(target, 'dragmove', event);
+                        core.dispatchEvent(target, 'dragmove', event);
                         if (percent >= 1) {
                             inertiaHandles[uid]();
-                            core.triggerEvent(target, 'dragend', event);
+                            core.dispatchEvent(target, 'dragend', event);
                             delete inertiaHandles[uid];
                         }
                     },
@@ -859,7 +870,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 return;
             }
         }
-        core.triggerEvent(target, 'dragend', event);
+        core.dispatchEvent(target, 'dragend', event);
         delete inertiaHandles[uid];
     }
 
@@ -881,7 +892,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             realX = Math.min(Math.max(expectX, env.left), env.right),
             realY = Math.min(Math.max(expectY, env.top), env.bottom);
 
-        if (core.triggerEvent(target, 'dragmove', {x: realX, y: realY, inertia: env !== currEnv})) {
+        if (core.dispatchEvent(target, 'dragmove', {x: realX, y: realY, inertia: env !== currEnv})) {
             target.setPosition(realX, realY);
         }
 
@@ -943,7 +954,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      * @return {HTMLElement} 事件所在的 DOM 元素
      */
     function getElementFromEvent(event) {
-        return chromeVersion ? document.elementFromPoint(event.clientX, event.clientY) : document.elementFromPoint(event.pageX, event.pageY);
+        return chromeVersion || ieVersion ? document.elementFromPoint(event.clientX, event.clientY) : document.elementFromPoint(event.pageX, event.pageY);
     }
 
     /**
@@ -1083,7 +1094,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
      */
     function onbeforescroll(event) {
         independentControls.forEach(function (item) {
-            core.triggerEvent(item, 'beforescroll', event);
+            core.dispatchEvent(item, 'beforescroll', event);
         });
     }
 
@@ -1252,7 +1263,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         }
         event = core.wrapEvent(event);
         independentControls.forEach(function (item) {
-            core.triggerEvent(item, 'scroll', event);
+            core.dispatchEvent(item, 'scroll', event);
         });
         core.mask(true);
     }
@@ -1294,7 +1305,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         }
 
         independentControls.forEach(function (item) {
-            core.triggerEvent(item, 'repaint');
+            core.dispatchEvent(item, 'repaint');
         });
 
         // 按广度优先查找所有正在显示的控件，保证子控件一定在父控件之后
@@ -1303,7 +1314,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         }
 
         resizeList = list.filter(function (item) {
-            core.triggerEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
+            core.dispatchEvent(item, 'resize', widthList = new ECUIEvent('repaint'));
             // 这里与Control控件的$resize方法存在强耦合，repaint有值表示在$resize中没有进行针对ie的width值回填
             if (widthList.repaint) {
                 return item;
@@ -1622,6 +1633,55 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         },
 
         /**
+         * 触发事件。
+         * dispatchEvent 会根据事件返回值或 event 的新状态决定是否触发默认事件处理。
+         * @public
+         *
+         * @param {ecui.ui.Control} control 控件对象
+         * @param {string} name 事件名
+         * @param {ECUIEvent|Object} event 事件对象或事件对象参数
+         * @return {boolean} 是否需要执行默认事件处理
+         */
+        dispatchEvent: function (control, name, event) {
+            // 防止事件重入
+            var uid = control.getUID(),
+                listeners;
+
+            eventStack[uid] = eventStack[uid] || {};
+            if (eventStack[uid][name]) {
+                return;
+            }
+            eventStack[uid][name] = true;
+
+            if (event) {
+                if (event instanceof ECUIEvent) {
+                    event.type = name;
+                } else {
+                    event = util.extend(new ECUIEvent(name), event);
+                }
+            } else {
+                event = new ECUIEvent(name);
+            }
+
+            delete event.returnValue;
+            if ((control['on' + name] && control['on' + name](event) === false) || event.returnValue === false || (control['$' + name] && control['$' + name](event) === false)) {
+                event.preventDefault();
+            }
+
+            // 检查事件是否被监听
+            if (listeners = eventListeners[uid + '#' + name]) {
+                listeners.forEach(function (item) {
+                    if (item) {
+                        item.call(control, event);
+                    }
+                });
+            }
+
+            delete eventStack[uid][name];
+            return event.returnValue !== false;
+        },
+
+        /**
          * 释放 ECUI 控件及其子控件占用的内存。
          * @public
          *
@@ -1744,7 +1804,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 event.track.logicX = event.pageX;
                 event.track.logicY = event.pageY;
 
-                if (core.triggerEvent(control, 'dragstart', event)) {
+                if (core.dispatchEvent(control, 'dragstart', event)) {
                     control.setPosition(x, y);
                 }
 
@@ -2238,55 +2298,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             var parent = getCommonParent(focusedControl, control);
             bubble(focusedControl, 'blur', null, parent);
             bubble(focusedControl = control, 'focus', null, parent);
-        },
-
-        /**
-         * 触发事件。
-         * triggerEvent 会根据事件返回值或 event 的新状态决定是否触发默认事件处理。
-         * @public
-         *
-         * @param {ecui.ui.Control} control 控件对象
-         * @param {string} name 事件名
-         * @param {ECUIEvent|Object} event 事件对象或事件对象参数
-         * @return {boolean} 是否需要执行默认事件处理
-         */
-        triggerEvent: function (control, name, event) {
-            // 防止事件重入
-            var uid = control.getUID(),
-                listeners;
-
-            eventStack[uid] = eventStack[uid] || {};
-            if (eventStack[uid][name]) {
-                return;
-            }
-            eventStack[uid][name] = true;
-
-            if (event) {
-                if (event instanceof ECUIEvent) {
-                    event.type = name;
-                } else {
-                    event = util.extend(new ECUIEvent(name), event);
-                }
-            } else {
-                event = new ECUIEvent(name);
-            }
-
-            delete event.returnValue;
-            if ((control['on' + name] && control['on' + name](event) === false) || event.returnValue === false || (control['$' + name] && control['$' + name](event) === false)) {
-                event.preventDefault();
-            }
-
-            // 检查事件是否被监听
-            if (listeners = eventListeners[uid + '#' + name]) {
-                listeners.forEach(function (item) {
-                    if (item) {
-                        item.call(control, event);
-                    }
-                });
-            }
-
-            delete eventStack[uid][name];
-            return event.returnValue !== false;
         },
 
         /**
