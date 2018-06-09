@@ -639,7 +639,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.pageY = event.pageY;
             this.which = event.which;
             if (ieVersion <= 10) {
-                var name = ieVersion === 10 ? 'quotes' : 'filter';
+                var name = ieVersion < 9 ? 'filter' : 'content';
 outer:          for (var caches = [], target = event.target, el; target !== document.body; target = getElementFromEvent(event)) {
                     for (el = target;; el = dom.getParent(el)) {
                         if (el === document.body) {
