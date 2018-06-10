@@ -609,9 +609,12 @@ _aStatus            - 控件当前的状态集合
              * @param {boolean} force 是否需要强制刷新缓存，相当于之前执行了 clearCache 方法，默认不强制刷新
              */
             cache: function (cacheSize, force) {
-                if (force || (this.getOuter().style.display !== 'none' && !this._bCached)) {
+                if (force || (this.getOuter().offsetWidth && !this._bCached)) {
                     this._bCached = true;
                     this.$cache(dom.getStyle(this._eMain), cacheSize);
+                    if (this._bReady) {
+                        this.initStructure();
+                    }
                 }
             },
 
@@ -955,7 +958,7 @@ _aStatus            - 控件当前的状态集合
                     if (el.style.display === 'none') {
                         this.$hide();
                         el.style.display = '';
-                    } else {
+                    } else if (this._bCached) {
                         this.initStructure();
                     }
 
@@ -1094,7 +1097,6 @@ _aStatus            - 控件当前的状态集合
              */
             repaint: function () {
                 this.cache(true, true);
-                this.initStructure();
             },
 
             /**
