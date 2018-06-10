@@ -178,9 +178,19 @@ _eContainer      - 容器 DOM 元素
             /**
              * @override
              */
+            $dispose: function () {
+                core.removeGestureListeners(this);
+                ui.Control.prototype.$dispose.call(this);
+            },
+
+            /**
+             * @override
+             */
             $itemclick: function (event) {
-                this.setSelected(event.item);
-                core.dispatchEvent(this, 'change');
+                if (event.item !== this._cSelected) {
+                    this.setSelected(event.item);
+                    core.dispatchEvent(this, 'change');
+                }
             },
 
             /**
@@ -219,17 +229,43 @@ _eContainer      - 容器 DOM 元素
             },
 
             /**
+             * @override
+             */
+            init: function (options) {
+                ui.Control.prototype.init.call(this, options);
+                core.addGestureListeners(this, {
+                    swipe: function (event) {
+                        if (this.isShow() && !this.isDisabled()) {
+                            var items = this.getItems(),
+                                index = items.indexOf(this._cSelected);
+                            if (Math.abs((event.angle + 180) % 360 - 180) <= 10) {
+                                if (index--) {
+                                    this.setSelected(index);
+                                    core.dispatchEvent(this, 'change');
+                                }
+                            } else if (Math.abs(event.angle - 180) <= 10) {
+                                if (++index < items.length) {
+                                    this.setSelected(index);
+                                    core.dispatchEvent(this, 'change');
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+
+            /**
              * 设置被选中的选项卡。
              * @public
              *
-             * @param {number|ecui.ui.Tab.Item} 选项卡子选项的索引/选项卡子选项控件
+             * @param {number|ecui.ui.Tab.Item} item 选项卡子选项的索引/选项卡子选项控件
              */
             setSelected: function (item) {
                 if ('number' === typeof item) {
                     item = this.getItem(item);
                 }
 
-                if (this._cSelected !== item) {
+                if (item && this._cSelected !== item) {
                     if (this._cSelected) {
                         this._cSelected.alterClass('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {

@@ -283,6 +283,18 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
+             * 3D Touch 用力按下事件。
+             * @event
+             */
+            $forcedown: util.blank,
+
+            /**
+             * 3D Touch 释放弹起事件。
+             * @event
+             */
+            $forceup: util.blank,
+
+            /**
              * 获取控件的基本高度。
              * 控件的基本高度指控件基本区域与用户数据存放区域的高度差值，即主元素与内部元素(如果相同则忽略其中之一)的上下边框宽度(border-width)与上下内填充宽度(padding)之和。
              * @protected

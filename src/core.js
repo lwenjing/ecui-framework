@@ -141,7 +141,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (!pointers.length) {
                     currEnv.mouseout(core.wrapEvent(event));
                 } else if (event.pointerId === trackId) {
-                    bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
+                    bubble(hoveredControl, 'mouseout', core.wrapEvent(event), hoveredControl = null);
                 }
             },
 

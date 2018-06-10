@@ -543,7 +543,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             options = options || {};
 
             var oldOptions = parseLocation(currLocation),
-                url = options[''] || oldOptions[''];
+                url = options[''] || oldOptions[''] || name;
 
             for (var key in options) {
                 if (options.hasOwnProperty(key)) {
