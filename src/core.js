@@ -832,6 +832,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
      */
     function dragend(event, env, target) {
+        if (!target.getMain()) {
+            // 控件已经被销毁，不要发送事件
+            return;
+        }
         var uid = target.getUID();
 
         if (env.limit) {
@@ -885,6 +889,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {number} y 需要移动到的 Y 坐标
      */
     function dragmove(track, env, x, y) {
+        if (!env.target.getMain()) {
+            // 控件已经被销毁，不要发送事件
+            return;
+        }
+
         var target = env.target,
             // 计算期待移到的位置
             expectX = env.originalX + x - track.logicX,
