@@ -167,8 +167,8 @@ _aStatus            - 控件当前的状态集合
                 }
 
                 if (cacheSize !== false) {
-                    this.$$width = this._eMain.offsetWidth || util.toNumber(style.width) + (core.isContentBox() ? this.$getBasicWidth() : 0);
-                    this.$$height = this._eMain.offsetHeight || util.toNumber(style.height) + (core.isContentBox() ? this.$getBasicHeight() : 0);
+                    this.$$width = this._eMain.offsetWidth;
+                    this.$$height = this._eMain.offsetHeight;
                 }
             },
 //{if 0}//
@@ -505,8 +505,6 @@ _aStatus            - 控件当前的状态集合
                     this._eMain.style.height = value + 'px';
                     this.$$height = height;
                 }
-
-                this.initStructure();
             },
 
             /**
@@ -516,10 +514,7 @@ _aStatus            - 控件当前的状态集合
              */
             $show: function () {
                 dom.removeClass(this.getOuter(), 'ui-hide');
-                if (!this._bCached) {
-                    this.cache();
-                    this.initStructure();
-                }
+                this.cache();
             },
 
             /**
@@ -612,7 +607,7 @@ _aStatus            - 控件当前的状态集合
                 if (force || (this.getOuter().offsetWidth && !this._bCached)) {
                     this._bCached = true;
                     this.$cache(dom.getStyle(this._eMain), cacheSize);
-                    if (this._bReady) {
+                    if (!force && this._bReady) {
                         this.initStructure();
                     }
                 }
@@ -1097,6 +1092,7 @@ _aStatus            - 控件当前的状态集合
              */
             repaint: function () {
                 this.cache(true, true);
+                this.initStructure();
             },
 
             /**
@@ -1200,6 +1196,8 @@ _aStatus            - 控件当前的状态集合
                 }
 
                 this.$setSize(width, height);
+                this.$resize();
+                this.initStructure();
 
                 if (width) {
                     this._sWidth = this._eMain.style.width;

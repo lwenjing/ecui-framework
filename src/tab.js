@@ -202,6 +202,26 @@ _eContainer      - 容器 DOM 元素
                 if (!this._cSelected) {
                     this.setSelected(+(event.options.selected || 0));
                 }
+
+                core.addGestureListeners(this, {
+                    swipe: function (event) {
+                        if (this.isShow() && !this.isDisabled()) {
+                            var items = this.getItems(),
+                                index = items.indexOf(this._cSelected);
+                            if (Math.abs((event.angle + 180) % 360 - 180) <= 10) {
+                                if (index--) {
+                                    this.setSelected(index);
+                                    core.dispatchEvent(this, 'change');
+                                }
+                            } else if (Math.abs(event.angle - 180) <= 10) {
+                                if (++index < items.length) {
+                                    this.setSelected(index);
+                                    core.dispatchEvent(this, 'change');
+                                }
+                            }
+                        }
+                    }
+                });
             },
 
             /**
@@ -226,32 +246,6 @@ _eContainer      - 容器 DOM 元素
              */
             getSelected: function () {
                 return this._cSelected;
-            },
-
-            /**
-             * @override
-             */
-            init: function (options) {
-                ui.Control.prototype.init.call(this, options);
-                core.addGestureListeners(this, {
-                    swipe: function (event) {
-                        if (this.isShow() && !this.isDisabled()) {
-                            var items = this.getItems(),
-                                index = items.indexOf(this._cSelected);
-                            if (Math.abs((event.angle + 180) % 360 - 180) <= 10) {
-                                if (index--) {
-                                    this.setSelected(index);
-                                    core.dispatchEvent(this, 'change');
-                                }
-                            } else if (Math.abs(event.angle - 180) <= 10) {
-                                if (++index < items.length) {
-                                    this.setSelected(index);
-                                    core.dispatchEvent(this, 'change');
-                                }
-                            }
-                        }
-                    }
-                });
             },
 
             /**

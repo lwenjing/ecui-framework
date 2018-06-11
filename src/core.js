@@ -374,8 +374,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             dblclick: function (event) {
-                if (ieVersion) {
+                if (ieVersion < 9) {
                     // IE下双击事件不依次产生 mousedown 与 mouseup 事件，需要模拟
+                    event = core.wrapEvent(event);
+                    event.track = tracks;
                     currEnv.mousedown(event);
                     currEnv.mouseup(event);
                 }
@@ -388,7 +390,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             dragend: function (event) {
-                currEnv.mouseup(event);
+                currEnv.mouseup(core.wrapEvent(event));
             },
 
             keydown: function (event) {
@@ -629,21 +631,22 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.which = event.which;
             if (ieVersion <= 10) {
                 var name = ieVersion < 9 ? 'filter' : 'content';
-outer:          for (var caches = [], target = event.target, el; target !== document.body; target = getElementFromEvent(event)) {
+outer:          for (var caches = [], target = event.target, el; target; target = getElementFromEvent(event)) {
                     for (el = target;; el = dom.getParent(el)) {
-                        if (el === document.body) {
+                        if (!el) {
                             break outer;
                         }
-                        if (el.currentStyle[name].indexOf('pointer-events:none') >= 0) {
-                            caches.push([el, el.style.display]);
-                            el.style.display = 'none';
+                        var text = el.currentStyle[name];
+                        if (text && text.indexOf('pointer-events:none') >= 0) {
+                            caches.push([el, el.style.visibility]);
+                            el.style.visibility = 'hidden';
                             break;
                         }
                     }
                 }
                 this.target = target;
                 caches.forEach(function (item) {
-                    item[0].style.display = item[1];
+                    item[0].style.visibility = item[1];
                 });
             } else {
                 this.target = event.target;
