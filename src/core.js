@@ -95,10 +95,13 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         event.track = tracks[trackId = pointerId] = {
                             identifier: pointerId,
+                            type: pointerType,
                             pageX: event.pageX,
                             pageY: event.pageY,
                             target: event.target,
-                            lastMoveTime: Date.now()
+                            lastMoveTime: Date.now(),
+                            speedX: 0,
+                            speedY: 0
                         };
                         pointers.push(event.track);
 
@@ -129,10 +132,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     event.track = track;
                     currEnv.mousemove(event);
                     onpressure(event, event.getNative().pressure >= 0.4);
-                }
-
-                if (gestureListeners.length) {
-                    ongesture(pointers);
+                    ongesture(pointers, event);
                 }
             },
 
@@ -173,6 +173,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         currEnv.mouseup(event);
                         trackId = null;
                         onpressure(event, false);
+                        ongesture(pointers, event);
                     }
 
                     util.remove(pointers, track);
@@ -231,15 +232,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             currEnv.mouseover(event);
                         }
                         onpressure(event, item.force === 1);
+                        ongesture(event.getNative().touches, event);
                     }
                 });
-
-                if (gestureListeners.length) {
-                    ongesture(event.getNative().touches);
-                    if (safariVersion) {
-                        event.preventDefault();
-                    }
-                }
             },
 
             touchend: function (event) {
@@ -264,6 +259,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
                         trackId = null;
                         onpressure(event, false);
+                        ongesture(event.getNative().touches, event);
                     }
                 });
 
@@ -1053,7 +1049,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             tracks[item.identifier] = tracks[item.identifier] || {
                 pageX: item.pageX,
                 pageY: item.pageY,
-                target: item.target
+                target: item.target,
+                speedX: 0,
+                speedY: 0
             };
             caches[item.identifier] = true;
         });
@@ -1145,64 +1143,82 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @private
      *
      * @param {Array} pointers 指针信息列表
+     * @param {ECUIEvent} event ECUI 事件对象
      */
-    function ongesture(pointers) {
-        switch (pointers.length) {
-        case 1:
-            var track = tracks[pointers[0].identifier];
-            if (!track.swipe && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
-                track.swipe = true;
-                util.timer(function () {
-                    if (tracks[track.identifier] !== track) {
-                        var event = new ECUIEvent('swipe');
-                        event.angle = track.angle;
-                        gestureListeners.forEach(function (item) {
-                            if (item[1].swipe) {
-                                item[1].swipe.call(item[0], event);
-                            }
-                        });
-                    }
-                }, 300);
-            }
-            break;
-        case 2:
-            var track1 = tracks[pointers[0].identifier],
-                track2 = tracks[pointers[1].identifier];
-            // 两指操作的时间间隔足够小
-            if (Math.abs(track1.lastMoveTime - track1.lastMoveTime) < 50) {
-                var angle = Math.abs(track1.angle - track2.angle);
-                if (Math.abs(angle - 180) < 10) {
-                    angle = calcAngle(track2.lastX - track1.lastX, track2.lastY - track1.lastY);
-                    if (angle > 180) {
-                        angle -= 180;
-                    }
-                    angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
-                    // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
-                    if (angle < 10) {
-                        gestureListeners.forEach(function (item) {
-                            if (item[1].zoom) {
-                                var event = new ECUIEvent('zoom');
-                                event.pageX = (track1.pageX + track2.pageX) / 2;
-                                event.pageY = (track1.pageY + track2.pageY) / 2;
-                                event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
-                                event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
-                                item[1].zoom.call(item[0], event);
-                            }
-                        });
-                    } else if (Math.abs(angle - 90) < 10 &&
-                            Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2)) -
-                                Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
-                        gestureListeners.forEach(function (item) {
-                            if (item[1].rotate) {
-                                var event = new ECUIEvent('rotate');
-                                event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
-                                item[1].rotate.call(item[0], event);
-                            }
-                        });
+    function ongesture(pointers, event) {
+        if (gestureListeners.length) {
+            switch (pointers.length) {
+            case 1:
+                var track = tracks[pointers[0].identifier];
+                if (track.type !== 'mouse') {
+                    if (event.getNative().type.slice(-4) === 'move') {
+                        if (!track.swipe && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
+                            track.swipe = true;
+                            util.timer(function () {
+                                if (tracks[track.identifier] !== track) {
+                                    var event = new ECUIEvent('swipe');
+                                    event.angle = track.angle;
+                                    gestureListeners.forEach(function (item) {
+                                        if (item[1].swipe) {
+                                            item[1].swipe.call(item[0], event);
+                                        }
+                                    });
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        if (track.lastClick && (Date.now() - track.lastClick.time < 300) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
+                            gestureListeners.forEach(function (item) {
+                                if (item[1].tap) {
+                                    item[1].tap.call(item[0], new ECUIEvent('tap'));
+                                }
+                            });
+                        }
                     }
                 }
+                break;
+            case 2:
+                var track1 = tracks[pointers[0].identifier],
+                    track2 = tracks[pointers[1].identifier];
+                // 两指操作的时间间隔足够小
+                if (Math.abs(track1.lastMoveTime - track1.lastMoveTime) < 50) {
+                    var angle = Math.abs(track1.angle - track2.angle);
+                    if (Math.abs(angle - 180) < 10) {
+                        angle = calcAngle(track2.lastX - track1.lastX, track2.lastY - track1.lastY);
+                        if (angle > 180) {
+                            angle -= 180;
+                        }
+                        angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
+                        // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
+                        if (angle < 10) {
+                            gestureListeners.forEach(function (item) {
+                                if (item[1].zoom) {
+                                    var event = new ECUIEvent('zoom');
+                                    event.pageX = (track1.pageX + track2.pageX) / 2;
+                                    event.pageY = (track1.pageY + track2.pageY) / 2;
+                                    event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
+                                    event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
+                                    item[1].zoom.call(item[0], event);
+                                }
+                            });
+                        } else if (Math.abs(angle - 90) < 10 &&
+                                Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2)) -
+                                    Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
+                            gestureListeners.forEach(function (item) {
+                                if (item[1].rotate) {
+                                    var event = new ECUIEvent('rotate');
+                                    event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
+                                    item[1].rotate.call(item[0], event);
+                                }
+                            });
+                        }
+                    }
+                }
+                break;
             }
-            break;
+            if (safariVersion) {
+                event.preventDefault();
+            }
         }
     }
 
