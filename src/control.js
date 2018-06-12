@@ -1196,15 +1196,15 @@ _aStatus            - 控件当前的状态集合
                 }
 
                 this.$setSize(width, height);
-                this.$resize();
-                this.initStructure();
-
                 if (width) {
                     this._sWidth = this._eMain.style.width;
                 }
                 if (height) {
                     this._sHeight = this._eMain.style.height;
                 }
+
+                this.$resize();
+                this.initStructure();
             },
 
             /**

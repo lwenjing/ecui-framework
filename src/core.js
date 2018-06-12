@@ -37,6 +37,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         trackId,                  // 当前正在跟踪的id
         pointers = [],            // 当前所有正在监听的pointer对象
         gestureListeners = [],    // 手势监听
+        gestureStack = [],        // 手势堆栈，受mask影响进行分层监听
         forcedControl = null,     // 当前被重压的控件
 
         pauseCount = 0,           // 暂停的次数
@@ -125,7 +126,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 // 没有trackCount表示是纯粹的鼠标移动行为
                 if (!pointers.length || event.getNative().pointerId === trackId) {
                     // Pointer设备上纯点击也可能会触发move
-                    if ((Math.abs(track.speedX) >= HIGH_SPEED || Math.abs(track.speedY) >= HIGH_SPEED) && isMobileMoved === false) {
+                    if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isMobileMoved === false) {
                         isMobileMoved = true;
                     }
 
@@ -2181,6 +2182,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 });
             } else if (opacity === undefined) {
                 unmasks.pop()();
+                gestureListeners = gestureStack.pop();
             } else {
                 if (!maskElements.length) {
                     dom.addClass(el, 'ui-modal');
@@ -2220,6 +2222,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     }
                 );
 
+                gestureStack.push(gestureListeners);
+                gestureListeners = [];
                 return unmasks[unmasks.length - 1];
             }
         },
@@ -2284,6 +2288,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {ecui.ui.Control} control ECUI 控件
          */
         removeGestureListeners: function (control) {
+            gestureStack.forEach(function (listeners) {
+                for (var i = listeners.length; i--; ) {
+                    if (listeners[i][0] === control) {
+                        listeners.splice(i, 1);
+                    }
+                }
+            });
             for (var i = gestureListeners.length; i--; ) {
                 if (gestureListeners[i][0] === control) {
                     gestureListeners.splice(i, 1);
