@@ -602,6 +602,7 @@ _aStatus            - 控件当前的状态集合
              *
              * @param {boolean} cacheSize 是否需要缓存控件的大小，如果控件是另一个控件的部件时，不缓存大小能加快渲染速度，默认缓存
              * @param {boolean} force 是否需要强制刷新缓存，相当于之前执行了 clearCache 方法，默认不强制刷新
+             * @return {boolean} 是否刷新缓存
              */
             cache: function (cacheSize, force) {
                 if (force || (this.getOuter().offsetWidth && !this._bCached)) {
@@ -610,7 +611,9 @@ _aStatus            - 控件当前的状态集合
                     if (!force && this._bReady) {
                         this.initStructure();
                     }
+                    return true;
                 }
+                return false;
             },
 
             /**
@@ -790,7 +793,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} 控件的高度
              */
             getHeight: function () {
-                this.cache();
+                this.cache(true);
                 return this.$$height;
             },
 
@@ -889,7 +892,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} 控件的宽度
              */
             getWidth: function () {
-                this.cache();
+                this.cache(true);
                 return this.$$width;
             },
 
@@ -1217,6 +1220,11 @@ _aStatus            - 控件当前的状态集合
             show: function () {
                 if (!this.isShow()) {
                     core.dispatchEvent(this, 'show');
+                    core.query(function (item) {
+                        return this.contain(item);
+                    }.bind(this)).forEach(function (item) {
+                        item.cache();
+                    });
                     return true;
                 }
                 return false;

@@ -60,7 +60,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 if (this.isReady()) {
                     this.$$bodyHeight = this.getBody().offsetHeight + this._nTopHidden + this._nBottomHidden;
                     this.getItems().map(function (item) {
-                        item.cache();
+                        item.cache(true);
                         return item.getOuter().offsetWidth ? item : null;
                     }).forEach(function (item, index) {
                         if (item) {
@@ -289,14 +289,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 var style = this.getBody().style;
                 style.paddingTop = (this.$$bodyPadding[0] + this.$$headerHeight) + 'px';
                 style.paddingBottom = (this.$$bodyPadding[2] + this.$$footerHeight) + 'px';
-            },
-
-            /**
-             * @override
-             */
-            $ready: function (event) {
-                ui.MScroll.prototype.$ready.call(this, event);
-                this.getBody().style.top = -this.$$headerHeight + 'px';
+                style.top = -this.$$headerHeight + 'px';
             },
 
             /**

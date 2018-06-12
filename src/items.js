@@ -74,17 +74,6 @@
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                this.$Items.$cache.call(this, style, cacheSize);
-
-                namedMap[this.getUID()].forEach(function (item) {
-                    item.cache(true, true);
-                });
-            },
-
-            /**
-             * @override
-             */
             $dispose: function () {
                 delete namedMap[this.getUID()];
                 this.$Items.$dispose.call(this);
@@ -189,6 +178,20 @@
                 if (!namedMap[this.getUID()].preventCount) {
                     this.$alterItems();
                 }
+            },
+
+            /**
+             * @override
+             */
+            cache: function (cacheSize, force) {
+                if (this.$Items.cache.call(this, cacheSize, force)) {
+                    namedMap[this.getUID()].forEach(function (item) {
+                        item.cache(true, force);
+                    });
+                    this.$alterItems();
+                    return true;
+                }
+                return false;
             },
 
             /**
