@@ -208,11 +208,11 @@ _eContainer      - 容器 DOM 元素
                         if (this.isShow() && !this.isDisabled()) {
                             var items = this.getItems(),
                                 index = items.indexOf(this._cSelected);
-                            if (Math.abs((event.angle + 180) % 360 - 180) <= 10) {
+                            if (Math.abs((event.angle + 180) % 360 - 180) <= 20) {
                                 if (index) {
                                     index--;
                                 }
-                            } else if (Math.abs(event.angle - 180) <= 10) {
+                            } else if (Math.abs(event.angle - 180) <= 20) {
                                 if (index < items.length - 1) {
                                     index++;
                                 }
