@@ -1165,8 +1165,26 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             track.swipe = true;
                             util.timer(function () {
                                 if (tracks[track.identifier] !== track) {
-                                    event.type = 'swipe';
                                     event.angle = track.angle;
+                                    if (event.angle > 160 && event.angle < 200) {
+                                        event.type = 'swipeleft';
+                                    } else if (event.angle > 340 || event.angle < 20) {
+                                        event.type = 'swiperight';
+                                    } else if (event.angle > 70 && event.angle < 110) {
+                                        event.type = 'swipeup';
+                                    } else if (event.angle > 250 && event.angle < 290) {
+                                        event.type = 'swipedown';
+                                    } else {
+                                        event.type = '';
+                                    }
+                                    if (event.type) {
+                                        gestureListeners.forEach(function (item) {
+                                            if (item[1][event.type]) {
+                                                item[1][event.type].call(item[0], event);
+                                            }
+                                        });
+                                    }
+                                    event.type = 'swipe';
                                     gestureListeners.forEach(function (item) {
                                         if (item[1].swipe) {
                                             item[1].swipe.call(item[0], event);
@@ -1212,13 +1230,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
                         if (angle < 60) {
                             gestureListeners.forEach(function (item) {
-                                if (item[1].zoom) {
-                                    event.type = 'zoom';
+                                if (item[1].pinch) {
+                                    event.type = 'pinch';
                                     event.pageX = (track1.pageX + track2.pageX) / 2;
                                     event.pageY = (track1.pageY + track2.pageY) / 2;
                                     event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
                                     event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
-                                    item[1].zoom.call(item[0], event);
+                                    item[1].pinch.call(item[0], event);
                                 }
                             });
                         } else if (Math.abs(angle - 90) < 60 &&

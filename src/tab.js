@@ -42,6 +42,36 @@ _eContainer      - 容器 DOM 元素
     }
 
     /**
+     * 滑动事件处理。
+     * @private
+     *
+     * @param {ECUIEvent} event ECUI 事件对象
+     */
+    function swipe(event) {
+        if (this.isShow() && !this.isDisabled()) {
+            var items = this.getItems(),
+                index = items.indexOf(this._cSelected);
+            if (event.type === 'swiperight') {
+                if (index) {
+                    index--;
+                }
+            } else if (event.type === 'swipeleft') {
+                if (index < items.length - 1) {
+                    index++;
+                }
+            }
+            if (items[index] !== this._cSelected) {
+                this.setSelected(items[index]);
+                core.dispatchEvent(this, 'change');
+                var el = dom.first(this._cSelected.getMain());
+                if (el && el.tagName === 'A' && el.href) {
+                    location.href = el.href;
+                }
+            }
+        }
+    }
+
+    /**
      * 选项卡控件。
      * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
      * options 属性：
@@ -204,29 +234,8 @@ _eContainer      - 容器 DOM 元素
                 }
 
                 core.addGestureListeners(this, {
-                    swipe: function (event) {
-                        if (this.isShow() && !this.isDisabled()) {
-                            var items = this.getItems(),
-                                index = items.indexOf(this._cSelected);
-                            if (Math.abs((event.angle + 180) % 360 - 180) <= 20) {
-                                if (index) {
-                                    index--;
-                                }
-                            } else if (Math.abs(event.angle - 180) <= 20) {
-                                if (index < items.length - 1) {
-                                    index++;
-                                }
-                            }
-                            if (items[index] !== this._cSelected) {
-                                this.setSelected(items[index]);
-                                core.dispatchEvent(this, 'change');
-                                var el = dom.first(this._cSelected.getMain());
-                                if (el && el.tagName === 'A' && el.href) {
-                                    location.href = el.href;
-                                }
-                            }
-                        }
-                    }
+                    swipeleft: swipe,
+                    swiperight: swipe
                 });
             },
 
