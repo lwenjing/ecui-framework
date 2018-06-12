@@ -1155,6 +1155,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {ECUIEvent} event ECUI 事件对象
      */
     function ongesture(pointers, event) {
+        function callback(type) {
+            event.type = type;
+            gestureListeners.filter(function (item) {
+                return item[1][type] && (!item[0] || (item[0].isShow() && !item[0].isDisabled()));
+            }).forEach(function (item) {
+                item[1][type].call(item[0], event);
+            });
+        }
+
         if (gestureListeners.length) {
             switch (pointers.length) {
             case 1:
@@ -1167,50 +1176,29 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                                 if (tracks[track.identifier] !== track) {
                                     event.angle = track.angle;
                                     if (event.angle > 160 && event.angle < 200) {
-                                        event.type = 'swipeleft';
+                                        callback('swipeleft');
                                     } else if (event.angle > 340 || event.angle < 20) {
-                                        event.type = 'swiperight';
+                                        callback('swiperight');
                                     } else if (event.angle > 70 && event.angle < 110) {
-                                        event.type = 'swipeup';
+                                        callback('swipeup');
                                     } else if (event.angle > 250 && event.angle < 290) {
-                                        event.type = 'swipedown';
-                                    } else {
-                                        event.type = '';
+                                        callback('swipedown');
                                     }
                                     if (event.type) {
-                                        gestureListeners.forEach(function (item) {
-                                            if (item[1][event.type]) {
-                                                item[1][event.type].call(item[0], event);
-                                            }
-                                        });
                                     }
-                                    event.type = 'swipe';
-                                    gestureListeners.forEach(function (item) {
-                                        if (item[1].swipe) {
-                                            item[1].swipe.call(item[0], event);
-                                        }
-                                    });
+                                    callback('swipe');
                                 }
                             }, 300);
                         }
-                        gestureListeners.forEach(function (item) {
-                            event.type = 'panmove';
-                            event.fromX = track.lastX;
-                            event.fromY = track.lastY;
-                            event.toX = track.pageX;
-                            event.toY = track.pageY;
-                            if (item[1].panmove) {
-                                item[1].panmove.call(item[0], event);
-                            }
-                        });
+
+                        event.fromX = track.lastX;
+                        event.fromY = track.lastY;
+                        event.toX = track.pageX;
+                        event.toY = track.pageY;
+                        callback('panmove');
                     } else {
                         if (isMobileMoved === false && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
-                            gestureListeners.forEach(function (item) {
-                                event.type = 'tap';
-                                if (item[1].tap) {
-                                    item[1].tap.call(item[0], event);
-                                }
-                            });
+                            callback('tap');
                         }
                     }
                 }
@@ -1234,29 +1222,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
                             event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
                             if (event.from < event.to) {
-                                event.type = 'pinchout';
+                                callback('pinchout');
                             } else if (event.from > event.to) {
-                                event.type = 'pinchin';
-                            } else {
-                                event.type = '';
-                            }
-                            if (event.type) {
-                                gestureListeners.forEach(function (item) {
-                                    if (item[1][event.type]) {
-                                        item[1][event.type].call(item[0], event);
-                                    }
-                                });
+                                callback('pinchin');
                             }
                         } else if (Math.abs(angle - 90) < 60 &&
                                 Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2)) -
                                     Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
-                            event.type = 'rotate';
                             event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
-                            gestureListeners.forEach(function (item) {
-                                if (item[1].rotate) {
-                                    item[1].rotate.call(item[0], event);
-                                }
-                            });
+                            callback('rotate');
                         }
                     }
                 }

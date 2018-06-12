@@ -48,25 +48,23 @@ _eContainer      - 容器 DOM 元素
      * @param {ECUIEvent} event ECUI 事件对象
      */
     function swipe(event) {
-        if (this.isShow() && !this.isDisabled()) {
-            var items = this.getItems(),
-                index = items.indexOf(this._cSelected);
-            if (event.type === 'swiperight') {
-                if (index) {
-                    index--;
-                }
-            } else if (event.type === 'swipeleft') {
-                if (index < items.length - 1) {
-                    index++;
-                }
+        var items = this.getItems(),
+            index = items.indexOf(this._cSelected);
+        if (event.type === 'swiperight') {
+            if (index) {
+                index--;
             }
-            if (items[index] !== this._cSelected) {
-                this.setSelected(items[index]);
-                core.dispatchEvent(this, 'change');
-                var el = dom.first(this._cSelected.getMain());
-                if (el && el.tagName === 'A' && el.href) {
-                    location.href = el.href;
-                }
+        } else if (event.type === 'swipeleft') {
+            if (index < items.length - 1) {
+                index++;
+            }
+        }
+        if (items[index] !== this._cSelected) {
+            this.setSelected(items[index]);
+            core.dispatchEvent(this, 'change');
+            var el = dom.first(this._cSelected.getMain());
+            if (el && el.tagName === 'A' && el.href) {
+                location.href = el.href;
             }
         }
     }
