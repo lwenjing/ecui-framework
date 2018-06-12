@@ -1165,7 +1165,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             track.swipe = true;
                             util.timer(function () {
                                 if (tracks[track.identifier] !== track) {
-                                    var event = new ECUIEvent('swipe');
+                                    event.type = 'swipe';
                                     event.angle = track.angle;
                                     gestureListeners.forEach(function (item) {
                                         if (item[1].swipe) {
@@ -1176,7 +1176,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             }, 300);
                         }
                         gestureListeners.forEach(function (item) {
-                            var event = new ECUIEvent('move');
+                            event.type = 'move';
                             event.fromX = track.lastX;
                             event.fromY = track.lastY;
                             event.toX = track.pageX;
@@ -1188,8 +1188,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     } else {
                         if (isMobileMoved === false && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
                             gestureListeners.forEach(function (item) {
+                                event.type = 'tap';
                                 if (item[1].tap) {
-                                    item[1].tap.call(item[0], new ECUIEvent('tap'));
+                                    item[1].tap.call(item[0], event);
                                 }
                             });
                         }
@@ -1212,7 +1213,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         if (angle < 60) {
                             gestureListeners.forEach(function (item) {
                                 if (item[1].zoom) {
-                                    var event = new ECUIEvent('zoom');
+                                    event.type = 'zoom';
                                     event.pageX = (track1.pageX + track2.pageX) / 2;
                                     event.pageY = (track1.pageY + track2.pageY) / 2;
                                     event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
@@ -1225,7 +1226,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                                     Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
                             gestureListeners.forEach(function (item) {
                                 if (item[1].rotate) {
-                                    var event = new ECUIEvent('rotate');
+                                    event.type = 'rotate';
                                     event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
                                     item[1].rotate.call(item[0], event);
                                 }
