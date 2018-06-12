@@ -56,7 +56,7 @@
      */
     function swipe(event) {
         var viewWidth = document.body.clientWidth;
-        if (parseFloat(currImg.style.width) !== currHotspot.$$calcWidth) {
+        if (util.toNumber(currImg.style.width) !== currHotspot.$$calcWidth) {
             return;
         }
         var items = core.query(function (item) {
@@ -104,14 +104,14 @@
         var viewWidth = document.body.clientWidth,
             viewHeight = document.body.clientHeight,
             distance = event.to - event.from,
-            width = Math.max(parseFloat(currImg.style.width) + distance, currHotspot.$$calcWidth);
+            width = Math.max(util.toNumber(currImg.style.width) + distance, currHotspot.$$calcWidth);
         currImg.style.width = width + 'px';
 
         if (width === currHotspot.$$calcWidth) {
             fillImage(currImg, currHotspot, 0);
         } else {
-            currImg.style.top = (parseFloat(currImg.style.top) - distance / currHotspot.$$calcWidth * currHotspot.$$calcHeight * (event.pageY - (document.body.parentNode.scrollTop || document.body.scrollTop)) / viewHeight) + 'px';
-            currImg.style.left = (parseFloat(currImg.style.left) - distance * (event.pageX - (document.body.parentNode.scrollLeft || document.body.scrollLeft)) / viewWidth) + 'px';
+            currImg.style.top = (util.toNumber(currImg.style.top) - distance / currHotspot.$$calcWidth * currHotspot.$$calcHeight * (event.pageY - (document.body.parentNode.scrollTop || document.body.scrollTop)) / viewHeight) + 'px';
+            currImg.style.left = (util.toNumber(currImg.style.left) - distance * (event.pageX - (document.body.parentNode.scrollLeft || document.body.scrollLeft)) / viewWidth) + 'px';
         }
     }
 
@@ -159,13 +159,13 @@
                         swipeleft: swipe,
                         swiperight: swipe,
                         panmove: function (event) {
-                            var width = parseFloat(currImg.style.width),
+                            var width = util.toNumber(currImg.style.width),
                                 height = width * currHotspot.$$calcHeight / currHotspot.$$calcWidth;
                             if (width === currHotspot.$$calcWidth) {
                                 return;
                             }
-                            currImg.style.left = Math.max(Math.min(parseFloat(currImg.style.left) - event.fromX + event.toX, Math.max(0, viewWidth - width)), Math.min(0, viewWidth - width)) + 'px';
-                            currImg.style.top = Math.max(Math.min(parseFloat(currImg.style.top) - event.fromY + event.toY, Math.max(0, viewHeight - height)), Math.min(0, viewHeight - height)) + 'px';
+                            currImg.style.left = Math.max(Math.min(util.toNumber(currImg.style.left) - event.fromX + event.toX, Math.max(0, viewWidth - width)), Math.min(0, viewWidth - width)) + 'px';
+                            currImg.style.top = Math.max(Math.min(util.toNumber(currImg.style.top) - event.fromY + event.toY, Math.max(0, viewHeight - height)), Math.min(0, viewHeight - height)) + 'px';
                         },
                         pinchin: zoom,
                         pinchout: zoom,
@@ -175,7 +175,7 @@
                                 tapHandle = null;
                                 event.type = 'pinch';
                                 event.from = 0;
-                                event.to = parseFloat(currImg.style.width) === currHotspot.$$calcWidth ? currHotspot.$$calcWidth * 2 : -parseFloat(currImg.style.width);
+                                event.to = util.toNumber(currImg.style.width) === currHotspot.$$calcWidth ? currHotspot.$$calcWidth * 2 : -util.toNumber(currImg.style.width);
                                 zoom(event);
                             } else {
                                 tapHandle = util.timer(function () {
