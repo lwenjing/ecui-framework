@@ -1194,13 +1194,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             }, 300);
                         }
                         gestureListeners.forEach(function (item) {
-                            event.type = 'move';
+                            event.type = 'panmove';
                             event.fromX = track.lastX;
                             event.fromY = track.lastY;
                             event.toX = track.pageX;
                             event.toY = track.pageY;
-                            if (item[1].move) {
-                                item[1].move.call(item[0], event);
+                            if (item[1].panmove) {
+                                item[1].panmove.call(item[0], event);
                             }
                         });
                     } else {
@@ -1229,23 +1229,31 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
                         // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
                         if (angle < 60) {
-                            gestureListeners.forEach(function (item) {
-                                if (item[1].pinch) {
-                                    event.type = 'pinch';
-                                    event.pageX = (track1.pageX + track2.pageX) / 2;
-                                    event.pageY = (track1.pageY + track2.pageY) / 2;
-                                    event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
-                                    event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
-                                    item[1].pinch.call(item[0], event);
-                                }
-                            });
+                            event.pageX = (track1.pageX + track2.pageX) / 2;
+                            event.pageY = (track1.pageY + track2.pageY) / 2;
+                            event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
+                            event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
+                            if (event.from < event.to) {
+                                event.type = 'pinchout';
+                            } else if (event.from > event.to) {
+                                event.type = 'pinchin';
+                            } else {
+                                event.type = '';
+                            }
+                            if (event.type) {
+                                gestureListeners.forEach(function (item) {
+                                    if (item[1][event.type]) {
+                                        item[1][event.type].call(item[0], event);
+                                    }
+                                });
+                            }
                         } else if (Math.abs(angle - 90) < 60 &&
                                 Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2)) -
                                     Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
+                            event.type = 'rotate';
+                            event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
                             gestureListeners.forEach(function (item) {
                                 if (item[1].rotate) {
-                                    event.type = 'rotate';
-                                    event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
                                     item[1].rotate.call(item[0], event);
                                 }
                             });
