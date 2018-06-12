@@ -1171,7 +1171,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 var track = tracks[pointers[0].identifier];
                 if (track.type !== 'mouse') {
                     if (event.getNative().type.slice(-4) === 'move') {
-                        if (!track.swipe && Date.now() - track.lastClick.time < 100 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
+                        if (!track.swipe && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
                             track.swipe = true;
                             util.timer(function () {
                                 if (tracks[track.identifier] !== track) {

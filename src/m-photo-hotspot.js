@@ -60,7 +60,7 @@
             return;
         }
         var items = core.query(function (item) {
-            return item instanceof ui.PhotoHotspot;
+            return item instanceof ui.MPhotoHotspot;
         });
         var index = items.indexOf(currHotspot),
             nextIndex = index;
