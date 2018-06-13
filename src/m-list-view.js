@@ -249,6 +249,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 if (!this._bLoading) {
                     this._bLoading = true;
                     core.dispatchEvent(this, 'loaddata');
+                    this.getFooter().innerHTML = this.HTML_LOADING;
                 }
             },
 
@@ -256,10 +257,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到达底部区域事件。
              * @event
              */
-            $footerenter: function () {
-                setEnterAndLeave.call(this);
-                this.getFooter().innerHTML = this.HTML_LOADING;
-            },
+            $footerenter: setEnterAndLeave,
 
             /**
              * 拖拽离开底部区域事件。
