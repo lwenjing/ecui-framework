@@ -84,7 +84,9 @@
              */
             $ready: function (event) {
                 this.$Items.$ready.call(this, event);
-                this.alterItems();
+                if (this.isCached()) {
+                    this.alterItems();
+                }
                 this.getItems().forEach(function (item) {
                     core.dispatchEvent(item, 'ready');
                 });
@@ -176,7 +178,11 @@
              */
             alterItems: function () {
                 if (!namedMap[this.getUID()].preventCount) {
-                    this.$alterItems();
+                    if (this.isReady() && !this.isShow()) {
+                        this.clearCache();
+                    } else {
+                        this.$alterItems();
+                    }
                 }
             },
 
@@ -188,7 +194,9 @@
                     namedMap[this.getUID()].forEach(function (item) {
                         item.cache(true, force);
                     });
-                    this.$alterItems();
+                    if (this.isReady()) {
+                        this.$alterItems();
+                    }
                     return true;
                 }
                 return false;

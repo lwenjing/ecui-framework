@@ -77,10 +77,6 @@ _nBottomIndex  - 下部隐藏的选项序号
                             }
                         }
                     }, this);
-                } else {
-                    this._nTopHidden = this._nBottomHidden = 0;
-                    this._nTopIndex = 0;
-                    this._nBottomIndex = this.getLength();
                 }
                 // 解决items不够填充整个listview区域
                 var top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight);
@@ -295,6 +291,16 @@ _nBottomIndex  - 下部隐藏的选项序号
             /**
              * @override
              */
+            $ready: function () {
+                ui.MScroll.prototype.$ready.call(this);
+                this._nTopHidden = this._nBottomHidden = 0;
+                this._nTopIndex = 0;
+                this._nBottomIndex = this.getLength();
+            },
+
+            /**
+             * @override
+             */
             $resize: function () {
                 ui.MScroll.prototype.$resize.call(this);
                 var style = this.getBody().style;
@@ -340,7 +346,7 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
-             * 重新加载数据
+             * 重新加载数据。
              * @public
              *
              * @param {Array} data 数据源
@@ -393,10 +399,8 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             add: function (item, index) {
                 this._bLoading = false;
-                if (!index && (!(item instanceof Array) || item.length)) {
-                    ui.Items.Methods.add.call(this, item, index);
-                    setEnterAndLeave.call(this);
-                }
+                ui.Items.Methods.add.call(this, item, index);
+                setEnterAndLeave.call(this);
             },
 
             /**

@@ -1006,6 +1006,16 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
+             * 判断是否已经缓存。
+             * @public
+             *
+             * @return {boolean} 控件是否已经缓存
+             */
+            isCached: function () {
+                return !!this._bCached;
+            },
+
+            /**
              * 判断是否响应浏览器事件。
              * 控件不响应浏览器事件时，相应的事件由父控件进行处理。
              * @public
