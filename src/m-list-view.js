@@ -52,6 +52,11 @@ _nBottomIndex  - 下部隐藏的选项序号
             this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
         },
         {
+            HTML_LOADING: '正在加载...',
+            HTML_REFRESH: '下拉刷新',
+            HTML_LOADED: '加载完成',
+            HTML_NODATA: '没有更多数据',
+
             /**
              * @override
              */
@@ -251,7 +256,10 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到达底部区域事件。
              * @event
              */
-            $footerenter: setEnterAndLeave,
+            $footerenter: function () {
+                setEnterAndLeave.call(this);
+                this.getFooter().innerHTML = this.HTML_LOADING;
+            },
 
             /**
              * 拖拽离开底部区域事件。
@@ -269,7 +277,10 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽到达顶部区域事件。
              * @event
              */
-            $headerenter: setEnterAndLeave,
+            $headerenter: function () {
+                setEnterAndLeave.call(this);
+                this.getHeader().innerHTML = this.HTML_REFRESH;
+            },
 
             /**
              * 拖拽离开顶部区域事件。
@@ -399,8 +410,10 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             add: function (item, index) {
                 this._bLoading = false;
+                var oldLength = this.getLength();
                 ui.Items.Methods.add.call(this, item, index);
                 setEnterAndLeave.call(this);
+                this.getFooter().innerHTML = oldLength === this.getLength() ? this.HTML_NODATA : this.HTML_LOADED;
             },
 
             /**
