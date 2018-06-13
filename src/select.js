@@ -79,11 +79,11 @@ _bRequired    - 是否必须选择
              * @protected
              */
             $alterItems: function () {
-                if (dom.getParent(this._uOptions.getOuter())) {
-                    var step = this.getBodyHeight(),
-                        width = this.getWidth(),
-                        itemLength = this.getItems().length;
+                var step = this.getBodyHeight(),
+                    width = this.getWidth(),
+                    itemLength = this.getItems().length;
 
+                if (dom.getParent(this._uOptions.getOuter())) {
                     // 为了设置激活状态样式, 因此必须控制下拉框中的选项必须在滚动条以内
                     this.setItemSize(width - this._uOptions.getMinimumWidth() - (itemLength > this._nOptionSize ? core.getScrollNarrow() : 0), step);
                     // 设置options框的大小，如果没有元素，至少有一个单位的高度
@@ -98,7 +98,6 @@ _bRequired    - 是否必须选择
             $initPopup: function () {
                 this.alterItems();
             },
-
 
             /**
              * 通过上下键与回车键操作下拉框。
