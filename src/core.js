@@ -105,7 +105,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     pointers.push(event.track);
 
                     if (pointers.length === 1) {
-                        isMobileMoved = pointerType === 'mouse' ? undefined : false;
+                        if (pointerType === 'mouse') {
+                            isMobileMoved = undefined;
+                        } else {
+                            isMobileMoved = false;
+                            currEnv.mouseover(event);
+                        }
                         currEnv.mousedown(event);
                         onpressure(event, event.getNative().pressure >= 0.4);
                     }
@@ -113,7 +118,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             pointermove: function (event) {
-                var track = tracks[event.pointerId];
+                var pointerId = event.pointerId,
+                    pointerType = event.pointerType,
+                    track = tracks[pointerId];
 
                 if (!track) {
                     track = {};
@@ -124,14 +131,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 calcSpeed(track, event);
 
                 // 没有trackCount表示是纯粹的鼠标移动行为
-                if (!pointers.length || event.getNative().pointerId === trackId) {
+                if (!pointers.length || pointerId === trackId) {
                     // Pointer设备上纯点击也可能会触发move
                     if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isMobileMoved === false) {
                         isMobileMoved = true;
                     }
 
                     event.track = track;
+                    event.target = getElementFromEvent(event.getNative());
                     currEnv.mousemove(event);
+                    if (pointerType !== 'mouse') {
+                        if (hoveredControl !== event.getControl()) {
+                            currEnv.mouseover(event);
+                        }
+                    }
                     onpressure(event, event.getNative().pressure >= 0.4);
                     ongesture(pointers, event);
                 }
@@ -172,6 +185,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         event.track = track;
                         currEnv.mouseup(event);
+                        if (event.getNative().pointerType !== 'mouse') {
+                            bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
+                        }
                         trackId = null;
                         onpressure(event, false);
                         ongesture(pointers, event);
