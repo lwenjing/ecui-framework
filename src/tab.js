@@ -231,10 +231,12 @@ _eContainer      - 容器 DOM 元素
                     this.setSelected(+(event.options.selected || 0));
                 }
 
-                core.addGestureListeners(this, {
-                    swipeleft: swipe,
-                    swiperight: swipe
-                });
+                if (event.options.gesture !== false) {
+                    core.addGestureListeners(this, {
+                        swipeleft: swipe,
+                        swiperight: swipe
+                    });
+                }
             },
 
             /**
