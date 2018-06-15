@@ -153,23 +153,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     // 模块发生变化，缓存状态下同样更换引擎
                     engine = loadStatus[name.split('.')[0]];
                     // 添加oncached事件，在路由已经cache的时候依旧执行
-                    if (!route.oncached || route.oncached(context) !== false) {
-                        var el = core.$(route.main);
-                        // TODO，如果没有，是否需要自动生成一个层?
-                        if (el) {
-                            el = core.findControl(el);
-                            var layers = ui.Layer.allShown(),
-                                index = layers.indexOf(el);
-                            if (index < 0) {
-                                if (el instanceof ui.Layer) {
-                                    el.show();
-                                }
-                            } else {
-                                for (; ++index < layers.length; ) {
-                                    layers[index].hide();
-                                }
-                            }
-                        }
+                    if (route.oncached) {
+                        route.oncached(context);
                     }
                     return;
                 }
@@ -365,6 +350,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
         if (el.route && routes[el.route].ondispose) {
             routes[el.route].ondispose();
+            el.route = null;
         }
         Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
             if (item.route) {
