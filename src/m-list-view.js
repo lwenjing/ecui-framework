@@ -249,7 +249,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 if (!this._bLoading) {
                     this._bLoading = true;
                     core.dispatchEvent(this, 'loaddata');
-                    this.getFooter().innerHTML = this.HTML_LOADING;
+                    this._eFooter.innerHTML = this.HTML_LOADING;
                 }
             },
 
@@ -277,7 +277,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $headerenter: function () {
                 setEnterAndLeave.call(this);
-                this.getHeader().innerHTML = this.HTML_REFRESH;
+                this._eHeader.innerHTML = this.HTML_REFRESH;
             },
 
             /**
@@ -371,6 +371,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this.premitAlterItems();
                 this.add(data);
                 this.reset();
+                this._eFooter.innerHTML = '';
             },
 
             /**
@@ -379,24 +380,26 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @param {Function} callback 处理完后回调
              */
             reset: function (callback) {
-                var y = this.getY(),
-                    top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight) + this.$$footerHeight,
-                    options = {
-                        $: {
-                            body: this.getBody(),
-                            head: this._eHeader,
-                            foot: this._eFooter
-                        },
-                        onfinish: callback && function () {
-                            callback();
-                        }
-                    };
-                // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
-                if (y > -this.$$headerHeight) {
-                    this._oHandle = core.effect.grade('this.body.style.top->' + -this.$$headerHeight + ';this.head.style.top->' + -this.$$headerHeight, 1000, options);
-                } else if (y !== -this.$$headerHeight && y < top) {
-                    // y !== -this.$$headerHeight解决items不够填充整个listview区域的问题
-                    this._oHandle = core.effect.grade('this.body.style.top->' + (top + this._nTopHidden) + ';this.foot.style.bottom->' + (y - top), 1000, options);
+                if (!this.isScrolling()) {
+                    var y = this.getY(),
+                        top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight) + this.$$footerHeight,
+                        options = {
+                            $: {
+                                body: this.getBody(),
+                                head: this._eHeader,
+                                foot: this._eFooter
+                            },
+                            onfinish: callback && function () {
+                                callback();
+                            }
+                        };
+                    // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
+                    if (y > -this.$$headerHeight) {
+                        this._oHandle = core.effect.grade('this.body.style.top->' + -this.$$headerHeight + ';this.head.style.top->' + -this.$$headerHeight + ';this.foot.style.bottom->' + (y + top), 1000, options);
+                    } else if (y !== -this.$$headerHeight && y < top) {
+                        // y !== -this.$$headerHeight解决items不够填充整个listview区域的问题
+                        this._oHandle = core.effect.grade('this.body.style.top->' + (top + this._nTopHidden) + ';this.foot.style.bottom->' + (y - top), 1000, options);
+                    }
                 }
             }
         },
@@ -411,7 +414,10 @@ _nBottomIndex  - 下部隐藏的选项序号
                 var oldLength = this.getLength();
                 ui.Items.Methods.add.call(this, item, index);
                 setEnterAndLeave.call(this);
-                this.getFooter().innerHTML = oldLength === this.getLength() ? this.HTML_NODATA : this.HTML_LOADED;
+                if (this.isReady()) {
+                    this._eFooter.style.bottom = '0px';
+                    this._eFooter.innerHTML = oldLength === this.getLength() ? this.HTML_NODATA : this.HTML_LOADED;
+                }
             },
 
             /**
