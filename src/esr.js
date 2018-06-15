@@ -1,5 +1,9 @@
 /*
 ECUI的路由处理扩展，支持按模块的动态加载，不同的模块由不同的模板引擎处理，因此不同模块可以有同名的模板，可以将模块理解成一个命名空间。
+使用示例：
+<body data-ecui="load:esr">
+支持的参数：
+esr(cache=true,meta=true)
 ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价于<a>标签，callRoute不会记录url信息，等价于传统的ajax调用，change用于参数的部分改变，一般用于翻页操作仅改变少量页码信息。
 */
 (function () {
