@@ -519,7 +519,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     delay = track.lastClick && Date.now() - track.lastClick.time,
                     commonParent;
 
-                if (swipeHandle && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) < 100) {
+                if (swipeHandle && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) < 50) {
                     swipeHandle();
                     swipeHandle = null;
                 }
@@ -1203,16 +1203,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                                 swipeHandle = null;
                                 if (tracks[track.identifier] !== track) {
                                     event.angle = track.angle;
-                                    if (event.angle > 160 && event.angle < 200) {
+                                    if (event.angle > 150 && event.angle < 210) {
                                         callback('swipeleft');
-                                    } else if (event.angle > 340 || event.angle < 20) {
+                                    } else if (event.angle > 330 || event.angle < 30) {
                                         callback('swiperight');
-                                    } else if (event.angle > 70 && event.angle < 110) {
+                                    } else if (event.angle > 60 && event.angle < 120) {
                                         callback('swipeup');
-                                    } else if (event.angle > 250 && event.angle < 290) {
+                                    } else if (event.angle > 240 && event.angle < 300) {
                                         callback('swipedown');
-                                    }
-                                    if (event.type) {
                                     }
                                     callback('swipe');
                                 }
@@ -2171,6 +2169,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 controls.forEach(function (item) {
                     item.object.init(item.options);
                 });
+
+                if (core.onready) {
+                    core.onready();
+                }
 
                 initRecursion--;
                 if (!initRecursion) {
