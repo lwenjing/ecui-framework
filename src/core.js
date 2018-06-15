@@ -519,7 +519,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     delay = track.lastClick && Date.now() - track.lastClick.time,
                     commonParent;
 
-                if (swipeHandle && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) < 50) {
+                if (swipeHandle && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) < 100) {
                     swipeHandle();
                     swipeHandle = null;
                 }
