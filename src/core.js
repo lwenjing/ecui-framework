@@ -38,7 +38,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         pointers = [],            // 当前所有正在监听的pointer对象
         gestureListeners = [],    // 手势监听
         gestureStack = [],        // 手势堆栈，受mask影响进行分层监听
-        swipeHandle = null,       // 手势滑动触发
         forcedControl = null,     // 当前被重压的控件
 
         pauseCount = 0,           // 暂停的次数
@@ -518,11 +517,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     control = event.getControl(),
                     delay = track.lastClick && Date.now() - track.lastClick.time,
                     commonParent;
-
-                if (swipeHandle && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) < 100) {
-                    swipeHandle();
-                    swipeHandle = null;
-                }
 
                 if (activedControl !== undefined) {
                     if (isMobileMoved !== undefined && delay < 300) { // TouchEvent
@@ -1199,9 +1193,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     if (event.getNative().type.slice(-4) === 'move') {
                         if (!track.swipe && Date.now() - track.lastClick.time < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
                             track.swipe = true;
-                            swipeHandle = util.timer(function () {
-                                swipeHandle = null;
-                                if (tracks[track.identifier] !== track) {
+                            util.timer(function () {
+                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) > 100) {
                                     event.angle = calcAngle(track.lastX - track.originalX, track.lastY - track.originalY);
                                     if (event.angle > 150 && event.angle < 210) {
                                         callback('swipeleft');
