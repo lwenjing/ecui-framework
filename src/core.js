@@ -1202,7 +1202,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             swipeHandle = util.timer(function () {
                                 swipeHandle = null;
                                 if (tracks[track.identifier] !== track) {
-                                    event.angle = track.angle;
+                                    event.angle = calcAngle(track.lastX - track.originalX, track.lastY - track.originalY);
                                     if (event.angle > 150 && event.angle < 210) {
                                         callback('swipeleft');
                                     } else if (event.angle > 330 || event.angle < 30) {
