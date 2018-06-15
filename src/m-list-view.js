@@ -246,7 +246,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $footercomplete: function () {
                 setComplete.call(this);
-                if (!this._bLoading) {
+                if (!this._bLoading && this._eFooter.innerHTML !== this.HTML_NODATA) {
                     this._bLoading = true;
                     core.dispatchEvent(this, 'loaddata');
                     this._eFooter.innerHTML = this.HTML_LOADING;
