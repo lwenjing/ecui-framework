@@ -96,7 +96,7 @@ do
             else
                 if [ "${file##*.}" = "html" ]
                 then
-                    java -jar ../lib-fe/smarty4j.jar "$1/$file" --left \<\!--{ --right }--\> --charset utf-8 | eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/<header/<div style=\\\"display:none\\\"/g\" -e \"s/<\/header/<\/div/g\" -e \"s/<container/<div ui=\\\"type:layer\\\" style=\\\"display:none\\\"/g\" -e \"s/<\/container/<\/div/g\" $reg_comment" > "$output/$file"
+                    java -jar lib-fe/smarty4j.jar "$1/$file" --left \<\!--{ --right }--\> --charset utf-8 | eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/<header/<div style=\\\"display:none\\\"/g\" -e \"s/<\/header/<\/div/g\" -e \"s/<container/<div ui=\\\"type:layer\\\" style=\\\"display:none\\\"/g\" -e \"s/<\/container/<\/div/g\" $reg_comment" > "$output/$file"
                 else
                     cp "$1/$file" "$output/"
                 fi
