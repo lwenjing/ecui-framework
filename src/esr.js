@@ -349,20 +349,21 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         el.style.visibility = 'hidden';
 
         if (el.route && routes[el.route].ondispose) {
+            dom.removeClass(el, el.route.replace(/\./g, '-'));
             routes[el.route].ondispose();
             el.route = null;
         }
         Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
-            if (item.route) {
-                item = routes[item.route];
-                if (item.ondispose) {
-                    item.ondispose();
-                }
+            if (item.route && routes[item.route].ondispose) {
+                routes[item.route].ondispose();
             }
         });
 
         core.dispose(el, true);
         el.innerHTML = engine.render(name || route.view, context);
+        if (route.NAME) {
+            dom.addClass(el, route.NAME.replace(/\./g, '-'));
+        }
         core.init(el);
 
         afterrender(route);
