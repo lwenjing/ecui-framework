@@ -1092,11 +1092,13 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         commandClose: '-->'
                     });
 
-                    el = ecui.dom.last(ecui.dom.first(document.body));
-                    var children = ecui.dom.children(el.parentNode);
-                    for (var i = 1; i < children.length; i += 2) {
-                        children[i].header = children[i - 1];
-                        el.appendChild(children[i]);
+                    if (esrOptions.app) {
+                        el = ecui.dom.last(ecui.dom.first(document.body));
+                        var children = ecui.dom.children(el.parentNode);
+                        for (var i = 1; i < children.length; i += 2) {
+                            children[i].header = children[i - 1];
+                            el.appendChild(children[i]);
+                        }
                     }
 
                     if (esr.onready) {
