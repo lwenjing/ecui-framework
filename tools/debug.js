@@ -166,6 +166,26 @@
             });
         }
 
+        function loadLayer(url) {
+            ecui.io.ajax(url, {
+                cache: true,
+                onsuccess: function (text) {
+                    text = text.replace('<header', '<div style="display:none"');
+                    text = text.replace('<container', '<div ui="type:layer" style="display:none"');
+                    text = text.replace('</header>', '</div>');
+                    text = text.replace('</container>', '</div>');
+                    var el = ecui.dom.last(ecui.dom.first(document.body));
+                    ecui.dom.insertHTML(el, 'beforeBegin', text);
+                    ecui.init(el.parentNode);
+                    var children = ecui.dom.children(el.parentNode);
+                    children[children.length - 2].header = children[children.length - 3];
+                    el.appendChild(children[children.length - 2]);
+                    loadRouteCss();
+                },
+                onerror: loadRouteCss
+            });
+        }
+
         var filename = moduleRoute[0];
         oldLoadScriptFn(moduleName + '/route.' + filename + '.js', null, {cache: true});
 
@@ -173,10 +193,10 @@
             cache: true,
             onsuccess: function (cssText) {
                 createStyle(cssText);
-                loadRouteCss();
+                loadLayer(moduleName + '/layer.' + filename + '.html');
             },
             onerror: function () {
-                loadRouteCss();
+                loadLayer(moduleName + '/layer.' + filename + '.html');
             }
         });
     }

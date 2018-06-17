@@ -132,7 +132,7 @@ s/\([^A-Za-z0-9_]\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file=\"route.
             else
                 if [ "${file##*.}" = "html" ]
                 then
-                    cat "$file" | java -jar "$libpath/smarty4j.jar" --left \<\!--{ --right }--\> --charset utf-8 | eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/<header/<div style=\\\"display:none\\\"/g\" -e \"s/<\/header/<\/div/g\" -e \"s/<container/<div ui=\\\"type:layer\\\" style=\\\"display:none\\\"/g\" -e \"s/<\/container/<\/div/g\" $reg_comment" > "$output/$file"
+                    sed -e "s/<body.*data-ecui=.*app=true.*/&<!--{include file=\".app-container.html\"}-->/g" "$file" | java -jar "$libpath/smarty4j.jar" --left \<\!--{ --right }--\> --charset utf-8 | eval "sed -e \"s/stylesheet\/less[^\\\"]*/stylesheet/g\" -e \"s/<header/<div style=\\\"display:none\\\"/g\" -e \"s/<\/header/<\/div/g\" -e \"s/<container/<div ui=\\\"type:layer\\\" style=\\\"display:none\\\"/g\" -e \"s/<\/container/<\/div/g\" $reg_comment" > "$output/$file"
                 else
                     cp "$file" "$output/"
                 fi
