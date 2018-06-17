@@ -38,7 +38,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         localStorage,
         metaVersion,
         meta,
-        appConfig,
         lastLayer,
         lastRouteName;
 
@@ -487,7 +486,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     // 当前路由不使用动画
                     layer.setPosition(0);
                 } else {
-                    var position = appConfig[lastRouteName] < appConfig[route.NAME] ? view.width : -view.width;
+                    var position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width;
                     layer.setPosition(position);
 
                     ecui.effect.grade(
@@ -729,23 +728,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
          */
         getRoute: function (name) {
             return routes[name];
-        },
-
-        /**
-         * 初始化 APP。
-         * @public
-         *
-         * @param {object} config APP配置信息
-         */
-        initApp: function (config) {
-            var el = ecui.dom.last(ecui.dom.first(document.body));
-            var children = ecui.dom.children(el.parentNode);
-            for (var i = 1; i < children.length; i += 2) {
-                children[i].header = children[i - 1];
-                el.appendChild(children[i]);
-            }
-
-            appConfig = config;
         },
 
         /**
@@ -1109,6 +1091,13 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         commandOpen: '<!--',
                         commandClose: '-->'
                     });
+
+                    el = ecui.dom.last(ecui.dom.first(document.body));
+                    var children = ecui.dom.children(el.parentNode);
+                    for (var i = 1; i < children.length; i += 2) {
+                        children[i].header = children[i - 1];
+                        el.appendChild(children[i]);
+                    }
 
                     if (esr.onready) {
                         var defaultRoute = esr.onready();
