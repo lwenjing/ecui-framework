@@ -57,6 +57,8 @@ then
     mkdir $output
 fi
 
+find . $* -type f -name "layer.*" | sed -e "s/\(\.\/\)\(.*\)/\<\!--{include file=\"\2\"}--\>/" > .layers
+
 for file in `ls`
 do
     if [ -d "$file" ]
@@ -174,7 +176,7 @@ then
 
     cd $output
     tar -zcvf "../$1.tar.gz" *
-    rm -rf $output
+    #rm -rf $output
 else
     cd $output
     tar -zcvf "../output.tar.gz" *

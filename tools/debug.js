@@ -46,38 +46,6 @@
 }());*/
 
 (function () {
-    ecui.dom.ready(function () {
-        function include(node, url) {
-            ecui.pause();
-            ecui.io.ajax(url, {
-                onsuccess: function (text) {
-                    text = text.replace('<header', '<div style="display:none"');
-                    text = text.replace('<container', '<div ui="type:layer" style="display:none"');
-                    text = text.replace('</header>', '</div>');
-                    text = text.replace('</container>', '</div>');
-                    for (var el = ecui.dom.create({innerHTML: text}).firstChild; el; el = next) {
-                        var next = el.nextSibling;
-                        ecui.dom.insertBefore(el, node);
-                    }
-                    ecui.dom.remove(node);
-                    ecui.resume();
-                }
-            });
-        }
-        function scan(el) {
-            for (var node = el.firstChild; node; node = node.nextSibling) {
-                if (node.nodeType === 1) {
-                    scan(node);
-                } else if (node.nodeType === 8) {
-                    if (/include file="(.+)"/.test(node.nodeValue)) {
-                        include(node, RegExp.$1);
-                    }
-                }
-            }
-        }
-        scan(document.body);
-    });
-
     /**
      * 动态加载模块，用于测试。
      * @public
