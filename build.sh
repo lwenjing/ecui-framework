@@ -176,7 +176,7 @@ then
 
     cd $output
     tar -zcvf "../$1.tar.gz" *
-    rm -rf $output
+    #rm -rf $output
 else
     cd $output
     tar -zcvf "../output.tar.gz" *

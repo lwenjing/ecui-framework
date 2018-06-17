@@ -1099,6 +1099,11 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             children[i].header = children[i - 1];
                             el.appendChild(children[i]);
                         }
+                        el = core.$(parseLocation(esr.getLocation())['']);
+                        if (el) {
+                            el.getControl().show();
+                            el.header.style.display = '';
+                        }
                     }
 
                     if (esr.onready) {
