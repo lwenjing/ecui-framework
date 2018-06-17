@@ -234,7 +234,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 document.body.appendChild(iframe);
                 setInterval(listener, 100);
             } else if (window.onhashchange !== undefined) {
-                ecui.dom.addEventListener(window, 'hashchange', listener);
+                dom.addEventListener(window, 'hashchange', listener);
                 listener();
             } else {
                 setInterval(listener, 100);
@@ -463,8 +463,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      */
     function transition(route) {
         function getLayer(route) {
-            for (var el = ecui.$(route.main); el; el = ecui.dom.getParent(el)) {
-                if (el.getControl && el.getControl() instanceof ecui.ui.Layer) {
+            for (var el = core.$(route.main); el; el = dom.getParent(el)) {
+                if (el.getControl && el.getControl() instanceof ui.Layer) {
                     return el.getControl();
                 }
             }
@@ -472,7 +472,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
         if (route.NAME !== lastRouteName) {
             var layer = getLayer(route),
-                view = ecui.util.getView();
+                view = util.getView();
 
             if (lastLayer) {
                 lastLayer.getMain().header.style.display = 'none';
@@ -489,7 +489,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     var position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width;
                     layer.setPosition(position);
 
-                    ecui.effect.grade(
+                    core.effect.grade(
                         'this.from.style.left->' + -position + ';this.to.style.left->0',
                         600,
                         {
@@ -498,7 +498,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                                 // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
                                 lastLayer.hide();
                                 if (this.to.id === 'common') {
-                                    ecui.$('backup').id = 'common';
+                                    core.$('backup').id = 'common';
                                     this.to.id = 'backup';
                                 }
                                 lastLayer = layer;
@@ -1084,7 +1084,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     for (var el = document.body.firstChild; el; el = el.nextSibling) {
                         if (el.nodeType === 8) {
                             etpl.compile(el.textContent || el.nodeValue);
-                            ecui.dom.remove(el);
+                            dom.remove(el);
                         }
                     }
                     etpl.config({
@@ -1093,8 +1093,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     });
 
                     if (esrOptions.app) {
-                        el = ecui.dom.last(ecui.dom.first(document.body));
-                        var children = ecui.dom.children(el.parentNode);
+                        el = dom.last(dom.first(document.body));
+                        var children = dom.children(el.parentNode);
                         for (var i = 1; i < children.length; i += 2) {
                             children[i].header = children[i - 1];
                             el.appendChild(children[i]);
