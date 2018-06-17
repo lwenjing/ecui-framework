@@ -1145,6 +1145,11 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     onsuccess: function (text) {
                         dom.insertHTML(document.body, 'afterBegin', text);
                         loadInit();
+                    },
+                    onerror: function () {
+                        console.log('找不到APP的布局文件，请确认.app-container.html文件是否存在');
+                        esrOptions.app = false;
+                        loadInit();
                     }
                 });
             }
