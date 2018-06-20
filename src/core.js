@@ -1149,6 +1149,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         allControls.push(control);
 
         if (options.id) {
+//{if 0}//
+            if (namedControls[options.id]) {
+                console.error('The identifier("' + options.id + '") has existed.');
+            }
+//{/if}//
             namedControls[options.id] = control;
             control.$ID = options.id;
             if (isGlobalId) {
