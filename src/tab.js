@@ -228,8 +228,8 @@ _eContainer      - 容器 DOM 元素
             $ready: function (event) {
                 ui.Control.prototype.$ready.call(this, event.options);
 
-                if (!this._cSelected) {
-                    this.setSelected(+(event.options.selected || 0));
+                if (!this._cSelected && event.options.selected !== 'none') {
+                    this.setSelected(+(event.options.selected) || 0);
                 }
 
                 if (event.options.gesture !== false) {
@@ -275,7 +275,7 @@ _eContainer      - 容器 DOM 元素
                     item = this.getItem(item);
                 }
 
-                if (item && this._cSelected !== item) {
+                if (this._cSelected !== item) {
                     if (this._cSelected) {
                         this._cSelected.alterClass('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {
