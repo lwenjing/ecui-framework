@@ -2157,7 +2157,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                                         ui[util.toCamelCase(options.type.charAt(0).toUpperCase() + options.type.slice(1))] :
                                         util.parseValue(options.type, ui) || util.parseValue(options.type) :
                                 ui.Control;
-                        controls.push({object: core.$create(item, options), options: options});
+//{if 0}//
+                        try {
+//{/if}//
+                            controls.push({object: core.$create(item, options), options: options});
+//{if 0}//
+                        } catch (e) {
+                            console.error('The type:' + options.type + ' can\'t constructor');
+                        }
+//{/if}//
                     }
                 });
 
