@@ -337,6 +337,7 @@
             var engine = this.engine;
             var open = engine.options.variableOpen;
             var code = [];
+            var firstOutput = true;
 
             this.value.split(open.replace('$', '=')).forEach(function (text, i) {
                 if (i) {
@@ -346,10 +347,10 @@
                         engine.options.variableClose,
                         2,
                         function (text) {
-                            text = text.trim();
-                            if (text.charAt(0) !== '$') {
+                            if (!firstOutput && text.charAt(0) !== '$') {
                                 text = '${' + text + '}';
                             }
+                            firstOutput = false;
                             code.push(
                                 RENDER_STRING_ADD_START,
                                 'f["' + engine.options.defaultFilter + '"](B(' + compileVariable(text, engine) + '))',
