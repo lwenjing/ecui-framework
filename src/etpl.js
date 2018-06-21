@@ -338,6 +338,7 @@
             var open = engine.options.variableOpen;
             var code = [];
             var firstOutput = true;
+            var leftText;
 
             this.value.split(open.replace('$', '=')).forEach(function (text, i) {
                 if (i) {
@@ -347,9 +348,7 @@
                         engine.options.variableClose,
                         2,
                         function (text) {
-                            if (!firstOutput) {
-                                text = '${' + text + '}';
-                            }
+                            text = firstOutput ? leftText + text : '${' + text + '}';
                             firstOutput = false;
                             code.push(
                                 RENDER_STRING_ADD_START,
@@ -358,7 +357,11 @@
                             );
                         },
                         function (text) {
-                            code.push(compileVariable(text, engine, 1));
+                            if (firstOutput) {
+                                leftText = text;
+                            } else {
+                                code.push(compileVariable(text, engine, 1));
+                            }
                         }
                     );
                 } else {
