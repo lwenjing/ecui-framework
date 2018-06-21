@@ -9,6 +9,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         util = core.util,
         ui = core.ui,
 
+        JAVASCRIPT = 'javascript',
         fontSizeCache = core.fontSizeCache,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isPointer = !isMobile && !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
@@ -370,7 +371,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
-            click: function (event) {
+            click: function () {
                 if (activedControl !== undefined) {
                     // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
                     activedControl = undefined;
@@ -498,8 +499,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mouseup: function (event) {
                 function blockAhref(el) {
                     var href = el.href;
-                    if (href !== 'javascript:void(0)') {
-                        el.href = 'javascript:void(0)';
+                    if (href !== JAVASCRIPT + ':void(0)') {
+                        el.href = JAVASCRIPT + ':void(0)';
                         util.timer(function () {
                             el.href = href;
                         }, 100);
