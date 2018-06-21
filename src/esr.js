@@ -883,7 +883,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         } else if (method[0] === 'FORM') {
                             valid = esr.parseObject(document.forms[item[0]], data);
                         } else {
-                            data = replace(item[0]);
+                            util.extend(data, replace(item[0]));
                         }
                     });
 
