@@ -337,11 +337,11 @@
             var engine = this.engine;
             var open = engine.options.variableOpen;
             var code = [];
-            var firstOutput = true;
-            var leftText;
 
             this.value.split(open.replace('$', '=')).forEach(function (text, i) {
                 if (i) {
+                    var firstOutput = true;
+                    var leftText = '';
                     parseTextBlock(
                         text,
                         open,
