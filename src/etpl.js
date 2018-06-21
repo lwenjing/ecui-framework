@@ -347,7 +347,7 @@
                         engine.options.variableClose,
                         2,
                         function (text) {
-                            if (!firstOutput && text.charAt(0) !== '$') {
+                            if (!firstOutput) {
                                 text = '${' + text + '}';
                             }
                             firstOutput = false;
