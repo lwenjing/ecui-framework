@@ -116,8 +116,6 @@ _eContainer      - 容器 DOM 元素
                     if (el.tagName !== 'STRONG') {
                         var containerEl = el;
                         el = dom.first(el);
-                        el.className = containerEl.className;
-                        containerEl.className = '';
                     }
 
                     ui.Item.call(this, el, options);
