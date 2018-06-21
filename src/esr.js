@@ -125,6 +125,11 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @param {Object} route 路由对象
      */
     function beforerender(route) {
+//{if 0}//
+        if (route.main === 'AppCommonContainer') {
+            core.dispose(core.$('AppBackupContainer'), true);
+        }
+//{/if}//
         if (route.onbeforerender) {
             route.onbeforerender(context);
         }
@@ -497,9 +502,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             onfinish: function () {
                                 // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
                                 lastLayer.hide();
-                                if (this.to.id === 'common') {
-                                    core.$('backup').id = 'common';
-                                    this.to.id = 'backup';
+                                if (this.to.id === 'AppCommonContainer') {
+                                    core.$('AppBackupContainer').id = 'AppCommonContainer';
+                                    this.to.id = 'AppBackupContainer';
                                 }
                                 lastLayer = layer;
                             }
@@ -1093,6 +1098,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     });
 
                     if (esrOptions.app) {
+                        el = core.$('AppCommonContainer');
+                        el.id = 'AppBackupContainer';
+                        dom.insertHTML(el, 'afterEnd', dom.previous(el).outerHTML + el.outerHTML);
+                        el.id = 'AppCommonContainer';
                         el = dom.last(dom.first(document.body));
                         var children = dom.children(el.parentNode);
                         for (var i = 1; i < children.length; i += 2) {
