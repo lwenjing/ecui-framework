@@ -203,6 +203,14 @@
                     buf = [];
                 }
             } else if (text) {
+                if (level) {
+                    closeIndex = text.indexOf(close);
+                    if (closeIndex >= 0) {
+                        onInBlock(text.slice(0, closeIndex));
+                        text = text.slice(closeIndex + closeLen);
+                        level--;
+                    }
+                }
                 onOutBlock(text);
             }
         });
@@ -364,6 +372,9 @@
                             }
                         }
                     );
+                    if (firstOutput && leftText) {
+                        code.push(compileVariable(leftText, engine, 1));
+                    }
                 } else {
                     code.push(compileVariable(text, engine, 1));
                 }
