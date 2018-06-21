@@ -9,6 +9,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         util = core.util,
         ui = core.ui,
 
+        JAVASCRIPT = 'javascript',
         fontSizeCache = core.fontSizeCache,
         isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
         isPointer = !isMobile && !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
@@ -378,7 +379,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 event = core.wrapEvent(event);
 
-                control = event.getTarget();
+                var control = event.getTarget();
                 if (control && control.isDisabled()) {
                     // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
                     event.preventDefault();
@@ -504,6 +505,14 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             mouseup: function (event) {
+                function blockAhref(el) {
+                    var href = el.href;
+                    el.href = JAVASCRIPT + ':void(0)';
+                    util.timer(function () {
+                        el.href = href;
+                    }, 1000);
+                }
+
                 var track = event.track,
                     control = event.getControl(),
                     delay = track.lastClick && Date.now() - track.lastClick.time,
@@ -529,11 +538,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                 // 取消冒泡要阻止A标签提交
                                 for (var el = event.getControl().getMain(); el; el = dom.getParent(el)) {
                                     if (el.tagName === 'A') {
-                                        var href = el.href;
-                                        el.href = '#' + core.esr.getLocation();
-                                        util.timer(function () {
-                                            el.href = href;
-                                        });
+                                        blockAhref(el, el.href);
                                         break;
                                     }
                                 }
