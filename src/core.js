@@ -378,15 +378,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 event = core.wrapEvent(event);
 
-                if (isMobile) {
-                    for (var control = event.target; control; control = dom.getParent(control)) {
-                        if (control.tagName === 'A') {
-                            event.preventDefault();
-                            break;
-                        }
-                    }
-                }
-
                 control = event.getTarget();
                 if (control && control.isDisabled()) {
                     // 取消点击的默认行为，只要外层的Control被屏蔽，内部的链接(A)与输入框(INPUT)全部不能再得到焦点
@@ -533,6 +524,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         commonParent = getCommonParent(control, activedControl);
                         if (isMobileMoved === undefined || (isMobileMoved === false && delay < 300)) { // MouseEvent
                             bubble(commonParent, 'click', event);
+
+                            if (event.cancelBubble) {
+                                // 取消冒泡要阻止A标签提交
+                                for (var el = event.getControl().getMain(); el; el = dom.getParent(el)) {
+                                    if (el.tagName === 'A') {
+                                        var href = el.href;
+                                        el.href = '#' + core.esr.getLocation();
+                                        util.timer(function () {
+                                            el.href = href;
+                                        });
+                                        break;
+                                    }
+                                }
+                            }
                         }
                         // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
                         // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题
