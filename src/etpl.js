@@ -346,9 +346,13 @@
                         engine.options.variableClose,
                         2,
                         function (text) {
+                            text = text.trim();
+                            if (text.charAt(0) !== '$') {
+                                text = '${' + text + '}';
+                            }
                             code.push(
                                 RENDER_STRING_ADD_START,
-                                'f["' + engine.options.defaultFilter + '"](String(' + compileVariable(text, engine) + '))',
+                                'f["' + engine.options.defaultFilter + '"](B(' + compileVariable(text, engine) + '))',
                                 RENDER_STRING_ADD_END
                             );
                         },
