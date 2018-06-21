@@ -1155,9 +1155,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      *
      * @param {ecui.ui.Control} control
      * @param {Object} options 控件初始化选项
-     * @param {boolean} existed 是否已经存在，默认为否
      */
-    function oncreate(control, options, existed) {
+    function oncreate(control, options) {
         if (control.oncreate) {
             control.oncreate(options);
         }

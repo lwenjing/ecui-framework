@@ -159,18 +159,26 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 }
             }
 
-            if (context.DENY_CACHE !== true && route.cache && core.$(route.main).route === route.NAME) {
-                // 数据必须还在才触发缓存
-                // 模块发生变化，缓存状态下同样更换引擎
-                engine = loadStatus[name.split('.')[0]];
-                // 添加oncached事件，在路由已经cache的时候依旧执行
-                if (esrOptions.app) {
-                    transition(route);
+            if (context.DENY_CACHE !== true) {
+                if (route.cache && core.$(route.main).route === route.NAME) {
+                    // 数据必须还在才触发缓存
+                    // 模块发生变化，缓存状态下同样更换引擎
+                    engine = loadStatus[name.split('.')[0]];
+                    // 添加oncached事件，在路由已经cache的时候依旧执行
+                    if (esrOptions.app) {
+                        transition(route);
+                    }
+                    if (route.oncached) {
+                        route.oncached(context);
+                    }
+                    return;
                 }
-                if (route.oncached) {
-                    route.oncached(context);
-                }
-                return;
+            } else {
+                // 解决A标签下反复修改的问题
+                util.timer(function () {
+                    currLocation = esr.getLocation().replace('~DENY_CACHE', '');
+                    history.replaceState('', '', '#' + currLocation);
+                }, 100);
             }
 
             if (!route.onrender || route.onrender() !== false) {
@@ -280,7 +288,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      */
     function redirect(loc) {
         if (pauseStatus) {
-            if (window.onhashchange) {
+            if (window.onhashchange !== undefined) {
                 setTimeout(listener, 100);
             }
         } else {
@@ -293,9 +301,11 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             if (!loc) {
                 loc = esr.DEFAULT_PAGE;
                 if (historyCache) {
-                    loc += '~ECUI_CACHE=' + historyIndex;
+                    loc += '~CACHE_NUM=' + historyIndex;
                     if (!(ieVersion < 9)) {
-                        history.replaceState('', '', '#' + loc);
+                        util.timer(function () {
+                            history.replaceState('', '', '#' + loc);
+                        }, 100);
                         return;
                     }
                 }
@@ -319,16 +329,16 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     });
                     historyIndex++;
 
-                    if (/~ECUI_CACHE=(\d+)/.test(loc)) {
+                    if (/~CACHE_NUM=(\d+)/.test(loc)) {
                         historyIndex = +RegExp.$1;
                     } else {
                         historyData.splice(historyIndex, historyData.length - historyIndex);
-                        loc += '~ECUI_CACHE=' + historyIndex;
+                        loc += '~CACHE_NUM=' + historyIndex;
                         if (ieVersion < 9) {
                             pauseStatus = true;
                             history.back();
                             var handle = util.timer(function () {
-                                if (/~ECUI_CACHE=(\d+)/.test(location.href)) {
+                                if (/~CACHE_NUM=(\d+)/.test(location.href)) {
                                     esr.setLocation(loc);
                                     pauseStatus = false;
                                     handle();
@@ -336,7 +346,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             }, -10);
                             return;
                         }
-                        history.replaceState('', '', '#' + loc);
+                        util.timer(function () {
+                            history.replaceState('', '', '#' + loc);
+                        }, 100);
                     }
                 }
                 // ie下使用中间iframe作为中转控制
@@ -1126,7 +1138,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 });
             }
 
-            esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([^\s]+)\s*($|,)/g, '"$1":"$2"')) + '}');
+            esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([A-Za-z0-9_]+)\s*($|,)/g, '"$1":"$2"$3')) + '}');
 
             if (esrOptions.meta) {
                 if (window.localStorage) {
@@ -1161,7 +1173,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         loadInit();
                     },
                     onerror: function () {
-                        console.log('找不到APP的布局文件，请确认.app-container.html文件是否存在');
+                        console.error('找不到APP的布局文件，请确认.app-container.html文件是否存在');
                         esrOptions.app = false;
                         loadInit();
                     }
