@@ -62,7 +62,7 @@ _eContainer      - 容器 DOM 元素
         if (items[index] !== this._cSelected) {
             this.setSelected(items[index]);
             core.dispatchEvent(this, 'change');
-            var el = dom.first(this._cSelected.getMain());
+            var el = this._cSelected.getMain();
             if (el && el.tagName === 'A' && el.href) {
                 location.href = el.href;
             }

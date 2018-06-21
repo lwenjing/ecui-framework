@@ -1155,12 +1155,12 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      *
      * @param {ecui.ui.Control} control
      * @param {Object} options 控件初始化选项
+     * @param {boolean} existed 是否已经存在，默认为否
      */
-    function oncreate(control, options) {
+    function oncreate(control, options, existed) {
         if (control.oncreate) {
             control.oncreate(options);
         }
-        allControls.push(control);
 
         if (options.id) {
 //{if 0}//
@@ -1543,6 +1543,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             oncreate(control, options);
+            allControls.push(control);
             independentControls.push(control);
 
             // 处理所有的委托操作，参见delegate
@@ -1583,6 +1584,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             var control = new UIClass(el, options);
             control.$setParent(parent);
             oncreate(control, options);
+            allControls.push(control);
 
             return control;
         },
@@ -2165,6 +2167,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                 list.forEach(function (item) {
                     if (options = core.getOptions(item)) {
+                        if (item.getControl) {
+                            oncreate(item.getControl(), options);
+                            return;
+                        }
                         options.main = item;
                         item = options.type ?
                                 options.type.indexOf('.') < 0 ?
