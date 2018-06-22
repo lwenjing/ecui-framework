@@ -168,6 +168,9 @@
                 this.premitAlterItems();
                 this.alterItems();
 
+                if (this.isReady()) {
+                    core.init(this.getBody());
+                }
                 return items;
             },
 
