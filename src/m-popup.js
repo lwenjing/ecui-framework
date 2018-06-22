@@ -23,6 +23,7 @@
         constructor: function (el, options) {
             namedMap[this.getUID()] = namedMap[this.getUID()] || {};
             namedMap[this.getUID()].enter = (position[options.enter || 'right'] || position.right).concat([options.scale ? Math.max(0, 1 - (options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale)) : 0]);
+            this.enter = options.enter;
         },
 
         Methods: {
@@ -37,7 +38,9 @@
                         el = popup.getOuter(),
                         style = el.style,
                         width = view.width * data.enter[1],
-                        height;
+                        height,
+                        popTop = height * data.enter[2],
+                        popLeft = width * data.enter[2];
 
                     view.height = util.toNumber(document.body.style.height);
                     height = view.height * data.enter[0];
@@ -53,11 +56,18 @@
                     if (dom.contain(this.getOuter(), event.target)) {
                         style.top = height + 'px';
                         style.left = width + 'px';
-                        popup.setSize(view.width, view.height);
+                        if (this.enter === 'top') {
+                            popTop = 0;
+                            height = -height;
+                        } else if (this.enter === 'left') {
+                            popLeft = 0;
+                            width = -width;
+                        }
+                        popup.setSize(view.width - width * data.enter[2], view.height - height * data.enter[2]);
 
                         locked = true;
                         ecui.effect.grade(
-                            'round:this.style.left->' + (width * data.enter[2]) + ';round:this.style.top->' + (height * data.enter[2]),
+                            'round:this.style.left->' + popLeft + ';round:this.style.top->' + popTop,
                             1000,
                             {
                                 $: el,
