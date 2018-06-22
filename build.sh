@@ -139,16 +139,16 @@ s/\([^A-Za-z0-9_]\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file=\"route.
     fi
 done
 
+if [ ! -d "$output/images/" ]
+then
+    mkdir "$output/images/"
+fi
+echo "copy lib-fe/images/"
+cp -R $lib/images/* "$output/images/"
+
 if [ $1 ]
 then
     cd $lib
-
-    if [ ! -d "$output/images/" ]
-    then
-        mkdir "$output/images/"
-    fi
-    echo "copy lib-fe/images/"
-    cp -R images/* "$output/images/"
 
     for file in `ls`
     do
