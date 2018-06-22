@@ -73,6 +73,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
     function afterrender(route) {
         if (esrOptions.app) {
             transition(route);
+            var layer = getLayer(route);
+            if (layer) {
+                layer.location = currLocation;
+            }
         }
 
         if (route.onafterrender) {
@@ -160,7 +164,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             }
 
             if (context.DENY_CACHE !== true) {
-                if (getLayer(route) && core.$(route.main).location === currLocation) {
+                var layer = getLayer(route);
+                if (layer && layer.location === currLocation) {
                     // 数据必须还在才触发缓存
                     // 模块发生变化，缓存状态下同样更换引擎
                     engine = loadStatus[name.split('.')[0]];
@@ -417,7 +422,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
         if (route.NAME) {
             el.route = route.NAME;
-            el.location = currLocation;
             autoChildRoute(route);
         } else {
             autoChildRoute(route);
