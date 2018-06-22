@@ -53,12 +53,9 @@ fi
 libpath="$lib"
 
 rm -rf $output
-if [ ! -d $output ]
-then
-    mkdir $output
-fi
+mkdir $output
 
-find . $* -type f -name "layer.*" | sed -e "s/\(\.\/\)\(.*\)/\<\!--{include file=\"\2\"}--\>/" > .layers
+find . -type f -name "layer.*" | sed -e "s/\(\.\/\)\(.*\)/\<\!--{include file=\"\2\"}--\>/" > .layers
 
 for file in `ls`
 do
@@ -142,16 +139,17 @@ s/\([^A-Za-z0-9_]\)ecui.esr.loadRoute('\([^']*\)');/\1\/\/{include file=\"route.
     fi
 done
 
-if [ ! -d "$output/images/" ]
-then
-    mkdir "$output/images/"
-fi
-echo "copy images/"
-cp -R images/* "$output/images/"
-
 if [ $1 ]
 then
     cd $lib
+
+    if [ ! -d "$output/images/" ]
+    then
+        mkdir "$output/images/"
+    fi
+    echo "copy lib-fe/images/"
+    cp -R images/* "$output/images/"
+
     for file in `ls`
     do
         if [ -f $file ]
