@@ -571,8 +571,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             }
         ),
 
-        // 管理层
-        Layer: core.inherits(ui.Control),
+        // 布局层，用于加载结构
+        AppLayer: core.inherits(ui.Control),
 
         /**
          * 添加路由信息。
