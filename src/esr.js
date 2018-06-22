@@ -232,7 +232,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      */
     function getLayer(route) {
         for (var el = core.$(route.main); el; el = dom.getParent(el)) {
-            if (el.getControl && el.getControl() instanceof esr.Layer) {
+            if (el.getControl && el.getControl() instanceof esr.AppLayer) {
                 return el.getControl();
             }
             // 子路由不直接返回层
