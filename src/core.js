@@ -2183,6 +2183,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 //{if 0}//
                         } catch (e) {
                             console.error('The type:' + options.type + ' can\'t constructor');
+                            throw e;
                         }
 //{/if}//
                     }
