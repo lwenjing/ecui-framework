@@ -165,7 +165,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
             if (context.DENY_CACHE !== true) {
                 var layer = getLayer(route);
-                if (layer && layer.location === currLocation) {
+                if (route.CACHE === undefined ? layer && layer.location === currLocation : route.CACHE) {
                     // 数据必须还在才触发缓存
                     // 模块发生变化，缓存状态下同样更换引擎
                     engine = loadStatus[name.split('.')[0]];
