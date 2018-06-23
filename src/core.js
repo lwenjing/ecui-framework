@@ -2146,6 +2146,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (isMobile) {
                     events.orientationchange();
                     util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+                    (function () {
+                        var getView = util.getView;
+                        util.getView = function () {
+                            // 解决软键盘弹起时的高度计算问题，这个值已经被 orientationchange 写入了body的style中
+                            var view = getView();
+                            view.height = util.toNumber(document.body.style.height);
+                            return view;
+                        };
+                    }());
                 }
 
                 var list = dom.getAttribute(el, ecuiName) ? [el] : [],
@@ -2204,6 +2213,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (!initRecursion) {
                     dom.addEventListener(window, 'resize', events.orientationchange);
                 }
+
+                // 防止循环引用
+                el = null;
             }
         },
 
