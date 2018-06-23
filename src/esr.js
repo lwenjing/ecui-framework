@@ -1176,21 +1176,54 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 historyCache = true;
             }
 //{if 0}//
-            if (esrOptions.app) {
-                io.ajax('.app-container.html', {
-                    cache: true,
-                    onsuccess: function (text) {
-                        dom.insertHTML(document.body, 'afterBegin', text);
-                        loadInit();
-                    },
-                    onerror: function () {
-                        console.error('找不到APP的布局文件，请确认.app-container.html文件是否存在');
-                        esrOptions.app = false;
-                        loadInit();
+            for (var tplList = [], el = document.body.firstChild; el; el = el.nextSibling) {
+                if (el.nodeType === 8) {
+                    if (/^\s*import:\s*([A-Za-z0-9.-_]+)\s*$/.test(el.textContent || el.nodeValue)) {
+                        tplList.push([el, RegExp.$1]);
                     }
-                });
-            } else {
-                loadInit();
+                }
+            }
+
+            (function loadTpl() {
+                if (tplList.length) {
+                    var item = tplList.splice(0, 1)[0];
+                    io.ajax(item[1], {
+                        cache: true,
+                        onsuccess: function (text) {
+                            dom.insertBefore(
+                                document.createComment(text.replace(/\<\!--/g, '<<<').replace(/--\>/g, '>>>')),
+                                item[0]
+                            );
+                            dom.remove(item[0]);
+                            loadTpl();
+                        },
+                        onerror: function () {
+                            console.error('找不到文件' + item[1]);
+                            loadTpl();
+                        }
+                    });
+                } else {
+                    loadApp();
+                }
+            }());
+
+            function loadApp() {
+                if (esrOptions.app) {
+                    io.ajax('.app-container.html', {
+                        cache: true,
+                        onsuccess: function (text) {
+                            dom.insertHTML(document.body, 'afterBegin', text);
+                            loadInit();
+                        },
+                        onerror: function () {
+                            console.error('找不到APP的布局文件，请确认.app-container.html文件是否存在');
+                            esrOptions.app = false;
+                            loadInit();
+                        }
+                    });
+                } else {
+                    loadInit();
+                }
             }
 //{else}//            loadInit();
 //{/if}//
