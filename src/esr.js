@@ -781,7 +781,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                     if (item.getControl) {
                         var control = item.getControl();
-                        if (!control.isDisabled()) {
+                        if (control instanceof ui.InputControl && !control.isDisabled()) {
                             setCacheData(data, item.name, control.getFormValue());
                         }
                     } else if (!item.disabled) {
@@ -1176,7 +1176,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 historyCache = true;
             }
 //{if 0}//
-            for (var tplList = [], el = document.body.firstChild; el; el = el.nextSibling) {
+            var tplList = [];
+            for (el = document.body.firstChild; el; el = el.nextSibling) {
                 if (el.nodeType === 8) {
                     if (/^\s*import:\s*([A-Za-z0-9.-_]+)\s*$/.test(el.textContent || el.nodeValue)) {
                         tplList.push([el, RegExp.$1]);
@@ -1191,7 +1192,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         cache: true,
                         onsuccess: function (text) {
                             dom.insertBefore(
-                                document.createComment(text.replace(/\<\!--/g, '<<<').replace(/--\>/g, '>>>')),
+                                document.createComment(text.replace(/<!--/g, '<<<').replace(/-->/g, '>>>')),
                                 item[0]
                             );
                             dom.remove(item[0]);
