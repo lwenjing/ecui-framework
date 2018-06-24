@@ -371,14 +371,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
-            click: function (event) {
+            click: function () {
                 if (activedControl !== undefined) {
                     // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
                     activedControl = undefined;
-                }
-
-                if ((event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT' || event.target.tagName === 'BUTTON') && !event.target.getControl) {
-                    event.target.focus();
                 }
             },
 
@@ -1024,7 +1020,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             }
 
-            if (isPointer || isMobile) {
+            if (isMobile) {
                 // 解决移动端点击穿透的问题，原因是mousedown的触发时间会比touchend晚300ms
                 dom.addEventListener(document, 'mousedown', function (event) {
                     event.preventDefault();
