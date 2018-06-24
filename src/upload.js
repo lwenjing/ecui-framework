@@ -30,7 +30,7 @@
         reader.readAsDataURL(file);
         reader.onload = function () {
             var data = new FormData();
-            data.append(this._eFile.name, file);
+            data.append(this._sName, file);
 
             ecui.io.ajax(this._sUrl, {
                 method: 'POST',
@@ -57,6 +57,7 @@
             ui.Control.call(this, el, options);
             this._sUrl = options.url;
             this._eFile = el.getElementsByTagName('INPUT')[0];
+            this._sName = this._eFile.name || options.name;
         },
         {
             /**
