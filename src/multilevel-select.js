@@ -62,10 +62,12 @@ _aSelect - 全部的下拉框控件列表
 
                         if (selected._aChildren) {
                             item = selects[++index];
-                            item.removeAll();
-                            item.add(selected._aChildren);
-                            if (!(selected._aChildren[0] instanceof ui.Item)) {
-                                selected._aChildren = item.getItems();
+                            if (item) {
+                                item.removeAll();
+                                item.add(selected._aChildren);
+                                if (!(selected._aChildren[0] instanceof ui.Item)) {
+                                    selected._aChildren = item.getItems();
+                                }
                             }
                         }
 
