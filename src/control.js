@@ -313,9 +313,6 @@ _aStatus            - 控件当前的状态集合
              * @return {number} 控件的基本宽度
              */
             $getBasicWidth: function () {
-                if (!this.$$border) {
-                    debugger
-                }
                 return this.$$border[1] + this.$$border[3] + this.$$padding[1] + this.$$padding[3];
             },
 
@@ -423,7 +420,9 @@ _aStatus            - 控件当前的状态集合
              * options 初始化选项
              * @event
              */
-            $ready: util.blank,
+            $ready: function () {
+                this._bReady = true;
+            },
 
             /**
              * 移除子控件事件。
@@ -970,7 +969,6 @@ _aStatus            - 控件当前的状态集合
                     if (waitReadyList === null) {
                         // 页面已经加载完毕，直接运行 $ready 方法
                         core.dispatchEvent(this, 'ready', {options: options});
-                        this._bReady = true;
                     } else {
                         if (!waitReadyList) {
                             // 页面未加载完成，首先将 $ready 方法的调用存放在调用序列中
@@ -981,15 +979,12 @@ _aStatus            - 控件当前的状态集合
                                 function () {
                                     waitReadyList.forEach(function (item) {
                                         core.dispatchEvent(item.control, 'ready', {options: item.options});
-                                        item.control._bReady = true;
                                     });
                                     waitReadyList = null;
                                 }
                             );
                         }
-                        if (this.$ready !== util.blank || this.onready) {
-                            waitReadyList.push({control: this, options: options});
-                        }
+                        waitReadyList.push({control: this, options: options});
                     }
                 }
             },

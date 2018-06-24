@@ -69,11 +69,12 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                      */
                     $show: function () {
                         ui.Control.prototype.$show.call(this);
-                        if (this._bAlterItems) {
-                            this.$alterItems();
-                            this._bAlterItems = false;
+                        var parent = this.getParent();
+                        if (parent._bAlterItems) {
+                            parent.$alterItems();
+                            parent._bAlterItems = false;
                         }
-                        refresh(this.getParent());
+                        refresh(parent);
                     }
                 }
             ),

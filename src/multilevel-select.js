@@ -88,6 +88,16 @@ _aSelect - 全部的下拉框控件列表
             $change: util.blank,
 
             /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.InputControl.prototype.$ready.call(this, event);
+                this._aSelect.forEach(function (item) {
+                    core.dispatchEvent(item, 'ready');
+                });
+            },
+
+            /**
              * 获取指定的下拉框对象。
              * @public
              *
