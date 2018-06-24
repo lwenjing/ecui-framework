@@ -16,6 +16,7 @@ _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
 _bRequired    - 是否必须选择
+_bAlterItems  - 是否延迟到显示时执行alterItems
 */
 (function () {
 //{if 0}//
@@ -68,6 +69,10 @@ _bRequired    - 是否必须选择
                      */
                     $show: function () {
                         ui.Control.prototype.$show.call(this);
+                        if (this._bAlterItems) {
+                            this.$alterItems();
+                            this._bAlterItems = false;
+                        }
                         refresh(this.getParent());
                     }
                 }
@@ -80,14 +85,18 @@ _bRequired    - 是否必须选择
              */
             $alterItems: function () {
                 if (dom.getParent(this._uOptions.getOuter())) {
-                    var step = this.getBodyHeight(),
-                        width = this.getWidth(),
-                        itemLength = this.getLength();
+                    if (this._uOptions.isShow()) {
+                        var step = this.getBodyHeight(),
+                            width = this.getWidth(),
+                            itemLength = this.getLength();
 
-                    // 为了设置激活状态样式, 因此必须控制下拉框中的选项必须在滚动条以内
-                    this.setItemSize(width - this._uOptions.getMinimumWidth() - (itemLength > this._nOptionSize ? core.getScrollNarrow() : 0), step);
-                    // 设置options框的大小，如果没有元素，至少有一个单位的高度
-                    this._uOptions.$setSize(width, (Math.min(itemLength, this._nOptionSize) || 1) * step + this._uOptions.getMinimumHeight());
+                        // 为了设置激活状态样式, 因此必须控制下拉框中的选项必须在滚动条以内
+                        this.setItemSize(width - this._uOptions.getMinimumWidth() - (itemLength > this._nOptionSize ? core.getScrollNarrow() : 0), step);
+                        // 设置options框的大小，如果没有元素，至少有一个单位的高度
+                        this._uOptions.$setSize(width, (Math.min(itemLength, this._nOptionSize) || 1) * step + this._uOptions.getMinimumHeight());
+                    } else {
+                        this._bAlterItems = true;
+                    }
                 }
             },
 

@@ -313,6 +313,9 @@ _aStatus            - 控件当前的状态集合
              * @return {number} 控件的基本宽度
              */
             $getBasicWidth: function () {
+                if (!this.$$border) {
+                    debugger
+                }
                 return this.$$border[1] + this.$$border[3] + this.$$padding[1] + this.$$padding[3];
             },
 
