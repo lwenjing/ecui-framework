@@ -39,7 +39,21 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         metaVersion,
         meta,
         lastLayer,
-        lastRouteName;
+        lastRouteName,
+
+        FormatInput = core.inherits(
+            ui.Control,
+            'ui-hide',
+            function (el, options) {
+                ui.Control.call(this, el, options);
+                this._sName = options.name;
+            },
+            {
+                getName: function () {
+                    return this._sName || this.getMain().name;
+                }
+            }
+        );
 
     /**
      * 增加IE的history信息。
@@ -548,11 +562,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
         // 用于创建空对象，参见request方法
         CreateObject: core.inherits(
-            ui.Control,
-            function (el, options) {
-                ui.Control.call(this, el, options);
-                dom.addClass(el, 'ui-hide');
-            },
+            FormatInput,
             {
                 getFormValue: function () {
                     return {};
@@ -562,11 +572,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
         // 用于创建空数组，参见request方法
         CreateArray: core.inherits(
-            ui.Control,
-            function (el, options) {
-                ui.Control.call(this, el, options);
-                dom.addClass(el, 'ui-hide');
-            },
+            FormatInput,
             {
                 getFormValue: function () {
                     return [];
@@ -781,8 +787,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 if (item.name && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
                     if (item.getControl) {
                         var control = item.getControl();
-                        if (control instanceof ui.InputControl && !control.isDisabled()) {
-                            setCacheData(data, item.name, control.getFormValue());
+                        if ((control instanceof ui.InputControl || control instanceof FormatInput) && !control.isDisabled()) {
+                            setCacheData(data, control.getName(), control.getFormValue());
                         }
                     } else if (!item.disabled) {
                         setCacheData(data, item.name, item.value);
