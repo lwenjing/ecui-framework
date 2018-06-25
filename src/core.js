@@ -294,7 +294,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         ongesture(event.getNative().changedTouches, event);
 
                         if (event.target !== getElementFromEvent(item)) {
-                            console.log(item);
                             // 同一个位置事件元素发生了变化，阻止事件穿透
                             event.preventDefault();
                         }
