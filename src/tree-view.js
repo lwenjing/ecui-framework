@@ -349,16 +349,6 @@ _aChildren     - 子控件集合
             },
 
             /**
-             * @override
-             */
-            init: function (options) {
-                ui.Control.prototype.init.call(this, options);
-                this._aChildren.forEach(function (item) {
-                    item.init(options);
-                });
-            },
-
-            /**
              * 当前子树区域是否收缩。
              * @public
              *

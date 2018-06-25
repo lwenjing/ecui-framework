@@ -141,7 +141,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
 
                     event.track = track;
-                    event.target = getElementFromEvent(event.getNative());
+                    event.target = getElementFromEvent(event);
                     currEnv.mousemove(event);
                     if (pointerType !== 'mouse') {
                         if (hoveredControl !== event.getControl()) {
@@ -194,6 +194,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         trackId = null;
                         onpressure(event, false);
                         ongesture(pointers, event);
+
+                        if (event.target !== getElementFromEvent(event)) {
+                            // 同一个位置事件元素发生了变化，阻止事件穿透
+                            event.preventDefault();
+                        }
                     }
 
                     util.remove(pointers, track);
@@ -265,6 +270,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             touchend: function (event) {
                 var track = tracks[trackId];
+
                 initTouchTracks(event);
 
                 Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
@@ -286,6 +292,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         trackId = null;
                         onpressure(event, false);
                         ongesture(event.getNative().changedTouches, event);
+
+                        if (event.target !== getElementFromEvent(item)) {
+                            console.log(item);
+                            // 同一个位置事件元素发生了变化，阻止事件穿透
+                            event.preventDefault();
+                        }
                     }
                 });
 
@@ -999,6 +1011,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @return {HTMLElement} 事件所在的 DOM 元素
      */
     function getElementFromEvent(event) {
+        event = event instanceof ECUIEvent ? event.getNative() : event;
         return chromeVersion || ieVersion || safariVersion ? document.elementFromPoint(event.clientX, event.clientY) : document.elementFromPoint(event.pageX, event.pageY);
     }
 
@@ -1018,13 +1031,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
                     }
                 }
-            }
-
-            if (isMobile) {
-                // 解决移动端点击穿透的问题，原因是mousedown的触发时间会比touchend晚300ms
-                dom.addEventListener(document, 'mousedown', function (event) {
-                    event.preventDefault();
-                }, true);
             }
 
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
@@ -1584,6 +1590,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             control.$setParent(parent);
             oncreate(control, options);
             allControls.push(control);
+
+            core.dispatchEvent(control, 'ready', {options: options});
 
             return control;
         },

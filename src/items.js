@@ -87,9 +87,6 @@
                 if (this.isCached()) {
                     this.alterItems();
                 }
-                this.getItems().forEach(function (item) {
-                    core.dispatchEvent(item, 'ready');
-                });
             },
 
             /**

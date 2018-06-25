@@ -61,12 +61,6 @@
                     month = this._uMonth.getValue(),
                     date = this._uDate.getValue();
                 return year && month && date ? new Date(year, month - 1, date) : null;
-            },
-            init: function (options) {
-                ui.Control.prototype.init.call(this, options);
-                this._uYear.init(options);
-                this._uMonth.init(options);
-                this._uDate.init(options);
             }
         }
     );
