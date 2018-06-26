@@ -50,19 +50,21 @@
                         if (data.enter[1]) {
                             var width = view.width,
                                 height = view.height * data.enter[2],
-                                initValue = view.height;
+                                initValue = view.height,
+                                reverseValue = view.top;
                         } else {
-                            style.top = '0px';
+                            style.top = view.top + 'px';
                             width = view.width * data.enter[2];
                             height = view.height;
                             initValue = view.width;
+                            reverseValue = view.left;
                         }
                         popup.setSize(width, height);
-                        style[data.enter[0]] = initValue + 'px';
+                        style[data.enter[0]] = (initValue + reverseValue) + 'px';
 
                         locked = true;
                         ecui.effect.grade(
-                            'round:this.style.' + data.enter[0] + '->' + Math.round(initValue - initValue * data.enter[2]),
+                            'round:this.style.' + data.enter[0] + '->' + Math.round(initValue + reverseValue - initValue * data.enter[2]),
                             1000,
                             {
                                 $: el,

@@ -2279,13 +2279,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 view = util.getView();
 
             if (ieVersion < 9) {
-                text = ';top:' + view.top + 'px;left:' + view.left + 'px;width:' + view.width + 'px;height:' + view.height + 'px;display:';
-            } else {
                 // 宽度向前扩展2屏，向后扩展2屏，是为了解决翻屏滚动的剧烈闪烁问题
                 // 不直接设置为整个页面的大小，是为了解决IE下过大的遮罩层不能半透明的问题
                 var top = Math.max(view.top - view.height * 2, 0),
                     left = Math.max(view.left - view.width * 2, 0),
                     text = ';top:' + top + 'px;left:' + left + 'px;width:' + Math.min(view.width * 5, view.pageWidth - left) + 'px;height:' + Math.min(view.height * 5, view.pageHeight - top) + 'px;display:';
+            } else {
+                text = ';top:' + view.top + 'px;left:' + view.left + 'px;width:' + view.width + 'px;height:' + view.height + 'px;display:';
             }
 
             if ('boolean' === typeof opacity) {
