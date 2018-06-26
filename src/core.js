@@ -112,7 +112,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             isTouchMoved = undefined;
                             tracks.mouse = track;
                         } else {
-                            if (document.ontouchstart !== undefined) {
+                            if (isToucher) {
                                 return;
                             }
                             trackId = pointerId;
