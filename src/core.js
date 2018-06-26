@@ -11,8 +11,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         JAVASCRIPT = 'javascript',
         fontSizeCache = core.fontSizeCache,
-        isMobile = /(Android|iPhone|iPad|UCWEB|Fennec|Mobile)/i.test(navigator.userAgent),
-        isPointer = !isMobile && !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
+        isToucher = document.ontouchstart !== undefined,
+        isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
         isStrict = document.compatMode === 'CSS1Compat',
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -21,7 +21,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 //{/if}//
     var HIGH_SPEED = 100,         // 对高速的定义
         scrollHandler,            // DOM滚动事件
-        isMobileMoved,
+        isTouchMoved,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
 
@@ -78,7 +78,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     repaint();
                 } else if (style.height !== height + 'px') {
-                    if (!isMobile) {
+                    if (!isToucher) {
                         style.height = height + 'px';
                     }
                 }
@@ -86,33 +86,38 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             // pad pro/surface pro等设备上的事件处理
             pointerdown: function (event) {
-                if (pointerType !== 'mouse' || event.which === 1) {
-                    var pointerType = event.pointerType,
-                        pointerId = event.pointerId;
+                var pointerType = event.pointerType,
+                    pointerId = event.pointerId;
 
+                if (pointerType !== 'mouse' || event.which === 1) {
                     event = core.wrapEvent(event);
 
-                    event.track = tracks[trackId = pointerId] = {
-                        identifier: pointerId,
-                        type: pointerType,
-                        pageX: event.pageX,
-                        pageY: event.pageY,
-                        originalX: event.pageX,
-                        originalY: event.pageY,
-                        target: event.target,
-                        lastMoveTime: Date.now(),
-                        speedX: 0,
-                        speedY: 0
-                    };
+                    var track = event.track = {
+                            identifier: pointerId,
+                            type: pointerType,
+                            pageX: event.pageX,
+                            pageY: event.pageY,
+                            originalX: event.pageX,
+                            originalY: event.pageY,
+                            target: event.target,
+                            lastMoveTime: Date.now(),
+                            speedX: 0,
+                            speedY: 0
+                        };
 
-                    pointers.push(event.track);
+                    pointers.push(track);
 
                     if (pointers.length === 1) {
                         if (pointerType === 'mouse') {
-                            isMobileMoved = undefined;
+                            isTouchMoved = undefined;
+                            tracks.mouse = track;
                         } else {
-                            isMobileMoved = false;
-                            currEnv.mouseover(event);
+                            if (document.ontouchstart !== undefined) {
+                                return;
+                            }
+                            trackId = pointerId;
+                            isTouchMoved = false;
+                            tracks[pointerId] = track;
                         }
                         currEnv.mousedown(event);
                         onpressure(event, event.getNative().pressure >= 0.4);
@@ -122,63 +127,66 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             pointermove: function (event) {
                 var pointerId = event.pointerId,
-                    pointerType = event.pointerType,
-                    track = tracks[pointerId];
+                    track = tracks[event.pointerType] || tracks[pointerId];
 
-                if (!track) {
-                    track = {};
-                }
+                if ((event.pointerType === 'mouse' && (!pointers.length || pointers[0] === track)) || pointerId === trackId) {
+                    if (!track) {
+                        track = {};
+                    }
 
-                event = core.wrapEvent(event);
+                    event = core.wrapEvent(event);
 
-                calcSpeed(track, event);
+                    calcSpeed(track, event);
 
-                // 没有trackCount表示是纯粹的鼠标移动行为
-                if (!pointers.length || pointerId === trackId) {
                     // Pointer设备上纯点击也可能会触发move
-                    if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isMobileMoved === false) {
-                        isMobileMoved = true;
+                    if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isTouchMoved === false) {
+                        isTouchMoved = true;
                     }
 
                     event.track = track;
                     event.target = getElementFromEvent(event);
                     currEnv.mousemove(event);
-                    if (pointerType !== 'mouse') {
+                    if (pointerId === trackId) {
                         if (hoveredControl !== event.getControl()) {
                             currEnv.mouseover(event);
                         }
+                        onpressure(event, event.getNative().pressure >= 0.4);
+                        ongesture(pointers, event);
                     }
-                    onpressure(event, event.getNative().pressure >= 0.4);
-                    ongesture(pointers, event);
                 }
             },
 
             pointerout: function (event) {
-                // 没有trackCount表示是纯粹的鼠标移动行为
-                if (!pointers.length) {
-                    currEnv.mouseout(core.wrapEvent(event));
+                if (event.pointerType === 'mouse') {
+                    events.mouseout(core.wrapEvent(event));
                 } else if (event.pointerId === trackId) {
+                    // touch结束
                     bubble(hoveredControl, 'mouseout', core.wrapEvent(event), hoveredControl = null);
                 }
             },
 
             pointerover: function (event) {
-                // 没有trackCount表示是纯粹的鼠标移动行为
-                if (!pointers.length || event.pointerId === trackId) {
-                    currEnv.mouseover(core.wrapEvent(event));
-                }
+                events.mouseover(core.wrapEvent(event));
             },
 
             pointerup: function (event) {
-                var track = tracks[event.pointerId];
-                if (track) {
-                    // 鼠标右键点击不触发事件
-                    track.pageX = event.pageX;
-                    track.pageY = event.pageY;
-                    track.target = event.target;
+                function onmousedown(event) {
+                    event.preventDefault();
+                    dom.removeEventListener(document, 'mousedown', onmousedown);
+                }
 
-                    if (event.pointerId === trackId) {
-                        if (isMobileMoved) {
+                var type = event.type,
+                    pointerId = event.pointerId,
+                    track = tracks[event.pointerType] || tracks[pointerId];
+
+                if (track) {
+                    if ((event.pointerType === 'mouse' && pointers[0] === track) || pointerId === trackId) {
+                        // 鼠标右键点击不触发事件
+                        track.pageX = event.pageX;
+                        track.pageY = event.pageY;
+                        track.target = event.target;
+
+                        if (isTouchMoved) {
                             // 产生了滚屏操作，不响应ECUI事件
                             bubble(activedControl, 'deactivate');
                             activedControl = undefined;
@@ -188,27 +196,37 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                         event.track = track;
                         currEnv.mouseup(event);
-                        if (event.getNative().pointerType !== 'mouse') {
-                            bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
-                        }
-                        trackId = null;
-                        onpressure(event, false);
-                        ongesture(pointers, event);
-
-                        if (event.target !== getElementFromEvent(event)) {
-                            // 同一个位置事件元素发生了变化，阻止事件穿透
-                            event.preventDefault();
-                        }
                     }
 
-                    util.remove(pointers, track);
-                    delete tracks[track.identifier];
+                    if (track === tracks.mouse) {
+                        // 只监听鼠标左键事件
+                        if (event.which === 1) {
+                            delete tracks.mouse;
+                        }
+                    } else {
+                        if (type === 'pointerup') {
+                            onpressure(event, false);
+                            ongesture(pointers, event);
+                            if (event.target !== getElementFromEvent(event)) {
+                                // 同一个位置事件元素发生了变化，阻止事件穿透
+                                dom.addEventListener(document, 'mousedown', onmousedown);
+                            }
+                        }
+                        trackId = undefined;
+                        delete tracks[pointerId];
+                    }
+                }
+
+                for (var i = 0; track = pointers[i]; i++) {
+                    if (track.identifier === pointerId) {
+                        pointers.splice(i, 1);
+                        break;
+                    }
                 }
             },
 
             pointercancel: function (event) {
-                tracks[event.pointerId].lastClick = undefined;
-                events.pointerup(event);
+                events.pointerup(event, true);
             },
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
@@ -216,7 +234,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 initTouchTracks(event);
 
                 if (event.touches.length === 1) {
-                    isMobileMoved = false;
+                    isTouchMoved = false;
 
                     var track = tracks[trackId = event.touches[0].identifier];
                     track.originalX = track.pageX;
@@ -249,8 +267,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     calcSpeed(track, event);
 
                     if (item.identifier === trackId) {
-                        if (isMobileMoved === false) {
-                            isMobileMoved = true;
+                        if (isTouchMoved === false) {
+                            isTouchMoved = true;
                         }
 
                         event.track = track;
@@ -275,7 +293,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
                     if (item.identifier === trackId) {
-                        if (isMobileMoved) {
+                        if (isTouchMoved) {
                             // 产生了滚屏操作，不响应ECUI事件
                             bubble(activedControl, 'deactivate');
                             activedControl = undefined;
@@ -289,7 +307,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.target = getElementFromEvent(item);
                         currEnv.mouseup(event);
                         bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
-                        trackId = null;
+                        trackId = undefined;
                         onpressure(event, false);
                         ongesture(event.getNative().changedTouches, event);
 
@@ -451,7 +469,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                                     // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
                                     // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
                                     // 父控件获得焦点，否则焦点不发生变化
-                                    if (isMobileMoved === undefined) { // MouseEvent
+                                    if (isTouchMoved === undefined) { // MouseEvent
                                         // 移动端是在mouseup时获得焦点
                                         core.setFocused(target);
                                     }
@@ -469,7 +487,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         onselectstart(control, event);
                         // 检查是否INPUT/SELECT/TEXTAREA/BUTTON标签，需要失去焦点，
                         // 因为ecui不能阻止mousedown focus输入框
-                        if (isMobileMoved === undefined) { // MouseEvent
+                        if (isTouchMoved === undefined) { // MouseEvent
                             // 移动端输入框是在mouseup时失去焦点
                             if (target.tagName === 'INPUT' || target.tagName === 'SELECT' || target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') {
                                 util.timer(
@@ -481,7 +499,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             }
                         }
                     }
-                    if (isMobileMoved === undefined) { // MouseEvent
+                    if (isTouchMoved === undefined) { // MouseEvent
                         // 移动端输入框是在mouseup时失去焦点
                         // 点击到了空白区域，取消控件的焦点
                         core.setFocused();
@@ -524,7 +542,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     commonParent;
 
                 if (activedControl !== undefined) {
-                    if (isMobileMoved !== undefined && delay < 300) { // TouchEvent
+                    if (isTouchMoved !== undefined && delay < 300) { // TouchEvent
                         core.setFocused(activedControl);
                     }
 
@@ -546,7 +564,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     if (activedControl) {
                         commonParent = getCommonParent(control, activedControl);
-                        if (isMobileMoved === undefined || (isMobileMoved === false && delay < 300)) { // MouseEvent
+                        if (isTouchMoved === undefined || (isTouchMoved === false && delay < 300)) { // MouseEvent
                             bubble(commonParent, 'click', event);
 
                             if (event.cancelBubble) {
@@ -575,7 +593,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     // 将 activedControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
 
-                    if (isMobileMoved !== undefined && delay < 300) {
+                    if (isTouchMoved !== undefined && delay < 300) {
                         for (control = event.target; control; control = dom.getParent(control)) {
                             if (control.tagName === 'A' && control.href) {
                                 location.href = control.href;
@@ -1026,7 +1044,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             for (var key in events) {
                 if (events.hasOwnProperty(key)) {
                     var type = key.slice(0, 5);
-                    if (!((type === 'mouse' && (isPointer || isMobile)) || (type === 'touch' && (isPointer || !isMobile)) || (type === 'point' && !isPointer))) {
+                    if (!((type === 'mouse' && (isPointer || isToucher)) || (type === 'touch' && !isToucher) || (type === 'point' && !isPointer))) {
                         dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
                     }
                 }
@@ -1214,7 +1232,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 var track = tracks[pointers[0].identifier];
                 if (track.type !== 'mouse') {
                     if (event.getNative().type.slice(-4) === 'move') {
-                        if (!track.swipe && Date.now() - track.lastClick.time < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
+                        if (!track.swipe && track.lastClick && Date.now() - track.lastClick.time < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
                             track.swipe = true;
                             util.timer(function () {
                                 if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) > 100) {
@@ -1239,7 +1257,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         event.toY = track.pageY;
                         callback('panmove');
                     } else {
-                        if (isMobileMoved === false && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
+                        if (isTouchMoved === false && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
                             callback('tap');
                         }
                     }
@@ -1370,7 +1388,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @param {ECUIEvent} event 事件对象
      */
     function onselectstart(control, event) {
-        if (isMobileMoved === undefined) { // MouseEvent
+        if (isTouchMoved === undefined) { // MouseEvent
             for (; control; control = control.getParent()) {
                 if (!control.isUserSelect()) {
                     event.preventDefault();
@@ -1383,7 +1401,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     /**
      * 重绘浏览器区域的控件。
      * repaint 方法在页面改变大小时自动触发，一些特殊情况下，例如包含框架的页面，页面变化时不会触发 onresize 事件，需要手工调用 repaint 函数重绘所有的控件。
-     * @public
+     * @private
      */
     function repaint() {
         function filter(item) {
@@ -2150,7 +2168,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         init: function (el) {
             if (!initEnvironment() && el) {
-                if (isMobile) {
+                if (isToucher) {
                     events.orientationchange();
                     util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
                     (function () {
