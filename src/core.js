@@ -1045,7 +1045,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (events.hasOwnProperty(key)) {
                     var type = key.slice(0, 5);
                     if (!((type === 'mouse' && (isPointer || isToucher)) || (type === 'touch' && !isToucher) || (type === 'point' && !isPointer))) {
-                        dom.addEventListener(document, key, events[key], chromeVersion > 30 && key === 'touchstart' ? {passive: false} : true);
+                        dom.addEventListener(document, key, events[key], chromeVersion > 30 ? {passive: false} : true);
                     }
                 }
             }
@@ -2276,12 +2276,17 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         mask: function (opacity, zIndex) {
             var el = document.body,
-                view = util.getView(),
+                view = util.getView();
+
+            if (isToucher) {
+                text = ';top:0px;left:0px;width:' + view.pageWidth + 'px;height:' + view.pageHeight + 'px;display:';
+            } else {
                 // 宽度向前扩展2屏，向后扩展2屏，是为了解决翻屏滚动的剧烈闪烁问题
                 // 不直接设置为整个页面的大小，是为了解决IE下过大的遮罩层不能半透明的问题
-                top = Math.max(view.top - view.height * 2, 0),
-                left = Math.max(view.left - view.width * 2, 0),
-                text = ';top:' + top + 'px;left:' + left + 'px;width:' + Math.min(view.width * 5, view.pageWidth - left) + 'px;height:' + Math.min(view.height * 5, view.pageHeight - top) + 'px;display:';
+                var top = Math.max(view.top - view.height * 2, 0),
+                    left = Math.max(view.left - view.width * 2, 0),
+                    text = ';top:' + top + 'px;left:' + left + 'px;width:' + Math.min(view.width * 5, view.pageWidth - left) + 'px;height:' + Math.min(view.height * 5, view.pageHeight - top) + 'px;display:';
+            }
 
             if ('boolean' === typeof opacity) {
                 // 仅简单的显示或隐藏当前的屏蔽层，用于resize时的重绘
