@@ -2279,7 +2279,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 view = util.getView();
 
             if (isToucher) {
-                text = ';position:fixed;top:0px;left:0px;width:' + view.width + 'px;height:' + view.height + 'px;display:';
+                text = ';top:0px;left:0px;width:' + view.width + 'px;height:' + view.height + 'px;display:';
             } else {
                 // 宽度向前扩展2屏，向后扩展2屏，是为了解决翻屏滚动的剧烈闪烁问题
                 // 不直接设置为整个页面的大小，是为了解决IE下过大的遮罩层不能半透明的问题
