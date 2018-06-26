@@ -24,19 +24,3 @@ body {
     position: absolute !important;
     background-color: #000 !important;
 }
-
-@media only screen and (max-device-width:800px) and (orientation:portrait) {
-    .ui-mask {
-        position: fixed !important;
-        top: 0px;
-        left: 0px;
-    }
-}
-
-@media only screen and (max-device-height:800px) and (orientation:landscape) {
-    .ui-mask {
-        position: fixed !important;
-        top: 0px;
-        left: 0px;
-    }
-}
