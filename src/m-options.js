@@ -1,12 +1,12 @@
 /*
 @example
-<ul ui="type:m-select;option-size:7;value:2">
+<ul ui="type:m-options;option-size:7;value:2">
   <li>1</li>
   <li>2</li>
   ...
 </ul>
 或
-<div ui="type:m-select;option-size:7;values:1-12;value:2"></div>
+<div ui="type:m-options;option-size:7;values:1-12;value:2"></div>
 
 @fields
 _nRadius       - 上下元素数量
@@ -44,39 +44,43 @@ _nMaxBottom    - 滚动时的最大底部坐标
      * value        默认选中的值
      * @control
      */
-    ui.MSelect = core.inherits(
-        ui.MScroll,
-        'ui-mobile-select',
-        function (el, options) {
-            ui.MScroll.call(this, el, options);
+    ui.MOptions = core.inherits(
+        ui.Control,
+        'ui-mobile-options',
+        [
+            function (el, options) {
+                dom.insertBefore(dom.create({
+                    className: options.classes.join('-mask ')
+                }), this.getBody());
 
-            var values = options.values;
+                this._nRadius = Math.floor(options.optionSize / 2);
+            },
+            function (el, options) {
+                ui.Control.call(this, el, options);
 
-            if (values) {
-                if ('string' === typeof values) {
-                    values = values.split(/[\-,]/);
-                }
-                values[0] = +values[0];
-                values[1] = +values[1];
-                if (values[2]) {
-                    values[2] = +values[2];
-                } else {
-                    values[2] = 1;
-                }
-                for (var i = values[0], ret = [];; i += values[2]) {
-                    ret.push('<div>' + i + '</div>');
-                    if (i === values[1]) {
-                        break;
+                var values = options.values;
+
+                if (values) {
+                    if ('string' === typeof values) {
+                        values = values.split(/[\-,]/);
                     }
+                    values[0] = +values[0];
+                    values[1] = +values[1];
+                    if (values[2]) {
+                        values[2] = +values[2];
+                    } else {
+                        values[2] = 1;
+                    }
+                    for (var i = values[0], ret = [];; i += values[2]) {
+                        ret.push('<div>' + i + '</div>');
+                        if (i === values[1]) {
+                            break;
+                        }
+                    }
+                    this.setContent(ret.join(''));
                 }
-                this.setContent(ret.join(''));
             }
-            dom.insertBefore(dom.create({
-                className: options.classes.join('-mask ')
-            }), this.getBody());
-
-            this._nRadius = Math.floor(options.optionSize / 2);
-        },
+        ],
         {
             /**
              * 移动端下拉框选项控件。
@@ -84,7 +88,11 @@ _nMaxBottom    - 滚动时的最大底部坐标
              */
             Item: core.inherits(
                 ui.Item,
-                'ui-mobile-select-item'
+                'ui-mobile-options-item',
+                function (el, options) {
+                    ui.Item.call(this, el, options);
+                    this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
+                }
             ),
 
             /**
@@ -118,7 +126,7 @@ _nMaxBottom    - 滚动时的最大底部坐标
              * @override
              */
             $cache: function (style, cacheSize) {
-                ui.MScroll.prototype.$cache.call(this, style, cacheSize);
+                ui.Control.prototype.$cache.call(this, style, cacheSize);
                 this._nItemHeight = this.getItem(0).getMain().offsetHeight;
             },
 
@@ -153,7 +161,7 @@ _nMaxBottom    - 滚动时的最大底部坐标
              * @override
              */
             $dragmove: function (event) {
-                ui.MScroll.prototype.$dragmove.call(this, event);
+                ui.Control.prototype.$dragmove.call(this, event);
                 setSelected(this, this.getItem(Math.round(-event.y / this._nItemHeight) + this._nRadius));
             },
 
@@ -163,14 +171,14 @@ _nMaxBottom    - 滚动时的最大底部坐标
             $initStructure: function (width, height) {
                 height = this._nItemHeight * (this._nRadius * 2 + 1);
                 this.getMain().style.height = height + 'px';
-                ui.MScroll.prototype.$initStructure.call(this, width, height);
+                ui.Control.prototype.$initStructure.call(this, width, height);
             },
 
             /**
              * @override
              */
             $ready: function (event) {
-                ui.MScroll.prototype.$ready.call(this, event);
+                ui.Control.prototype.$ready.call(this, event);
                 this.setValue(event.options.value);
             },
 
@@ -178,7 +186,7 @@ _nMaxBottom    - 滚动时的最大底部坐标
              * @override
              */
             $resize: function () {
-                ui.MScroll.prototype.$resize.call(this);
+                ui.Control.prototype.$resize.call(this);
                 this.getMain().style.height = '';
             },
 
@@ -189,7 +197,7 @@ _nMaxBottom    - 滚动时的最大底部坐标
              * @return {string} 选中的值
              */
             getValue: function () {
-                return this._cSelected ? this._cSelected.getContent() : null;
+                return this._cSelected ? this._cSelected._sValue : null;
             },
 
             /**
@@ -202,7 +210,7 @@ _nMaxBottom    - 滚动时的最大底部坐标
                 if (value !== undefined) {
                     value = String(value);
                     for (var i = 0, items = this.getItems(); i < items.length; i++) {
-                        if (items[i].getContent() === value) {
+                        if (items[i]._sValue === value) {
                             setSelected(this, items[i]);
                             this.getBody().style.top = (this._nNormalBottom - this._nItemHeight * i) + 'px';
                             return;
@@ -213,6 +221,7 @@ _nMaxBottom    - 滚动时的最大底部坐标
                 this.getBody().style.top = (this._nNormalBottom + this._nItemHeight) + 'px';
             }
         },
+        ui.MScroll,
         ui.Items
     );
 }());
