@@ -55,7 +55,9 @@ _aChildren     - 子控件集合
     function createChild(el, parent, options) {
         el.className += parent.constructor.CLASS;
         options = util.extend({}, options);
+//{if 0}//
         delete options.id;
+//{/if}//
         return core.$fastCreate(parent.constructor, el, null, util.extend(options, core.getOptions(el) || {}));
     }
 
