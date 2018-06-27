@@ -170,6 +170,7 @@ _bRequired    - 是否必须选择
             $alterItems: function () {
                 if (dom.getParent(this._uOptions.getOuter()) && this._uOptions.isShow()) {
                     this._uOptions.$alterItems();
+                    this._bAlterItems = false;
                 } else {
                     this._bAlterItems = true;
                 }
@@ -181,9 +182,7 @@ _bRequired    - 是否必须选择
             $cache: function (style, cacheSize) {
                 ui.InputControl.prototype.$cache.call(this, style, cacheSize);
                 this._uText.cache(false, true);
-                if (dom.getParent(this._uOptions.getOuter())) {
-                    this._uOptions.cache(false, true);
-                }
+                this._uOptions.cache(false, true);
             },
 
             /**
@@ -207,6 +206,7 @@ _bRequired    - 是否必须选择
             $ready: function (options) {
                 ui.InputControl.prototype.$ready.call(this, options);
                 this.setValue(this.getValue());
+                this._bAlterItems = true;
             },
 
             /**

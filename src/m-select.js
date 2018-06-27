@@ -19,7 +19,6 @@ _bRequired    - 是否必须选择
 (function () {
 //{if 0}//
     var core = ecui,
-        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
@@ -37,31 +36,9 @@ _bRequired    - 是否必须选择
         function (el, options) {
             util.setDefault(options, 'enter', 'bottom');
 
-            var values = options.values;
-
-            if (values) {
-                if ('string' === typeof values) {
-                    values = values.split(/[\-,]/);
-                }
-                values[0] = +values[0];
-                values[1] = +values[1];
-                if (values[2]) {
-                    values[2] = +values[2];
-                } else {
-                    values[2] = 1;
-                }
-                for (var i = values[0], ret = [];; i += values[2]) {
-                    ret.push('<div>' + i + '</div>');
-                    if (i === values[1]) {
-                        break;
-                    }
-                }
-                this.setContent(ret.join(''));
-            }
-
             ui.$select.call(this, el, options);
 
-            this.$getSection('Options')._nRadius = Math.floor((options.optionSize || 5) / 2);
+            this.$getSection('Options').setOptionSize(options.optionSize || 2);
         },
         {
             /**
@@ -70,76 +47,7 @@ _bRequired    - 是否必须选择
              */
             Options: core.inherits(
                 ui.$select.prototype.Options,
-                [
-                    function (el, options) {
-                        dom.insertBefore(dom.create({
-                            className: options.classes.join('-mask ')
-                        }), this.getBody());
-                    }
-                ],
                 {
-                    /**
-                     * 选项控件发生变化的处理。
-                     * @protected
-                     */
-                    $alterItems: function () {
-                        var select = this.getParent(),
-                            itemHeight = select.$$itemHeight,
-                            top = this._nNormalTop = -itemHeight * (select.getLength() - this._nRadius - 1),
-                            bottom = this._nNormalBottom = itemHeight * this._nRadius;
-
-                        this.setScrollRange(
-                            {
-                                top: this._nMinTop = top - itemHeight * 2,
-                                right: 0,
-                                bottom: this._nMaxBottom = bottom + itemHeight * 2,
-                                left: 0
-                            }
-                        );
-                        this.setRange({
-                            top: top,
-                            bottom: bottom,
-                            stepY: itemHeight
-                        });
-                    },
-
-                    /**
-                     * 拖拽的惯性时间计算。
-                     * @protected
-                     *
-                     * @param {Object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
-                     */
-                    $draginertia: function (speed) {
-                        speed = speed.y;
-                        if (!speed) {
-                            return 0;
-                        }
-
-                        var y = util.toNumber(this.getBody().style.top),
-                            sy = speed * 0.5 / 2,  // 计划0.5秒动画结束
-                            expectY = Math.round(y + sy),
-                            itemHeight = this.getParent().$$itemHeight;
-
-                        if (expectY < this._nNormalTop) {
-                            expectY = Math.max(this._nMinTop, expectY);
-                        } else if (expectY > this._nNormalBottom) {
-                            expectY = Math.min(this._nMaxBottom, expectY);
-                        } else {
-                            expectY = Math.round(expectY / itemHeight) * itemHeight;
-                        }
-                        //计算实际结束时间
-                        return (expectY - y) * 2 / speed;
-                    },
-
-                    /**
-                     * @override
-                     */
-                    $dragmove: function (event) {
-                        ui.$select.prototype.Options.prototype.$dragmove.call(this, event);
-                        var select = this.getParent();
-                        core.setFocused(select.getItem(Math.round(-event.y / select.$$itemHeight) + this._nRadius));
-                    },
-
                     /**
                      * @override
                      */
@@ -153,11 +61,10 @@ _bRequired    - 是否必须选择
                      */
                     $show: function () {
                         ui.$select.prototype.Options.prototype.$show.call(this);
-                        var select = this.getParent(),
-                            height = select.$$itemHeight * (this._nRadius * 2 + 1);
-                        this.getMain().style.height = height + 'px';
-                        this.$$height = height;
-                        this.getBody().style.top = (this._nNormalBottom - select.$$itemHeight * select.getItems().indexOf(select.getSelected())) + 'px';
+                        var select = this.getParent();
+
+                        this.getBody().style.top = (this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(select.getSelected()))) + 'px';
+                        core.setFocused(select.getSelected());
 
                         core.mask(0.5);
                         util.timer(function () {
@@ -172,7 +79,8 @@ _bRequired    - 是否必须选择
                         }, 100, this);
                     }
                 },
-                ui.MScroll
+                ui.MScroll,
+                ui.MOptions
             ),
 
             /**
@@ -190,15 +98,7 @@ _bRequired    - 是否必须选择
                         core.dispatchEvent(this.getParent().$getSection('Options'), 'activate', event);
                     }
                 }
-            ),
-
-            /**
-             * @override
-             */
-            $cache: function (style, cacheSize) {
-                ui.$select.prototype.$cache.call(this, style, cacheSize);
-                this.$$itemHeight = util.toNumber(core.getCustomStyle(style, 'item-height'));
-            }
+            )
         },
         ui.MPopup
     );

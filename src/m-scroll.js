@@ -9,11 +9,6 @@
 //{/if}//
     var namedMap = {};
 
-    /**
-     * 移动端滚动控件。
-     * 移动端 scroll 存在惯性，对 onscroll 直接监听的方式无法很好的实现动画效果，本控件提供对移动端滚动事件的封装。
-     * @control
-     */
     ui.MScroll = {
         NAME: '$MScroll',
 
@@ -97,6 +92,22 @@
              */
             getRange: function () {
                 return namedMap[this.getUID()].range;
+            },
+
+            /**
+             * 获取滚动范围。
+             * @public
+             *
+             * @return {Array} 正常显示范围
+             */
+            getScrollRange: function () {
+                var data = namedMap[this.getUID()];
+                return {
+                    left: data.left,
+                    top: data.top,
+                    right: data.right,
+                    bottom: data.bottom
+                };
             },
 
             /**

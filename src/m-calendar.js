@@ -5,29 +5,67 @@
         ui = core.ui;
 //{/if}//
     ui.MCalendar = core.inherits(
-        ui.Control,
+        ui.InputControl,
         'ui-mobile-calendar',
         function (el, options) {
-            el.innerHTML = '<div class="' + ui.MOptions.CLASS + 'ui-mobile-calender-year"></div><div class="' + ui.MOptions.CLASS + 'ui-mobile-calender-month"></div><div class="' + ui.MOptions.CLASS + 'ui-mobile-calender-date"></div>';
-            ui.Control.call(this, el, options);
-            var list = dom.children(el);
-            this._uYear = core.$fastCreate(this.Options, list[0], this, {values: [2000, 2040], optionSize: 7});
-            this._uMonth = core.$fastCreate(this.Options, list[1], this, {values: [1, 12], optionSize: 7});
-            this._uDate = core.$fastCreate(this.Options, list[2], this, {values: [1, 31], optionSize: 7});
-            this._aItems = this._uDate.getItems();
+            var optionsClass = options.classes.join('-options '),
+                popupEl = dom.create({
+                    className: options.classes.join('-popup '),
+                    innerHTML: '<div class="' + optionsClass + '"></div><div class="' + optionsClass + '"></div><div class="' + optionsClass + '"></div>'
+                }),
+                list = dom.children(popupEl);
+
+            ui.InputControl.call(this, el, options);
+
+            this.setPopup(core.$fastCreate(ui.Control, popupEl, this, {enter: 'bottom'}));
+
+            this._uYear = core.$fastCreate(this.Options, list[0], this, {values: [2000, 2040]});
+            this._uMonth = core.$fastCreate(this.Options, list[1], this, {values: [1, 12]});
+            this._uDate = core.$fastCreate(this.Options, list[2], this, {values: [1, 31]});
         },
         {
             Options: core.inherits(
+                ui.Control,
+                function (el, options) {
+                    ui.Control.call(this, el, options);
+
+                    var values = options.values;
+
+                    if ('string' === typeof values) {
+                        values = values.split(/[\-,]/);
+                    }
+                    values[0] = +values[0];
+                    values[1] = +values[1];
+                    if (values[2]) {
+                        values[2] = +values[2];
+                    } else {
+                        values[2] = 1;
+                    }
+                    for (var i = values[0], ret = [];; i += values[2]) {
+                        ret.push('<div class="' + options.classes.join('-item') + '">' + i + '</div>');
+                        if (i === values[1]) {
+                            break;
+                        }
+                    }
+                    this.setContent(ret.join(''));
+
+                    this._aItems = [];
+                    dom.children(el).forEach(function (item) {
+                        this._aItems.push(core.$fastCreate(ui.Item, item, this));
+                    }, this);
+
+                    this.setOptionSize(3);
+                },
+                ui.MScroll,
                 ui.MOptions,
                 {
                     $dragend: function (event) {
-                        ui.MOptions.prototype.$dragend.call(this, event);
+                        ui.MOptions.Methods.$dragend.call(this, event);
                         var parent = this.getParent();
                         if (this === parent._uYear || this === parent._uMonth) {
                             var year = parent._uYear.getValue(),
                                 month = parent._uMonth.getValue();
                             if (year && month) {
-                                parent._uDate.preventAlterItems();
                                 var days = new Date(year, month, 0).getDate(),
                                     oldDays = parent._uDate.getLength();
 
@@ -36,15 +74,14 @@
                                         parent._uDate.setValue(days);
                                     }
                                     for (; days < oldDays; days++) {
-                                        parent._uDate.remove(parent._aItems[days]);
+                                        parent._uDate._aItems[days].hide();
                                     }
                                 } else if (days > oldDays) {
                                     for (; oldDays < days; oldDays++) {
-                                        parent._uDate.add(parent._aItems[oldDays]);
+                                        parent._uDate._aItems[oldDays].show();
                                     }
                                 }
-                                parent._uDate.premitAlterItems();
-                                parent._uDate.alterItems();
+                                parent._uDate.$alterItems();
                             }
                         }
                     }
@@ -62,6 +99,7 @@
                     date = this._uDate.getValue();
                 return year && month && date ? new Date(year, month - 1, date) : null;
             }
-        }
+        },
+        ui.MPopup
     );
 }());
