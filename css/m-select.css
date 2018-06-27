@@ -1,5 +1,5 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
-.ui-mobile-pop-select {
+.ui-mobile-select {
     position: relative;
     content: "item-height:45px";
 
@@ -16,12 +16,12 @@
     }
     font-size: 30px;
 }
-.ui-mobile-pop-select-options {
+.ui-mobile-select-options {
     width: 100%;
     background: white;
     font-size: 30px;
 
-    .ui-mobile-pop-select-options-mask {
+    .ui-mobile-select-options-mask {
         position: absolute !important;
         width: 100% !important;
         height: 100% !important;
@@ -29,7 +29,7 @@
         z-index: 1;
         pointer-events: none;
     }
-    .ui-mobile-pop-select-options-body {
+    .ui-mobile-select-options-body {
         .ui-item {
             font-size: 18px;
             height: 45px;

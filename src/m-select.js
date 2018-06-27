@@ -23,7 +23,6 @@ _bRequired    - 是否必须选择
         ui = core.ui,
         util = core.util;
 //{/if}//
-
     /**
      * 下拉框控件。
      * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
@@ -32,9 +31,9 @@ _bRequired    - 是否必须选择
      * required       是否必须选择
      * @control
      */
-    ui.MPopSelect = core.inherits(
+    ui.MSelect = core.inherits(
         ui.$select,
-        'ui-mobile-pop-select',
+        'ui-mobile-select',
         function (el, options) {
             util.setDefault(options, 'enter', 'bottom');
 
