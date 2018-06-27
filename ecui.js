@@ -20,7 +20,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/progress.js"></script>');
     document.write('<script type="text/javascript" src="src/progress-bar.js"></script>');
     document.write('<script type="text/javascript" src="src/progress-circle.js"></script>');
-    document.write('<script type="text/javascript" src="src/retina.js"></script>');
     document.write('<script type="text/javascript" src="src/tab.js"></script>');
     document.write('<script type="text/javascript" src="src/table.js"></script>');
     document.write('<script type="text/javascript" src="src/tree-view.js"></script>');
