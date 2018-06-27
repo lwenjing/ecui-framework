@@ -1,63 +1,49 @@
 /*
-@example
-<div ui="type:m-scroll">
-  <strong>窗体的标题</strong>
-  <!-- 这里放窗体的内容 -->
-  ...
-</div>
-
-@fields
-_bScrolling - 滚动标记
-_nTop       - 允许滚动的顶部范围
-_nRight     - 允许滚动的右部范围
-_nBottom    - 允许滚动的底部范围
-_nLeft      - 允许滚动的左部范围
-_oRange     - 滚动结束后回弹的区域范围，格式为[top, right, bottom, left, Y轴滚动的最小单位(用于item-scroll), X轴滚动的最小单位(用于item-scroll)]
+滚动操作集合。
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
         dom = core.dom,
         ui = core.ui;
 //{/if}//
+    var namedMap = {};
+
     /**
      * 移动端滚动控件。
      * 移动端 scroll 存在惯性，对 onscroll 直接监听的方式无法很好的实现动画效果，本控件提供对移动端滚动事件的封装。
      * @control
      */
-    ui.MScroll = core.inherits(
-        ui.Control,
-        'ui-mobile-scroll',
-        function (el, options) {
-            var bodyEl = el;
+    ui.MScroll = {
+        NAME: '$MScroll',
 
-            el = dom.insertBefore(
-                dom.create(
+        constructor: function (el, options) {
+            var bodyEl = dom.create(
                     {
-                        className: el.className,
-                        style: {
-                            cssText: el.style.cssText
-                        }
+                        className: options.classes.join('-body ') + 'ui-mobile-scroll-body'
                     }
-                ),
-                el
-            );
-            bodyEl.className = options.classes.join('-body ');
-            bodyEl.style.cssText = '';
+                );
+
+            for (; el.firstChild; ) {
+                bodyEl.appendChild(el.firstChild);
+            }
+
+            dom.addClass(el, 'ui-mobile-scroll');
             el.appendChild(bodyEl);
-
-            ui.Control.call(this, el, options);
-
             this.$setBody(bodyEl);
+
+            namedMap[this.getUID()] = {};
         },
-        {
+
+        Methods: {
             /**
              * @override
              */
             $activate: function (event) {
-                ui.Control.prototype.$activate.call(this, event);
+                this.$MScroll.$activate.call(this, event);
 
-                var body = this.getBody();
+                var body = this.getBody(),
+                    data = namedMap[this.getUID()];
 
                 core.drag(
                     this,
@@ -66,11 +52,11 @@ _oRange     - 滚动结束后回弹的区域范围，格式为[top, right, botto
                         el: body,
                         inertia: 0.5,
                         absolute: true,
-                        left: this._nLeft !== undefined ? this._nLeft : body.offsetLeft,
-                        right: this._nRight !== undefined ? this._nRight : body.offsetLeft,
-                        top: this._nTop !== undefined ? this._nTop : body.offsetTop,
-                        bottom: this._nBottom !== undefined ? this._nBottom : body.offsetTop,
-                        limit: this._oRange
+                        left: data.left !== undefined ? data.left : body.offsetLeft,
+                        right: data.right !== undefined ? data.right : body.offsetLeft,
+                        top: data.top !== undefined ? data.top : body.offsetTop,
+                        bottom: data.bottom !== undefined ? data.bottom : body.offsetTop,
+                        limit: data.range
                     }
                 );
             },
@@ -79,15 +65,15 @@ _oRange     - 滚动结束后回弹的区域范围，格式为[top, right, botto
              * @override
              */
             $dragend: function (event) {
-                ui.Control.prototype.$dragend.call(this, event);
-                this._bScrolling = false;
+                this.$MScroll.$dragend.call(this, event);
+                namedMap[this.getUID()].scrolling = false;
             },
 
             /**
              * @override
              */
             $dragmove: function (event) {
-                ui.Control.prototype.$dragmove.call(this, event);
+                this.$MScroll.$dragmove.call(this, event);
                 var style = this.getBody().style;
                 style.left = event.x + 'px';
                 style.top = event.y + 'px';
@@ -98,8 +84,8 @@ _oRange     - 滚动结束后回弹的区域范围，格式为[top, right, botto
              * @override
              */
             $dragstart: function (event) {
-                ui.Control.prototype.$dragstart.call(this, event);
-                this._bScrolling = true;
+                this.$MScroll.$dragstart.call(this, event);
+                namedMap[this.getUID()].scrolling = true;
                 event.preventDefault();
             },
 
@@ -110,7 +96,7 @@ _oRange     - 滚动结束后回弹的区域范围，格式为[top, right, botto
              * @return {Array} 正常显示范围
              */
             getRange: function () {
-                return this._oRange;
+                return namedMap[this.getUID()].range;
             },
 
             /**
@@ -134,7 +120,7 @@ _oRange     - 滚动结束后回弹的区域范围，格式为[top, right, botto
              * @return {boolean} 是否正在滚动
              */
             isScrolling: function () {
-                return !!this._bScrolling;
+                return !!namedMap[this.getUID()].scrolling;
             },
 
             /**
@@ -144,10 +130,11 @@ _oRange     - 滚动结束后回弹的区域范围，格式为[top, right, botto
              * @param {Object} range 允许滚动的范围
              */
             setScrollRange: function (range) {
-                this._nLeft = range.left;
-                this._nTop = range.top;
-                this._nRight = range.right;
-                this._nBottom = range.bottom;
+                var data = namedMap[this.getUID()];
+                data.left = range.left;
+                data.top = range.top;
+                data.right = range.right;
+                data.bottom = range.bottom;
             },
 
             /**
@@ -157,10 +144,8 @@ _oRange     - 滚动结束后回弹的区域范围，格式为[top, right, botto
              * @param {Object} range 正常显示范围
              */
             setRange: function (range) {
-                this._oRange = range;
+                namedMap[this.getUID()].range = range;
             }
         }
-    );
-//{if 0}//
+    };
 }());
-//{/if}//

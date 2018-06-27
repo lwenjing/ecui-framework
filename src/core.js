@@ -2108,6 +2108,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     subClass.interfaces.forEach(function (constructor) {
                         constructor.call(this, el, options);
                     }, this);
+                    if (subClass.afterinterfaces) {
+                        subClass.afterinterfaces.call(this, el, options);
+                    }
                 };
 
             if ('string' !== typeof realType) {
@@ -2116,7 +2119,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 realConstructor = type;
             }
 
-            if ('function' !== typeof realConstructor) {
+            if (realConstructor instanceof Array) {
+                subClass.constructor = realConstructor[1] || superClass;
+                subClass.afterinterfaces = realConstructor[0];
+            } else if ('function' !== typeof realConstructor) {
                 subClass.constructor = superClass;
                 index--;
             } else {

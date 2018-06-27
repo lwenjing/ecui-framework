@@ -42,15 +42,15 @@ _nBottomIndex  - 下部隐藏的选项序号
      * @control
      */
     ui.MListView = core.inherits(
-        ui.MScroll,
+        ui.Control,
         'ui-mobile-listview',
-        function (el, options) {
-            ui.MScroll.call(this, el, options);
-
-            var body = this.getBody();
-            this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
-            this._eFooter = dom.insertBefore(dom.create({className: options.classes.join('-footer ')}), body);
-        },
+        [
+            function (el, options) {
+                var body = this.getBody();
+                this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
+                this._eFooter = dom.insertBefore(dom.create({className: options.classes.join('-footer ')}), body);
+            }
+        ],
         {
             HTML_LOADING: '正在加载...',
             HTML_REFRESH: '下拉刷新',
@@ -105,7 +105,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $cache: function (style, cacheSize) {
-                ui.MScroll.prototype.$cache.call(this, style, cacheSize);
+                ui.Control.prototype.$cache.call(this, style, cacheSize);
                 var body = this.getBody();
                 style = dom.getStyle(body);
                 if (ieVersion < 8) {
@@ -127,14 +127,14 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $dispose: function () {
                 this._eHeader = this._eFooter = null;
-                ui.MScroll.prototype.$dispose.call(this);
+                ui.Control.prototype.$dispose.call(this);
             },
 
             /**
              * @override
              */
             $dragend: function (event) {
-                ui.MScroll.prototype.$dragend.call(this, event);
+                ui.Control.prototype.$dragend.call(this, event);
                 if (!this._bLoading && this._sStatus === 'headercomplete') {
                     this._bLoading = true;
                     core.dispatchEvent(this, 'refresh');
@@ -203,7 +203,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 }
                 event.y += this._nTopHidden;
 
-                ui.MScroll.prototype.$dragmove.call(this, event);
+                ui.Control.prototype.$dragmove.call(this, event);
 
                 top = this.getHeight() - this.$$bodyHeight;
                 if (y > -this.$$headerHeight) {
@@ -233,7 +233,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $dragstart: function (event) {
-                ui.MScroll.prototype.$dragstart.call(this, event);
+                ui.Control.prototype.$dragstart.call(this, event);
                 if (this._oHandle) {
                     this._oHandle();
                 }
@@ -290,7 +290,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $initStructure: function (width, height) {
-                ui.MScroll.prototype.$initStructure.call(this, width, height);
+                ui.Control.prototype.$initStructure.call(this, width, height);
                 var style = this.getBody().style;
                 style.paddingTop = (this.$$bodyPadding[0] + this.$$headerHeight) + 'px';
                 style.paddingBottom = (this.$$bodyPadding[2] + this.$$footerHeight) + 'px';
@@ -301,7 +301,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $ready: function () {
-                ui.MScroll.prototype.$ready.call(this);
+                ui.Control.prototype.$ready.call(this);
                 this._nTopHidden = this._nBottomHidden = 0;
                 this._nTopIndex = 0;
                 this._nBottomIndex = this.getLength();
@@ -311,7 +311,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $resize: function () {
-                ui.MScroll.prototype.$resize.call(this);
+                ui.Control.prototype.$resize.call(this);
                 var style = this.getBody().style;
                 style.paddingTop = this.$$bodyPadding[0] + 'px';
                 style.paddingBottom = this.$$bodyPadding[2] + 'px';
@@ -351,7 +351,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             getY: function () {
-                return ui.MScroll.prototype.getY.call(this) - this._nTopHidden;
+                return ui.Control.getY.call(this) - this._nTopHidden;
             },
 
             /**
@@ -403,6 +403,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 }
             }
         },
+        ui.MScroll,
         ui.Items,
         {
             /**
