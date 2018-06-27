@@ -131,19 +131,6 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
-             * @override
-             */
-            $dragend: function (event) {
-                ui.Control.prototype.$dragend.call(this, event);
-                if (!this._bLoading && this._sStatus === 'headercomplete') {
-                    this._bLoading = true;
-                    core.dispatchEvent(this, 'refresh');
-                } else {
-                    this.reset();
-                }
-            },
-
-            /**
              * 拖拽的惯性时间计算。
              * @protected
              *
@@ -151,93 +138,6 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $draginertia: function (speed) {
                 return Math.min(2, Math.abs(speed.y / 400));
-            },
-
-            /**
-             * @override
-             */
-            $dragmove: function (event) {
-                var y = event.y,
-                    top = util.toNumber(this.getBody().style.top);
-
-                if (top < -screen.availHeight * 1.5) {
-                    for (; top < -screen.availHeight * 1.5; ) {
-                        var item = this.getItem(this._nTopIndex++),
-                            height = item.getHeight();
-
-                        item.hide();
-                        this._nTopHidden += height;
-                        top += height;
-                    }
-                } else if (top > -screen.availHeight) {
-                    for (; top > -screen.availHeight && this._nTopIndex; ) {
-                        item = this.getItem(--this._nTopIndex);
-                        height = item.getHeight();
-
-                        item.show();
-                        this._nTopHidden -= height;
-                        top -= height;
-                    }
-                }
-
-                top = this.getHeight() - this.$$bodyHeight - y + this._nBottomHidden;
-                if (top < -screen.availHeight * 1.5) {
-                    for (; top < -screen.availHeight * 1.5; ) {
-                        item = this.getItem(--this._nBottomIndex);
-                        height = item.getHeight();
-
-                        item.hide();
-                        this._nBottomHidden += height;
-                        top += height;
-                    }
-                } else if (top > -screen.availHeight) {
-                    var length = this.getLength();
-                    for (; top > -screen.availHeight && this._nBottomIndex < length; ) {
-                        item = this.getItem(this._nBottomIndex++);
-                        height = item.getHeight();
-
-                        item.show();
-                        this._nBottomHidden -= height;
-                        top -= height;
-                    }
-                }
-                event.y += this._nTopHidden;
-
-                ui.Control.prototype.$dragmove.call(this, event);
-
-                top = this.getHeight() - this.$$bodyHeight;
-                if (y > -this.$$headerHeight) {
-                    status = y < 0 ? 'headerenter' : 'headercomplete';
-                    this._eHeader.style.top = y + 'px';
-                } else if (y === -this.$$headerHeight) {
-                    // 解决items不够填充整个listview区域，导致footercomplete的触发
-                    status = '';
-                } else if (y < top + this.$$footerHeight) {
-                    var status = y > top ? 'footerenter' : 'footercomplete';
-                    this._eFooter.style.bottom = (top - y) + 'px';
-                } else {
-                    status = '';
-                }
-                if (this._sStatus && this._sStatus.charAt(0) !== status.charAt(0)) {
-                    core.dispatchEvent(this, this._sStatus.slice(0, 6) + 'leave');
-                }
-                if (this._sStatus !== status) {
-                    if (status) {
-                        core.dispatchEvent(this, status);
-                    }
-                    this._sStatus = status;
-                }
-            },
-
-            /**
-             * @override
-             */
-            $dragstart: function (event) {
-                ui.Control.prototype.$dragstart.call(this, event);
-                if (this._oHandle) {
-                    this._oHandle();
-                }
-                this._sStatus = '';
             },
 
             /**
@@ -348,13 +248,6 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
-             * @override
-             */
-            getY: function () {
-                return ui.Control.getY.call(this) - this._nTopHidden;
-            },
-
-            /**
              * 重新加载数据。
              * @public
              *
@@ -407,6 +300,106 @@ _nBottomIndex  - 下部隐藏的选项序号
         ui.Items,
         {
             /**
+             * @override
+             */
+            $dragend: function (event) {
+                ui.MScroll.Methods.$dragend.call(this, event);
+                if (!this._bLoading && this._sStatus === 'headercomplete') {
+                    this._bLoading = true;
+                    core.dispatchEvent(this, 'refresh');
+                } else {
+                    this.reset();
+                }
+            },
+
+            /**
+             * @override
+             */
+            $dragmove: function (event) {
+                var y = event.y,
+                    top = util.toNumber(this.getBody().style.top);
+
+                if (top < -screen.availHeight * 1.5) {
+                    for (; top < -screen.availHeight * 1.5; ) {
+                        var item = this.getItem(this._nTopIndex++),
+                            height = item.getHeight();
+
+                        item.hide();
+                        this._nTopHidden += height;
+                        top += height;
+                    }
+                } else if (top > -screen.availHeight) {
+                    for (; top > -screen.availHeight && this._nTopIndex; ) {
+                        item = this.getItem(--this._nTopIndex);
+                        height = item.getHeight();
+
+                        item.show();
+                        this._nTopHidden -= height;
+                        top -= height;
+                    }
+                }
+
+                top = this.getHeight() - this.$$bodyHeight - y + this._nBottomHidden;
+                if (top < -screen.availHeight * 1.5) {
+                    for (; top < -screen.availHeight * 1.5; ) {
+                        item = this.getItem(--this._nBottomIndex);
+                        height = item.getHeight();
+
+                        item.hide();
+                        this._nBottomHidden += height;
+                        top += height;
+                    }
+                } else if (top > -screen.availHeight) {
+                    var length = this.getLength();
+                    for (; top > -screen.availHeight && this._nBottomIndex < length; ) {
+                        item = this.getItem(this._nBottomIndex++);
+                        height = item.getHeight();
+
+                        item.show();
+                        this._nBottomHidden -= height;
+                        top -= height;
+                    }
+                }
+                event.y += this._nTopHidden;
+
+                ui.MScroll.Methods.$dragmove.call(this, event);
+
+                top = this.getHeight() - this.$$bodyHeight;
+                if (y > -this.$$headerHeight) {
+                    status = y < 0 ? 'headerenter' : 'headercomplete';
+                    this._eHeader.style.top = y + 'px';
+                } else if (y === -this.$$headerHeight) {
+                    // 解决items不够填充整个listview区域，导致footercomplete的触发
+                    status = '';
+                } else if (y < top + this.$$footerHeight) {
+                    var status = y > top ? 'footerenter' : 'footercomplete';
+                    this._eFooter.style.bottom = (top - y) + 'px';
+                } else {
+                    status = '';
+                }
+                if (this._sStatus && this._sStatus.charAt(0) !== status.charAt(0)) {
+                    core.dispatchEvent(this, this._sStatus.slice(0, 6) + 'leave');
+                }
+                if (this._sStatus !== status) {
+                    if (status) {
+                        core.dispatchEvent(this, status);
+                    }
+                    this._sStatus = status;
+                }
+            },
+
+            /**
+             * @override
+             */
+            $dragstart: function (event) {
+                ui.MScroll.Methods.$dragstart.call(this, event);
+                if (this._oHandle) {
+                    this._oHandle();
+                }
+                this._sStatus = '';
+            },
+
+            /**
              * 本控件新增选项只能从顶部或底部。
              * @override
              */
@@ -419,6 +412,13 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this._eFooter.style.bottom = '0px';
                     this._eFooter.innerHTML = oldLength === this.getLength() ? this.HTML_NODATA : this.HTML_LOADED;
                 }
+            },
+
+            /**
+             * @override
+             */
+            getY: function () {
+                return ui.MScroll.Methods.getY.call(this) - this._nTopHidden;
             },
 
             /**
