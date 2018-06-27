@@ -162,9 +162,11 @@ _bRequired    - 是否必须选择
                         core.mask(0.5);
                         util.timer(function () {
                             core.addGestureListeners(this, {
-                                tap: function () {
-                                    this.hide();
-                                    core.removeGestureListeners(this);
+                                tap: function (event) {
+                                    if (event.getControl() !== this) {
+                                        this.hide();
+                                        core.removeGestureListeners(this);
+                                    }
                                 }.bind(this)
                             });
                         }, 100, this);
