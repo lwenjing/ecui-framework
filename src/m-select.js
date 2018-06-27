@@ -143,13 +143,31 @@ _bRequired    - 是否必须选择
                     /**
                      * @override
                      */
-                    $show: function (width, height) {
-                        ui.$select.prototype.Options.prototype.$show.call(this, width, height);
-                        height = this.getParent().$$itemHeight * (this._nRadius * 2 + 1);
+                    $hide: function () {
+                        ui.$select.prototype.Options.prototype.$hide.call(this);
+                        core.mask();
+                    },
+
+                    /**
+                     * @override
+                     */
+                    $show: function () {
+                        ui.$select.prototype.Options.prototype.$show.call(this);
+                        var select = this.getParent(),
+                            height = select.$$itemHeight * (this._nRadius * 2 + 1);
                         this.getMain().style.height = height + 'px';
                         this.$$height = height;
-                        var select = this.getParent();
                         this.getBody().style.top = (this._nNormalBottom - select.$$itemHeight * select.getItems().indexOf(select.getSelected())) + 'px';
+
+                        core.mask(0.5);
+                        util.timer(function () {
+                            core.addGestureListeners(this, {
+                                tap: function () {
+                                    this.hide();
+                                    core.removeGestureListeners(this);
+                                }.bind(this)
+                            });
+                        }, 100, this);
                     }
                 },
                 ui.MScroll
@@ -162,6 +180,9 @@ _bRequired    - 是否必须选择
             Item: core.inherits(
                 ui.$select.prototype.Item,
                 {
+                    /**
+                     * @override
+                     */
                     $activate: function (event) {
                         ui.$select.prototype.Item.prototype.$activate.call(this, event);
                         core.dispatchEvent(this.getParent().$getSection('Options'), 'activate', event);
