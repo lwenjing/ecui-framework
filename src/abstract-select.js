@@ -11,7 +11,6 @@
 </div>
 
 @fields
-_nOptionSize  - 下接选择框可以用于选择的条目数量
 _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
@@ -81,24 +80,42 @@ _bRequired    - 是否必须选择
             ui.InputControl.call(this, el, options);
 
             this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
-            this._uOptions = core.$fastCreate(this.Options || ui.Control, optionsEl, this);
-
-            this.$setBody(optionsEl);
+            this._uOptions = core.$fastCreate(this.Options, optionsEl, this);
 
             this._bRequired = !!options.required;
+            this._cSelected = null;
 
             this.setPopup(this._uOptions);
-
-            this._cSelected = null;
+            this.$setBody(this._uOptions.getBody());
         },
         {
+            /**
+             * 选项框部件。
+             * @unit
+             */
+            Options: core.inherits(
+                ui.Control,
+                {
+                    /**
+                     * @override
+                     */
+                    $show: function () {
+                        ui.Control.prototype.$show.call(this);
+                        var select = this.getParent();
+                        if (select._bAlterItems) {
+                            this.$alterItems();
+                            select._bAlterItems = false;
+                        }
+                    }
+                }
+            ),
+
             /**
              * 选项部件。
              * @unit
              */
             Item: core.inherits(
                 ui.Item,
-                'ui-select-item',
                 function (el, options) {
                     ui.Item.call(this, el, options);
                     this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
@@ -148,10 +165,15 @@ _bRequired    - 是否必须选择
 
             /**
              * 选项控件发生变化的处理。
-             * 在 选项组接口 中，选项控件发生添加/移除操作时调用此方法。虚方法，子控件必须实现。
              * @protected
              */
-            $alterItems: util.blank,
+            $alterItems: function () {
+                if (dom.getParent(this._uOptions.getOuter()) && this._uOptions.isShow()) {
+                    this._uOptions.$alterItems();
+                } else {
+                    this._bAlterItems = true;
+                }
+            },
 
             /**
              * @override

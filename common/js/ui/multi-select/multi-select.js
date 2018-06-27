@@ -79,7 +79,7 @@ cities - 地区联动下拉框控件。
             this._cSelected = [];
         },
         {
-            $change: function (event) {
+            $change: function () {
                 var text = [], value = [];
                 this._cSelected.forEach(function (item) {
                     text.push(item.getContent());
@@ -97,7 +97,6 @@ cities - 地区联动下拉框控件。
              */
             Item: core.inherits(
                 ui.Item,
-                'ui-select-item',
                 function (el, options) {
                     ui.Item.call(this, el, options);
                     this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);

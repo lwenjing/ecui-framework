@@ -528,7 +528,7 @@ _aStatus            - 控件当前的状态集合
              */
             alterClass: function (className) {
                 if (this._sClass) {
-                    var classes = this.getClasses(this);
+                    var classes = this.getClasses();
                     classes.push('');
 
                     if (className.charAt(0) === '+') {

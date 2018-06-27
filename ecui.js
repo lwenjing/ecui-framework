@@ -49,9 +49,9 @@ var ecui;
     document.write('<script type="text/javascript" src="src/esr.js"></script>');
 
     document.write('<script type="text/javascript" src="src/m-scroll.js"></script>');
+    document.write('<script type="text/javascript" src="src/m-panel.js"></script>');
     document.write('<script type="text/javascript" src="src/m-popup.js"></script>');
     document.write('<script type="text/javascript" src="src/m-pop-select.js"></script>');
-    document.write('<script type="text/javascript" src="src/m-options.js"></script>');
     document.write('<script type="text/javascript" src="src/m-calendar.js"></script>');
     document.write('<script type="text/javascript" src="src/m-list-view.js"></script>');
 

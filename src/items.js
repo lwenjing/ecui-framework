@@ -125,6 +125,7 @@
                         // 根据是字符串还是Element对象选择不同的初始化方式
                         if (dom.isElement(item)) {
                             var options = core.getOptions(item) || {};
+                            util.setDefault(options, 'primary', UIClass.TYPES[0]);
                         } else {
                             if ('string' === typeof item) {
                                 options = {};
@@ -132,6 +133,7 @@
                             } else {
                                 options = item;
                             }
+                            util.setDefault(options, 'primary', UIClass.TYPES[0]);
                             item = dom.create(
                                 {
                                     className: options.primary,
@@ -166,7 +168,7 @@
                 this.alterItems();
 
                 if (this.isReady()) {
-                    core.init(this.getBody());
+                    core.init(body);
                 }
                 return items;
             },

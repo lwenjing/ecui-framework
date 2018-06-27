@@ -52,10 +52,10 @@
                         el: body,
                         inertia: 0.5,
                         absolute: true,
-                        left: data.left !== undefined ? data.left : body.offsetLeft,
-                        right: data.right !== undefined ? data.right : body.offsetLeft,
-                        top: data.top !== undefined ? data.top : body.offsetTop,
-                        bottom: data.bottom !== undefined ? data.bottom : body.offsetTop,
+                        left: data.left !== undefined ? data.left : this.getWidth() - body.offsetWidth,
+                        right: data.right !== undefined ? data.right : 0,
+                        top: data.top !== undefined ? data.top : this.getHeight() - body.offsetHeight,
+                        bottom: data.bottom !== undefined ? data.bottom : 0,
                         limit: data.range
                     }
                 );

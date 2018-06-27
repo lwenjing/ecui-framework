@@ -694,14 +694,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.pageY = event.pageY;
             this.which = event.which;
             if (ieVersion <= 10) {
-                var name = ieVersion < 9 ? 'filter' : 'content';
 outer:          for (var caches = [], target = event.target, el; target; target = getElementFromEvent(event)) {
                     for (el = target;; el = dom.getParent(el)) {
                         if (!el) {
                             break outer;
                         }
-                        var text = el.currentStyle[name];
-                        if (text && text.indexOf('pointer-events:none') >= 0) {
+                        if (core.getCustomStyle('pointer-events') === 'none') {
                             caches.push([el, el.style.visibility]);
                             el.style.visibility = 'hidden';
                             break;
@@ -1978,6 +1976,20 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         getAttributeName: function () {
             return ecuiName;
+        },
+
+        /**
+         * 获取自定义样式。
+         * 标签自身的 content 样式没有意义，所以可以用于自定义样式的扩展。在 IE 9以下浏览器中，使用 filter 自定义样式。
+         * @public
+         *
+         * @param {HTMLElement} style Element 样式对象
+         * @param {string} name 自定义样式名称
+         * @return {string} 自定义样式值
+         */
+        getCustomStyle: function (style, name) {
+            new RegExp('(^|"|\\s*)' + name + '\\s*:([^;"]+)(;|"|$)').test(style[ieVersion < 9 ? 'filter' : 'content']);
+            return RegExp.$2.trim();
         },
 
         /**

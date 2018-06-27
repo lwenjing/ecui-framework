@@ -22,7 +22,7 @@
 
         constructor: function (el, options) {
             namedMap[this.getUID()] = namedMap[this.getUID()] || {};
-            namedMap[this.getUID()].enter = (position[options.enter || 'bottom'] || position.right).concat([options.scale ? Math.min(1, options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale) : 1]);
+            namedMap[this.getUID()].enter = (position[options.enter || 'bottom'] || position.right).concat([options.scale ? Math.min(1, options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale) : 0]);
         },
 
         Methods: {
@@ -40,31 +40,34 @@
                     if (!dom.getParent(el)) {
                         // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
                         document.body.appendChild(el);
-                        popup.cache(true, true);
                     }
 
                     this.$MPopup.$click.call(this, event);
 
                     if (dom.contain(this.getOuter(), event.target)) {
+                        popup.show();
+
                         style.top = style.right = style.bottom = style.left = 'auto';
                         if (data.enter[1]) {
                             var width = view.width,
-                                height = view.height * data.enter[2],
-                                initValue = view.height,
-                                reverseValue = view.top;
+                                height = data.enter[2] ? view.height * data.enter[2] : popup.getHeight(),
+                                initValue = view.height + view.top,
+                                reverseValue = height;
                         } else {
                             style.top = view.top + 'px';
-                            width = view.width * data.enter[2];
+                            width = data.enter[2] ? view.width * data.enter[2] : popup.getWidth();
                             height = view.height;
-                            initValue = view.width;
-                            reverseValue = view.left;
+                            initValue = view.width + view.left;
+                            reverseValue = width;
                         }
-                        popup.setSize(width, height);
-                        style[data.enter[0]] = (initValue + reverseValue) + 'px';
+                        if (data.enter[2]) {
+                            popup.setSize(width, height);
+                        }
+                        style[data.enter[0]] = initValue + 'px';
 
                         locked = true;
                         ecui.effect.grade(
-                            'round:this.style.' + data.enter[0] + '->' + Math.round(initValue + reverseValue - initValue * data.enter[2]),
+                            'round:this.style.' + data.enter[0] + '->' + Math.round(initValue - reverseValue),
                             1000,
                             {
                                 $: el,
@@ -73,8 +76,6 @@
                                 }
                             }
                         );
-
-                        popup.show();
                     }
                 }
             },
