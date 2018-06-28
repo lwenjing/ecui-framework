@@ -45,13 +45,13 @@
                     event,
                     {
                         el: body,
-                        inertia: 0.5,
+                        decelerate: 0.5,
                         absolute: true,
                         left: data.left !== undefined ? data.left : this.getWidth() - body.offsetWidth,
                         right: data.right !== undefined ? data.right : 0,
                         top: data.top !== undefined ? data.top : this.getHeight() - body.offsetHeight,
                         bottom: data.bottom !== undefined ? data.bottom : 0,
-                        limit: data.range
+                        limit: data.range || {}
                     }
                 );
             },

@@ -189,9 +189,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @return {string} 属性值
              */
             getAttribute: ieVersion < 8 ? function (el, name) {
-                return el[name];
+                return el[name] || '';
             } : function (el, name) {
-                return el.getAttribute(name);
+                return el.getAttribute(name) || '';
             },
 
             /**

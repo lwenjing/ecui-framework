@@ -124,7 +124,12 @@
                     if (!(item instanceof ui.Item)) {
                         // 根据是字符串还是Element对象选择不同的初始化方式
                         if (dom.isElement(item)) {
-                            var options = core.getOptions(item) || {};
+                            var text = dom.getAttribute(item, core.getAttributeName()),
+                                options = core.getOptions(item) || {};
+                            if (options.type) {
+                                item.setAttribute(core.getAttributeName(), text);
+                                options = {};
+                            }
                             if (!options.primary) {
                                 options.primary = item.className.trim().split(' ')[0] || UIClass.TYPES[0];
                             }
