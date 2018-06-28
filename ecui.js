@@ -52,6 +52,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/imp/m-popup.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/m-options.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-select.js"></script>');
+    document.write('<script type="text/javascript" src="src/mobile/m-multi-options.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-calendar.js"></script>');
     document.write('<script type="text/javascript" src="src/mobile/m-list-view.js"></script>');
 

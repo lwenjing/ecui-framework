@@ -19,7 +19,6 @@ _bRequired    - 是否必须选择
 (function () {
 //{if 0}//
     var core = ecui,
-        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
