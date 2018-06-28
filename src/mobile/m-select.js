@@ -62,7 +62,6 @@ _bRequired    - 是否必须选择
                         core.setFocused(select.getSelected());
                     }
                 },
-                ui.MScroll,
                 ui.MOptions
             ),
 

@@ -19,6 +19,8 @@
     ui.MOptions = {
         NAME: '$MOptions',
 
+        SUPER: ui.MScroll,
+
         constructor: function (el, options) {
             dom.addClass(el, 'ui-mobile-options');
             dom.insertBefore(dom.create({
