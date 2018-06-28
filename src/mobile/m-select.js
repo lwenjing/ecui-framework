@@ -23,17 +23,6 @@ _bRequired    - 是否必须选择
         ui = core.ui,
         util = core.util;
 //{/if}//
-    var SubmitButton = core.inherits(
-            ui.Control,
-            {
-                onclick: function () {
-                    var options = this.getParent();
-                    core.dispatchEvent(options.getParent(), 'select');
-                    options.hide();
-                }
-            }
-        );
-
     /**
      * 下拉框控件。
      * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
@@ -50,7 +39,9 @@ _bRequired    - 是否必须选择
 
             ui.$select.call(this, el, options);
 
-            this.$getSection('Options').setOptionSize(options.optionSize || 3);
+            var unit = this.$getSection('Options');
+            unit.setOptionSize(options.optionSize || 3);
+            core.ext['m-confirm'](unit);
         },
         {
             /**
@@ -59,21 +50,6 @@ _bRequired    - 是否必须选择
              */
             Options: core.inherits(
                 ui.$select.prototype.Options,
-                [
-                    function (el, options) {
-                        var bodyEl = this.getBody();
-                        el.appendChild(dom.create({
-                            className: options.classes.join('-title ') + 'ui-mobile-options-title',
-                            innerHTML: '<div>确定</div>'
-                        }));
-                        core.$fastCreate(SubmitButton, el.lastChild, this, {focusable: false});
-                        el = el.appendChild(dom.create({
-                            className: options.classes.join('-layout ') + 'ui-mobile-options-layout'
-                        }));
-                        el.appendChild(dom.previous(bodyEl));
-                        el.appendChild(bodyEl);
-                    }
-                ],
                 {
                     /**
                      * @override
@@ -121,7 +97,7 @@ _bRequired    - 是否必须选择
              * 选择事件的默认处理。
              * @event
              */
-            $select: function () {
+            $confirm: function () {
                 this.setSelected(core.getFocused());
             }
         },
