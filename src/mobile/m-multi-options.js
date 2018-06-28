@@ -1,3 +1,12 @@
+/*
+@example
+<div ui="type:m-multi-options">
+...
+</div>
+
+@fields
+_aOptions    - 选项框数组
+*/
 //{if 0}//
 (function () {
     var core = ecui,
@@ -5,6 +14,10 @@
         ui = core.ui,
         util = core.util;
 //{/if}//
+    /**
+     * 多选项输入框控件。
+     * @control
+     */
     ui.MMultiOptions = core.inherits(
         ui.InputControl,
         function (el, options) {
@@ -28,9 +41,16 @@
             }, this);
         },
         {
+            /**
+             * 弹出层部件。
+             * @unit
+             */
             Popup: core.inherits(
                 ui.Control,
                 {
+                    /**
+                     * @override
+                     */
                     $cache: function (style) {
                         ui.Control.prototype.$cache.call(this, style);
                         this.getParent()._aOptions.forEach(function (item) {
@@ -39,6 +59,11 @@
                     }
                 }
             ),
+
+            /**
+             * 选项框部件。
+             * @unit
+             */
             Options: core.inherits(
                 ui.Control,
                 function (el, options) {
@@ -72,6 +97,10 @@
                     this.setOptionSize(3);
                 },
                 {
+                    /**
+                     * 选项部件。
+                     * @unit
+                     */
                     Item: core.inherits(
                         ui.Control,
                         function (el, options) {
@@ -79,6 +108,9 @@
                             this._sValue = options.value || this.getContent();
                         },
                         {
+                            /**
+                             * @override
+                             */
                             $focus: function (event) {
                                 ui.Control.prototype.$focus.call(this, event);
                                 this.getParent().setSelected(this);
@@ -89,13 +121,30 @@
                 ui.MScroll,
                 ui.MOptions,
                 {
+                    /**
+                     * @override
+                     */
                     $dragend: function (event) {
                         ui.MScroll.Methods.$dragend.call(this, event);
                         core.dispatchEvent(this.getParent(), 'change');
                     },
+
+                    /**
+                     * 获取选中控件的值。
+                     * @public
+                     *
+                     * @return {string} 选中控件的值
+                     */
                     getValue: function () {
                         return this._cSelect ? this._cSelect._sValue : '';
                     },
+
+                    /**
+                     * 设置选中控件。
+                     * @public
+                     *
+                     * @param {ecui.ui.MMultiOptions.Options.Item} item 选中的控件
+                     */
                     setSelected: function (item) {
                         item = item || null;
                         if (this._cSelect !== item) {
@@ -108,20 +157,35 @@
                             this._cSelect = item;
                         }
                     },
+
+                    /**
+                     * 设置控件的值，如果不存在，选中空数据。
+                     * @public
+                     *
+                     * @param {string} value 控件的值
+                     */
                     setValue: function (value) {
                         value = String(value);
                         for (var i = 0, item; item = this._aItems[i]; i++) {
                             if (item._sValue === value) {
                                 this.getBody().style.top = (3 - i) * this.$$itemHeight + 'px';
                                 this.setSelected(item);
-                                break;
+                                return;
                             }
                         }
+                        this.setSelected();
                     }
                 }
             )
         },
         {
+            /**
+             * 获取选项控件。
+             * @public
+             *
+             * @param {number} index 选项编号
+             * @return {ecui.ui.MMultiOptions.Options} 选项控件
+             */
             getOptions: function (index) {
                 return this._aOptions[index];
             }

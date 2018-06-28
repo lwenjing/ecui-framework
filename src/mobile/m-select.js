@@ -1,11 +1,11 @@
 /*
 @example
-<select ui="type:m-pop-select" name="sex">
+<select ui="type:m-select" name="sex">
     <option value="male" selected="selected">男</option>
     <option value="female">女</option>
 </select>
 或
-<div ui="type:m-pop-select;name:sex;value:male">
+<div ui="type:m-select;name:sex;value:male">
     <div ui="value:male">男</div>
     <div ui="value:female">女</div>
 </div>
