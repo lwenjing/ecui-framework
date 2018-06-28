@@ -2461,7 +2461,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         setFocused: function (control) {
             if (!control || control.isDisabled()) {
                 // 处于失效状态的控件不允许获得焦点状态
-                control = null;
+                bubble(focusedControl, 'blur', null, null);
+                return;
             }
 
             for (var target = control; target; target = target.getParent()) {
