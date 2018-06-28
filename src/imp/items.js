@@ -125,6 +125,9 @@
                         // 根据是字符串还是Element对象选择不同的初始化方式
                         if (dom.isElement(item)) {
                             var options = core.getOptions(item) || {};
+                            if (!options.primary) {
+                                options.primary = item.className.trim().split(' ')[0] || UIClass.TYPES[0];
+                            }
                         } else {
                             if ('string' === typeof item) {
                                 options = {};
@@ -132,17 +135,20 @@
                             } else {
                                 options = item;
                             }
+                            if (!options.primary) {
+                                options.primary = UIClass.TYPES[0];
+                            }
                             item = dom.create(
                                 {
-                                    className: options.primary || '',
+                                    className: options.primary,
                                     innerHTML: options[this.TEXTNAME]
                                 }
                             );
                         }
 
                         options.parent = this;
-                        item.className += UIClass.CLASS;
                         item = core.$fastCreate(UIClass, item, null, options);
+                        item.getMain().className += UIClass.CLASS;
                     }
 
                     // 选项控件，直接添加
