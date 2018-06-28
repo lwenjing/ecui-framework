@@ -123,6 +123,7 @@
                 this.$MOptions.$show.call(this);
                 var height = this.$$itemHeight * (this._nOptionSize * 2 + 1);
                 this.getMain().style.height = height + 'px';
+                dom.getParent(this.getBody()).style.height = height + 'px';
                 this.$$height = height + this.getMinimumHeight();
 
                 util.timer(function () {
