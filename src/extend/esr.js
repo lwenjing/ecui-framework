@@ -429,6 +429,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         core.dispose(el, true);
         el.innerHTML = engine.render(name || route.view, context);
         if (route.NAME) {
+            el.route = route.NAME;
             dom.addClass(el, route.NAME.replace(/\./g, '-'));
         }
         core.init(el);
@@ -438,7 +439,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         el.style.visibility = '';
 
         if (route.NAME) {
-            el.route = route.NAME;
             autoChildRoute(route);
         } else {
             autoChildRoute(route);
