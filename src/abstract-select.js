@@ -57,7 +57,6 @@ _bRequired    - 是否必须选择
 
                 var optionsEl = dom.create(
                     {
-                        className: options.classes.join('-options ') + 'ui-popup ui-hide',
                         innerHTML: Array.prototype.map.call(
                             oldEl.options,
                             function (item) {
@@ -69,9 +68,9 @@ _bRequired    - 是否必须选择
                 );
             } else {
                 optionsEl = oldEl;
-                optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
                 oldEl.style.cssText = '';
             }
+            optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
 
             dom.remove(oldEl);
 
@@ -179,10 +178,9 @@ _bRequired    - 是否必须选择
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                ui.InputControl.prototype.$cache.call(this, style, cacheSize);
-                this._uText.cache(false, true);
-                this._uOptions.cache(false, true);
+            $cache: function (style) {
+                ui.InputControl.prototype.$cache.call(this, style);
+                this._uText.cache(true);
             },
 
             /**

@@ -65,7 +65,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 if (this.isReady()) {
                     this.$$bodyHeight = this.getBody().offsetHeight + this._nTopHidden + this._nBottomHidden;
                     this.getItems().map(function (item) {
-                        item.cache(true);
+                        item.cache();
                         return item.getOuter().offsetWidth ? item : null;
                     }).forEach(function (item, index) {
                         if (item) {
@@ -104,8 +104,8 @@ _nBottomIndex  - 下部隐藏的选项序号
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                ui.Control.prototype.$cache.call(this, style, cacheSize);
+            $cache: function (style) {
+                ui.Control.prototype.$cache.call(this, style);
                 var body = this.getBody();
                 style = dom.getStyle(body);
                 if (ieVersion < 8) {

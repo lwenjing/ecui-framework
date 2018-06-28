@@ -1443,7 +1443,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         }
 
         list.forEach(function (item) {
-            item.cache(true, true);
+            item.cache(true);
         });
         list.forEach(function (item) {
             item.initStructure();
@@ -2117,6 +2117,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 realConstructor = constructor,
                 subClass = function (el, options) {
                     subClass.constructor.call(this, el, options);
+                    el = this.getMain();
                     subClass.interfaces.forEach(function (constructor) {
                         constructor.call(this, el, options);
                     }, this);

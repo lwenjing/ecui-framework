@@ -103,16 +103,6 @@ _aChildren     - 子控件集合
         },
         {
             /**
-             * @override
-             */
-            $cache: function (style, cacheSize) {
-                ui.Control.prototype.$cache.call(this, style, cacheSize);
-                this._aChildren.forEach(function (item) {
-                    item.cache(true, true);
-                });
-            },
-
-            /**
              * 控件点击时改变子树视图控件的显示/隐藏状态。
              * @override
              */
