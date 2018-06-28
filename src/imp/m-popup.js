@@ -8,6 +8,11 @@
         ui = core.ui,
         util = core.util;
 //{/if}//
+    function hideHandler() {
+        core.mask();
+        core.removeEventListener(this, 'hide', hideHandler);
+    }
+
     var namedMap = {},
         position = {
             top: ['bottom', true],
@@ -21,8 +26,9 @@
         NAME: '$MPopup',
 
         constructor: function (el, options) {
-            namedMap[this.getUID()] = namedMap[this.getUID()] || {};
-            namedMap[this.getUID()].enter = (position[options.enter || 'bottom'] || position.right).concat([options.scale ? Math.min(1, options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale) : 0]);
+            var data = namedMap[this.getUID()] = namedMap[this.getUID()] || {};
+            data.enter = (position[options.enter || 'bottom'] || position.right).concat([options.scale ? Math.min(1, options.scale.indexOf('%') > 0 ? +options.scale.slice(0, -1) / 100 : +options.scale) : 0]);
+            data.mask = options.mask;
         },
 
         Methods: {
@@ -46,6 +52,21 @@
 
                     if (dom.contain(this.getOuter(), event.target)) {
                         popup.show();
+                        if (data.mask) {
+                            core.mask(data.mask);
+                            core.addEventListener(popup, 'hide', hideHandler);
+
+                            util.timer(function () {
+                                core.addGestureListeners(popup, {
+                                    tap: function (event) {
+                                        if (!dom.contain(popup.getMain(), event.target)) {
+                                            popup.hide();
+                                            core.removeGestureListeners(popup);
+                                        }
+                                    }
+                                });
+                            }, 100);
+                        }
 
                         style.top = style.right = style.bottom = style.left = 'auto';
                         if (data.enter[1]) {

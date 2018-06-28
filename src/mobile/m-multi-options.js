@@ -9,6 +9,7 @@
         ui.InputControl,
         function (el, options) {
             util.setDefault(options, 'enter', 'bottom');
+            util.setDefault(options, 'mask', '0.5');
 
             var popupEl = dom.create({
                     className: options.classes.join('-popup ') + 'ui-popup ui-hide'
@@ -35,33 +36,6 @@
                         this.getParent()._aOptions.forEach(function (item) {
                             item.cache();
                         });
-                    },
-
-                    /**
-                     * @override
-                     */
-                    $hide: function () {
-                        ui.Control.prototype.$hide.call(this);
-                        core.mask();
-                    },
-
-                    /**
-                     * @override
-                     */
-                    $show: function () {
-                        ui.Control.prototype.$show.call(this);
-                        core.mask(0.5);
-
-                        util.timer(function () {
-                            core.addGestureListeners(this, {
-                                tap: function (event) {
-                                    if (!dom.contain(this.getMain(), event.target)) {
-                                        this.hide();
-                                        core.removeGestureListeners(this);
-                                    }
-                                }.bind(this)
-                            });
-                        }, 100, this);
                     }
                 }
             ),

@@ -105,17 +105,6 @@
                 this.getMain().style.height = height + 'px';
                 dom.getParent(this.getBody()).style.height = height + 'px';
                 this.$$height = height + this.getMinimumHeight();
-
-                util.timer(function () {
-                    core.addGestureListeners(this, {
-                        tap: function (event) {
-                            if (!dom.contain(this.getMain(), event.target)) {
-                                this.hide();
-                                core.removeGestureListeners(this);
-                            }
-                        }.bind(this)
-                    });
-                }, 100, this);
             },
 
             /**

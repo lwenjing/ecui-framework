@@ -35,6 +35,7 @@ _bRequired    - 是否必须选择
         'ui-mobile-select',
         function (el, options) {
             util.setDefault(options, 'enter', 'bottom');
+            util.setDefault(options, 'mask', '0.5');
 
             ui.$select.call(this, el, options);
 
@@ -53,22 +54,12 @@ _bRequired    - 是否必须选择
                     /**
                      * @override
                      */
-                    $hide: function () {
-                        ui.$select.prototype.Options.prototype.$hide.call(this);
-                        core.mask();
-                    },
-
-                    /**
-                     * @override
-                     */
                     $show: function () {
                         ui.$select.prototype.Options.prototype.$show.call(this);
                         var select = this.getParent();
 
                         this.getBody().style.top = (this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(select.getSelected()))) + 'px';
                         core.setFocused(select.getSelected());
-
-                        core.mask(0.5);
                     }
                 },
                 ui.MScroll,
@@ -93,7 +84,7 @@ _bRequired    - 是否必须选择
             ),
 
             /**
-             * 选择事件的默认处理。
+             * 确认事件的默认处理。
              * @event
              */
             $confirm: function () {
