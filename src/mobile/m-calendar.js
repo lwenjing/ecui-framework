@@ -39,7 +39,7 @@
                     this._uMonth.setValue(value.getMonth() + 1);
                     this._uDate.setValue(value.getDate());
                 }
-                core.dispatch(this, 'change');
+                core.dispatchEvent(this, 'change');
             },
 
             $confirm: function () {

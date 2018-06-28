@@ -51,6 +51,17 @@
                     $show: function () {
                         ui.Control.prototype.$show.call(this);
                         core.mask(0.5);
+
+                        util.timer(function () {
+                            core.addGestureListeners(this, {
+                                tap: function (event) {
+                                    if (!dom.contain(this.getMain(), event.target)) {
+                                        this.hide();
+                                        core.removeGestureListeners(this);
+                                    }
+                                }.bind(this)
+                            });
+                        }, 100, this);
                     }
                 }
             ),
