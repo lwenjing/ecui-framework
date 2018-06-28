@@ -16,35 +16,14 @@
         });
     }
 
-    var SubmitButton = core.inherits(
-            ui.Control,
-            {
-                onclick: function () {
-                    var options = this.getParent();
-                    core.dispatchEvent(options.getParent(), 'select', {item: core.getFocused()});
-                    options.hide();
-                }
-            }
-        );
-
     ui.MOptions = {
         NAME: '$MOptions',
 
         constructor: function (el, options) {
             dom.addClass(el, 'ui-mobile-options');
-            var bodyEl = this.getBody();
-            el.appendChild(dom.create({
-                className: options.classes.join('-title ') + 'ui-mobile-options-title',
-                innerHTML: '<div>确定</div>'
-            }));
-            core.$fastCreate(SubmitButton, el.lastChild, this, {focusable: false});
-            el = el.appendChild(dom.create({
-                className: options.classes.join('-layout ') + 'ui-mobile-options-layout'
-            }));
-            el.appendChild(dom.create({
+            dom.insertBefore(dom.create({
                 className: options.classes.join('-mask ') + 'ui-mobile-options-mask'
-            }));
-            el.appendChild(bodyEl);
+            }), this.getBody());
         },
 
         Methods: {

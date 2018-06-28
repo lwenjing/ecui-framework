@@ -1,30 +1,9 @@
 /*<script>window.onload=function(){value=document.getElementsByTagName('TEXTAREA')[0].value;parent.postMessage({url:location.href.slice(7),text:value.slice(value.indexOf('\n')+1).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&')},'*');}</script><textarea>*/
 .ui-mobile-options {
     width: 100%;
-    padding-top: 30px;
     background: white;
     content: "item-height:30px";
 
-    .ui-mobile-options-title {
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        width: 100%;
-        height: 30px;
-        font-size: 14px;
-        background: white;
-        z-index: 1;
-
-        div {
-            position: absolute;
-            line-height: 29px;
-            right: 10px;
-        }
-    }
-    .ui-mobile-options-layout {
-        width: 100%;
-        position: relative !important;
-    }
     .ui-mobile-options-mask {
         position: absolute !important;
         width: 100% !important;
