@@ -79,7 +79,7 @@ _bRequired    - 是否必须选择
             ui.InputControl.call(this, el, options);
 
             this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
-            this._uOptions = core.$fastCreate(this.Options, optionsEl, this);
+            this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
 
             this._bRequired = !!options.required;
             this._cSelected = null;

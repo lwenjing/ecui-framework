@@ -2,30 +2,36 @@
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util;
 //{/if}//
     ui.MCalendar = core.inherits(
         ui.InputControl,
         'ui-mobile-calendar',
         function (el, options) {
-            var optionsClass = options.classes.join('-options '),
-                popupEl = dom.create({
-                    className: options.classes.join('-popup '),
-                    innerHTML: '<div class="' + optionsClass + '"></div><div class="' + optionsClass + '"></div><div class="' + optionsClass + '"></div>'
+            util.setDefault(options, 'enter', 'bottom');
+
+            var popupEl = dom.create({
+                    className: this.Popup.CLASS + 'ui-popup ui-hide',
+                    innerHTML: '<div class="' + this.Options.CLASS + '"></div><div class="' + this.Options.CLASS + '"></div><div class="' + this.Options.CLASS + '"></div>'
                 }),
                 list = dom.children(popupEl);
 
             ui.InputControl.call(this, el, options);
 
-            this.setPopup(core.$fastCreate(ui.Control, popupEl, this, {enter: 'bottom'}));
+            this.setPopup(core.$fastCreate(this.Popup, popupEl, this));
 
             this._uYear = core.$fastCreate(this.Options, list[0], this, {values: [2000, 2040]});
             this._uMonth = core.$fastCreate(this.Options, list[1], this, {values: [1, 12]});
             this._uDate = core.$fastCreate(this.Options, list[2], this, {values: [1, 31]});
         },
         {
+            Popup: core.inherits(
+                ui.Control
+            ),
             Options: core.inherits(
                 ui.Control,
+                'ui-mobile-calendar-options',
                 function (el, options) {
                     ui.Control.call(this, el, options);
 
@@ -87,12 +93,6 @@
                     }
                 }
             ),
-            $cache: function (style, cacheSize) {
-                ui.Control.prototype.$cache.call(this, style, cacheSize);
-                this._uYear.cache(true, true);
-                this._uMonth.cache(true, true);
-                this._uDate.cache(true, true);
-            },
             getValue: function () {
                 var year = this._uYear.getValue(),
                     month = this._uMonth.getValue(),

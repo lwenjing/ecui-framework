@@ -16,13 +16,35 @@
         });
     }
 
+    var SubmitButton = core.inherits(
+            ui.Control,
+            {
+                onclick: function () {
+                    var options = this.getParent();
+                    core.dispatchEvent(options.getParent(), 'select', {item: core.getFocused()});
+                    options.hide();
+                }
+            }
+        );
+
     ui.MOptions = {
         NAME: '$MOptions',
 
         constructor: function (el, options) {
-            dom.insertBefore(dom.create({
-                className: options.classes.join('-mask ')
-            }), this.getBody());
+            dom.addClass(el, 'ui-mobile-options');
+            var bodyEl = this.getBody();
+            el.appendChild(dom.create({
+                className: options.classes.join('-title ') + 'ui-mobile-options-title',
+                innerHTML: '<div>确定</div>'
+            }));
+            core.$fastCreate(SubmitButton, el.lastChild, this, {focusable: false});
+            el = el.appendChild(dom.create({
+                className: options.classes.join('-layout ') + 'ui-mobile-options-layout'
+            }));
+            el.appendChild(dom.create({
+                className: options.classes.join('-mask ') + 'ui-mobile-options-mask'
+            }));
+            el.appendChild(bodyEl);
         },
 
         Methods: {
@@ -52,8 +74,8 @@
             /**
              * @override
              */
-            $cache: function (style, cacheSize) {
-                this.$MOptions.$cache.call(this, style, cacheSize);
+            $cache: function (style) {
+                this.$MOptions.$cache.call(this, style);
                 this.$$itemHeight = util.toNumber(core.getCustomStyle(style, 'item-height'));
             },
 
@@ -101,7 +123,18 @@
                 this.$MOptions.$show.call(this);
                 var height = this.$$itemHeight * (this._nOptionSize * 2 + 1);
                 this.getMain().style.height = height + 'px';
-                this.$$height = height;
+                this.$$height = height + this.getMinimumHeight();
+
+                util.timer(function () {
+                    core.addGestureListeners(this, {
+                        tap: function (event) {
+                            if (!dom.contain(this.getMain(), event.target)) {
+                                this.hide();
+                                core.removeGestureListeners(this);
+                            }
+                        }.bind(this)
+                    });
+                }, 100, this);
             },
 
             /**

@@ -19,6 +19,7 @@ _bRequired    - 是否必须选择
 (function () {
 //{if 0}//
     var core = ecui,
+        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
@@ -38,7 +39,7 @@ _bRequired    - 是否必须选择
 
             ui.$select.call(this, el, options);
 
-            this.$getSection('Options').setOptionSize(options.optionSize || 2);
+            this.$getSection('Options').setOptionSize(options.optionSize || 3);
         },
         {
             /**
@@ -67,16 +68,6 @@ _bRequired    - 是否必须选择
                         core.setFocused(select.getSelected());
 
                         core.mask(0.5);
-                        util.timer(function () {
-                            core.addGestureListeners(this, {
-                                tap: function (event) {
-                                    if (event.getControl() !== this) {
-                                        this.hide();
-                                        core.removeGestureListeners(this);
-                                    }
-                                }.bind(this)
-                            });
-                        }, 100, this);
                     }
                 },
                 ui.MScroll,
@@ -98,7 +89,15 @@ _bRequired    - 是否必须选择
                         core.dispatchEvent(this.getParent().$getSection('Options'), 'activate', event);
                     }
                 }
-            )
+            ),
+
+            /**
+             * 选择事件的默认处理。
+             * @event
+             */
+            $select: function (event) {
+                this.setSelected(event.item);
+            }
         },
         ui.MPopup
     );

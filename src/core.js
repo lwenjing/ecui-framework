@@ -462,20 +462,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
                     // 常见的表现是需要点击两次才能进行滚动操作，而且中途不能离开控件区域
                     // 以免触发悬停状态的样式改变。
-                    if (!scrollHandler || ieVersion >= 9) {
-                        for (; target; target = target.getParent()) {
-                            if (target.isFocusable()) {
-                                if (!(target !== control && target.contain(focusedControl))) {
-                                    // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
-                                    // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
-                                    // 父控件获得焦点，否则焦点不发生变化
-                                    if (isTouchMoved === undefined) { // MouseEvent
-                                        // 移动端是在mouseup时获得焦点
-                                        core.setFocused(target);
-                                    }
-                                }
-                                break;
-                            }
+                    if (isTouchMoved === undefined) { // MouseEvent
+                        // 触控设备在mouseup时获得焦点
+                        if (!scrollHandler || ieVersion >= 9) {
+                            core.setFocused(target);
                         }
                     }
 
@@ -2474,9 +2464,21 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 control = null;
             }
 
-            var parent = getCommonParent(focusedControl, control);
-            bubble(focusedControl, 'blur', null, parent);
-            bubble(focusedControl = control, 'focus', null, parent);
+            for (var target = control; target; target = target.getParent()) {
+                // 不允许获得焦点状态的控件自动向上查找，找不到直接结束
+                if (target.isFocusable()) {
+                    if (target === control || !target.contain(focusedControl)) {
+                        // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
+                        // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
+                        // 父控件获得焦点，否则焦点不发生变化
+                        var parent = getCommonParent(focusedControl, control);
+                        bubble(focusedControl, 'blur', null, parent);
+                        bubble(focusedControl = control, 'focus', null, parent);
+                    }
+                    break;
+                }
+            }
+
         },
 
         /**
