@@ -14,6 +14,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         isToucher = document.ontouchstart !== undefined,
         isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none
         isStrict = document.compatMode === 'CSS1Compat',
+        iosVersion = /(iPhone|iPad) OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
@@ -31,6 +32,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         initRecursion = 0,        // init 操作的递归次数
 
+        bodyElement,
         maskElements = [],        // 遮罩层组
         unmasks = [],             // 用于取消庶罩层的函数列表
 
@@ -1037,15 +1039,31 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     }
                 }
             }
-            dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
+
+            var body = document.body,
+                el;
+
+            if (safariVersion && iosVersion > 10) {
+                bodyElement = dom.create({
+                    id: body.id,
+                    className: 'SAFARI-BODY-FIXED'
+                });
+                for (; body.firstChild; ) {
+                    bodyElement.appendChild(body.firstChild);
+                }
+                body.appendChild(bodyElement);
+                body.id = '';
+            }
+
+            dom.insertHTML(body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
-            var el = document.body.lastChild;
+            el = body.lastChild;
             flgFixedOffset = el.lastChild.offsetTop;
             flgFixedSize = el.offsetWidth !== 80;
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
 
-            var options = core.getOptions(document.body, 'data-ecui') || {};
+            var options = core.getOptions(body, 'data-ecui') || {};
 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
@@ -1080,7 +1098,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             );
 
-            core.init(document.body);
+            core.init(body);
+            body = el = null;
 
             return true;
         }
@@ -1966,6 +1985,17 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         getAttributeName: function () {
             return ecuiName;
+        },
+
+        /**
+         * 获取当前的 Body 区域。
+         * safari 浏览器为了屏弊高版本下默认的手势滚动，会在 BODY 标签内嵌入一个额外的层。
+         * @public
+         *
+         * @return {HTMLElement} BODY区域
+         */
+        getBody: function () {
+            return bodyElement || document.body;
         },
 
         /**

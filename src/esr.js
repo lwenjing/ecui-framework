@@ -1139,7 +1139,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         commandOpen: '<<<',
                         commandClose: '>>>'
                     });
-                    for (var el = document.body.firstChild; el; el = el.nextSibling) {
+                    for (var el = body.firstChild; el; el = el.nextSibling) {
                         if (el.nodeType === 8) {
                             etpl.compile(el.textContent || el.nodeValue);
                             dom.remove(el);
@@ -1155,7 +1155,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         el.id = 'AppBackupContainer';
                         dom.insertHTML(el, 'afterEnd', dom.previous(el).outerHTML + el.outerHTML);
                         el.id = 'AppCommonContainer';
-                        el = dom.last(dom.first(document.body));
+                        el = dom.last(dom.first(body));
                         var children = dom.children(el.parentNode);
                         for (var i = 1; i < children.length; i += 2) {
                             children[i].header = children[i - 1];
@@ -1179,6 +1179,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 });
             }
 
+            var body = core.getBody();
             esrOptions = JSON.parse('{' + decodeURIComponent(value.replace(/(\w+)\s*=\s*([A-Za-z0-9_]+)\s*($|,)/g, '"$1":"$2"$3')) + '}');
 
             if (esrOptions.meta) {
@@ -1207,7 +1208,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             }
 //{if 0}//
             var tplList = [];
-            for (el = document.body.firstChild; el; el = el.nextSibling) {
+            for (el = body.firstChild; el; el = el.nextSibling) {
                 if (el.nodeType === 8) {
                     if (/^\s*import:\s*([A-Za-z0-9.-_]+)\s*$/.test(el.textContent || el.nodeValue)) {
                         tplList.push([el, RegExp.$1]);
@@ -1243,7 +1244,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     io.ajax('.app-container.html', {
                         cache: true,
                         onsuccess: function (text) {
-                            dom.insertHTML(document.body, 'afterBegin', text);
+                            dom.insertHTML(body, 'AFTERBEGIN', text);
                             loadInit();
                         },
                         onerror: function () {
