@@ -1037,7 +1037,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     }
                 }
             }
-
+            dom.addEventListener(window, 'touchstart', function (event) {
+                event.preventDefault();
+                console.log('window touchstart');
+            });
+            dom.addEventListener(window, 'touchmove', function (event) {
+                event.preventDefault();
+                console.log('window touchmove');
+            });
             dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
             var el = document.body.lastChild;
@@ -1913,7 +1920,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     control.setPosition(x, y);
                 }
 
-                event.preventDefault();
+                event.exit();
             }
         },
 
