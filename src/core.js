@@ -543,6 +543,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     bubble(control, 'mouseup', event);
 
                     for (var el = event.target; el; el = dom.getParent(el)) {
+                        // 移动端浏览器可能不触发A标签上的onclick事件，但实际上A标签已经被使用
                         if (el.tagName === 'A') {
                             var target = core.findControl(el);
                             if (target && target.isDisabled()) {
@@ -799,7 +800,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function bubble(start, type, event, end) {
         event = event || new ECUIEvent(type);
-        event.cancelBubble = false;
         start = start || null;
         end = end || null;
         for (; start !== end; start = start.getParent()) {
@@ -1768,6 +1768,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             delete event.returnValue;
+            delete event.cancelBubble;
             if ((control['on' + name] && control['on' + name](event) === false) || event.returnValue === false || (control['$' + name] && control['$' + name](event) === false)) {
                 event.preventDefault();
             }
