@@ -1878,7 +1878,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
 
                 // 判断鼠标没有mouseup
-                var parent = control.getOuter().offsetParent,
+                var parent = control.getOuter().offsetParent || document.documentElement,
                     style = dom.getStyle(parent);
 
                 // 拖拽范围默认不超出上级元素区域
