@@ -2148,7 +2148,19 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
             subClass.CLASS = subClass.TYPES.length ? ' ' + subClass.TYPES.join(' ') + ' ' : ' ';
 
-            Array.prototype.slice.call(arguments, index).forEach(function (item) {
+            for (var superMethods = [], item; item = arguments[index++]; ) {
+                if (item.NAME) {
+                    if (item.SUPER) {
+                        if (item.SUPER instanceof Array) {
+                            superMethods.push.apply(this, item.SUPER);
+                        } else {
+                            superMethods.push(item.SUPER);
+                        }
+                    }
+                }
+                superMethods.push(item);
+            }
+            superMethods.forEach(function (item) {
                 if (item.NAME) {
                     if (item.constructor) {
                         subClass.interfaces.push(item.constructor);

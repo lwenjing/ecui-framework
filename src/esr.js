@@ -524,27 +524,50 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         if (route.NAME !== lastRouteName) {
             var layer = getLayer(route);
             if (layer) {
-                if (lastLayer) {
-                    lastLayer.getMain().header.style.display = 'none';
-                }
-                layer.getMain().header.style.display = '';
+                var layerEl = layer.getMain();
+                layerEl.header.style.display = '';
                 layer.show();
 
                 // 路由权重在该项目中暂不考虑相等情况
                 if (lastLayer) {
                     var view = util.getView(),
-                        position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width;
-                    layer.setPosition(position);
+                        lastLayerEl = lastLayer.getMain(),
+                        position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width,
+                        fn;
+
+                    lastLayerEl.header.style.display = 'none';
+
+                    if (esrOptions.transition === 'cover') {
+                        if (position > 0) {
+                            lastLayerEl.style.zIndex = 5;
+                            layerEl.style.zIndex = 10;
+                            layer.setPosition(position);
+                            fn = 'this.to.style.left->0';
+                        } else {
+                            lastLayerEl.style.zIndex = 10;
+                            layerEl.style.zIndex = 5;
+                            layer.setPosition(0);
+                            fn = 'this.from.style.left->' + (-position);
+                        }
+                        layerEl.header.style.zIndex = 10;
+                        core.mask(0.5, 7);
+                    } else {
+                        layer.setPosition(position);
+                        fn = 'this.from.style.left->' + -position + ';this.to.style.left->0';
+                    }
 
                     core.effect.grade(
-                        'this.from.style.left->' + -position + ';this.to.style.left->0',
+                        fn,
                         600,
                         {
-                            $: {from: lastLayer.getMain(), to: layer.getMain()},
+                            $: {from: lastLayerEl, to: layerEl},
                             onfinish: function () {
                                 // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
                                 lastLayer.hide();
                                 lastLayer = layer;
+                                if (esrOptions.transition === 'cover') {
+                                    core.mask();
+                                }
                             }
                         }
                     );
