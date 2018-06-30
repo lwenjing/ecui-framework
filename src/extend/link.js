@@ -1,6 +1,5 @@
 /*
-@example
-<div ui="type:link" href="...">首页</div>
+link - 链接插件，点击完成跳转
 */
 (function () {
 //{if 0}//
