@@ -615,7 +615,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mousemove: function (event) {
                 dragmove(event.track, currEnv, event.clientX, event.clientY);
-                core.wrapEvent(event).parentDefault();
+                core.wrapEvent(event).preventDefault();
             },
 
             mouseover: util.blank,
