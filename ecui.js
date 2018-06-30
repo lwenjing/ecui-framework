@@ -12,7 +12,6 @@ var ecui;
     document.write('<script type="text/javascript" src="src/imp/m-popup.js"></script>');
     document.write('<script type="text/javascript" src="src/imp/m-options.js"></script>');
 
-    document.write('<script type="text/javascript" src="src/base/link.js"></script>');
     document.write('<script type="text/javascript" src="src/base/button.js"></script>');
     document.write('<script type="text/javascript" src="src/base/month-view.js"></script>');
     document.write('<script type="text/javascript" src="src/base/calendar.js"></script>');
@@ -44,6 +43,7 @@ var ecui;
     document.write('<script type="text/javascript" src="src/input/multilevel-select.js"></script>');
 
     document.write('<script type="text/javascript" src="src/extend/anchor.js"></script>');
+    document.write('<script type="text/javascript" src="src/extend/link.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/m-confirm.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/decorate.js"></script>');
     document.write('<script type="text/javascript" src="src/extend/effect.js"></script>');

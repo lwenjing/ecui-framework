@@ -1,0 +1,33 @@
+/*
+@example
+<div ui="type:link" href="...">首页</div>
+*/
+(function () {
+//{if 0}//
+    var core = ecui,
+        dom = core.dom,
+        ext = core.ext;
+//{/if}//
+    function onclick(event) {
+        // link嵌套只处理最内层
+        if (!event.__Link__) {
+            var href = dom.getAttribute(this.getMain(), 'href');
+            if (href) {
+                linkElement.href = href;
+                location.href = linkElement.href;
+                event.__Link__ = true;
+            }
+        }
+    }
+
+    var linkElement = dom.create('A');
+
+    /**
+     * 链接控件。
+     * 用来取代A标签，解决A标签不能嵌套的问题。
+     * @control
+     */
+    ext.link = function (control) {
+        core.addEventListener(control, 'click', onclick);
+    };
+}());
