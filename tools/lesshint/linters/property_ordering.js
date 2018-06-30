@@ -8,7 +8,7 @@ module.exports = {
     message: 'Property ordering is not alphabetized',
 
     orders: [
-        'position', 'display', 'float',
+        'position', 'display', 'float', 'visibility', 'overflow',
         'top', 'right', 'bottom', 'left', 'z-index',
         'width', 'height', 'padding', 'border', 'margin',
         'font', 'color', 'line-height', 'letter-spacing', 'text-align',

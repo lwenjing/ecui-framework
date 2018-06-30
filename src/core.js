@@ -2023,8 +2023,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {string} 自定义样式值
          */
         getCustomStyle: function (style, name) {
-            new RegExp('(^|"|\\s*)' + name + '\\s*:([^;"]+)(;|"|$)').test(style[ieVersion < 9 ? 'filter' : 'content']);
-            return RegExp.$2.trim();
+            var text = ieVersion < 9 ? style.filter : style.content.trim().slice(1, -1);
+            new RegExp('(^|\\s*)' + name + '\\s*:([^;]+)(;|$)').test(text);
+            return (RegExp.$2 || '').trim();
         },
 
         /**

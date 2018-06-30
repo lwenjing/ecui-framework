@@ -1,5 +1,5 @@
 {
-    "fileExtensions": [".less"],
+    "fileExtensions": [".less", ".css"],
 
     "excludedFiles": [],
 

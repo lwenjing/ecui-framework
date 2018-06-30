@@ -39,7 +39,7 @@ module.exports = {
                         line = line.slice(start + 2);
                     }
                 }
-                if (!comment) {
+                if (!comment && line.trim().length) {
                     if (/^ */g.test(line)) {
                         let len = RegExp.lastMatch.length;
                         if (line.charAt(len) === '}') {
