@@ -73,7 +73,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     style.width = width + 'px';
                     style.height = height + 'px';
 
-                    var fontSize = util.toNumber(dom.getStyle(dom.getParent(document.body), 'font-size'));
+                    var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
                     fontSizeCache.forEach(function (item) {
                         item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
                     });
@@ -554,7 +554,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     // dblclick 在 ie 下的事件触发顺序是 mousedown/mouseup/click/mouseup/dblclick
                     bubble(control, 'mouseup', event);
 
-                    for (var el = event.target; el; el = dom.getParent(el)) {
+                    for (var el = event.target; el; el = dom.parent(el)) {
                         // 移动端浏览器可能不触发A标签上的onclick事件，但实际上A标签已经被使用
                         if (el.tagName === 'A') {
                             var target = core.findControl(el);
@@ -572,7 +572,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                             if (event.cancelBubble) {
                                 // 取消冒泡要阻止A标签提交
-                                for (el = control.getMain(); el; el = dom.getParent(el)) {
+                                for (el = control.getMain(); el; el = dom.parent(el)) {
                                     if (el.tagName === 'A') {
                                         blockAhref(el);
                                         break;
@@ -597,7 +597,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     activedControl = undefined;
 
                     if (isTouchMoved !== undefined && delay < 300) {
-                        for (control = event.target; control; control = dom.getParent(control)) {
+                        for (control = event.target; control; control = dom.parent(control)) {
                             if (control.tagName === 'A' && control.href) {
                                 location.href = control.href;
                                 break;
@@ -701,7 +701,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.which = event.which;
             if (ieVersion <= 10) {
 outer:          for (var caches = [], target = event.target, el; target; target = getElementFromEvent(event)) {
-                    for (el = target;; el = dom.getParent(el)) {
+                    for (el = target;; el = dom.parent(el)) {
                         if (!el) {
                             break outer;
                         }
@@ -1582,7 +1582,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     control.appendTo(parent);
                 }
             } else {
-                control.$setParent(core.findControl(dom.getParent(control.getOuter())));
+                control.$setParent(core.findControl(dom.parent(control.getOuter())));
             }
 
             oncreate(control, options);
@@ -1844,7 +1844,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             if (isControl) {
                 core.$clearState(control);
             } else {
-                parent = core.findControl(dom.getParent(control));
+                parent = core.findControl(dom.parent(control));
                 // 以下判断需要考虑control.getOuter()物理上不属于control但逻辑上属于的情况
                 if (focusedControl && contain(control, focusedControl)) {
                     core.setFocused(parent);
@@ -1959,7 +1959,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {ecui.ui.Control} ECUI 控件对象，如果不能找到，返回 null
          */
         findControl: function (el) {
-            for (; el; el = dom.getParent(el)) {
+            for (; el; el = dom.parent(el)) {
                 if (el.getControl) {
                     return el.getControl();
                 }
@@ -2567,7 +2567,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             var body = document.body,
-                html = dom.getParent(body);
+                html = dom.parent(body);
 
             if (ieVersion < 9) {
                 event = window.event;

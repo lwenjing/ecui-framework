@@ -253,7 +253,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @param {object} route 路由对象
      */
     function getLayer(route) {
-        for (var el = core.$(route.main); el; el = dom.getParent(el)) {
+        for (var el = core.$(route.main); el; el = dom.parent(el)) {
             // 子路由不直接返回层
             if (el.route && el.route !== route.NAME) {
                 break;
@@ -720,7 +720,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             if (el instanceof ui.Control) {
                 el = el.getMain();
             }
-            for (; el; el = dom.getParent(el)) {
+            for (; el; el = dom.parent(el)) {
                 if (el.route) {
                     return routes[el.route];
                 }

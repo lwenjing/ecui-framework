@@ -62,7 +62,7 @@ _aStatus            - 控件当前的状态集合
             }
         }
 
-        if (parentElement !== dom.getParent(el)) {
+        if (parentElement !== dom.parent(el)) {
             if (parentElement) {
                 parentElement.appendChild(el);
             } else {
