@@ -37,7 +37,8 @@
             $activate: function (event) {
                 this.$MScroll.$activate.call(this, event);
 
-                var body = this.getMain(),
+                var main = this.getMain(),
+                    body = this.getBody(),
                     data = namedMap[this.getUID()];
 
                 core.drag(
@@ -47,9 +48,9 @@
                         el: body,
                         decelerate: 400,
                         absolute: true,
-                        left: data.left !== undefined ? data.left : body.clientWidth - body.scrollWidth,
+                        left: data.left !== undefined ? data.left : main.clientWidth - body.offsetWidth,
                         right: data.right !== undefined ? data.right : 0,
-                        top: data.top !== undefined ? data.top : body.clientHeight - body.scrollHeight,
+                        top: data.top !== undefined ? data.top : main.clientHeight - body.scrollHeight,
                         bottom: data.bottom !== undefined ? data.bottom : 0,
                         limit: data.range
                     }
@@ -69,8 +70,9 @@
              */
             $dragmove: function (event) {
                 this.$MScroll.$dragmove.call(this, event);
-                this.getMain().scrollTop = -event.y;
-                this.getMain().scrollLeft = -event.x;
+                var style = this.getBody().style;
+                style.left = event.x + 'px';
+                style.top = event.y + 'px';
                 event.preventDefault();
             },
 
@@ -113,14 +115,14 @@
              * @override
              */
             getX: function () {
-                return -this.getMain().scrollLeft;
+                return this.getBody().offsetLeft;
             },
 
             /**
              * @override
              */
             getY: function () {
-                return -this.getMain().scrollTop;
+                return this.getBody().offsetTop;
             },
 
             /**

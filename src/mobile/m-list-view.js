@@ -194,8 +194,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 var style = this.getBody().style;
                 style.paddingTop = (this.$$bodyPadding[0] + this.$$headerHeight) + 'px';
                 style.paddingBottom = (this.$$bodyPadding[2] + this.$$footerHeight) + 'px';
-                style.minHeight = this.getClientHeight() + 'px';
-                this.getMain().scrollTop = this.$$headerHeight;
+                style.top = -this.$$headerHeight + 'px';
             },
 
             /**
@@ -216,7 +215,6 @@ _nBottomIndex  - 下部隐藏的选项序号
                 var style = this.getBody().style;
                 style.paddingTop = this.$$bodyPadding[0] + 'px';
                 style.paddingBottom = this.$$bodyPadding[2] + 'px';
-                style.minHeight = '';
             },
 
             /**
@@ -280,7 +278,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                         top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight) + this.$$footerHeight,
                         options = {
                             $: {
-                                body: this.getMain(),
+                                body: this.getBody(),
                                 head: this._eHeader,
                                 foot: this._eFooter
                             },
@@ -290,10 +288,10 @@ _nBottomIndex  - 下部隐藏的选项序号
                         };
                     // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
                     if (y > -this.$$headerHeight) {
-                        this._oHandle = core.effect.grade('this.body.scrollTop->' + this.$$headerHeight, 1000, options);
+                        this._oHandle = core.effect.grade('this.body.style.top->' + -this.$$headerHeight + ';this.head.style.top->' + -this.$$headerHeight + ';this.foot.style.bottom->' + (y + top), 1000, options);
                     } else if (y !== -this.$$headerHeight && y < top) {
                         // y !== -this.$$headerHeight解决items不够填充整个listview区域的问题
-                        this._oHandle = core.effect.grade('this.body.scrollTop->' + (-top - this._nTopHidden), 1000, options);
+                        this._oHandle = core.effect.grade('this.body.style.top->' + (top + this._nTopHidden) + ';this.foot.style.bottom->' + (y - top), 1000, options);
                     }
                 }
             }
@@ -319,7 +317,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $dragmove: function (event) {
                 var y = event.y,
-                    top = -this.getMain().scrollTop;
+                    top = util.toNumber(this.getBody().style.top);
 
                 if (top < -screen.availHeight * 1.5) {
                     for (; top < -screen.availHeight * 1.5; ) {
@@ -369,12 +367,13 @@ _nBottomIndex  - 下部隐藏的选项序号
                 top = this.getHeight() - this.$$bodyHeight;
                 if (y > -this.$$headerHeight) {
                     status = y < 0 ? 'headerenter' : 'headercomplete';
+                    this._eHeader.style.top = y + 'px';
                 } else if (y === -this.$$headerHeight) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
                 } else if (y < top + this.$$footerHeight) {
                     var status = y > top ? 'footerenter' : 'footercomplete';
-                    this._eFooter.style.bottom = (top - y - this.getMain().scrollTop) + 'px';
+                    this._eFooter.style.bottom = (top - y) + 'px';
                 } else {
                     status = '';
                 }
@@ -410,7 +409,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 ui.Items.Methods.add.call(this, item, index);
                 setEnterAndLeave.call(this);
                 if (this.isReady()) {
-                    this._eFooter.style.bottom = '';
+                    this._eFooter.style.bottom = '0px';
                     this._eFooter.innerHTML = oldLength === this.getLength() ? this.HTML_NODATA : this.HTML_LOADED;
                 }
             },

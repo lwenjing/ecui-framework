@@ -39,7 +39,7 @@
                     innerHTML: '<div class="ui-messagebox-text"></div><div class="ui-messagebox-buttons"></div>'
                 }
             );
-            instance = core.create(ui.Dialog, {main: el, parent: document.body});
+            instance = core.create(ui.Dialog, {main: el, parent: core.getBody()});
         }
 
         var el = instance.getBody(),

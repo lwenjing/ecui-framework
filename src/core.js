@@ -2341,7 +2341,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {Function} 用于关闭当前遮罩层的函数
          */
         mask: function (opacity, zIndex) {
-            var el = document.body,
+            var el = core.getBody(),
                 view = util.getView();
 
             if (ieVersion < 9) {
@@ -2395,7 +2395,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             util.timer(dom.remove, 1000, null, el);
                             el.style.display = 'none';
                             if (!maskElements.length) {
-                                dom.removeClass(document.body, 'ui-modal');
+                                dom.removeClass(core.getBody(), 'ui-modal');
                             }
                         }
                         el = null;

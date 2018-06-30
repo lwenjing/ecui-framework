@@ -45,9 +45,5 @@ m-confirm - 确认按钮插件。
             control.$setBody(layout);
         }
         core.$fastCreate(SubmitButton, title.lastChild, control, {focusable: false});
-
-        core.addEventListener(control, 'scroll', function () {
-            this.getMain().lastChild.style.top = this.getMain().scrollTop + 'px';
-        });
     };
 }());
