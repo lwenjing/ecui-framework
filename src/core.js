@@ -99,8 +99,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             type: pointerType,
                             pageX: event.pageX,
                             pageY: event.pageY,
-                            originalX: event.pageX,
-                            originalY: event.pageY,
+                            clientX: event.clientX,
+                            clientY: event.clientY,
+                            originalX: event.clientX,
+                            originalY: event.clientY,
                             target: event.target,
                             lastMoveTime: Date.now(),
                             speedX: 0,
@@ -186,6 +188,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         // 鼠标右键点击不触发事件
                         track.pageX = event.pageX;
                         track.pageY = event.pageY;
+                        track.clientX = event.clientX;
+                        track.clientY = event.clientY;
                         track.target = event.target;
 
                         if (isTouchMoved) {
@@ -239,13 +243,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     isTouchMoved = false;
 
                     var track = tracks[trackId = event.touches[0].identifier];
-                    track.originalX = track.pageX;
-                    track.originalY = track.pageY;
+                    track.originalX = track.clientX;
+                    track.originalY = track.clientY;
 
                     event = core.wrapEvent(event);
 
                     event.pageX = track.pageX;
                     event.pageY = track.pageY;
+                    event.clientX = track.clientX;
+                    event.clientY = track.clientY;
                     event.target = track.target;
                     event.track = track;
                     track.lastMoveTime = Date.now();
@@ -264,6 +270,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     var track = tracks[item.identifier];
                     event.pageX = item.pageX;
                     event.pageY = item.pageY;
+                    event.clientX = item.clientX;
+                    event.clientY = item.clientY;
                     event.target = getElementFromEvent(item);
 
                     calcSpeed(track, event);
@@ -306,6 +314,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         event.track = track;
                         event.pageX = item.pageX;
                         event.pageY = item.pageY;
+                        event.clientX = item.clientX;
+                        event.clientY = item.clientY;
                         event.target = getElementFromEvent(item);
                         currEnv.mouseup(event);
                         bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
@@ -604,7 +614,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                dragmove(event.track, currEnv, event.pageX, event.pageY);
+                dragmove(event.track, currEnv, event.clientX, event.clientY);
+                core.wrapEvent(event).parentDefault();
             },
 
             mouseover: util.blank,
@@ -613,8 +624,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 var track = event.track,
                     target = currEnv.target,
                     uid = target.getUID(),
-                    mx = event.pageX,
-                    my = event.pageY,
+                    mx = event.clientX,
+                    my = event.clientY,
                     start = Date.now(),
                     vx = track.speedX || 0,
                     vy = track.speedY || 0,
@@ -685,6 +696,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         if (event) {
             this.pageX = event.pageX;
             this.pageY = event.pageY;
+            this.clientX = event.clientX;
+            this.clientY = event.clientY;
             this.which = event.which;
             if (ieVersion <= 10) {
 outer:          for (var caches = [], target = event.target, el; target; target = getElementFromEvent(event)) {
@@ -845,18 +858,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     function calcSpeed(track, event) {
         var time = Date.now(),
             delay = time - track.lastMoveTime > 500,
-            offsetX = event.pageX - track.pageX,
-            offsetY = event.pageY - track.pageY,
+            offsetX = event.clientX - track.clientX,
+            offsetY = event.clientY - track.clientY,
             speed = 1000 / (time - track.lastMoveTime);
 
         track.speedX = delay ? 0 : offsetX * speed;
         track.speedY = delay ? 0 : offsetY * speed;
         track.angle = calcAngle(offsetX, offsetY);
         track.lastMoveTime = time;
-        track.lastX = track.pageX;
-        track.lastY = track.pageY;
-        track.pageX = event.pageX;
-        track.pageY = event.pageY;
+        track.lastX = track.clientX;
+        track.lastY = track.clientY;
+        track.clientX = event.clientX;
+        track.clientY = event.clientY;
     }
 
     /**
@@ -1018,7 +1031,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @return {HTMLElement} 事件所在的 DOM 元素
      */
     function getElementFromEvent(event) {
-        event = event instanceof ECUIEvent ? event.getNative() : event;
         return chromeVersion || ieVersion || safariVersion ? document.elementFromPoint(event.clientX, event.clientY) : document.elementFromPoint(event.pageX, event.pageY);
     }
 
@@ -1118,6 +1130,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 identifier: item.identifier,
                 pageX: item.pageX,
                 pageY: item.pageY,
+                clientX: item.clientX,
+                clientY: item.clientY,
                 target: item.target,
                 speedX: 0,
                 speedY: 0
@@ -1259,8 +1273,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                         event.fromX = track.lastX;
                         event.fromY = track.lastY;
-                        event.toX = track.pageX;
-                        event.toY = track.pageY;
+                        event.toX = track.clientX;
+                        event.toY = track.clientY;
                         callback('panmove');
                     } else {
                         if (isTouchMoved === false && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
@@ -1283,17 +1297,17 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
                         // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
                         if (angle < 60) {
-                            event.pageX = (track1.pageX + track2.pageX) / 2;
-                            event.pageY = (track1.pageY + track2.pageY) / 2;
+                            event.clientX = (track1.clientX + track2.clientX) / 2;
+                            event.clientY = (track1.clientY + track2.clientY) / 2;
                             event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
-                            event.to = Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2));
+                            event.to = Math.sqrt(Math.pow(track2.clientX - track1.clientX, 2) + Math.pow(track2.clientY - track1.clientY, 2));
                             if (event.from < event.to) {
                                 callback('pinchout');
                             } else if (event.from > event.to) {
                                 callback('pinchin');
                             }
                         } else if (Math.abs(angle - 90) < 60 &&
-                                Math.sqrt(Math.pow(track2.pageX - track1.pageX, 2) + Math.pow(track2.pageY - track1.pageY, 2)) -
+                                Math.sqrt(Math.pow(track2.clientX - track1.clientX, 2) + Math.pow(track2.clientY - track1.clientY, 2)) -
                                     Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
                             event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
                             callback('rotate');
@@ -1924,14 +1938,14 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
                 dragEnv.target = control;
                 setEnv(dragEnv);
-                event.track.logicX = event.pageX;
-                event.track.logicY = event.pageY;
+                event.track.logicX = event.clientX;
+                event.track.logicY = event.clientY;
 
                 if (core.dispatchEvent(control, 'dragstart', event)) {
                     control.setPosition(x, y);
                 }
 
-                event.exit();
+                event.preventDefault();
             }
         },
 
@@ -2529,6 +2543,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * event 方法将浏览器产生的鼠标与键盘事件标准化并添加 ECUI 框架需要的信息到事件对象中。标准化的属性如下：
          * pageX           {number} 鼠标的X轴坐标
          * pageY           {number} 鼠标的Y轴坐标
+         * clientX           {number} 鼠标当前区域的X轴坐标
+         * clientY           {number} 鼠标当前区域的Y轴坐标
          * which           {number} 触发事件的按键码
          * target          {HTMLElement} 触发事件的 Element 对象
          * returnValue     {boolean}  是否进行默认处理
