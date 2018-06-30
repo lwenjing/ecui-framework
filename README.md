@@ -20,12 +20,12 @@ mkdir work && cd work
 git clone http://devops.biz.taoche.com/gitlab/lib/lib-fe.git
 ```
 ### 创建 项目目录
-可以使用 lib-fe下的 ecui-generator 脚本创建项目，也可以自己手动按照框架对目录和文件命名的要求一一创建：
+可以使用 lib-fe下的 generator-ecui 脚本创建项目，也可以自己手动按照框架对目录和文件命名的要求一一创建：
 #### 使用脚本
 打开终端，在 work目录下执行以下命令：
 ```
 // 初始化项目并且创建路由 demo.list 和 demo.detail，并且在index中添加路由的链接
-./lib-fe/ecui-generator.sh  -i -r demo.list,demo.detail
+./lib-fe/generator-ecui.sh  -i -r demo.list,demo.detail
 
 ```
 #### 手动搭建
