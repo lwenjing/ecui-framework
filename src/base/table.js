@@ -538,12 +538,12 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                         top = pos.top - view.top,
                         left = pos.left - view.left - this._eLayout.scrollLeft;
 
-                    top = Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top));
+                    top = Math.min(this.getClientHeight() - this.$$paddingTop + top, Math.max(0, top));
                     if (!top || dom.contain(this.getMain(), event.target)) {
                         style.position = 'fixed';
                         style.top = top + 'px';
                         style.left = left + 'px';
-                        style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getBodyWidth() - this.$$scrollFixed[0]) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px)';
+                        style.clip = 'rect(0px ' + (this._eLayout.scrollLeft + this.getClientWidth() - this.$$scrollFixed[0]) + 'px ' + this.$$paddingTop + 'px ' + this._eLayout.scrollLeft + 'px)';
                     }
                 }
             },
@@ -657,7 +657,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 if (this._bHeadFloat) {
                     var style = this._uHead.getOuter().style;
                     style.position = '';
-                    style.top = (Math.min(this.getBodyHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
+                    style.top = (Math.min(this.getClientHeight() - this.$$paddingTop, Math.max(0, util.getView().top - dom.getPosition(this.getOuter()).top)) + this._eLayout.scrollTop) + 'px';
                     style.left = '0px';
                     style.clip = ieVersion < 8 ? 'rect(0,100%,100%,0)' : 'auto';
                 }

@@ -67,7 +67,7 @@
 
             instance.getOuter().style.visibility = 'hidden';
             instance.showModal(0);
-            instance.setBodySize(el.scrollWidth, el.scrollHeight);
+            instance.setClientSize(el.scrollWidth, el.scrollHeight);
             instance.center();
             instance.getOuter().style.visibility = '';
         }

@@ -34,20 +34,19 @@
              * @protected
              */
             $alterItems: function () {
-                var top = -this.$$itemHeight * (getItems(this).length - this._nOptionSize - 1),
-                    bottom = this.$$itemHeight * this._nOptionSize;
+                var top = -this.$$itemHeight * getItems(this).length;
 
                 this.setScrollRange(
                     {
-                        top: top - this.$$itemHeight * 2,
+                        top: top - this.$$itemHeight,
                         right: 0,
-                        bottom: bottom + this.$$itemHeight * 2,
+                        bottom: 0,
                         left: 0
                     }
                 );
                 this.setRange({
                     top: top,
-                    bottom: bottom,
+                    bottom: -this.$$itemHeight,
                     stepY: this.$$itemHeight
                 });
             },
@@ -73,7 +72,7 @@
                     return 0;
                 }
 
-                var y = util.toNumber(this.getBody().style.top),
+                var y = -this.getMain().scrollTop,
                     sy = speed * 0.5 / 2,  // 计划0.5秒动画结束
                     expectY = Math.round(y + sy),
                     scrollRange = this.getScrollRange(),
@@ -95,7 +94,36 @@
              */
             $dragmove: function (event) {
                 this.$MOptions.$dragmove.call(this, event);
-                core.setFocused(getItems(this)[Math.round(-event.y / this.$$itemHeight) + this._nOptionSize]);
+                var item = getItems(this)[Math.round(-event.y / this.$$itemHeight) - 1];
+                if (item) {
+                    core.setFocused(item);
+                }
+            },
+
+            /**
+             * @override
+             */
+            $initStructure: function (width, height) {
+                this.$MOptions.$initStructure.call(this, width, height);
+                var style = this.getBody().style;
+                style.paddingTop = style.paddingBottom = (this._nOptionSize + 1) * this.$$itemHeight + 'px';
+            },
+
+            /**
+             * @override
+             */
+            $resize: function () {
+                this.$MOptions.$resize.call(this);
+                var style = this.getBody().style;
+                style.paddingTop = style.paddingBottom = '';
+            },
+
+            /**
+             * @override
+             */
+            $scroll: function (event) {
+                this.$MOptions.$scroll.call(this, event);
+                this.getBody().previousSibling.style.top = this.getMain().scrollTop + 'px';
             },
 
             /**
@@ -105,7 +133,6 @@
                 this.$MOptions.$show.call(this);
                 var height = this.$$itemHeight * (this._nOptionSize * 2 + 1);
                 this.getMain().style.height = height + 'px';
-                dom.getParent(this.getBody()).style.height = height + 'px';
                 this.$$height = height + this.getMinimumHeight();
             },
 

@@ -1394,6 +1394,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return;
         }
         event = core.wrapEvent(event);
+        core.dispatchEvent(event.getControl(), 'scroll', event);
         independentControls.forEach(function (item) {
             core.dispatchEvent(item, 'scroll', event);
         });
@@ -1902,7 +1903,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {Object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
-            if (activedControl !== undefined) {
+            if (activedControl !== undefined && currEnv.type !== 'drag') {
                 // 控件之前处于惯性状态必须停止
                 var uid = control.getUID();
                 if (inertiaHandles[uid]) {

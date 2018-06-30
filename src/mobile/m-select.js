@@ -58,7 +58,9 @@ _bRequired    - 是否必须选择
                         ui.$select.prototype.Options.prototype.$show.call(this);
                         var select = this.getParent();
 
-                        this.getBody().style.top = (this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(select.getSelected()))) + 'px';
+                        util.timer(function () {
+                            this.getMain().scrollTop = this.$$itemHeight * (select.getItems().indexOf(select.getSelected()) + 1);
+                        }, 0, this);
                         core.setFocused(select.getSelected());
                     }
                 },

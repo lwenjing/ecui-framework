@@ -210,9 +210,9 @@ _eRight      - 右侧乐定行的Element元素
 
                 if (this.$getSection('Head').getMain().style.position === 'fixed' || fixed) {
                     leftHeadStyle.position = rightHeadStyle.position = 'fixed';
-                    leftHeadStyle.top = rightHeadStyle.top = (Math.min(this.getBodyHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
+                    leftHeadStyle.top = rightHeadStyle.top = (Math.min(this.getClientHeight() - this.$$paddingTop + top, Math.max(0, top))) + 'px';
                     leftHeadStyle.left = left + 'px';
-                    rightHeadStyle.left = (Math.min(this.getBodyWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
+                    rightHeadStyle.left = (Math.min(this.getClientWidth(), this.$$tableWidth) - this.$$paddingRight + left - this.$$rightTDWidth - this.$$scrollFixed[0]) + 'px';
                 }
 
                 if (fixed) {
@@ -221,8 +221,8 @@ _eRight      - 右侧乐定行的Element元素
                     rightMainStyle.left = rightHeadStyle.left;
                     var scrollTop = layout.scrollTop - this.$$paddingTop;
                     leftMainStyle.top = rightMainStyle.top = top - scrollTop + 'px';
-                    leftMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingLeft + 'px ' + (scrollTop + this.getBodyHeight() - this.$$scrollFixed[1]) + 'px 0px)';
-                    rightMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingRight + 'px ' + (scrollTop + this.getBodyHeight() - this.$$scrollFixed[1]) + 'px 0px)';
+                    leftMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingLeft + 'px ' + (scrollTop + this.getClientHeight() - this.$$scrollFixed[1]) + 'px 0px)';
+                    rightMainStyle.clip = 'rect(' + scrollTop + 'px ' + this.$$paddingRight + 'px ' + (scrollTop + this.getClientHeight() - this.$$scrollFixed[1]) + 'px 0px)';
                 }
             },
 
