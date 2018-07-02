@@ -1055,18 +1055,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             var body = document.body,
                 el;
 
-            if (safariVersion && iosVersion > 10) {
-                bodyElement = dom.create({
-                    id: body.id,
-                    className: 'SAFARI-BODY-FIXED'
-                });
-                for (; body.firstChild; ) {
-                    bodyElement.appendChild(body.firstChild);
-                }
-                body.appendChild(bodyElement);
-                body.id = '';
-            }
-
             dom.insertHTML(body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
             el = body.lastChild;
@@ -1079,6 +1067,20 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
+
+            if (safariVersion && iosVersion > 10) {
+                bodyElement = dom.create({
+                    id: body.id,
+                    className: 'SAFARI-BODY-FIXED'
+                });
+                bodyElement.setAttribute(ecuiName, dom.getAttribute(body, ecuiName));
+                body.removeAttribute(ecuiName);
+                for (; body.firstChild; ) {
+                    bodyElement.appendChild(body.firstChild);
+                }
+                body.appendChild(bodyElement);
+                body.id = '';
+            }
 
             if (options.load) {
                 for (var text = options.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
