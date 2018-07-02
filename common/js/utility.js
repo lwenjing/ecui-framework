@@ -62,7 +62,7 @@
             data.data.offset = data.data.pageSize * (data.data.pageNo - 1);
         }
         var code = data.code;
-        if (0 === code) {
+        if ('0000' === code) {
             data = data.data;
             //对数据进行统一化处理
             var rule = urlRule.filter(function (item) {
@@ -87,7 +87,7 @@
             if (code === 300000) {
                 throw data.msg;
             }
-            daikuan.showHint('error', data.msg);
+            fapiao.showHint('error', data.msg);
         }
         return code;
     };
@@ -99,20 +99,20 @@ ecui.render = {};
 ecui.render.select = function (data) {
     this.removeAll(true);
     this.add(data);
-}
+};
 
-daikuan.cookie = {
-    set: function(key, val, exp) {
+fapiao.cookie = {
+    set: function (key, val, exp) {
         var cookie = key + '=' + val;
         if (exp) {
             cookie += ('; expires=' + exp.toGMTString());
         }
         document.cookie = cookie;
     },
-    get: function(key) {
+    get: function (key) {
         var cookies = document.cookie.split('; ');
         var val = null;
-        cookies.forEach(function(cookie) {
+        cookies.forEach(function (cookie) {
             cookie = cookie.split('=');
             if (cookie[0] === key) {
                 val = cookie[1];
@@ -120,7 +120,7 @@ daikuan.cookie = {
         });
         return val;
     },
-    del: function(key) {
+    del: function (key) {
         var d = new Date();
         d.setTime(d.getTime() - 1000000);
         var cookie = key + '="" ; expires=' + d.toGMTString();
@@ -128,19 +128,19 @@ daikuan.cookie = {
     }
 };
 
-daikuan.util = {
+fapiao.util = {
     clone: function (obj) {
         var newobj = obj.constructor === Array ? [] : {};
         if (typeof obj !== 'object') {
             return;
         } else {
             for (var i in obj) {
-                newobj[i] = typeof obj[i] === 'object' ? daikuan.util.clone(obj[i]) : obj[i];
+                newobj[i] = typeof obj[i] === 'object' ? fapiao.util.clone(obj[i]) : obj[i];
             }
         }
         return newobj;
     },
-    unique: function(array) {
+    unique: function (array) {
         var ret = [];
         if (!(array instanceof Array)) {
             return array;
@@ -154,8 +154,8 @@ daikuan.util = {
     }
 };
 
-daikuan.getCity = function(code, city_data) {
-    if (code == 0) {
+fapiao.getCity = function (code, city_data) {
+    if (code === 0) {
         return [' '];
     }
     code = code.toString();
@@ -164,20 +164,20 @@ daikuan.getCity = function(code, city_data) {
         area = code.slice(0, 6),
         arr = [];
     arr.push(city_data[pro]);
-    (code.slice(2,4) != '00') && arr.push(city_data[city] || '');
-    (code.slice(4,6) != '00') && arr.push(city_data[area] || '');
+    (code.slice(2, 4) !== '00') && arr.push(city_data[city] || '');
+    (code.slice(4, 6) !== '00') && arr.push(city_data[area] || '');
     return arr;
 };
 
-Date.prototype.pattern = function(fmt) {
+Date.prototype.pattern = function (fmt) {
     var o = {
-        'M+': this.getMonth()+1, //月份
+        'M+': this.getMonth() + 1, //月份
         'd+': this.getDate(), //日
-        'h+': this.getHours()%12 == 0 ? 12 : this.getHours()%12, //小时
+        'h+': this.getHours() % 12 === 0 ? 12 : this.getHours() % 12, //小时
         'H+': this.getHours(), //小时
         'm+': this.getMinutes(), //分
         's+': this.getSeconds(), //秒
-        'q+': Math.floor((this.getMonth()+3)/3), //季度
+        'q+': Math.floor((this.getMonth() + 3) / 3), //季度
         'S': this.getMilliseconds() //毫秒
     };
     var week = ['日', '一', '二', '三', '四', '五', '六'];
@@ -185,18 +185,18 @@ Date.prototype.pattern = function(fmt) {
         fmt = fmt.replace(RegExp.$1, (this.getFullYear() + '').substr(4 - RegExp.$1.length));
     }
     if (/(E+)/.test(fmt)) {
-        fmt = fmt.replace(RegExp.$1, ((RegExp.$1.length>1) ? (RegExp.$1.length > 2 ? '星期' : '周') : '') + week[this.getDay()]);
+        fmt = fmt.replace(RegExp.$1, ((RegExp.$1.length > 1) ? (RegExp.$1.length > 2 ? '星期' : '周') : '') + week[this.getDay()]);
     }
     for (var k in o) {
         if (new RegExp('(' + k + ')').test(fmt)) {
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)));
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)));
         }
     }
     return fmt;
 };
 
 // 弹出提示框
-daikuan.showHint = function (type, msg) {
+fapiao.showHint = function (type, msg) {
     var className = {
         success: 'successHint',
         error: 'errorHint',
@@ -208,11 +208,11 @@ daikuan.showHint = function (type, msg) {
     ecui.dom.insertAfter(hintContainer, ecui.dom.last(ecui.getBody()));
     ecui.util.timer(function () {
         ecui.dom.addClass(hintContainer, 'ui-hide');
-    }, 2000)
+    }, 2000);
 };
 
 // 录入表单反显数据
-daikuan.setEditFormValue = function (data, form) {
+fapiao.setEditFormValue = function (data, form) {
     var elements = form.elements;
     var ignore = [], arr_obj_ignore = [];
     for (var i = 0, item; item = elements[i++]; ) {
@@ -268,7 +268,7 @@ daikuan.setEditFormValue = function (data, form) {
 };
 
 // 搜索数据回填表单数据
-daikuan.setFormValue = function (context, form, searchParm) {
+fapiao.setFormValue = function (context, form, searchParm) {
     var elements = form.elements;
     for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
@@ -294,7 +294,7 @@ daikuan.setFormValue = function (context, form, searchParm) {
 };
 
 // 清空表单数据
-daikuan.resetFormValue = function (form) {
+fapiao.resetFormValue = function (form) {
     var elements = form.elements;
     for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
@@ -320,8 +320,8 @@ daikuan.resetFormValue = function (form) {
 };
 
 // 获取表单数据设置searchParam数据
-daikuan.setSearchParam = function(searchParm, form) {
-    Array.prototype.slice.call(form.elements).forEach(function(item) {
+fapiao.setSearchParam = function (searchParm, form) {
+    Array.prototype.slice.call(form.elements).forEach(function (item) {
         if (item.name) {
             var _control = ecui.findControl(item);
             if (_control) {
@@ -350,7 +350,7 @@ daikuan.setSearchParam = function(searchParm, form) {
 };
 
 // 初始化dialog控件
-daikuan.initDialog = function (container, targetName, options) {
+fapiao.initDialog = function (container, targetName, options) {
     ecui.dispose(container);
     container.innerHTML = ecui.esr.getEngine().render(targetName, options);
     ecui.init(container);
@@ -359,8 +359,8 @@ daikuan.initDialog = function (container, targetName, options) {
 
 // 复制text到剪切板中
 // 在异步ajax请求中使用document.execCommand('copy')无效，同步的ajax请求中正常使用
-daikuan.copy = function (text) {
-    var textarea = document.createElement("textarea");
+fapiao.copy = function (text) {
+    var textarea = document.createElement('textarea');
     textarea.style.position = 'fixed';
     textarea.style.top = -100;
     textarea.style.left = 0;
@@ -379,13 +379,13 @@ daikuan.copy = function (text) {
 };
 
 // 设置分页数据
-daikuan.setPageData = function (context, listNmae) {
+fapiao.setPageData = function (context, listNmae) {
     var data = ecui.util.parseValue(listNmae, context);
 
     context.offset = data.offset;
     context.total = data.total;
     context.totalPage = data.totalPage;
-}
+};
 
 /**
  * 列表路由对象。
@@ -393,19 +393,30 @@ daikuan.setPageData = function (context, listNmae) {
  *
  * @param {Object} route 路由对象
  */
-daikuan.TableListRoute = function (route) {
+fapiao.TableListRoute = function (route) {
     this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
     this.main = route.NAME.slice(0, -9) + '_table';
     ecui.util.extend(this, route);
-}
-daikuan.TableListRoute.prototype.onbeforerequest = function (context) {
-    context.pageNo = context.pageNo || +this.searchParm.pageNo;
-    context.pageSize = +this.searchParm.pageSize;
-    daikuan.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
 };
-daikuan.TableListRoute.prototype.onbeforerender = function (context) {
+fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
+    context.pageNo = context.pageNo || +this.searchParm.CURRENTPAGE;
+    context.pageSize = +this.searchParm.PAGESIZE;
+    fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
+};
+fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
-    context.offset = data.offset;
-    context.total = data.total;
-    context.totalPage = data.totalPage;
+    // context.offset = data.offset;
+    // context.total = data.total;
+    // context.totalPage = data.totalPage;
+    var pageNo = data.CURRENTPAGE || 1;
+    var total = data.COUNT || 10;
+    var pageSize = 2;
+    context.page = {
+        total: total,
+        totalPage: Math.ceil(total / pageSize),
+        pageSize: pageSize,
+        pageNo: pageNo,
+        start: (pageNo - 1) * pageSize + 1,
+        end: pageNo * pageSize
+    };
 };

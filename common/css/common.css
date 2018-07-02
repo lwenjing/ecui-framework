@@ -3,6 +3,7 @@
 * {
     margin: 0;
     padding: 0;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
 html * {
@@ -155,36 +156,32 @@ a {
     width: 80px;
     height: 30px;
     line-height: 30px;
+    display: inline-block;
+    vertical-align: middle;
     text-align: center;
     font-size: 14px;
     color: #fff;
-    background-color: #368cda;
-    border: 1px solid #368cda;
+    background-color: #0079cc;
+    border: 1px solid #0079cc;
     border-radius: 25px;
     cursor: pointer;
 }
 
 .blue-btn-hover {
-    background-color: #429aeb;
-    border: 1px solid #429aeb;
+    background-color: #005cb1;
+    border: 1px solid #005cb1;
     color: #fff;
     border-radius: 25px;
-    height: 30px;
-    line-height: 30px;
-    width: 80px;
     text-align: center;
     cursor: pointer;
     font-size: 14px;
 }
 
 .blue-btn-active {
-    background-color: #2e7bc2;
-    border: 1px solid #2e7bc2;
+    background-color: #005cb1;
+    border: 1px solid #005cb1;
     color: #fff;
     border-radius: 25px;
-    height: 30px;
-    line-height: 30px;
-    width: 80px;
     text-align: center;
     cursor: pointer;
     font-size: 14px;
@@ -192,16 +189,14 @@ a {
 
 .ui-disabled .blue-btn,
 .blue-btn-disabled {
-    background-color: #EFF2F7;
-    border: 1px solid #eff2f7;
-    color: #E0E6ED;
+    background-color: #005cb1;
+    border: 1px solid #005cb1;
+    color: #005cb1;
     border-radius: 25px;
-    height: 30px;
-    line-height: 30px;
-    width: 80px;
     text-align: center;
     cursor: pointer;
     font-size: 14px;
+    opacity: 0.5;
 }
 
 
@@ -210,13 +205,13 @@ a {
  */
 
 .white-btn {
+    width: 80px;
+    height: 30px;
+    line-height: 30px;
     background-color: #fff;
     border: 1px solid #acbaca;
     color: #4293dd;
     border-radius: 25px;
-    height: 30px;
-    line-height: 30px;
-    width: 80px;
     text-align: center;
     cursor: pointer;
     font-size: 14px;
@@ -227,9 +222,6 @@ a {
     border: 1px solid #368cda;
     color: #368CDA;
     border-radius: 25px;
-    height: 30px;
-    line-height: 30px;
-    width: 80px;
     text-align: center;
     cursor: pointer;
     font-size: 14px;
@@ -240,9 +232,6 @@ a {
     border: 1px solid #2e7bc2;
     color: #fff;
     border-radius: 25px;
-    height: 30px;
-    line-height: 30px;
-    width: 80px;
     text-align: center;
     cursor: pointer;
     font-size: 14px;
@@ -254,9 +243,6 @@ a {
     border: 1px solid #EFF2F7;
     color: #e0e6ed;
     border-radius: 25px;
-    height: 30px;
-    line-height: 30px;
-    width: 80px;
     text-align: center;
     cursor: pointer;
     font-size: 14px;
@@ -787,25 +773,30 @@ a {
     padding: 0px;
     table {
         th {
-            height: 50px;
-            line-height: 50px;
-            background: #EDF8FF;
-            border-top: 2px solid #a9d3fa;
-            border-bottom: 1px solid #a9d3fa;
+            height: 30px;
+            line-height: 30px;
+            font-size: 14px;
+            color: #495060;
+            font-weight: bold;
+            background: #f8f8f9;
+            border-top: 2px solid #ddd;
+            border-right: 1px dashed #ccc;
+            border-bottom: 1px solid #ccc;
             font-size: 16px;
             padding: 0;
-            text-align: left;
+            text-align: center;
         }
         td {
-            height: 50px;
+            height: 25px;
+            line-height: 25px;
+            font-size: 12px;
             padding: 0;
-            text-align: left;
+            border-right: 1px dotted #ccc;
+            border-bottom: 1px dotted #ccc;
+            text-align: center;
             text-overflow: ellipsis;
             overflow: hidden;
             word-break: break-all;
-        }
-        .ui-table-row:nth-child(2n)>td {
-            background: #f7fcff;
         }
     }
 }

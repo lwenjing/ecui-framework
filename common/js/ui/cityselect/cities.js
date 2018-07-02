@@ -24,19 +24,19 @@ cities - 地区联动下拉框控件。
             PROVINCE = {},
             CITY = {},
             AREA = {};
-        for (code in daikuan.cities) {
+        for (code in fapiao.cities) {
             if (code.slice(2) == '0000') {
-                PROVINCE[code] = daikuan.cities[code];
+                PROVINCE[code] = fapiao.cities[code];
             } else if (code.slice(4) == '00') {
                 if (!CITY[code.slice(0, 2) + '0000']) {
                     CITY[code.slice(0, 2) + '0000'] = {};
                 }
-                CITY[code.slice(0, 2) + '0000'][code] = daikuan.cities[code];
+                CITY[code.slice(0, 2) + '0000'][code] = fapiao.cities[code];
             } else {
                 if (!AREA[code.slice(0, 4) + '00']) {
                     AREA[code.slice(0, 4) + '00'] = {};
                 }
-                AREA[code.slice(0, 4) + '00'][code] = daikuan.cities[code];
+                AREA[code.slice(0, 4) + '00'][code] = fapiao.cities[code];
             }
         }
         // debugger
