@@ -93,12 +93,19 @@ _nBottomIndex  - 下部隐藏的选项序号
                         bottom: 0
                     }
                 );
+                top += this.$$footerHeight;
                 this.setRange(
                     {
-                        top: top + this.$$footerHeight,
+                        top: top,
                         bottom: -this.$$headerHeight
                     }
                 );
+                if (this.isReady()) {
+                    top += this._nTopHidden;
+                    if (util.toNumber(this.getBody().style.top) < top) {
+                        this.getBody().style.top = top + 'px';
+                    }
+                }
             },
 
             /**

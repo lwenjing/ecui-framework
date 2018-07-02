@@ -605,7 +605,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 是否刷新缓存
              */
             cache: function (force) {
-                if (force || (this.getOuter().offsetWidth && !this._bCached)) {
+                if (this.getOuter().offsetWidth && (force || !this._bCached)) {
                     if (this._bCached !== undefined) {
                         // 之前缓存过，因为clearCache方法标记为需要重新缓存，不需要再次主动执行initStructure方法
                         force = true;
