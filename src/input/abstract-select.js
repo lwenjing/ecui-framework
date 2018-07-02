@@ -219,35 +219,6 @@ _bRequired    - 是否必须选择
             },
 
             /**
-             * 改变下拉框当前选中的项。
-             * @private
-             *
-             * @param {ecui.ui.Select.Item} item 新选中的项
-             */
-            setSelected: function (item) {
-                item = item || null;
-                if (item !== this._cSelected) {
-                    if (this._cSelected) {
-                        this._cSelected.alterClass('-selected');
-                    }
-                    if (item) {
-                        item.alterClass('+selected');
-                        this._uText.setContent(item.getBody().innerHTML);
-                        ui.InputControl.prototype.setValue.call(this, item._sValue);
-                        if (this._uOptions.isShow()) {
-                            core.setFocused(item);
-                        }
-                        this.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
-                    } else {
-                        this._uText.setContent('');
-                        ui.InputControl.prototype.setValue.call(this, '');
-                        core.loseFocus(this._cSelected);
-                    }
-                    this._cSelected = item;
-                }
-            },
-
-            /**
              * 下拉框移除子选项时，如果选项被选中，需要先取消选中。
              * @override
              */
@@ -278,6 +249,35 @@ _bRequired    - 是否必须选择
              */
             getSelected: function () {
                 return this._cSelected || null;
+            },
+
+            /**
+             * 改变下拉框当前选中的项。
+             * @private
+             *
+             * @param {ecui.ui.Select.Item} item 新选中的项
+             */
+            setSelected: function (item) {
+                item = item || null;
+                if (item !== this._cSelected) {
+                    if (this._cSelected) {
+                        this._cSelected.alterClass('-selected');
+                    }
+                    if (item) {
+                        item.alterClass('+selected');
+                        this._uText.setContent(item.getBody().innerHTML);
+                        ui.InputControl.prototype.setValue.call(this, item._sValue);
+                        if (this._uOptions.isShow()) {
+                            core.setFocused(item);
+                        }
+                        this.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
+                    } else {
+                        this._uText.setContent('');
+                        ui.InputControl.prototype.setValue.call(this, '');
+                        core.loseFocus(this._cSelected);
+                    }
+                    this._cSelected = item;
+                }
             },
 
             /**

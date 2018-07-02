@@ -95,7 +95,9 @@
              */
             $dragmove: function (event) {
                 this.$MOptions.$dragmove.call(this, event);
-                core.setFocused(getItems(this)[Math.round(-event.y / this.$$itemHeight) + this._nOptionSize]);
+                var item = getItems(this)[Math.round(-event.y / this.$$itemHeight) + this._nOptionSize];
+                core.setFocused(item);
+                this.setSelected(item);
             },
 
             /**
@@ -110,6 +112,16 @@
             },
 
             /**
+             * 获取被选中的选项控件。
+             * @public
+             *
+             * @return {ecui.ui.Item} 选项控件
+             */
+            getSelected: function () {
+                return this._cSelected || null;
+            },
+
+            /**
              * 设置下拉框允许显示的选项数量。
              * @public
              *
@@ -117,6 +129,30 @@
              */
             setOptionSize: function (value) {
                 this._nOptionSize = value;
+            },
+
+            /**
+             * 设置选中控件。
+             * @public
+             *
+             * @param {ecui.ui.MMultiOptions.Options.Item} item 选中的控件
+             */
+            setSelected: function (item) {
+                item = item || null;
+                if (this._cSelect !== item) {
+                    var items = getItems(this);
+                    if (this._cSelect) {
+                        var index = items.indexOf(this._cSelect) - this._nOptionSize;
+                        items[Math.max(index, 0)].alterClass('-pos' + (-Math.min(index, 0)));
+                        this._cSelect.alterClass('-selected');
+                    }
+                    if (item) {
+                        index = items.indexOf(item) - this._nOptionSize;
+                        items[Math.max(index, 0)].alterClass('+pos' + (-Math.min(index, 0)));
+                        item.alterClass('+selected');
+                    }
+                    this._cSelect = item;
+                }
             }
         }
     };
