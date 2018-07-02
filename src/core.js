@@ -485,7 +485,11 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         }
                     }
 
-                    onmousedown(control, event);
+                    if (!isScrollClick(event)) {
+                        bubble(activedControl = control, 'activate', event);
+                    }
+                    bubble(control, 'mousedown', event);
+                    onselectstart(control, event);
                 } else {
                     target = event.target;
                     if (control = event.getTarget()) {
@@ -1326,21 +1330,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     }
 
     /**
-     * 处理鼠标点击。
-     * @private
-     *
-     * @param {ecui.ui.Control} control 需要操作的控件
-     * @param {ECUIEvent} event 事件对象
-     */
-    function onmousedown(control, event) {
-        if (!isScrollClick(event)) {
-            bubble(activedControl = control, 'activate', event);
-        }
-        bubble(control, 'mousedown', event);
-        onselectstart(control, event);
-    }
-
-    /**
      * 滚轮事件处理。
      * @private
      *
@@ -1948,11 +1937,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;
 
-                if (core.dispatchEvent(control, 'dragstart', event)) {
+                if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
                     control.setPosition(x, y);
                 }
-
-                event.preventDefault();
             }
         },
 
