@@ -49,6 +49,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 var body = this.getBody();
                 this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
                 this._eFooter = dom.insertBefore(dom.create({className: options.classes.join('-footer ')}), body);
+                this._oHandle = util.blank;
             }
         ],
         {
@@ -281,6 +282,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             reset: function (callback) {
                 if (!this.isScrolling()) {
+                    this._oHandle();
                     var y = this.getY(),
                         top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight) + this.$$footerHeight,
                         options = {
@@ -293,12 +295,16 @@ _nBottomIndex  - 下部隐藏的选项序号
                                 callback();
                             }
                         };
+
                     // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
                     if (y > -this.$$headerHeight) {
                         this._oHandle = core.effect.grade('this.body.style.top->' + -this.$$headerHeight + ';this.head.style.top->' + -this.$$headerHeight + ';this.foot.style.bottom->' + (y + top), 1000, options);
                     } else if (y !== -this.$$headerHeight && y < top) {
                         // y !== -this.$$headerHeight解决items不够填充整个listview区域的问题
                         this._oHandle = core.effect.grade('this.body.style.top->' + (top + this._nTopHidden) + ';this.foot.style.bottom->' + (y - top), 1000, options);
+                    } else {
+                        this._eHeader.style.top = -this.$$headerHeight + 'px';
+                        this._eFooter.style.bottom = -this.$$footerHeight + 'px';
                     }
                 }
             }
@@ -315,7 +321,9 @@ _nBottomIndex  - 下部隐藏的选项序号
                     this._bLoading = true;
                     core.dispatchEvent(this, 'refresh');
                 } else {
-                    this.reset();
+                    util.timer(function () {
+                        this.reset();
+                    }.bind(this));
                 }
             },
 
@@ -400,9 +408,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $dragstart: function (event) {
                 ui.MScroll.Methods.$dragstart.call(this, event);
-                if (this._oHandle) {
-                    this._oHandle();
-                }
+                this._oHandle();
                 this._sStatus = '';
             },
 
