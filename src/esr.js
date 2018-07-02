@@ -529,7 +529,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 layer.show();
 
                 // 路由权重在该项目中暂不考虑相等情况
-                if (lastLayer) {
+                if (lastLayer && routes[lastRouteName].weight !== routes[route.NAME].weight) {
                     var view = util.getView(),
                         lastLayerEl = lastLayer.getMain(),
                         position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width,
@@ -624,6 +624,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             route.main = route.main || esr.DEFAULT_MAIN;
             route.view = route.view || name;
             routes[name] = route;
+
+            if (esrOptions.app && route.weight === undefined) {
+                route.weight = name === esr.DEFAULT_PAGE ? 0 : name.split('.').length;
+            }
 
             if (delegateRoutes[name]) {
                 delegateRoutes[name].forEach(function (item) {
