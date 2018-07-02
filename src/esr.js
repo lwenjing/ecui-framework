@@ -530,11 +530,11 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
 
                 // 路由权重在该项目中暂不考虑相等情况
                 if (lastLayer) {
+                    var lastLayerEl = lastLayer.getMain();
                     lastLayerEl.header.style.display = 'none';
 
                     if (routes[lastRouteName].weight !== routes[route.NAME].weight) {
                         var view = util.getView(),
-                            lastLayerEl = lastLayer.getMain(),
                             position = routes[lastRouteName].weight < routes[route.NAME].weight ? view.width : -view.width,
                             fn;
 
