@@ -195,7 +195,9 @@ _bRequired    - 是否必须选择
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
                 // 设置文本区域
-                this._uText.$setSize(width, height);
+                if (this._uText.isCached()) {
+                    this._uText.$setSize(width, height);
+                }
             },
 
             /**
