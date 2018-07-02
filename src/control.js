@@ -617,6 +617,9 @@ _aStatus            - 控件当前的状态集合
                     }
                     return true;
                 }
+                if (force) {
+                    this.clearCache();
+                }
                 return false;
             },
 
