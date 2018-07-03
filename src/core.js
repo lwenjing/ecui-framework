@@ -1097,7 +1097,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
 
-            if ((safariVersion && iosVersion > 10) || (chromeVersion && isToucher)) {
+            if (safariVersion && iosVersion > 10) {
                 bodyElement = dom.create({
                     id: body.id,
                     className: 'SAFARI-BODY-FIXED'
@@ -1111,6 +1111,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 body.id = '';
             }
 
+            document.body.scrollTop = 100;
+            document.body.parentNode.scrollTop = 100;
             if (options.load) {
                 for (var text = options.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
                     text = RegExp['$\''];
@@ -1412,7 +1414,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return;
         }
         event = core.wrapEvent(event);
-        core.dispatchEvent(event.getControl(), 'scroll', event);
+        if (event.getControl()) {
+            core.dispatchEvent(event.getControl(), 'scroll', event);
+        }
         independentControls.forEach(function (item) {
             core.dispatchEvent(item, 'scroll', event);
         });
