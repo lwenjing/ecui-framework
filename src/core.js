@@ -1414,8 +1414,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return;
         }
         event = core.wrapEvent(event);
-        if (event.getControl()) {
-            core.dispatchEvent(event.getControl(), 'scroll', event);
+        var control = event.getControl();
+        if (control) {
+            core.dispatchEvent(control, 'scroll', event);
         }
         independentControls.forEach(function (item) {
             core.dispatchEvent(item, 'scroll', event);
