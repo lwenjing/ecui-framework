@@ -986,58 +986,59 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     headers: headers,
                     data: data,
                     onsuccess: function (text) {
-                        if (requestVersion === version) {
-                            count--;
-                            try {
-                                var data = JSON.parse(text),
-                                    key;
+                        count--;
+                        try {
+                            var data = JSON.parse(text),
+                                key;
 
-                                // 枚举常量管理
-                                if (esrOptions.meta) {
-                                    if (data.meta) {
-                                        metaUpdate = true;
-                                    }
+                            // 枚举常量管理
+                            if (esrOptions.meta) {
+                                if (data.meta) {
+                                    metaUpdate = true;
                                 }
-
-                                if (esr.onparsedata) {
-                                    data = esr.onparsedata(url, data);
-                                } else {
-                                    data = data.data;
-                                }
-
-                                if (varName) {
-                                    esr.setData(varName, data);
-                                } else {
-                                    for (key in data) {
-                                        if (data.hasOwnProperty(key)) {
-                                            esr.setData(key, data[key]);
-                                        }
-                                    }
-                                }
-                            } catch (e) {
-                                err.push({handle: e, url: varUrl, name: varName});
                             }
 
-                            if (!count) {
-                                if (err.length > 0) {
-                                    if (onerror(err) === false) {
-                                        return;
+                            if (esr.onparsedata) {
+                                data = esr.onparsedata(url, data);
+                            } else {
+                                data = data.data;
+                            }
+
+                            if (varName) {
+                                esr.setData(varName, data);
+                            } else {
+                                for (key in data) {
+                                    if (data.hasOwnProperty(key)) {
+                                        esr.setData(key, data[key]);
                                     }
                                 }
+                            }
+                        } catch (e) {
+                            err.push({handle: e, url: varUrl, name: varName});
+                        }
+
+                        if (!count) {
+                            if (err.length > 0) {
+                                if (onerror(err) === false) {
+                                    return;
+                                }
+                            }
+                            if (requestVersion === version) {
                                 onsuccess();
+                            } else {
+                                // 数据无效，需要恢复环境
+                                onerror();
                             }
                         }
                     },
                     onerror: function () {
-                        if (requestVersion === version) {
-                            count--;
-                            err.push({url: varUrl, name: varName});
-                            if (!count) {
-                                if (onerror(err) === false) {
-                                    return;
-                                }
-                                onsuccess();
+                        count--;
+                        err.push({url: varUrl, name: varName});
+                        if (!count) {
+                            if (onerror(err) === false) {
+                                return;
                             }
+                            onsuccess();
                         }
                     }
                 });
