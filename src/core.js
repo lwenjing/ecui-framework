@@ -1056,6 +1056,21 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function initEnvironment() {
         if (scrollNarrow === undefined) {
+            if (isToucher) {
+                (function () {
+                    var getView = util.getView;
+                    util.getView = function () {
+                        // 解决软键盘弹起时的高度计算问题，这个值已经被 orientationchange 写入了body的style中
+                        var view = getView();
+                        view.height = util.toNumber(document.body.style.height);
+                        return view;
+                    };
+                }());
+
+                events.orientationchange();
+                util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+            }
+
             // 设置全局事件处理
             for (var key in events) {
                 if (events.hasOwnProperty(key)) {
@@ -1096,6 +1111,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 body.id = '';
             }
 
+            document.body.scrollTop = 100;
+            document.body.parentNode.scrollTop = 100;
             if (options.load) {
                 for (var text = options.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
                     text = RegExp['$\''];
@@ -1106,7 +1123,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             }
 
-            dom.addEventListener(window, 'resize', events.orientationchange);
+            if (!isToucher) {
+                dom.addEventListener(window, 'resize', events.orientationchange);
+            }
             dom.addEventListener(window, 'scroll', onscroll);
             dom.addEventListener(
                 window,
@@ -1395,7 +1414,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return;
         }
         event = core.wrapEvent(event);
-        core.dispatchEvent(event.getControl(), 'scroll', event);
+        var control = event.getControl();
+        if (control) {
+            core.dispatchEvent(control, 'scroll', event);
+        }
         independentControls.forEach(function (item) {
             core.dispatchEvent(item, 'scroll', event);
         });
@@ -2234,25 +2256,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          */
         init: function (el) {
             if (!initEnvironment() && el) {
-                if (isToucher) {
-                    events.orientationchange();
-                    util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
-                    (function () {
-                        var getView = util.getView;
-                        util.getView = function () {
-                            // 解决软键盘弹起时的高度计算问题，这个值已经被 orientationchange 写入了body的style中
-                            var view = getView();
-                            view.height = util.toNumber(document.body.style.height);
-                            return view;
-                        };
-                    }());
-                }
-
                 var list = dom.getAttribute(el, ecuiName) ? [el] : [],
                     controls = [],
                     options;
 
-                if (!initRecursion) {
+                if (!isToucher && !initRecursion) {
                     // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
                     dom.removeEventListener(window, 'resize', events.orientationchange);
                 }
@@ -2301,7 +2309,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
 
                 initRecursion--;
-                if (!initRecursion) {
+                if (!isToucher && !initRecursion) {
                     dom.addEventListener(window, 'resize', events.orientationchange);
                 }
 
