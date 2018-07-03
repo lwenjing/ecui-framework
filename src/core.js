@@ -301,7 +301,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
                 });
 
-                if (event.getNative().touches.length > 1) {
+                if (event.getNative().touches.length > 1 || currEnv.type === 'drag') {
                     event.preventDefault();
                 }
             },
@@ -629,7 +629,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             mousemove: function (event) {
                 dragmove(event.track, currEnv, event.clientX, event.clientY);
-                core.wrapEvent(event).preventDefault();
             },
 
             mouseover: util.blank,
@@ -1076,7 +1075,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (events.hasOwnProperty(key)) {
                     var type = key.slice(0, 5);
                     if (!((type === 'mouse' && (isPointer || isToucher)) || (type === 'touch' && !isToucher) || (type === 'point' && !isPointer))) {
-                        dom.addEventListener(document, key, events[key], chromeVersion > 30 ? {passive: false} : true);
+                        dom.addEventListener(document, key, events[key]);
                     }
                 }
             }
@@ -1097,7 +1096,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
 
-            if (safariVersion && iosVersion > 10) {
+            if (safariVersion && iosVersion > 100) {
                 bodyElement = dom.create({
                     id: body.id,
                     className: 'SAFARI-BODY-FIXED'
