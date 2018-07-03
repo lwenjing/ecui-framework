@@ -78,9 +78,15 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
                     });
 
-                    repaint();
+                    if (!iosVersion) {
+                        repaint();
+                    }
                 } else if (style.height !== height + 'px') {
                     style.height = height + 'px';
+
+                    if (iosVersion) {
+                        repaint();
+                    }
                 } else if (isToucher) {
                     util.timer(events.orientationchange, 200);
                 }
