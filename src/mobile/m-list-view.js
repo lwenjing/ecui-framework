@@ -106,7 +106,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                 );
                 if (this.isReady()) {
-                    top += this._nTopHidden;
+                    top = Math.min(top + this._nTopHidden, -this.$$headerHeight);
                     if (util.toNumber(body.style.top) < top) {
                         body.style.top = top + 'px';
                     }

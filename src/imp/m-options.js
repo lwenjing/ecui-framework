@@ -140,15 +140,10 @@
             setSelected: function (item) {
                 item = item || null;
                 if (this._cSelect !== item) {
-                    var items = getItems(this);
                     if (this._cSelect) {
-                        var index = items.indexOf(this._cSelect) - this._nOptionSize;
-                        items[Math.max(index, 0)].alterClass('-pos' + (-Math.min(index, 0)));
                         this._cSelect.alterClass('-selected');
                     }
                     if (item) {
-                        index = items.indexOf(item) - this._nOptionSize;
-                        items[Math.max(index, 0)].alterClass('+pos' + (-Math.min(index, 0)));
                         item.alterClass('+selected');
                     }
                     this._cSelect = item;
