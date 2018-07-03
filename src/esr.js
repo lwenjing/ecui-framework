@@ -525,8 +525,6 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             var layer = getLayer(route);
             if (layer) {
                 var layerEl = layer.getMain();
-                layerEl.header.style.display = '';
-                layer.show();
 
                 // 路由权重在该项目中暂不考虑相等情况
                 if (lastLayer) {
@@ -580,6 +578,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 } else {
                     lastLayer = layer;
                 }
+
+                layerEl.header.style.display = '';
+                layer.show();
 
                 lastRouteName = route.NAME;
             }

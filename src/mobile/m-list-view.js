@@ -64,8 +64,12 @@ _nBottomIndex  - 下部隐藏的选项序号
             $alterItems: function () {
                 // 第一次进来使用缓存的数据，第二次进来取实际数据
                 if (this.isReady()) {
-                    this.$$bodyHeight = this.getBody().offsetHeight + this._nTopHidden + this._nBottomHidden;
-                    this.getItems().map(function (item) {
+                    var items = this.getItems(),
+                        body = this.getBody();
+
+                    this.alterClass(items.length ? '-empty' : '+empty');
+                    this.$$bodyHeight = body.offsetHeight + this._nTopHidden + this._nBottomHidden;
+                    items.map(function (item) {
                         item.cache();
                         return item.getOuter().offsetWidth ? item : null;
                     }).forEach(function (item, index) {
@@ -102,9 +106,9 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                 );
                 if (this.isReady()) {
-                    top += this._nTopHidden;
-                    if (util.toNumber(this.getBody().style.top) < top) {
-                        this.getBody().style.top = top + 'px';
+                    top = Math.min(top + this._nTopHidden, -this.$$headerHeight);
+                    if (util.toNumber(body.style.top) < top) {
+                        body.style.top = top + 'px';
                     }
                 }
             },
@@ -203,6 +207,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 style.paddingTop = (this.$$bodyPadding[0] + this.$$headerHeight) + 'px';
                 style.paddingBottom = (this.$$bodyPadding[2] + this.$$footerHeight) + 'px';
                 style.top = -this.$$headerHeight + 'px';
+                this.alterClass(this.getLength() ? '-empty' : '+empty');
             },
 
             /**
