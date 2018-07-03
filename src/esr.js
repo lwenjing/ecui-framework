@@ -555,6 +555,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                             fn = 'this.from.style.left->' + -position + ';this.to.style.left->0';
                         }
 
+                        pauseStatus = true;
                         core.effect.grade(
                             fn,
                             600,
@@ -564,6 +565,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                                     // 在执行结束后，如果不同时common layer则隐藏from layer，并且去掉目标路由中的动画执行函数
                                     lastLayer.hide();
                                     lastLayer = layer;
+                                    pauseStatus = false;
                                     if (esrOptions.transition === 'cover') {
                                         core.mask();
                                     }
