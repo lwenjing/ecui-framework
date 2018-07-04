@@ -301,9 +301,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
                 });
 
-                if (event.getNative().touches.length > 1 || currEnv.type === 'drag') {
-                    event.preventDefault();
-                }
+                event.preventDefault();
             },
 
             touchend: function (event) {
