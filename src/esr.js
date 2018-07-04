@@ -143,14 +143,14 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
      * @param {Object} route 路由对象
      */
     function beforerender(route) {
-//{if 0}//
         if (route.main === 'AppCommonContainer') {
             var el = core.$('AppCommonContainer');
+//{if 0}//
             core.dispose(el, true);
+//{/if}//
             core.$('AppBackupContainer').id = 'AppCommonContainer';
             el.id = 'AppBackupContainer';
         }
-//{/if}//
         if (route.onbeforerender) {
             route.onbeforerender(context);
         }
