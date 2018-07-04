@@ -32,9 +32,10 @@ _nBottomIndex  - 下部隐藏的选项序号
     }
 
     function setComplete() {
-        var range = this.getRange();
-        range.top = this.getHeight() - this.$$bodyHeight - this.$$footerHeight;
-        range.bottom = this.$$headerHeight;
+        var range = this.getRange(),
+            scrollRange = this.getScrollRange();
+        range.top = scrollRange.top;
+        range.bottom = scrollRange.bottom;
     }
 
     /**
@@ -94,7 +95,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     {
                         left: 0,
                         right: 0,
-                        top: top - this.$$footerHeight,
+                        top: top ? top - this.$$footerHeight : 0,
                         bottom: this.$$headerHeight
                     }
                 );
@@ -292,7 +293,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 if (!this.isScrolling()) {
                     this._oHandle();
                     var y = this.getY(),
-                        top = Math.min(0, this.getHeight() - this.$$bodyHeight + this.$$headerHeight) - this.$$footerHeight,
+                        top = Math.min(0, this.getHeight() - this.$$bodyHeight + this.$$headerHeight),
                         options = {
                             $: {
                                 body: this.getBody(),
@@ -304,10 +305,11 @@ _nBottomIndex  - 下部隐藏的选项序号
                             }
                         };
 
+                    top = top ? top - this.$$footerHeight : 0;
                     // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
                     if (y > 0) {
                         this._oHandle = core.effect.grade('this.body.style.top->0;this.head.style.top->' + -this.$$headerHeight, 1000, options);
-                    } else if (y !== 0 && y < top) {
+                    } else if (y < top) {
                         // y !== 0解决items不够填充整个listview区域的问题
                         this._oHandle = core.effect.grade('this.body.style.top->' + (top - this.$$footerHeight + this._nTopHidden) + ';this.foot.style.bottom->' + -this.$$footerHeight, 1000, options);
                     } else {
