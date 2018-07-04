@@ -247,7 +247,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
-                console.log(event.type);
                 initTouchTracks(event);
 
                 if (event.touches.length === 1) {
@@ -273,7 +272,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             touchmove: function (event) {
-                console.log(event.type);
                 initTouchTracks(event);
 
                 event = core.wrapEvent(event);
@@ -305,7 +303,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             touchend: function (event) {
-                console.log(event.type);
                 var track = tracks[trackId];
 
                 initTouchTracks(event);
