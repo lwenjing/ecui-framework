@@ -404,6 +404,7 @@ fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
     fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
 };
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {
+    console.log(context);
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     // context.offset = data.offset;
     // context.total = data.total;
