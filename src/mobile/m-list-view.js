@@ -158,8 +158,10 @@ _nBottomIndex  - 下部隐藏的选项序号
             $footercomplete: function () {
                 setComplete.call(this);
                 if (!this._bLoading && this._eFooter.innerHTML !== this.HTML_NODATA) {
-                    this._bLoading = true;
-                    core.dispatchEvent(this, 'loaddata');
+                    // 可以选择是否需要防止重复提交
+                    if (core.dispatchEvent(this, 'loaddata')) {
+                        this._bLoading = true;
+                    }
                     this._eFooter.innerHTML = this.HTML_LOADING;
                 }
             },
@@ -206,6 +208,14 @@ _nBottomIndex  - 下部隐藏的选项序号
             },
 
             /**
+             * 列表数据加载的默认处理。
+             * @event
+             */
+            $loaddata: function () {
+                return false;
+            },
+
+            /**
              * @override
              */
             $ready: function () {
@@ -213,6 +223,14 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this._nTopHidden = this._nBottomHidden = 0;
                 this._nTopIndex = 0;
                 this._nBottomIndex = this.getLength();
+            },
+
+            /**
+             * 列表刷新的默认处理。
+             * @event
+             */
+            $refresh: function () {
+                return false;
             },
 
             /**
@@ -308,8 +326,10 @@ _nBottomIndex  - 下部隐藏的选项序号
             $dragend: function (event) {
                 ui.MScroll.Methods.$dragend.call(this, event);
                 if (!this._bLoading && this._sStatus === 'headercomplete') {
-                    this._bLoading = true;
-                    core.dispatchEvent(this, 'refresh');
+                    // 可以选择是否需要防止重复提交
+                    if (core.dispatchEvent(this, 'refresh')) {
+                        this._bLoading = true;
+                    }
                 } else {
                     util.timer(function () {
                         this.reset();
