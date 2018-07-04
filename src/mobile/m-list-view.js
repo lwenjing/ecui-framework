@@ -25,16 +25,16 @@ _nBottomIndex  - 下部隐藏的选项序号
 //{/if}//
     function setEnterAndLeave() {
         var range = this.getRange();
-        if (range && !range.bottom) {
-            range.top = this.getHeight() - this.$$bodyHeight + this.$$footerHeight;
-            range.bottom = -this.$$headerHeight;
+        if (range && range.bottom) {
+            range.top = this.getHeight() - this.$$bodyHeight;
+            range.bottom = 0;
         }
     }
 
     function setComplete() {
         var range = this.getRange();
-        range.top = this.getHeight() - this.$$bodyHeight;
-        range.bottom = 0;
+        range.top = this.getHeight() - this.$$bodyHeight - this.$$footerHeight;
+        range.bottom = this.$$headerHeight;
     }
 
     /**
@@ -89,24 +89,23 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }, this);
                 }
                 // 解决items不够填充整个listview区域
-                var top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight);
+                var top = Math.min(0, this.getHeight() - this.$$bodyHeight);
                 this.setScrollRange(
                     {
                         left: 0,
                         right: 0,
+                        top: top - this.$$footerHeight,
+                        bottom: this.$$headerHeight
+                    }
+                );
+                this.setRange(
+                    {
                         top: top,
                         bottom: 0
                     }
                 );
-                top += this.$$footerHeight;
-                this.setRange(
-                    {
-                        top: top,
-                        bottom: -this.$$headerHeight
-                    }
-                );
                 if (this.isReady()) {
-                    top = Math.min(top + this._nTopHidden, -this.$$headerHeight);
+                    top = Math.min(top + this._nTopHidden, 0);
                     if (util.toNumber(body.style.top) < top) {
                         body.style.top = top + 'px';
                     }
@@ -131,7 +130,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 }
                 this.$$headerHeight = this._eHeader.offsetHeight;
                 this.$$footerHeight = this._eFooter.offsetHeight;
-                this.$$bodyHeight = body.offsetHeight + this.$$headerHeight + this.$$footerHeight;
+                this.$$bodyHeight = body.offsetHeight;
             },
 
             /**
@@ -203,10 +202,6 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
-                var style = this.getBody().style;
-                style.paddingTop = (this.$$bodyPadding[0] + this.$$headerHeight) + 'px';
-                style.paddingBottom = (this.$$bodyPadding[2] + this.$$footerHeight) + 'px';
-                style.top = -this.$$headerHeight + 'px';
                 this.alterClass(this.getLength() ? '-empty' : '+empty');
             },
 
@@ -218,16 +213,6 @@ _nBottomIndex  - 下部隐藏的选项序号
                 this._nTopHidden = this._nBottomHidden = 0;
                 this._nTopIndex = 0;
                 this._nBottomIndex = this.getLength();
-            },
-
-            /**
-             * @override
-             */
-            $resize: function () {
-                ui.Control.prototype.$resize.call(this);
-                var style = this.getBody().style;
-                style.paddingTop = this.$$bodyPadding[0] + 'px';
-                style.paddingBottom = this.$$bodyPadding[2] + 'px';
             },
 
             /**
@@ -289,7 +274,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 if (!this.isScrolling()) {
                     this._oHandle();
                     var y = this.getY(),
-                        top = Math.min(-this.$$headerHeight, this.getHeight() - this.$$bodyHeight) + this.$$footerHeight,
+                        top = Math.min(0, this.getHeight() - this.$$bodyHeight + this.$$headerHeight) - this.$$footerHeight,
                         options = {
                             $: {
                                 body: this.getBody(),
@@ -302,11 +287,11 @@ _nBottomIndex  - 下部隐藏的选项序号
                         };
 
                     // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
-                    if (y > -this.$$headerHeight) {
-                        this._oHandle = core.effect.grade('this.body.style.top->' + -this.$$headerHeight + ';this.head.style.top->' + -this.$$headerHeight + ';this.foot.style.bottom->' + (y + top), 1000, options);
-                    } else if (y !== -this.$$headerHeight && y < top) {
-                        // y !== -this.$$headerHeight解决items不够填充整个listview区域的问题
-                        this._oHandle = core.effect.grade('this.body.style.top->' + (top + this._nTopHidden) + ';this.foot.style.bottom->' + (y - top), 1000, options);
+                    if (y > 0) {
+                        this._oHandle = core.effect.grade('this.body.style.top->0;this.head.style.top->' + -this.$$headerHeight, 1000, options);
+                    } else if (y !== 0 && y < top) {
+                        // y !== 0解决items不够填充整个listview区域的问题
+                        this._oHandle = core.effect.grade('this.body.style.top->' + (top - this.$$footerHeight + this._nTopHidden) + ';this.foot.style.bottom->' + -this.$$footerHeight, 1000, options);
                     } else {
                         this._eHeader.style.top = -this.$$headerHeight + 'px';
                         this._eFooter.style.bottom = -this.$$footerHeight + 'px';
@@ -385,15 +370,15 @@ _nBottomIndex  - 下部隐藏的选项序号
                 ui.MScroll.Methods.$dragmove.call(this, event);
 
                 top = this.getHeight() - this.$$bodyHeight;
-                if (y > -this.$$headerHeight) {
-                    status = y < 0 ? 'headerenter' : 'headercomplete';
-                    this._eHeader.style.top = y + 'px';
-                } else if (y === -this.$$headerHeight) {
+                if (y > 0) {
+                    status = y < this.$$headerHeight ? 'headerenter' : 'headercomplete';
+                    this._eHeader.style.top = (y - this.$$headerHeight) + 'px';
+                } else if (y === 0) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
-                } else if (y < top + this.$$footerHeight) {
-                    var status = y > top ? 'footerenter' : 'footercomplete';
-                    this._eFooter.style.bottom = (top - y) + 'px';
+                } else if (y < top) {
+                    var status = y > top + this.$$footerHeight ? 'footerenter' : 'footercomplete';
+                    this._eFooter.style.bottom = (top - this.$$footerHeight - y) + 'px';
                 } else {
                     status = '';
                 }
