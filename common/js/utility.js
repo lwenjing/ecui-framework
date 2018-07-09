@@ -19,44 +19,6 @@
 
     //统一对请求成功返回参数做分类
     ecui.esr.onparsedata = function (url, data) {
-        if (url.indexOf('v1/base/series') >= 0) {
-            data = data.data;
-            var options = [];
-            for (var i = 0; i < data.length; i++) {
-                options.push({
-                    value: '',
-                    code: data[i].subbrand,
-                    capturable: false,
-                    primary: 'title'
-                });
-                for (var j = 0, list = data[i].serials; j < list.length; j++) {
-                    options.push({
-                        value: list[j].serialid,
-                        code: list[j].serialname
-                    });
-                }
-            }
-            return options;
-        }
-        if (url.indexOf('v1/base/motorcycletype') >= 0) {
-            data = data.data;
-            options = [];
-            for (i = 0; i < data.length; i++) {
-                options.push({
-                    value: '',
-                    code: data[i].caryear,
-                    capturable: false,
-                    primary: 'title'
-                });
-                for (j = 0, list = data[i].carmodels; j < list.length; j++) {
-                    options.push({
-                        value: list[j].carid,
-                        code: list[j].carname
-                    });
-                }
-            }
-            return options;
-        }
         if (data.data.pageNo !== undefined && data.data.total === undefined &&  data.data.offset === undefined) {
             data.data.total = data.data.totalRecord;
             data.data.offset = data.data.pageSize * (data.data.pageNo - 1);
