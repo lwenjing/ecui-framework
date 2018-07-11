@@ -42,7 +42,7 @@
             }
             return data;
         }
-        if (code === 12011) {
+        if (code === '5999') {
             // 分支3.4：登录相关的错误
             window.location = './login.html';
         } else {
@@ -388,7 +388,11 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     // context.totalPage = data.totalPage;
     var pageNo = data.CURRENTPAGE || 1;
     var total = data.COUNT || 10;
+<<<<<<< HEAD
     var pageSize = context.pageSize || 10;
+=======
+    var pageSize = context.pageSize;
+>>>>>>> 33866a2179f12aafcd4fbbb03c041772ae42d0b5
     context.page = {
         total: total,
         totalPage: Math.ceil(total / pageSize),
