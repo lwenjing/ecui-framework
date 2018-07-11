@@ -24,7 +24,7 @@
             data.data.offset = data.data.pageSize * (data.data.pageNo - 1);
         }
         var code = data.code;
-        if ('0000' === code) {
+        if ('0000' === code || '9012' === code) {
             data = data.data;
             //对数据进行统一化处理
             var rule = urlRule.filter(function (item) {
@@ -42,7 +42,7 @@
             }
             return data;
         }
-        if (code === 12011) {
+        if (code === '5999') {
             // 分支3.4：登录相关的错误
             window.location = './login.html';
         } else {
@@ -382,14 +382,13 @@ fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
     fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
 };
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {
-    console.log(context);
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     // context.offset = data.offset;
     // context.total = data.total;
     // context.totalPage = data.totalPage;
     var pageNo = data.CURRENTPAGE || 1;
     var total = data.COUNT || 10;
-    var pageSize = 2;
+    var pageSize = context.pageSize;
     context.page = {
         total: total,
         totalPage: Math.ceil(total / pageSize),
