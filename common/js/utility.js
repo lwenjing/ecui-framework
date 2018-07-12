@@ -389,15 +389,15 @@ fapiao.TableListRoute = function (route) {
     ecui.util.extend(this, route);
 };
 fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
-    context.pageNo = context.pageNo || +this.searchParm.CURRENTPAGE;
-    context.pageSize = +this.searchParm.PAGESIZE;
+    context.pageNo = context.pageNo || +this.searchParm.currentPage;
+    context.pageSize = +this.searchParm.pageSize;
     fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
 };
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
-    var pageNo = data.CURRENTPAGE || 1;
+    var pageNo = data.currentPage || 1;
     var total = data.COUNT || 10;
-    var pageSize = context.PAGESIZE || 10;
+    var pageSize = context.pageSize || 10;
     context.page = {
         total: total,
         totalPage: Math.ceil(total / pageSize),
