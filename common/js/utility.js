@@ -397,7 +397,7 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     var pageNo = data.currentPage || 1;
     var total = data.count || 10;
-    var pageSize = context.pageSize || 10;
+    var pageSize = data.pageSize || 10;
     context.page = {
         total: total,
         totalPage: Math.ceil(total / pageSize),
