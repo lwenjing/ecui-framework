@@ -115,6 +115,12 @@ fapiao.util = {
         return ret;
     },
     DX: function (n) {
+        var oldN = n;
+        // 判断正负数
+        if(n.substr(0,1) == '-') {
+            n = n.substr(1);
+        }
+
         if (!/^(0|[1-9]\d*)(\.\d+)?$/.test(n)) {
             return '数据非法';
         }
@@ -128,7 +134,13 @@ fapiao.util = {
         for (var i = 0; i < n.length; i++) {
             str += '零壹贰叁肆伍陆柒捌玖'.charAt(n.charAt(i)) + unit.charAt(i);
         }
-        return str.replace(/零(千|百|拾|角)/g, '零').replace(/(零)+/g, '零').replace(/零(万|亿|元)/g, '$1').replace(/(亿)万|壹(拾)/g, '$1$2').replace(/^元零?|零分/g, '').replace(/元$/g, '元整');
+        str = str.replace(/零(千|百|拾|角)/g, '零').replace(/(零)+/g, '零').replace(/零(万|亿|元)/g, '$1').replace(/(亿)万|壹(拾)/g, '$1$2').replace(/^元零?|零分/g, '').replace(/元$/g, '元整');
+        // 判断正负数
+        if(oldN.substr(0,1) == '-') {
+            n = n.substr(1);
+            str = '负' + str;
+        }
+        return str;
     }
 };
 
@@ -388,11 +400,7 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     // context.totalPage = data.totalPage;
     var pageNo = data.CURRENTPAGE || 1;
     var total = data.COUNT || 10;
-<<<<<<< HEAD
     var pageSize = context.pageSize || 10;
-=======
-    var pageSize = context.pageSize;
->>>>>>> 33866a2179f12aafcd4fbbb03c041772ae42d0b5
     context.page = {
         total: total,
         totalPage: Math.ceil(total / pageSize),
