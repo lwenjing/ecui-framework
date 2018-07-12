@@ -19,7 +19,7 @@
 
     //统一对请求成功返回参数做分类
     ecui.esr.onparsedata = function (url, data) {
-        if (data.data.pageNo !== undefined && data.data.total === undefined &&  data.data.offset === undefined) {
+        if (data.data && data.data.pageNo !== undefined && data.data.total === undefined &&  data.data.offset === undefined) {
             data.data.total = data.data.totalRecord;
             data.data.offset = data.data.pageSize * (data.data.pageNo - 1);
         }
@@ -47,9 +47,9 @@
             window.location = './login.html';
         } else {
             if (code === 300000) {
-                throw data.msg;
+                throw data.message;
             }
-            fapiao.showHint('error', data.msg);
+            fapiao.showHint('error', data.message);
         }
         return code;
     };
@@ -395,12 +395,9 @@ fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
 };
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
-    // context.offset = data.offset;
-    // context.total = data.total;
-    // context.totalPage = data.totalPage;
     var pageNo = data.CURRENTPAGE || 1;
     var total = data.COUNT || 10;
-    var pageSize = context.pageSize || 10;
+    var pageSize = context.PAGESIZE || 10;
     context.page = {
         total: total,
         totalPage: Math.ceil(total / pageSize),
