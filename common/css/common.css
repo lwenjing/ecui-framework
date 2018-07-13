@@ -703,6 +703,7 @@ a {
         text-indent: 5px;
         line-height: 28px;
         cursor: pointer;
+        font-size: 14px;
     }
     .ui-item-hover {
         background-color: #368cda;
