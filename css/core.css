@@ -38,6 +38,10 @@ body {
     overflow: hidden !important;
 }
 
+.ui-overflow-auto{
+    overflow:auto !important;
+}
+
 .ui-mask {
     position: absolute !important;
     background-color: #000000 !important;
