@@ -50,6 +50,7 @@
                 throw data.message;
             }
             fapiao.showHint('error', data.message);
+            return;
         }
         return code;
     };
