@@ -407,4 +407,24 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
         start: (pageNo - 1) * pageSize + 1,
         end: pageNo * pageSize
     };
+    calHeight();
+
+};
+
+fapiao.TableListRoute.prototype.onafterrender = function (context) {
+    calHeight();
+};
+
+function calHeight() {
+    var containerH = ecui.$('container').offsetHeight;
+    var searchConditionsH = ecui.$('searchConditions').offsetHeight;
+    var billSearch_tableH = containerH - searchConditionsH - 10;
+    var tableContainerH = billSearch_tableH - 110;
+    ecui.$('billSearch_table').style.height = billSearch_tableH + 'px';
+    if((ecui.$('tableContainer'))){
+        ecui.$('tableContainer').style.height = tableContainerH + 'px';
+    }
+}
+window.onresize = function(){
+    calHeight();
 };
