@@ -130,7 +130,9 @@
                         return match.slice(-1) === '}' ? '}' : '';
                     });
                 }
-                el.styleSheet.cssText = cssText;
+                if (el.styleSheet) {
+                    el.styleSheet.cssText = cssText;
+                }
             } else {
                 el.innerHTML = cssText;
             }
