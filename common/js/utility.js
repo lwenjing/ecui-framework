@@ -246,7 +246,7 @@ fapiao.setEditFormValue = function (data, form) {
             } else {
                 // ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
                 value = ecui.util.parseValue(name, data);
-                value = value && value.length ? value[Array.prototype.slice.call(elements[name]).indexOf(item) - 1] : '';
+                value = value && value.length ? value[ecui.util.arraySlice(elements[name]).indexOf(item) - 1] : '';
                 if (item.getControl) {
                     var control = item.getControl();
                     if (!(control instanceof ecui.esr.CreateObject)) {
@@ -314,7 +314,7 @@ fapiao.resetFormValue = function (form) {
 
 // 获取表单数据设置searchParam数据
 fapiao.setSearchParam = function (searchParm, form) {
-    Array.prototype.slice.call(form.elements).forEach(function (item) {
+    ecui.util.arraySlice(form.elements).forEach(function (item) {
         if (item.name) {
             var _control = ecui.findControl(item);
             if (_control) {
@@ -396,6 +396,19 @@ fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
     context.pageSize = context.pageSize || +this.searchParm.pageSize;
     fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
 };
+function calHeight() {
+    var route = ecui.esr.getLocation().split('~')[0];
+    if (route === 'bill.list') {
+        var containerH = ecui.$('container').offsetHeight;
+        var searchConditionsH = ecui.$('searchConditions').offsetHeight;
+        var billSearch_tableH = containerH - searchConditionsH - 10;
+        var tableContainerH = billSearch_tableH - 110;
+        ecui.$('billSearch_table').style.height = billSearch_tableH + 'px';
+        if ((ecui.$('tableContainer'))) {
+            ecui.$('tableContainer').style.height = tableContainerH + 'px';
+        }
+    }
+}
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     var pageNo = data.currentPage || 1;
@@ -410,26 +423,12 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
         end: pageNo * pageSize
     };
     calHeight();
-
 };
 
 fapiao.TableListRoute.prototype.onafterrender = function (context) {
     calHeight();
 };
 
-function calHeight() {
-    var route = ecui.esr.getLocation().split('~')[0];
-    if(route == 'bill.list'){
-        var containerH = ecui.$('container').offsetHeight;
-        var searchConditionsH = ecui.$('searchConditions').offsetHeight;
-        var billSearch_tableH = containerH - searchConditionsH - 10;
-        var tableContainerH = billSearch_tableH - 110;
-        ecui.$('billSearch_table').style.height = billSearch_tableH + 'px';
-        if((ecui.$('tableContainer'))){
-            ecui.$('tableContainer').style.height = tableContainerH + 'px';
-        }
-    }
-}
-window.onresize = function(){
+window.onresize = function () {
     calHeight();
 };
