@@ -715,7 +715,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         if (!el) {
                             break outer;
                         }
-                        if (core.getCustomStyle('pointer-events') === 'none') {
+                        if (core.getCustomStyle(el.style || { 'content': '' }, 'pointer-events') === 'none') {
                             caches.push([el, el.style.visibility]);
                             el.style.visibility = 'hidden';
                             break;
