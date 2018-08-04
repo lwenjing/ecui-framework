@@ -18,44 +18,42 @@
     ];
 
     //统一对请求成功返回参数做分类
-    if (ecui.esr) {
-        ecui.esr.onparsedata = function (url, data) {
-            if (data.data && data.data.pageNo !== undefined && data.data.total === undefined &&  data.data.offset === undefined) {
-                data.data.total = data.data.totalRecord;
-                data.data.offset = data.data.pageSize * (data.data.pageNo - 1);
+    ecui.esr.onparsedata = function (url, data) {
+        if (data.data && data.data.pageNo !== undefined && data.data.total === undefined &&  data.data.offset === undefined) {
+            data.data.total = data.data.totalRecord;
+            data.data.offset = data.data.pageSize * (data.data.pageNo - 1);
+        }
+        var code = data.code;
+        if ('0000' === code || '9012' === code) {
+            data = data.data;
+            //对数据进行统一化处理
+            var rule = urlRule.filter(function (item) {
+                    return item.exp.test(url);
+                })[0];
+            if (rule) {
+                rule = rule.def;
+                data.forEach(function (item) {
+                    var tmpData = {};
+                    for (var key in rule) {
+                        tmpData[key] = item[key];
+                        item[key] = tmpData[rule[key]] || item[rule[key]];
+                    }
+                });
             }
-            var code = data.code;
-            if ('0000' === code || '9012' === code) {
-                data = data.data;
-                //对数据进行统一化处理
-                var rule = urlRule.filter(function (item) {
-                        return item.exp.test(url);
-                    })[0];
-                if (rule) {
-                    rule = rule.def;
-                    data.forEach(function (item) {
-                        var tmpData = {};
-                        for (var key in rule) {
-                            tmpData[key] = item[key];
-                            item[key] = tmpData[rule[key]] || item[rule[key]];
-                        }
-                    });
-                }
-                return data;
+            return data;
+        }
+        if (code === '5999') {
+            // 分支3.4：登录相关的错误
+            window.location = './login.html';
+        } else {
+            if (code === 300000) {
+                throw data.message;
             }
-            if (code === '5999') {
-                // 分支3.4：登录相关的错误
-                window.location = './login.html';
-            } else {
-                if (code === 300000) {
-                    throw data.message;
-                }
-                fapiao.showHint('error', data.message);
-                return;
-            }
-            return code;
-        };
-    }
+            fapiao.showHint('error', data.message);
+            return;
+        }
+        return code;
+    };
 }());
 
 ecui.ui.Select.prototype.TEXTNAME = 'code';
@@ -246,7 +244,7 @@ fapiao.setEditFormValue = function (data, form) {
             } else {
                 // ecui.esr.CreateArray数组回填时index减去ecui.esr.CreateArray本身input表单元素
                 value = ecui.util.parseValue(name, data);
-                value = value && value.length ? value[ecui.util.arraySlice(elements[name]).indexOf(item) - 1] : '';
+                value = value && value.length ? value[Array.prototype.slice.call(elements[name]).indexOf(item) - 1] : '';
                 if (item.getControl) {
                     var control = item.getControl();
                     if (!(control instanceof ecui.esr.CreateObject)) {
@@ -314,7 +312,7 @@ fapiao.resetFormValue = function (form) {
 
 // 获取表单数据设置searchParam数据
 fapiao.setSearchParam = function (searchParm, form) {
-    ecui.util.arraySlice(form.elements).forEach(function (item) {
+    Array.prototype.slice.call(form.elements).forEach(function (item) {
         if (item.name) {
             var _control = ecui.findControl(item);
             if (_control) {
@@ -396,23 +394,10 @@ fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
     context.pageSize = context.pageSize || +this.searchParm.pageSize;
     fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
 };
-function calHeight() {
-    var route = ecui.esr.getLocation().split('~')[0];
-    if (route === 'bill.list') {
-        var containerH = ecui.$('container').offsetHeight;
-        var searchConditionsH = ecui.$('searchConditions').offsetHeight;
-        var billSearch_tableH = containerH - searchConditionsH - 10;
-        var tableContainerH = billSearch_tableH - 110;
-        ecui.$('billSearch_table').style.height = billSearch_tableH + 'px';
-        if ((ecui.$('tableContainer'))) {
-            ecui.$('tableContainer').style.height = tableContainerH + 'px';
-        }
-    }
-}
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     var pageNo = data.currentPage || 1;
-    var total = data.count || 10;
+    var total = data.count || 0;
     var pageSize = data.pageSize || 10;
     context.page = {
         total: total,
@@ -423,12 +408,26 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
         end: pageNo * pageSize
     };
     calHeight();
+
 };
 
 fapiao.TableListRoute.prototype.onafterrender = function (context) {
     calHeight();
 };
 
-window.onresize = function () {
+function calHeight() {
+    var route = ecui.esr.getLocation().split('~')[0];
+    if(route == 'bill.list'){
+        var containerH = ecui.$('container').offsetHeight;
+        var searchConditionsH = ecui.$('searchConditions').offsetHeight;
+        var billSearch_tableH = containerH - searchConditionsH - 10;
+        var tableContainerH = billSearch_tableH - 110;
+        ecui.$('billSearch_table').style.height = billSearch_tableH + 'px';
+        if((ecui.$('tableContainer'))){
+            ecui.$('tableContainer').style.height = tableContainerH + 'px';
+        }
+    }
+}
+window.onresize = function(){
     calHeight();
 };

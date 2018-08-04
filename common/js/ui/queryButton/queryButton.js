@@ -31,8 +31,28 @@ queryButton - 查询按钮控件。
                 var route = ecui.esr.findRoute(this);
                 var children = ecui.esr.getRoute(route.children);
 				fapiao.setSearchParam(children.searchParm, this.getForm());
-				// children.searchParm.pageNo = 1;
 				ecui.esr.callRoute(route.children + '~pageNo=1', true);
+            },
+        }
+    );
+
+    ui.CustomQueryButton = core.inherits(
+        ui.Button,
+        'ui-query-button',
+        {
+            /**
+             * 输入提交事件。
+             * @event,billSearch_table
+             */
+            $submit: function (event) {
+                event.preventDefault();
+            },
+            $click: function (event) {
+                ui.Button.prototype.$click.call(this, event);
+                var children = ecui.esr.getRoute('billSearchListTable');
+                fapiao.setSearchParam(children.searchParm, this.getForm());
+                children.searchParm.pageSize = 20;
+                ecui.esr.callRoute('billSearchListTable', true);
             },
         }
     );
