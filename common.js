@@ -1,5 +1,4 @@
-var fapiao = {},
-    ui = {};
+var fapiao = {}, ui = {};
 ecui.dom.getParent = ecui.dom.parent;
 ecui.ext.esr = ecui.ext.data;
 ecui.triggerEvent = ecui.dispatchEvent;
