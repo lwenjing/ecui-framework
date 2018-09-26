@@ -418,18 +418,18 @@ fapiao.TableListRoute.prototype.onafterrender = function (context) {
 
 function calHeight() {
     var route = ecui.esr.getLocation().split('~')[0];
-    if (route == 'bill.list' || route == 'bill.list.pre') {
+    if (route === 'bill.list' || route === 'bill.list.pre') {
         var containerH = ecui.$('container').offsetHeight;
         var searchConditionsH = 0;
         var search_table = ecui.$('billSearch_table');
         var tableContainer = ecui.$('tableContainer');
-        if (route == 'bill.list.pre') {
+        if (route === 'bill.list.pre') {
             searchConditionsH = ecui.$('preSearchConditions').offsetHeight;
             search_table = ecui.$('billPreSearchTable');
             tableContainer = ecui.$('preTableContainer');
         }
         else {
-            var searchConditionsH = ecui.$('searchConditions').offsetHeight;
+            searchConditionsH = ecui.$('searchConditions').offsetHeight;
         }
         var billSearch_tableH = containerH - searchConditionsH - 10;
         var tableContainerH = billSearch_tableH - 110;
@@ -442,4 +442,22 @@ function calHeight() {
 
 window.onresize = function () {
     calHeight();
+};
+
+/**
+ *  网格列表组件。
+ * @public
+ *
+ * @param {Object} options 请求参数
+ */
+fapiao.Gridframe = function (options) {
+    this.options = {
+        name : "",// 表单名称
+        search : false,
+
+    };
+
+    this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
+    this.main = route.NAME.slice(0, -9) + '_table';
+    ecui.util.extend(this, route);
 };
