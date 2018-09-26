@@ -19,7 +19,7 @@
     if (ecui.esr) {
         //统一对请求成功返回参数做分类
         ecui.esr.onparsedata = function (url, data) {
-            if (data.data && data.data.pageNo !== undefined && data.data.total === undefined &&  data.data.offset === undefined) {
+            if (data.data && data.data.pageNo !== undefined && data.data.total === undefined && data.data.offset === undefined) {
                 data.data.total = data.data.totalRecord;
                 data.data.offset = data.data.pageSize * (data.data.pageNo - 1);
             }
@@ -28,8 +28,8 @@
                 data = data.data;
                 //对数据进行统一化处理
                 var rule = urlRule.filter(function (item) {
-                        return item.exp.test(url);
-                    })[0];
+                    return item.exp.test(url);
+                })[0];
                 if (rule) {
                     rule = rule.def;
                     data.forEach(function (item) {
@@ -120,7 +120,7 @@ fapiao.util = {
     DX: function (n) {
         var oldN = n;
         // 判断正负数
-        if(n.substr(0,1) == '-') {
+        if (n.substr(0, 1) == '-') {
             n = n.substr(1);
         }
 
@@ -139,7 +139,7 @@ fapiao.util = {
         }
         str = str.replace(/零(千|百|拾|角)/g, '零').replace(/(零)+/g, '零').replace(/零(万|亿|元)/g, '$1').replace(/(亿)万|壹(拾)/g, '$1$2').replace(/^元零?|零分/g, '').replace(/元$/g, '元整');
         // 判断正负数
-        if(oldN.substr(0,1) == '-') {
+        if (oldN.substr(0, 1) == '-') {
             n = n.substr(1);
             str = '负' + str;
         }
@@ -208,7 +208,7 @@ fapiao.showHint = function (type, msg) {
 fapiao.setEditFormValue = function (data, form) {
     var elements = form.elements;
     var ignore = [], arr_obj_ignore = [];
-    for (var i = 0, item; item = elements[i++]; ) {
+    for (var i = 0, item; item = elements[i++];) {
         var name = item.name;
         // 使用ecui.util.parseValue解析数据，处理ecui.esr.CreateObject创建的对象数据的参数回填
         var value = ecui.util.parseValue(name, data);
@@ -240,7 +240,7 @@ fapiao.setEditFormValue = function (data, form) {
                 } else {
                     item.value = value;
                 }
-            // 对象数组 数据 不做任何处理 ecui.esr.CreateArray 和 ecui.esr.CreateObject 同时使用
+                // 对象数组 数据 不做任何处理 ecui.esr.CreateArray 和 ecui.esr.CreateObject 同时使用
             } else if (arr_obj_ignore.indexOf(name.split('.')[0]) === -1) {
                 // return;
             } else {
@@ -263,7 +263,7 @@ fapiao.setEditFormValue = function (data, form) {
 // 搜索数据回填表单数据
 fapiao.setFormValue = function (context, form, searchParm) {
     var elements = form.elements;
-    for (var i = 0, item; item = elements[i++]; ) {
+    for (var i = 0, item; item = elements[i++];) {
         var name = item.name;
         if (name) {
             if (context[name]) {
@@ -289,7 +289,7 @@ fapiao.setFormValue = function (context, form, searchParm) {
 // 清空表单数据
 fapiao.resetFormValue = function (form) {
     var elements = form.elements;
-    for (var i = 0, item; item = elements[i++]; ) {
+    for (var i = 0, item; item = elements[i++];) {
         var name = item.name;
         if (name) {
             var _control = item.getControl && item.getControl();
@@ -332,7 +332,7 @@ fapiao.setSearchParam = function (searchParm, form) {
                     if (_control.isChecked()) {
                         searchParm[item.name].push(_control.getValue());
                     }
-                }  else {
+                } else {
                     searchParm[item.name] = _control.getValue();
                 }
             } else {
@@ -418,17 +418,28 @@ fapiao.TableListRoute.prototype.onafterrender = function (context) {
 
 function calHeight() {
     var route = ecui.esr.getLocation().split('~')[0];
-    if (route == 'bill.list') {
+    if (route == 'bill.list' || route == 'bill.list.pre') {
         var containerH = ecui.$('container').offsetHeight;
-        var searchConditionsH = ecui.$('searchConditions').offsetHeight;
+        var searchConditionsH = 0;
+        var search_table = ecui.$('billSearch_table');
+        var tableContainer = ecui.$('tableContainer');
+        if (route == 'bill.list.pre') {
+            searchConditionsH = ecui.$('preSearchConditions').offsetHeight;
+            search_table = ecui.$('billPreSearchTable');
+            tableContainer = ecui.$('preTableContainer');
+        }
+        else {
+            var searchConditionsH = ecui.$('searchConditions').offsetHeight;
+        }
         var billSearch_tableH = containerH - searchConditionsH - 10;
         var tableContainerH = billSearch_tableH - 110;
-        ecui.$('billSearch_table').style.height = billSearch_tableH + 'px';
-        if ((ecui.$('tableContainer'))) {
-            ecui.$('tableContainer').style.height = tableContainerH + 'px';
+        search_table.style.height = billSearch_tableH + 'px';
+        if (tableContainer) {
+            tableContainer.style.height = tableContainerH + 'px';
         }
     }
 }
+
 window.onresize = function () {
     calHeight();
 };
