@@ -635,7 +635,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     data = options.data || '',
                     async = options.async !== false,
                     method = (options.method || 'GET').toUpperCase(),
-                    headers = options.headers || {},
                     onerror = options.onerror || util.blank,
                     // 基本的逻辑来自lili同学提供的patch
                     stop,
@@ -667,6 +666,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     }
                     // 请求前调用
                     options = self.beforeAjax(options);
+                    var headers = options.headers || {};
 
                     xhr.open(method, url, async);
 
