@@ -464,7 +464,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     i = oldClasses.length,
                     j = newClasses.length;
 
-                for (; i && j; ) {
+                for (; i && j;) {
                     if (oldClasses[i - 1] === newClasses[j - 1]) {
                         oldClasses.splice(--i, 1);
                     } else if (oldClasses[i - 1] < newClasses[j - 1]) {
@@ -557,6 +557,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         ext: {},
         io: {
             /**
+             * ajax请求前调用方法
+             * options 参数
+             */
+            beforeAjax: function (options) {
+                return options;
+            },
+            /**
              * 发送一个ajax请求。
              * options 对象支持的属性如下：
              * method    {string}   请求类型，默认为GET
@@ -624,7 +631,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 options = options || {};
 
-                var data = options.data || '',
+                var self = this,
+                    data = options.data || '',
                     async = options.async !== false,
                     method = (options.method || 'GET').toUpperCase(),
                     headers = options.headers || {},
@@ -657,6 +665,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             url += (url.indexOf('?') >= 0 ? '&' : '?') + 'b' + Date.now() + '=1';
                         }
                     }
+                    // 请求前调用
+                    options = self.beforeAjax(options);
 
                     xhr.open(method, url, async);
 
@@ -784,7 +794,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 function onrecieve(event) {
                     recvbuf += event.data;
-                    for (;;) {
+                    for (; ;) {
                         var index = recvbuf.indexOf('\n');
                         if (index < 0) {
                             return;
@@ -880,13 +890,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var fontSize = core.fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
                 sheets.forEach(function (item) {
                     if (ieVersion) {
-                        for (i = 0, rule = item.rules || item.cssRules, item = []; value = rule[i++]; ) {
+                        for (i = 0, rule = item.rules || item.cssRules, item = []; value = rule[i++];) {
                             item.push(value);
                         }
                     } else {
                         item = Array.prototype.slice.call(item.rules || item.cssRules);
                     }
-                    for (var i = 0, rule; rule = item[i++]; ) {
+                    for (var i = 0, rule; rule = item[i++];) {
                         if (rule.cssRules && rule.cssRules.length) {
                             item = item.concat(Array.prototype.slice.call(rule.cssRules));
                         } else {
@@ -1067,7 +1077,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             parseValue: function (name, namespace) {
                 namespace = namespace || window;
-                for (var i = 0, list = name.split('.'); name = list[i++]; ) {
+                for (var i = 0, list = name.split('.'); name = list[i++];) {
                     namespace = namespace[name];
                     if (namespace === undefined || namespace === null) {
                         return undefined;
@@ -1084,7 +1094,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {Object} obj 需要移除的对象
              */
             remove: function (array, obj) {
-                for (var i = array.length; i--; ) {
+                for (var i = array.length; i--;) {
                     if (array[i] === obj) {
                         array.splice(i, 1);
                     }
@@ -1252,7 +1262,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 set: function (el, value) {
                     el.style.filter =
                         el.style.filter.replace(/alpha\([^\)]*\)/gi, '') +
-                            (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') +
+                        (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') +
                             '(opacity=' + value * 100 + ')' : '');
                 }
             } : undefined,
@@ -1284,7 +1294,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         function loadedHandler() {
             if (!hasReady) {
                 // 在处理的过程中，可能又有新的dom.ready函数被添加，需要添加到最后而不是直接执行
-                for (var i = 0, func; func = list[i++]; ) {
+                for (var i = 0, func; func = list[i++];) {
                     func();
                 }
                 list = [];

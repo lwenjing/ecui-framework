@@ -20,6 +20,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
+
     var historyCache,
         historyIndex = 0,
         historyData = [],
@@ -68,10 +69,10 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             iframeDoc.open('text/html');
             iframeDoc.write(
                 '<html><body><script type="text/javascript">' +
-                    'var loc="' + loc.replace(/\\/g, '\\\\').replace(/\"/g, '\\\"') + '";' +
-                    'parent.ecui.esr.setLocation(loc);' +
-                    'parent.ecui.esr.callRoute(loc);' +
-                    '</script></body></html>'
+                'var loc="' + loc.replace(/\\/g, '\\\\').replace(/\"/g, '\\\"') + '";' +
+                'parent.ecui.esr.setLocation(loc);' +
+                'parent.ecui.esr.callRoute(loc);' +
+                '</script></body></html>'
             );
             iframeDoc.close();
             return true;
@@ -211,8 +212,8 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                         route.onbeforerequest(context);
                     }
                     if (route.model(context, function () {
-                            esr.render(route);
-                        }) !== false) {
+                        esr.render(route);
+                    }) !== false) {
                         esr.render(route);
                     }
                 } else if (!route.model.length) {
@@ -875,14 +876,14 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
             } else if ('function' === typeof route.view) {
                 beforerender(route);
                 if (route.view(context, function (name) {
-                        if (name) {
-                            render(route, name);
-                        } else {
-                            routeRequestCount--;
-                        }
-                        afterrender(route);
-                        autoChildRoute(route);
-                    }) !== false) {
+                    if (name) {
+                        render(route, name);
+                    } else {
+                        routeRequestCount--;
+                    }
+                    afterrender(route);
+                    autoChildRoute(route);
+                }) !== false) {
                     routeRequestCount--;
                     afterrender(route);
                     autoChildRoute(route);
@@ -930,13 +931,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
          */
         request: function (urls, onsuccess, onerror) {
             function request(varUrl, varName) {
-                var method = varUrl.split(' '),
-                    headers = {};
-
-                if (esr.headers) {
-                    util.extend(headers, esr.headers);
-                }
-
+                var method = varUrl.split(' '), headers = {};
                 if (esrOptions.meta) {
                     headers['x-enum-version'] = metaVersion;
                 }
@@ -1066,7 +1061,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                                 for (var key in data.meta.record) {
                                     if (data.meta.record.hasOwnProperty(key)) {
                                         meta[key] = meta[key] || {};
-                                        for (var i = 0, items = data.meta.record[key], item; item = items[i++]; ) {
+                                        for (var i = 0, items = data.meta.record[key], item; item = items[i++];) {
                                             meta[key][item.id] = item;
                                         }
                                     }
@@ -1271,6 +1266,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     loadInit();
                 }
             }
+
 //{else}//            loadInit();
 //{/if}//
             for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
@@ -1303,14 +1299,14 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 });
 
                 // 除去这里做回填，渲染结束时也会自动回填，是为了处理路由没有刷新的组件
-/*                var data = historyData[historyIndex] = historyData[historyIndex] || {};
-                if (data[name]) {
-                    values.forEach(function (value) {
-                        if (data[name].hasOwnProperty(value)) {
-                            control['set' + value](data[name][value]);
-                        }
-                    });
-                }*/
+                /*                var data = historyData[historyIndex] = historyData[historyIndex] || {};
+                                if (data[name]) {
+                                    values.forEach(function (value) {
+                                        if (data[name].hasOwnProperty(value)) {
+                                            control['set' + value](data[name][value]);
+                                        }
+                                    });
+                                }*/
             }
         }
     };
