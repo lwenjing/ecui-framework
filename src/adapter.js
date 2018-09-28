@@ -560,7 +560,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * ajax请求前调用方法
              * options 参数
              */
-            beforeAjax: function (options) {
+            beforeAjax: function (options, url) {
                 return options;
             },
             /**
@@ -665,7 +665,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         }
                     }
                     // 请求前调用
-                    options = self.beforeAjax(options);
+                    options = self.beforeAjax(options, url);
                     var headers = options.headers || {};
 
                     xhr.open(method, url, async);
