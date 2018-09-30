@@ -452,12 +452,254 @@ window.onresize = function () {
  */
 fapiao.Gridframe = function (options) {
     this.options = {
-        name : "",// 表单名称
-        search : false,
-
+        fullHeight: false,
+        initBlank: false,
+        name: "",// 表单名称
+        search: false,
+        button: null,
+        url: "",
+        searchParm: null,
+        columns: []
     };
+    this.contain = ecui.$('container');
 
-    this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
-    this.main = route.NAME.slice(0, -9) + '_table';
-    ecui.util.extend(this, route);
+
+    this.setOptions(options);
+    this.initContain();
+};
+
+
+fapiao.Gridframe.prototype = {
+    setOptions: function (options) {
+        var self = this;
+        ecui.util.extend(self.options, options);
+
+        // 搜索相关
+        self.searchMain = self.options.name + "SearchContainer";
+        self.searchName = self.options.name + "Search";
+        self.searchForm = self.options.name + "SearchForm";
+
+        self.buttonMain = self.options.name + "ButtonContainer";
+        self.buttonName = self.options.name + "Button";
+
+        self.listTableMain = self.options.name + "TableListContainer";
+        self.listTableContent = self.options.name + "TableListContent";
+        self.listTableData = self.options.name + "TableData";
+        self.listTableId = self.options.name + "ListTableId";
+
+    },
+    initContain: function () {
+        var self = this, html = [];
+        // 路由总控
+        html.push("<div class='bill-list-page'>");
+        if (self.options.search) {
+            html.push("<div id='" + self.searchMain + " '></div>");
+        }
+        if (self.options.button) {
+            html.push("<div id='" + self.buttonMain + "'></div>");
+        }
+        html.push("<div id='" + self.listTableMain + "'></div>");
+        html.push("</div>");
+
+        self.contain.innerHTML = html.join("");
+        if (self.options.search) {
+            self.initSearch();
+        }
+        if (self.options.button) {
+            self.initButton();
+        }
+
+        self.initTableList();
+    },
+    initSearch: function () {
+        var self = this, route = {
+            NAME: "bill.list.pre",
+            main: self.searchMain,
+            view: function (context,callback) {
+                callback("dddd");
+                return false;
+            },
+            render: function (context, callback) {
+                return self.initSearchView.call(self, context, callback);
+            }
+        };
+        if (self.options.initBlank) {
+            route.targetRoute = self.listTableId;
+        } else {
+            route.children = self.listTableId;
+        }
+        if (self.options.searchParm) {
+            route.searchParm = self.options.searchParm;
+            route.onafterrender = function (context) {
+                fapiao.setFormValue(context, document.forms[self.searchForm], self.options.searchParm);
+            }
+        }
+
+        ecui.esr.addRoute(route.NAME, route);
+    },
+    initSearchView: function (context, callback) {
+        var self = this, searchDom = [];
+        searchDom.push('<div class="bill-search search-items" id="' + self.searchName + '">');
+        searchDom.push('    <form name="' + self.searchForm + '">');
+        searchDom.push('        <div class="search_form">');
+        searchDom.push('            <input name="currentPage" value="" class="ui-hide"/>');
+        searchDom.push('            <input name="pageSize" value="" class="ui-hide"/>');
+        searchDom.push('            <div class="search-item">');
+        searchDom.push('                <div class="search-label">流水号</div>');
+        searchDom.push('                <div ui="type:text;name:invoiceNo" class="search-input"></div>');
+        searchDom.push('            </div>');
+        searchDom.push('            <div class="search-item">');
+        searchDom.push('                <div class="search-label">购方名称</div>');
+        searchDom.push('                <div ui="type:text;name:gmfMc" class="search-input"></div>');
+        searchDom.push('           </div>');
+        searchDom.push('            <div class="search-item">');
+        searchDom.push('                <div class="search-label">导入日期</div>');
+        searchDom.push('                <input ui="type:calendar-input;name:startTime;" class="width-ninty search-input" name="startTime"/>');
+        searchDom.push('                <span class="span-style">&nbsp;- </span>');
+        searchDom.push('                <input ui="type:calendar-input;name:endTime;" class="width-ninty search-input" name="endTime"/>');
+        searchDom.push('           </div>');
+        searchDom.push('            <div class="search-btn" ui="type: QueryButton;" style="margin: 0;">查询</div>');
+        searchDom.push('            <div class="search-btn" ui="type: ui.bill.pre.seeMore;" style="margin-right: 0;">更多条件</div>');
+        searchDom.push('       </div>');
+        searchDom.push('   </form>');
+        searchDom.push('</div>');
+
+        return searchDom.join("");
+    },
+    initButton: function () {
+    },
+    initTableList: function () {
+        var self = this, route = {
+            fullHeight: self.options.fullHeight,
+            NAME: self.options.name,
+            main: self.listTableMain,
+            model: [self.listTableData + '@FORM ' + self.options.url],
+            view: function (context,callback) {
+                callback("dddd");
+                return false;
+            },
+            render: function (context) {
+                return self.initTableView.call(self, context);
+            },
+            searchParm: self.options.searchParm,
+            onbeforerequest: function (context) {
+                context.pageNo = context.pageNo || +this.searchParm.currentPage;
+                context.pageSize = context.pageSize || +this.searchParm.pageSize;
+                fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
+            },
+            onbeforerender: function (context) {
+                var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
+                var pageNo = data.currentPage || 1;
+                var total = data.count || 0;
+                var pageSize = data.pageSize || 10;
+                context.page = {
+                    total: total,
+                    totalPage: Math.ceil(total / pageSize),
+                    pageSize: pageSize,
+                    pageNo: pageNo,
+                    start: (pageNo - 1) * pageSize + 1,
+                    end: pageNo * pageSize
+                };
+            },
+            onafterrender: function (context) {
+                if (self.options.fullHeight) {
+                    var containerH = ecui.$('container').offsetHeight;
+                    var searchConditionsH = ecui.$(self.searchMain).offsetHeight;
+
+                    var listTableContent = ecui.$(self.listTableContent);
+                    var billSearch_tableH = containerH - searchConditionsH - 10;
+                    var tableContainerH = billSearch_tableH - 110;
+                    ecui.$(self.listTableMain).style.height = billSearch_tableH + 'px';
+                    if (listTableContent) {
+                        listTableContent.style.height = tableContainerH + 'px';
+                    }
+                }
+            }
+        };
+
+        ecui.esr.addRoute(this.options.name, route);
+    },
+    initTableView: function (context) {
+        var self = this, tableDom = [], operateDom = [];
+        tableDom.push('<div class="list-table-container">');
+        tableDom.push('    <div class="table-container" id="preTableContainer">');
+        tableDom.push('        <div class="list-table ui-table">');
+        tableDom.push('            <table>');
+        tableDom.push('                <thead>');
+        tableDom.push('                <tr>');
+        if (self.options.checkbox) {
+            tableDom.push('<th style="width: 50px;">');
+            tableDom.push('    <div ui="type:label;for:checkbox">');
+            tableDom.push('        <div ui="type:checkbox;id:all-checked;">');
+            tableDom.push('            <input value="${item.FPQQLSH}" name="mxSelect" type="checkbox">');
+            tableDom.push('        </div>');
+            tableDom.push('        <span>&nbsp;</span>');
+            tableDom.push('    </div>');
+            tableDom.push('</th>');
+        }
+        self.options.columns.forEach(function (column) {
+            tableDom.push("<th");
+            if (column.thClazz) {
+                tableDom.push(" class='" + column.thClazz + "'");
+            }
+            if (column.width) {
+                tableDom.push(" style='width:" + column.width + "'");
+            }
+            tableDom.push(">" + column.label + "</th>")
+        });
+        tableDom.push('                </tr>');
+        tableDom.push('                </thead>');
+        tableDom.push('                <tbody>');
+        context[self.listTableData].forEach(function (item, index) {
+            tableDom.push('<tr>');
+            if (self.options.checkbox) {
+                tableDom.push('<td>');
+                tableDom.push('    <div ui="type:label;for:checkbox">');
+                tableDom.push('        <div ui="type:checkbox;subject:all-checked">');
+                tableDom.push('            <input value="' + item[self.options.checkbox] + '" data-line="' + JSON.stringify(item));
+                tableDom.push('" name="mxSelect" type="checkbox">');
+                tableDom.push('        </div>');
+                tableDom.push('        <span>' + index + '</span>');
+                tableDom.push('    </div>');
+                tableDom.push('</td>');
+            }
+
+            self.options.columns.forEach(function (column) {
+                if (column.operates) {
+                    operateDom.push("<td class='operate' style='text-align:left'>");
+                    column.operates.forEach(function (operate) {
+                        operateDom.push("<div class='oprate-btn " + operate.name);
+                        operateDom.push("' data-line='" + JSON.stringify(item));
+                        operateDom.push("'");
+                        operateDom.push(operate.label);
+                        operateDom.push("<div>");
+                    });
+                    operateDom.push("</td>")
+                } else {
+                    tableDom.push("<td");
+                    if (column.tdClazz) {
+                        tableDom.push(" class='" + column.tdClazz + "'");
+                    }
+                    if (column.width) {
+                        tableDom.push(" style='width:" + column.width + "'");
+                    }
+                    if (column.filter) {
+                        tableDom.push(">" + column.filter(column) + "</td>")
+                    }
+                    else {
+                        tableDom.push(">" + item[column.column] + "</td>")
+                    }
+                }
+            });
+            tableDom.push('</tr>');
+        });
+        tableDom.push('                </tbody>');
+        tableDom.push('            </table>');
+        tableDom.push('        </div>');
+        tableDom.push('    </div>');
+        tableDom.push('    <!-- use: footer_paging(page=${page}) -->');
+        tableDom.push('</div>');
+
+        return tableDom.join("");
+    }
 };

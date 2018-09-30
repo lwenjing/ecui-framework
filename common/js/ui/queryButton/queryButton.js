@@ -50,10 +50,10 @@ queryButton - 查询按钮控件。
             $click: function (event) {
                 ui.Button.prototype.$click.call(this, event);
                 var route = ecui.esr.findRoute(this);
-                var targetRoute = ecui.esr.getRoute(route.targetView);
+                var targetRoute = ecui.esr.getRoute(route.targetRoute);
                 fapiao.setSearchParam(targetRoute.searchParm, this.getForm());
                 targetRoute.searchParm.pageSize = 20;
-                ecui.esr.callRoute(route.targetView, true);
+                ecui.esr.callRoute(route.targetRoute, true);
             },
         }
     );
