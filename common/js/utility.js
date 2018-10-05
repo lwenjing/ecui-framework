@@ -58,6 +58,16 @@
 
 }());
 
+/**
+ * 字符串批量替换
+ * @param from
+ * @param to
+ * @returns {string}
+ */
+String.prototype.replaceAll = function (from, to) {
+    return this.replace(new RegExp(from.replace(/([.?*+^$[\]\\(){}-])/g, "\\$1"), 'g'), to);
+};
+
 ecui.ui.Select.prototype.TEXTNAME = 'code';
 
 ecui.render = {};
@@ -418,19 +428,11 @@ fapiao.TableListRoute.prototype.onafterrender = function (context) {
 
 function calHeight() {
     var route = ecui.esr.getLocation().split('~')[0];
-    if (route === 'bill.list' || route === 'bill.list.pre') {
+    if (route === 'bill.list') {
         var containerH = ecui.$('container').offsetHeight;
-        var searchConditionsH = 0;
+        var searchConditionsH = ecui.$('searchConditions').offsetHeight;
         var search_table = ecui.$('billSearch_table');
         var tableContainer = ecui.$('tableContainer');
-        if (route === 'bill.list.pre') {
-            searchConditionsH = ecui.$('preSearchConditions').offsetHeight;
-            search_table = ecui.$('billPreSearchTable');
-            tableContainer = ecui.$('preTableContainer');
-        }
-        else {
-            searchConditionsH = ecui.$('searchConditions').offsetHeight;
-        }
         var billSearch_tableH = containerH - searchConditionsH - 10;
         var tableContainerH = billSearch_tableH - 110;
         search_table.style.height = billSearch_tableH + 'px';
@@ -454,112 +456,196 @@ fapiao.Gridframe = function (options) {
     this.options = {
         fullHeight: false,
         initBlank: false,
+        checkbox: true,
+        idColumn: "id",
         name: "",// 表单名称
-        search: false,
-        button: null,
+        searchs: false,
+        buttons: null,
         url: "",
         searchParm: null,
-        columns: []
+        columns: [],
+        rowClick: function (rowData) {
+            alert(JSON.stringify(rowData));
+        }
     };
-    this.contain = ecui.$('container');
 
+    this.pageData = {};
 
     this.setOptions(options);
     this.initContain();
 };
 
-
 fapiao.Gridframe.prototype = {
     setOptions: function (options) {
         var self = this;
         ecui.util.extend(self.options, options);
+        this._name = self.options.name.replaceAll(".", "_");
 
         // 搜索相关
-        self.searchMain = self.options.name + "SearchContainer";
+        self.searchMain = self._name + "SearchContainer";
         self.searchName = self.options.name + "Search";
-        self.searchForm = self.options.name + "SearchForm";
+        self.searchView = self._name + "SearchView";
+        self.searchForm = self._name + "SearchForm";
 
-        self.buttonMain = self.options.name + "ButtonContainer";
+        self.buttonMain = self._name + "ButtonContainer";
         self.buttonName = self.options.name + "Button";
+        self.buttonView = self._name + "ButtonView";
 
-        self.listTableMain = self.options.name + "TableListContainer";
-        self.listTableContent = self.options.name + "TableListContent";
-        self.listTableData = self.options.name + "TableData";
-        self.listTableId = self.options.name + "ListTableId";
-
+        self.listTableMain = self._name + "TableListContainer";
+        self.listTableName = self.options.name + "TableList";
+        self.listTableView = self._name + "TableListView";
+        self.listTableContent = self._name + "TableListContent";
+        self.listTableData = self._name + "TableData";
     },
     initContain: function () {
         var self = this, html = [];
         // 路由总控
-        html.push("<div class='bill-list-page'>");
-        if (self.options.search) {
-            html.push("<div id='" + self.searchMain + " '></div>");
+        html.push("<!-- target: gridframe -->");
+        html.push("<div class='bill-list-page gridframe'>");
+        if (self.options.searchs) {
+            html.push("<div id='" + self.searchMain + "'></div>");
         }
-        if (self.options.button) {
+        if (self.options.buttons) {
             html.push("<div id='" + self.buttonMain + "'></div>");
         }
         html.push("<div id='" + self.listTableMain + "'></div>");
         html.push("</div>");
 
-        self.contain.innerHTML = html.join("");
-        if (self.options.search) {
+        ecui.esr.addRoute(self.options.name, {
+            NAME: self.options.name,
+            main: "container",
+            tpl: html.join(""),
+            view: "gridframe",
+            onafterrender: function () {
+                if (self.options.searchs) {
+                    ecui.esr.callRoute(self.searchName, true);
+                }
+                else {
+                    ecui.esr.callRoute(self.listTableName, true);
+                }
+                if (self.options.buttons) {
+                    ecui.esr.callRoute(self.buttonName, true);
+                }
+            }
+        });
+
+        if (self.options.searchs) {
             self.initSearch();
         }
-        if (self.options.button) {
+        if (self.options.buttons) {
             self.initButton();
         }
 
         self.initTableList();
+
+        window.onresize = function () {
+            if (self.options.fullHeight) {
+                self.calcHeight.call(self);
+            }
+            self.reRenderSearch.call(self);
+        };
     },
     initSearch: function () {
         var self = this, route = {
-            NAME: "bill.list.pre",
+            NAME: self.searchName,
             main: self.searchMain,
-            view: function (context,callback) {
-                callback("dddd");
-                return false;
+            model: [],
+            tpl: function (context) {
+                return self.initSearchView.call(self, context);
             },
-            render: function (context, callback) {
-                return self.initSearchView.call(self, context, callback);
-            }
+            view: self.searchView
         };
+        self.options.searchs.forEach(function (search) {
+            if ("Select" === search.type && search.url) {
+                route.model.push(search.dataName + "@" + search.url);
+            }
+        });
         if (self.options.initBlank) {
-            route.targetRoute = self.listTableId;
+            route.targetRoute = self.listTableName;
         } else {
-            route.children = self.listTableId;
+            route.children = self.listTableName;
         }
         if (self.options.searchParm) {
             route.searchParm = self.options.searchParm;
             route.onafterrender = function (context) {
                 fapiao.setFormValue(context, document.forms[self.searchForm], self.options.searchParm);
+                self.reRenderSearch.call(self);
             }
         }
-
         ecui.esr.addRoute(route.NAME, route);
     },
-    initSearchView: function (context, callback) {
+    reRenderSearch: function () {
+        var self = this;
+        // 查询条件过多时，换行处理
+        var maxWidth = document.getElementsByClassName("search-line")[0].offsetWidth - 200;
+        var moreSearch = ecui.$("seeMoreSearchContain");
+        var searchItems = document.getElementsByClassName("search-item");
+        var nextLine = [];
+        for (var i = 0; i < searchItems.length; i++) {
+            var searchItem = searchItems[i];
+            var left = searchItem.offsetLeft, width = searchItem.offsetWidth;
+            if (left + width > maxWidth) {
+                nextLine.push(searchItem);
+            }
+        }
+        if (nextLine.length) {
+            var seeMoreSearchBtn = ecui.$("seeMoreSearchBtn");
+            document.getElementsByClassName("search-btn")[0].style.right = "100px";
+            ecui.dom.removeClass(seeMoreSearchBtn, 'ui-hide');
+            seeMoreSearchBtn.onclick = function () {
+                self.seeMore.call(self);
+            };
+            nextLine.forEach(function (searchItem) {
+                moreSearch.appendChild(searchItem);
+            });
+        }
+    },
+    initSearchView: function (context) {
         var self = this, searchDom = [];
-        searchDom.push('<div class="bill-search search-items" id="' + self.searchName + '">');
+        searchDom.push('<!-- target: ' + self.searchView + ' -->');
+        searchDom.push('<div class="bill-search search-items" id="' + self.searchView + '">');
         searchDom.push('    <form name="' + self.searchForm + '">');
         searchDom.push('        <div class="search_form">');
-        searchDom.push('            <input name="currentPage" value="" class="ui-hide"/>');
-        searchDom.push('            <input name="pageSize" value="" class="ui-hide"/>');
-        searchDom.push('            <div class="search-item">');
-        searchDom.push('                <div class="search-label">流水号</div>');
-        searchDom.push('                <div ui="type:text;name:invoiceNo" class="search-input"></div>');
+        searchDom.push('            <div class="search-line">');
+        self.options.searchs.forEach(function (search) {
+            if ("hide" === search.type) {
+                searchDom.push('<input name="' + search.name + '" value="" class="ui-hide"/>');
+            }
+            else {
+                searchDom.push('<div class="search-item">');
+                searchDom.push('   <div class="search-label">' + search.label + '</div>');
+                if ("calendar-input" === search.type) {
+                    var names = search.name.split(":");
+                    searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
+                    if (names.length > 1) {
+                        searchDom.push('<span class="span-style">&nbsp;- </span>');
+                        searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
+                    }
+                } else {
+                    searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input">');
+                    if ("Select" === search.type) {
+                        searchDom.push('<div ui="value:;">全部</div>');
+                        if (search.options instanceof Array) {
+                            context[search.dataName] = search.options;
+                        }
+                        context[search.dataName].forEach(function (option) {
+                            searchDom.push('<div ui="value:' + (option.id || option.CODE) + ';">' + (option.text || option.NAME) + '</div>');
+                        });
+                    }
+                    searchDom.push('</div>');
+                }
+                searchDom.push('</div>');
+            }
+        });
+
+        if (self.options.initBlank) {
+            searchDom.push('            <div class="search-btn" ui="type: CustomQueryButton;" style="margin: 0;">查询</div>');
+        } else {
+            searchDom.push('            <div class="search-btn" ui="type: QueryButton;" style="margin: 0;">查询</div>');
+        }
+        searchDom.push('                <div class="search-btn ui-hide" id="seeMoreSearchBtn" style="margin-right:0">更多条件</div>');
         searchDom.push('            </div>');
-        searchDom.push('            <div class="search-item">');
-        searchDom.push('                <div class="search-label">购方名称</div>');
-        searchDom.push('                <div ui="type:text;name:gmfMc" class="search-input"></div>');
-        searchDom.push('           </div>');
-        searchDom.push('            <div class="search-item">');
-        searchDom.push('                <div class="search-label">导入日期</div>');
-        searchDom.push('                <input ui="type:calendar-input;name:startTime;" class="width-ninty search-input" name="startTime"/>');
-        searchDom.push('                <span class="span-style">&nbsp;- </span>');
-        searchDom.push('                <input ui="type:calendar-input;name:endTime;" class="width-ninty search-input" name="endTime"/>');
-        searchDom.push('           </div>');
-        searchDom.push('            <div class="search-btn" ui="type: QueryButton;" style="margin: 0;">查询</div>');
-        searchDom.push('            <div class="search-btn" ui="type: ui.bill.pre.seeMore;" style="margin-right: 0;">更多条件</div>');
+        searchDom.push('            <div id="seeMoreSearchContain" class="ui-hide"></div>');
         searchDom.push('       </div>');
         searchDom.push('   </form>');
         searchDom.push('</div>');
@@ -567,28 +653,74 @@ fapiao.Gridframe.prototype = {
         return searchDom.join("");
     },
     initButton: function () {
+        var self = this, route = {
+            NAME: self.buttonName,
+            main: self.buttonMain,
+            tpl: function (context) {
+                return self.initButtonView.call(self, context);
+            },
+            view: self.buttonView,
+            onafterrender: function () {
+                if (self.options.buttons) {
+                    self.options.buttons.forEach(function (button) {
+                        var buttonDoms = document.getElementsByClassName(button.name);
+                        for (var i = 0; i < buttonDoms.length; i++) {
+                            buttonDoms[i].onclick = function () {
+                                if (self.options.checkbox) {
+                                    var all = ecui.get('all-checked');
+                                    var rowDatas = [];
+                                    all.getDependents().forEach(function (item) {
+                                            if (item.isChecked()) {
+                                                rowDatas.push(self.pageData[item.getValue()]);
+                                            }
+                                        }
+                                    );
+                                    button.clickAction.call(this, rowDatas)
+                                } else {
+                                    button.clickAction.call(this, self)
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        };
+        ecui.esr.addRoute(route.NAME, route);
+    },
+    initButtonView: function () {
+        var self = this, buttonDom = [];
+        buttonDom.push('<!-- target: ' + self.buttonView + ' -->');
+        buttonDom.push('<div class="list-button-container">');
+        self.options.buttons.forEach(function (button) {
+            buttonDom.push("<div class='blue-btn grid-button ");
+            buttonDom.push(button.name);
+            buttonDom.push("'>");
+            buttonDom.push(button.label);
+            buttonDom.push("</div>");
+        });
+        buttonDom.push("</div>");
+        return buttonDom.join("");
     },
     initTableList: function () {
         var self = this, route = {
             fullHeight: self.options.fullHeight,
-            NAME: self.options.name,
+            NAME: self.listTableName,
             main: self.listTableMain,
-            model: [self.listTableData + '@FORM ' + self.options.url],
-            view: function (context,callback) {
-                callback("dddd");
-                return false;
-            },
-            render: function (context) {
+            model: [self.listTableData + '@FORM ' + self.options.url + "?" + self.searchForm],
+            tpl: function (context) {
                 return self.initTableView.call(self, context);
             },
+            view: self.listTableView,
             searchParm: self.options.searchParm,
             onbeforerequest: function (context) {
-                context.pageNo = context.pageNo || +this.searchParm.currentPage;
-                context.pageSize = context.pageSize || +this.searchParm.pageSize;
-                fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1]], this.searchParm);
+                if (self.options.searchs) {
+                    context.pageNo = context.pageNo || +this.searchParm.currentPage;
+                    context.pageSize = context.pageSize || +this.searchParm.pageSize;
+                    fapiao.setFormValue(context, document.forms[self.searchForm], this.searchParm);
+                }
             },
             onbeforerender: function (context) {
-                var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
+                var data = ecui.util.parseValue(self.listTableData, context);
                 var pageNo = data.currentPage || 1;
                 var total = data.count || 0;
                 var pageSize = data.pageSize || 10;
@@ -602,28 +734,61 @@ fapiao.Gridframe.prototype = {
                 };
             },
             onafterrender: function (context) {
+                if (context.tableWidth > 50) {
+                    var gridTable = document.getElementsByClassName("gridframe-table")[0];
+                    gridTable.style.minWidth = context.tableWidth + "px";
+                    gridTable.style.width = context.tableWidth + "px";
+                }
                 if (self.options.fullHeight) {
-                    var containerH = ecui.$('container').offsetHeight;
-                    var searchConditionsH = ecui.$(self.searchMain).offsetHeight;
-
-                    var listTableContent = ecui.$(self.listTableContent);
-                    var billSearch_tableH = containerH - searchConditionsH - 10;
-                    var tableContainerH = billSearch_tableH - 110;
-                    ecui.$(self.listTableMain).style.height = billSearch_tableH + 'px';
-                    if (listTableContent) {
-                        listTableContent.style.height = tableContainerH + 'px';
+                    self.calcHeight();
+                }
+                if (self.operates) {
+                    self.operates.forEach(function (operate) {
+                        var operateDoms = document.getElementsByClassName(operate.name);
+                        for (var i = 0; i < operateDoms.length; i++) {
+                            var operateDom = operateDoms[i];
+                            operateDom.onclick = function () {
+                                var id = this.getAttribute("data-id");
+                                operate.clickAction.call(self, self.pageData[id], this);
+                            }
+                        }
+                    });
+                }
+                var linkDoms = document.getElementsByClassName("row-link");
+                if (linkDoms.length) {
+                    for (var i = 0; i < linkDoms.length; i++) {
+                        var linkDom = linkDoms[i];
+                        linkDom.onclick = function () {
+                            var id = this.getAttribute("data-id");
+                            self.options.rowClick.call(self, self.pageData[id], this);
+                        }
                     }
                 }
             }
         };
 
-        ecui.esr.addRoute(this.options.name, route);
+        ecui.esr.addRoute(this.listTableName, route);
+    },
+    calcHeight: function () {
+        var self = this, containerH = ecui.$('container').offsetHeight;
+        var searchConditionsH = ecui.$(self.searchMain).offsetHeight;
+        var buttonHeight = ecui.$(self.buttonMain).offsetHeight;
+
+        var listTableContent = ecui.$(self.listTableView);
+        var billSearch_tableH = containerH - searchConditionsH - buttonHeight - 10;
+        var tableContainerH = billSearch_tableH - 60;
+        ecui.$(self.listTableMain).style.height = billSearch_tableH + 'px';
+        if (listTableContent) {
+            listTableContent.style.height = tableContainerH + 'px';
+        }
     },
     initTableView: function (context) {
-        var self = this, tableDom = [], operateDom = [];
+        var self = this, tableDom = [], operateDom = [], tableWidth = 0;
+        self.pageData = {};
+        tableDom.push('<!-- target: ' + self.listTableView + ' -->');
         tableDom.push('<div class="list-table-container">');
-        tableDom.push('    <div class="table-container" id="preTableContainer">');
-        tableDom.push('        <div class="list-table ui-table">');
+        tableDom.push('    <div class="table-container" id="' + self.listTableView + '">');
+        tableDom.push('        <div class="list-table ui-table gridframe-table">');
         tableDom.push('            <table>');
         tableDom.push('                <thead>');
         tableDom.push('                <tr>');
@@ -631,11 +796,12 @@ fapiao.Gridframe.prototype = {
             tableDom.push('<th style="width: 50px;">');
             tableDom.push('    <div ui="type:label;for:checkbox">');
             tableDom.push('        <div ui="type:checkbox;id:all-checked;">');
-            tableDom.push('            <input value="${item.FPQQLSH}" name="mxSelect" type="checkbox">');
+            tableDom.push('            <input name="mxSelect" type="checkbox">');
             tableDom.push('        </div>');
             tableDom.push('        <span>&nbsp;</span>');
             tableDom.push('    </div>');
             tableDom.push('</th>');
+            tableWidth += parseInt("50px");
         }
         self.options.columns.forEach(function (column) {
             tableDom.push("<th");
@@ -644,55 +810,74 @@ fapiao.Gridframe.prototype = {
             }
             if (column.width) {
                 tableDom.push(" style='width:" + column.width + "'");
+                tableWidth += parseInt(column.width);
             }
             tableDom.push(">" + column.label + "</th>")
         });
+        context.tableWidth = tableWidth;
         tableDom.push('                </tr>');
         tableDom.push('                </thead>');
         tableDom.push('                <tbody>');
-        context[self.listTableData].forEach(function (item, index) {
-            tableDom.push('<tr>');
-            if (self.options.checkbox) {
-                tableDom.push('<td>');
-                tableDom.push('    <div ui="type:label;for:checkbox">');
-                tableDom.push('        <div ui="type:checkbox;subject:all-checked">');
-                tableDom.push('            <input value="' + item[self.options.checkbox] + '" data-line="' + JSON.stringify(item));
-                tableDom.push('" name="mxSelect" type="checkbox">');
-                tableDom.push('        </div>');
-                tableDom.push('        <span>' + index + '</span>');
-                tableDom.push('    </div>');
-                tableDom.push('</td>');
-            }
 
-            self.options.columns.forEach(function (column) {
-                if (column.operates) {
-                    operateDom.push("<td class='operate' style='text-align:left'>");
-                    column.operates.forEach(function (operate) {
-                        operateDom.push("<div class='oprate-btn " + operate.name);
-                        operateDom.push("' data-line='" + JSON.stringify(item));
-                        operateDom.push("'");
-                        operateDom.push(operate.label);
-                        operateDom.push("<div>");
-                    });
-                    operateDom.push("</td>")
-                } else {
-                    tableDom.push("<td");
-                    if (column.tdClazz) {
-                        tableDom.push(" class='" + column.tdClazz + "'");
-                    }
-                    if (column.width) {
-                        tableDom.push(" style='width:" + column.width + "'");
-                    }
-                    if (column.filter) {
-                        tableDom.push(">" + column.filter(column) + "</td>")
-                    }
-                    else {
-                        tableDom.push(">" + item[column.column] + "</td>")
-                    }
+        if (context[self.listTableData] && context[self.listTableData].list) {
+            context[self.listTableData].list.forEach(function (item, index) {
+                self.pageData[item[self.options.idColumn]] = item;
+                operateDom = [];
+                tableDom.push('<tr>');
+                if (self.options.checkbox) {
+                    tableDom.push('<td>');
+                    tableDom.push('    <div ui="type:label;for:checkbox">');
+                    tableDom.push('        <div ui="type:checkbox;subject:all-checked">');
+                    tableDom.push('            <input value="' + item[self.options.idColumn] + '" name="mxSelect" type="checkbox">');
+                    tableDom.push('        </div>');
+                    tableDom.push('        <span>' + (index + 1) + '</span>');
+                    tableDom.push('    </div>');
+                    tableDom.push('</td>');
                 }
+
+                self.options.columns.forEach(function (column) {
+                    if (column.operates) {
+                        if (!self.operates) {
+                            self.operates = column.operates;
+                        }
+                        operateDom.push("<td class='operate' style='text-align:left'>");
+                        column.operates.forEach(function (operate) {
+                            var show = operate.isShow || true;
+                            if ('function' === typeof operate.isShow) {
+                                show = operate.isShow.call(self, item);
+                            }
+                            if (show) {
+                                operateDom.push("<div class='oprate-btn " + operate.name);
+                                operateDom.push("' data-id='" + item[self.options.idColumn]);
+                                operateDom.push("'>");
+                                operateDom.push(operate.label);
+                                operateDom.push("</div>");
+                            }
+                        });
+                        operateDom.push("</td>")
+                    } else {
+                        tableDom.push("<td>");
+                        if (column.link) {
+                            tableDom.push("<a class='row-link' href='javascript:void(0);' data-id='" + item[self.options.idColumn] + "'>")
+                        }
+                        if (column.custom) {
+                            tableDom.push(column.custom(item))
+                        }
+                        else {
+                            tableDom.push(item[column.column])
+                        }
+                        if (column.link) {
+                            tableDom.push("</a>")
+                        }
+                        tableDom.push("</td>")
+                    }
+                });
+                if (operateDom && operateDom.length) {
+                    tableDom.push(operateDom.join(""));
+                }
+                tableDom.push('</tr>');
             });
-            tableDom.push('</tr>');
-        });
+        }
         tableDom.push('                </tbody>');
         tableDom.push('            </table>');
         tableDom.push('        </div>');
@@ -701,5 +886,15 @@ fapiao.Gridframe.prototype = {
         tableDom.push('</div>');
 
         return tableDom.join("");
+    },
+    seeMore: function () {
+        var self = this, el = ecui.$("seeMoreSearchContain");
+        ecui.dom[ecui.dom.hasClass(el, 'ui-hide') ? 'removeClass' : 'addClass'](el, 'ui-hide');
+        if (self.options.fullHeight) {
+            self.calcHeight();
+        }
+    },
+    reload: function () {
+        ecui.esr.callRoute(this.listTableName, true);
     }
 };

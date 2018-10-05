@@ -429,12 +429,9 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
         });
 
         core.dispose(el, true);
-        if (route.render && 'function' === typeof route.render) {
-            el.innerHTML = route.render(context);
-        }
-        else {
-            el.innerHTML = engine.render(name || route.view, context);
-        }
+
+        el.innerHTML = engine.render(name || route.view, context);
+
         if (route.NAME) {
             el.route = route.NAME;
             dom.addClass(el, route.NAME.replace(/\./g, '-'));
@@ -873,6 +870,18 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                 });
             }
 
+            if (route.tpl) {
+                var moduleName = route.NAME.split('.')[0];
+                engine = loadStatus[moduleName] || new etpl.Engine();
+                engine.options.namingConflict = "override";
+                if ('function' === typeof route.tpl) {
+                    var tpl = route.tpl(context);
+                    engine.compile(tpl);
+                } else {
+                    engine.compile(route.tpl);
+                }
+            }
+
             if (route.view === undefined) {
                 beforerender(route);
                 init();
@@ -988,8 +997,7 @@ ECUI支持的路由参数格式为routeName~k1=v1~k2=v2... redirect跳转等价�
                     onsuccess: function (text) {
                         count--;
                         try {
-                            var data = JSON.parse(text),
-                                key;
+                            var data = JSON.parse(text), key;
 
                             // 枚举常量管理
                             if (esrOptions.meta) {
