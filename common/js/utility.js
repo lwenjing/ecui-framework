@@ -856,7 +856,11 @@ fapiao.Gridframe.prototype = {
                         });
                         operateDom.push("</td>")
                     } else {
-                        tableDom.push("<td>");
+                        tableDom.push("<td");
+                        if (column.align) {
+                            tableDom.push(" style='text-align:" + column.align + "'");
+                        }
+                        tableDom.push(">");
                         if (column.link) {
                             tableDom.push("<a class='row-link' href='javascript:void(0);' data-id='" + item[self.options.idColumn] + "'>")
                         }
