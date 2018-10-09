@@ -501,7 +501,7 @@ fapiao.Gridframe.prototype = {
         var self = this, html = [];
         // 路由总控
         html.push("<!-- target: gridframe -->");
-        html.push("<div class='bill-list-page gridframe'>");
+        html.push("<div class='stay-list-page gridframe'>");
         if (self.options.searchs) {
             html.push("<div id='" + self.searchMain + "'></div>");
         }
@@ -603,7 +603,7 @@ fapiao.Gridframe.prototype = {
     initSearchView: function (context) {
         var self = this, searchDom = [];
         searchDom.push('<!-- target: ' + self.searchView + ' -->');
-        searchDom.push('<div class="bill-search search-items" id="' + self.searchView + '">');
+        searchDom.push('<div class="stay-search search-items" id="' + self.searchView + '">');
         searchDom.push('    <form name="' + self.searchForm + '">');
         searchDom.push('        <div class="search_form">');
         searchDom.push('            <div class="search-line">');
