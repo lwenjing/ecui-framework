@@ -428,7 +428,7 @@ fapiao.TableListRoute.prototype.onafterrender = function (context) {
 
 function calHeight() {
     var route = ecui.esr.getLocation().split('~')[0];
-    if (route === 'bill.list') {
+    if (route === 'query.bill') {
         var containerH = ecui.$('container').offsetHeight;
         var searchConditionsH = ecui.$('searchConditions').offsetHeight;
         var search_table = ecui.$('billSearch_table');
@@ -770,16 +770,16 @@ fapiao.Gridframe.prototype = {
         ecui.esr.addRoute(this.listTableName, route);
     },
     calcHeight: function () {
-        var self = this, containerH = ecui.$('container').offsetHeight;
-        var searchConditionsH = ecui.$(self.searchMain).offsetHeight;
+        var self = this, containerHeight = ecui.$('container').offsetHeight;
+        var searchHeight = ecui.$(self.searchMain).offsetHeight;
         var buttonHeight = ecui.$(self.buttonMain).offsetHeight;
 
         var listTableContent = ecui.$(self.listTableView);
-        var billSearch_tableH = containerH - searchConditionsH - buttonHeight - 10;
-        var tableContainerH = billSearch_tableH - 60;
-        ecui.$(self.listTableMain).style.height = billSearch_tableH + 'px';
+        var tableHeight = containerHeight - searchHeight - buttonHeight - 10;
+        var tableContentHeight = tableHeight - 60;
+        ecui.$(self.listTableMain).style.height = tableHeight + 'px';
         if (listTableContent) {
-            listTableContent.style.height = tableContainerH + 'px';
+            listTableContent.style.height = tableContentHeight + 'px';
         }
     },
     initTableView: function (context) {
