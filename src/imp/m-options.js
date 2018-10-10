@@ -23,7 +23,7 @@
 
         constructor: function (el, options) {
             dom.addClass(el, 'ui-mobile-options');
-            dom.insertBefore(dom.create({
+            this.$MOptionsData.mask = dom.insertBefore(dom.create({
                 className: options.classes.join('-mask ') + 'ui-mobile-options-mask'
             }), this.getBody());
         },
@@ -65,7 +65,7 @@
              * 拖拽的惯性时间计算。
              * @protected
              *
-             * @param {Object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
+             * @param {object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
              */
             $draginertia: function (speed) {
                 speed = speed.y;
@@ -95,9 +95,7 @@
              */
             $dragmove: function (event) {
                 this.$MOptions.$dragmove.call(this, event);
-                var item = getItems(this)[Math.round(-event.y / this.$$itemHeight) + this._nOptionSize];
-                core.setFocused(item);
-                this.setSelected(item);
+                this.setSelected(getItems(this)[Math.round(-event.y / this.$$itemHeight) + this._nOptionSize]);
             },
 
             /**
@@ -106,7 +104,6 @@
             $show: function () {
                 this.$MOptions.$show.call(this);
                 var height = this.$$itemHeight * (this._nOptionSize * 2 + 1);
-                this.getMain().style.height = height + 'px';
                 dom.parent(this.getBody()).style.height = height + 'px';
                 this.$$height = height + this.getMinimumHeight();
             },
@@ -132,6 +129,14 @@
             },
 
             /**
+             * @override
+             */
+            setPosition: function (x, y) {
+                this.$MOptions.setPosition.call(this, x, y);
+                this.$MOptionsData.mask.style.top = this.getMain().scrollTop + 'px';
+            },
+
+            /**
              * 设置选中控件。
              * @public
              *
@@ -141,10 +146,13 @@
                 item = item || null;
                 if (this._cSelect !== item) {
                     if (this._cSelect) {
-                        this._cSelect.alterClass('-selected');
+                        this._cSelect.alterStatus('-selected');
                     }
                     if (item) {
-                        item.alterClass('+selected');
+                        item.alterStatus('+selected');
+                        core.setFocused(item);
+                    } else {
+                        core.setFocused(this);
                     }
                     this._cSelect = item;
                 }

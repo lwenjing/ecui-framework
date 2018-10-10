@@ -23,15 +23,18 @@ _aOptions    - 选项框数组
         function (el, options) {
             util.setDefault(options, 'enter', 'bottom');
             util.setDefault(options, 'mask', '0.5');
+            util.setDefault(options, 'readOnly', true);
 
             var popupEl = dom.create({
                     className: options.classes.join('-popup ') + 'ui-popup ui-hide'
                 }),
-                children = dom.children(el);
+                children = dom.children(el).filter(function (item) {
+                    return item.tagName !== 'INPUT';
+                });
 
             ui.InputControl.call(this, el, options);
 
-            this.setPopup(core.$fastCreate(this.Popup, popupEl, this, {ext: {'m-confirm': true}}));
+            this.setPopup(core.$fastCreate(this.Popup, popupEl, this));
 
             this._aOptions = [];
             children.forEach(function (item) {
@@ -57,7 +60,8 @@ _aOptions    - 选项框数组
                             item.cache();
                         });
                     }
-                }
+                },
+                ui.MConfirm
             ),
 
             /**
@@ -87,7 +91,7 @@ _aOptions    - 选项框数组
                             break;
                         }
                     }
-                    this.setContent(ret.join(''));
+                    this.getBody().innerHTML = ret.join('');
 
                     this._aItems = [];
                     dom.children(el).forEach(function (item) {
@@ -139,7 +143,7 @@ _aOptions    - 选项框数组
                         value = String(value);
                         for (var i = 0, item; item = this._aItems[i]; i++) {
                             if (item._sValue === value) {
-                                this.getBody().style.top = (3 - i) * this.$$itemHeight + 'px';
+                                this.setPosition(0, (3 - i) * this.$$itemHeight);
                                 this.setSelected(item);
                                 return;
                             }
@@ -150,6 +154,14 @@ _aOptions    - 选项框数组
             )
         },
         {
+            /**
+             * @override
+             */
+            $blur: function (event) {
+                this.getPopup().hide();
+                ui.InputControl.prototype.$blur.call(this, event);
+            },
+
             /**
              * 获取选项控件。
              * @public

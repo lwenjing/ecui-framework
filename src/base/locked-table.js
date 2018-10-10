@@ -37,7 +37,7 @@ _eRight      - 右侧乐定行的Element元素
 
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
-        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
@@ -282,8 +282,8 @@ _eRight      - 右侧乐定行的Element元素
             /**
              * @override
              */
-            $resize: function () {
-                ui.Table.prototype.$resize.call(this);
+            $resize: function (event) {
+                ui.Table.prototype.$resize.call(this, event);
 
                 this._aHeadRows.forEach(function (item) {
                     restoreRow(this, item);

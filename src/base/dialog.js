@@ -1,6 +1,8 @@
 /*
 @example
 <div ui="type:dialog">
+  <!-- 标题可以省略 -->
+  <strong>标题</strong>
   <!-- 这里放滚动的内容 -->
   ...
 </div>
@@ -13,7 +15,10 @@ _uClose     - 关闭按钮
 //{if 0}//
     var core = ecui,
         dom = core.dom,
-        ui = core.ui;
+        ui = core.ui,
+        util = core.util,
+
+        ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     /**
      * 窗体控件。
@@ -24,41 +29,29 @@ _uClose     - 关闭按钮
         ui.Layer,
         'ui-dialog',
         function (el, options) {
-            var bodyEl = el,
-                titleEl = dom.first(el);
+            var bodyEl = dom.create({className: options.classes.join('-body ')}),
+                titleEl = dom.first(el),
+                closeEl;
 
-            if (titleEl && titleEl.tagName !== 'STRONG') {
-                titleEl = undefined;
-            }
-
-            el = dom.insertBefore(
-                dom.create(
-                    {
-                        // 生成标题控件与内容区域控件对应的Element对象
-                        className: el.className,
-                        style: {
-                            cssText: bodyEl.style.cssText
-                        },
-                        innerHTML: '<div class="' + options.classes.join('-close ') + '"></div>' + (titleEl ? '' : '<strong class="' + options.classes.join('-title ') + '"></strong>')
-                    }
-                ),
-                el
-            );
-
-            if (titleEl) {
+            if (titleEl && titleEl.tagName === 'STRONG') {
                 titleEl.className += ' ' + options.classes.join('-title ');
-                el.appendChild(titleEl);
+                dom.remove(titleEl);
             } else {
-                titleEl = el.lastChild;
+                titleEl = dom.create('STRONG', {className: options.classes.join('-title ')});
             }
 
-            bodyEl.className = options.classes.join('-body ');
-            bodyEl.style.cssText = '';
+            for (; el.firstChild; ) {
+                bodyEl.appendChild(el.firstChild);
+            }
+
+            el.innerHTML = '<div class="' + options.classes.join('-close ') + '"></div>';
+            closeEl = el.lastChild;
+            el.appendChild(titleEl);
             el.appendChild(bodyEl);
 
-            ui.Control.call(this, el, options);
+            ui.Layer.call(this, el, options);
 
-            this._uClose = core.$fastCreate(this.Close, el.firstChild, this);
+            this._uClose = core.$fastCreate(this.Close, closeEl, this);
             this._uTitle = core.$fastCreate(this.Title, titleEl, this, {userSelect: false});
             this.$setBody(bodyEl);
         },
@@ -75,7 +68,7 @@ _uClose     - 关闭按钮
                      * @override
                      */
                     $click: function (event) {
-                        ui.Control.prototype.$click.call(this, event);
+                        ui.Button.prototype.$click.call(this, event);
                         this.getParent().hide();
                     }
                 }
@@ -100,13 +93,52 @@ _uClose     - 关闭按钮
             ),
 
             /**
+             * @override
+             */
+            $cache: function (style) {
+                ui.Layer.prototype.$cache.call(this, style);
+                style = dom.getStyle(this.getBody());
+                if (ieVersion < 8) {
+                    var list = style.borderWidth.split(' ');
+                    this.$$bodyBorder = [util.toNumber(list[0])];
+                    this.$$bodyBorder[1] = list[1] ? util.toNumber(list[1]) : this.$$bodyBorder[0];
+                    this.$$bodyBorder[2] = list[2] ? util.toNumber(list[2]) : this.$$bodyBorder[0];
+                    this.$$bodyBorder[3] = list[3] ? util.toNumber(list[3]) : this.$$bodyBorder[1];
+                    list = style.padding.split(' ');
+                    this.$$bodyPadding = [util.toNumber(list[0])];
+                    this.$$bodyPadding[1] = list[1] ? util.toNumber(list[1]) : this.$$bodyPadding[0];
+                    this.$$bodyPadding[2] = list[2] ? util.toNumber(list[2]) : this.$$bodyPadding[0];
+                    this.$$bodyPadding[3] = list[3] ? util.toNumber(list[3]) : this.$$bodyPadding[1];
+                } else {
+                    this.$$bodyBorder = [util.toNumber(style.borderTopWidth), util.toNumber(style.borderRightWidth), util.toNumber(style.borderBottomWidth), util.toNumber(style.borderLeftWidth)];
+                    this.$$bodyPadding = [util.toNumber(style.paddingTop), util.toNumber(style.paddingRight), util.toNumber(style.paddingBottom), util.toNumber(style.paddingLeft)];
+                }
+
+                this.$$titleHeight = this._uTitle.getMain().offsetHeight;
+            },
+
+            /**
+             * @override
+             */
+            getMinimumHeight: function () {
+                return ui.Layer.prototype.getMinimumHeight.call(this) + this.$$bodyBorder[0] + this.$$bodyBorder[2] + this.$$bodyPadding[0] + this.$$bodyPadding[2] + this.$$titleHeight;
+            },
+
+            /**
+             * @override
+             */
+            getMinimumWidth: function () {
+                return ui.Layer.prototype.getMinimumWidth.call(this) + this.$$bodyBorder[1] + this.$$bodyBorder[3] + this.$$bodyPadding[1] + this.$$bodyPadding[3];
+            },
+
+            /**
              * 设置窗体控件标题。
              * @public
              *
              * @param {string} text 窗体标题
              */
             setTitle: function (text) {
-                this._uTitle.setContent(text || '');
+                this._uTitle.getBody().innerHTML = text || '';
             }
         }
     );

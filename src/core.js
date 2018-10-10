@@ -5,6 +5,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ext = core.ext,
         util = core.util,
         ui = core.ui,
@@ -18,27 +19,32 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        safariVersion = !/(chrome|crios|ucbrowser)/i.test(navigator.userAgent) && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
 //{/if}//
     var HIGH_SPEED = 100,         // 对高速的定义
         scrollHandler,            // DOM滚动事件
+        dragStopHandler = util.blank, // ios设备上移出webview区域停止事件
+        touchTarget,              // touch点击的目标，用于防止ios下的点击穿透处理
         isTouchMoved,
         ecuiName = 'ui',          // Element 中用于自动渲染的 ecui 属性名称
         isGlobalId,               // 是否自动将 ecui 的标识符全局化
 
-        flgFixedOffset,           // 在计算相对位置时，是否需要修正边框样式的影响
+        viewWidth,                // 浏览器宽高属性
+        viewHeight,               // 浏览器宽高属性
         flgFixedSize,             // 在计算盒子模型时，是否需要修正宽高
         scrollNarrow,             // 浏览器滚动条相对窄的一边的长度
 
         initRecursion = 0,        // init 操作的递归次数
+        readyList = [],
+        orientationHandle,
 
-        bodyElement,
         maskElements = [],        // 遮罩层组
         unmasks = [],             // 用于取消庶罩层的函数列表
 
         tracks = {},              // 鼠标/触摸事件对象跟踪
         trackId,                  // 当前正在跟踪的id
         pointers = [],            // 当前所有正在监听的pointer对象
+        lastClick = {},           // 最后一次点击的信息
         gestureListeners = [],    // 手势监听
         gestureStack = [],        // 手势堆栈，受mask影响进行分层监听
         forcedControl = null,     // 当前被重压的控件
@@ -65,35 +71,48 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
         events = {
             // 屏幕旋转
             orientationchange: function () {
-                var width = document.documentElement.clientWidth,
-                    height = document.documentElement.clientHeight,
-                    style = document.body.style;
-
-                if (style.width !== width + 'px') {
-                    style.width = width + 'px';
-                    style.height = height + 'px';
-
-                    var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
-                    fontSizeCache.forEach(function (item) {
-                        item[0]['font-size'] = (Math.round(fontSize * item[1] / 2) * 2) + 'px';
-                    });
-
-                    if (!iosVersion) {
-                        repaint();
-                    }
-                } else if (style.height !== height + 'px') {
-                    style.height = height + 'px';
-
-                    if (iosVersion) {
-                        repaint();
-                    }
-                } else if (isToucher) {
-                    util.timer(events.orientationchange, 200);
+                if (orientationHandle) {
+                    orientationHandle();
                 }
 
-                if (document.activeElement && document.activeElement.scrollIntoViewIfNeeded) {
-                    document.activeElement.scrollIntoViewIfNeeded(false);
-                }
+                orientationHandle = util.timer(function () {
+                    var width = document.documentElement.clientWidth,
+                        height = document.documentElement.clientHeight;
+
+                    if (viewWidth !== width) {
+                        var fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
+                        fontSizeCache.forEach(function (item) {
+                            item[0]['font-size'] = Math.round(fontSize * item[1]) + 'px';
+                        });
+
+                        viewWidth = width;
+                        viewHeight = height;
+
+                        repaint();
+                    } else if (viewHeight !== height) {
+                        if (isToucher) {
+                            // android 软键盘弹出和收起
+                            var event = document.createEvent('HTMLEvents');
+                            event.initEvent('keyboardchange', true, true);
+
+                            if (height > viewHeight + 100) {
+                                // 软键盘收起，失去焦点
+                                if (document.activeElement && document.activeElement.blur) {
+                                    document.activeElement.blur();
+                                }
+                                event.height = 0;
+                            } else {
+                                event.height = viewHeight - height;
+                            }
+
+                            document.dispatchEvent(event);
+
+                            viewHeight = height;
+                        }
+                    } else if (isToucher) {
+                        orientationHandle = util.timer(events.orientationchange, 100);
+                    }
+                }, 100);
             },
 
             // pad pro/surface pro等设备上的事件处理
@@ -111,8 +130,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             pageY: event.pageY,
                             clientX: event.clientX,
                             clientY: event.clientY,
-                            originalX: event.clientX,
-                            originalY: event.clientY,
                             target: event.target,
                             lastMoveTime: Date.now(),
                             speedX: 0,
@@ -133,6 +150,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             isTouchMoved = false;
                             tracks[pointerId] = track;
                         }
+                        checkActived(event);
                         currEnv.mousedown(event);
                         onpressure(event, event.getNative().pressure >= 0.4);
                     }
@@ -158,7 +176,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
 
                     event.track = track;
-                    event.target = getElementFromEvent(event);
                     currEnv.mousemove(event);
                     if (pointerId === trackId) {
                         if (hoveredControl !== event.getControl()) {
@@ -184,13 +201,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             pointerup: function (event) {
-                function onmousedown(event) {
-                    event.preventDefault();
-                    dom.removeEventListener(document, 'mousedown', onmousedown);
-                }
-
-                var type = event.type,
-                    pointerId = event.pointerId,
+                var pointerId = event.pointerId,
                     track = tracks[event.pointerType] || tracks[pointerId];
 
                 if (track) {
@@ -220,13 +231,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                             delete tracks.mouse;
                         }
                     } else {
-                        if (type === 'pointerup') {
+                        if (event.getNative().type === 'pointerup') {
                             onpressure(event, false);
                             ongesture(pointers, event);
-                            if (event.target !== getElementFromEvent(event)) {
-                                // 同一个位置事件元素发生了变化，阻止事件穿透
-                                dom.addEventListener(document, 'mousedown', onmousedown);
-                            }
                         }
                         trackId = undefined;
                         delete tracks[pointerId];
@@ -247,98 +254,132 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             // 触屏事件到鼠标事件的转化，与touch相关的事件由于ie浏览器会触发两轮touch与mouse的事件，所以需要屏弊一个
             touchstart: function (event) {
-                initTouchTracks(event);
-
-                if (event.touches.length === 1) {
-                    isTouchMoved = false;
-
-                    var track = tracks[trackId = event.touches[0].identifier];
-                    track.originalX = track.clientX;
-                    track.originalY = track.clientY;
-
-                    event = core.wrapEvent(event);
-
-                    event.pageX = track.pageX;
-                    event.pageY = track.pageY;
-                    event.clientX = track.clientX;
-                    event.clientY = track.clientY;
-                    event.target = track.target;
-                    event.track = track;
-                    track.lastMoveTime = Date.now();
-                    currEnv.mouseover(event);
-                    currEnv.mousedown(event);
-                    onpressure(event, event.getNative().touches[0].force === 1);
+                if (document.body !== event.target) {
+                    dom.addEventListener(event.target, 'touchmove', RemovedDomTouchBubble);
+                    dom.addEventListener(event.target, 'touchend', RemovedDomTouchBubble);
                 }
+
+                dragStopHandler();
+                initTouchTracks(event, function () {
+                    if (event.touches.length === 1) {
+                        isTouchMoved = false;
+
+                        var track = tracks[trackId = event.touches[0].identifier];
+
+                        event = core.wrapEvent(event);
+
+                        event.pageX = track.pageX;
+                        event.pageY = track.pageY;
+                        event.clientX = track.clientX;
+                        event.clientY = track.clientY;
+                        event.target = track.target;
+                        event.track = track;
+
+                        track.lastMoveTime = Date.now();
+                        checkActived(event);
+                        currEnv.mouseover(event);
+                        currEnv.mousedown(event);
+                        onpressure(event, event.getNative().touches[0].force === 1);
+                    }
+                });
             },
 
             touchmove: function (event) {
-                initTouchTracks(event);
+                initTouchTracks(event, function () {
+                    event = core.wrapEvent(event);
 
-                event = core.wrapEvent(event);
+                    var noPrimaryMove = true;
 
-                Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
-                    var track = tracks[item.identifier];
-                    event.pageX = item.pageX;
-                    event.pageY = item.pageY;
-                    event.clientX = item.clientX;
-                    event.clientY = item.clientY;
-                    event.target = getElementFromEvent(item);
+                    Array.prototype.slice.call(event.getNative().changedTouches).forEach(function (item) {
+                        var track = tracks[item.identifier];
+                        event.pageX = item.pageX;
+                        event.pageY = item.pageY;
+                        event.clientX = item.clientX;
+                        event.clientY = item.clientY;
 
-                    calcSpeed(track, event);
+                        calcSpeed(track, event);
 
-                    if (item.identifier === trackId) {
-                        if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isTouchMoved === false) {
-                            isTouchMoved = true;
+                        if (item.identifier === trackId) {
+                            if ((Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) && isTouchMoved === false) {
+                                isTouchMoved = true;
+                            }
+
+                            event.track = track;
+                            currEnv.mousemove(event);
+
+                            var target = event.target;
+                            event.target = getElementFromEvent(event);
+                            if (hoveredControl !== event.getControl()) {
+                                currEnv.mouseover(event);
+                            }
+                            event.target = target;
+                            onpressure(event, item.force === 1);
+                            ongesture(event.getNative().touches, event);
+
+                            noPrimaryMove = false;
                         }
+                    });
 
-                        event.track = track;
-                        currEnv.mousemove(event);
-                        if (hoveredControl !== event.getControl()) {
-                            currEnv.mouseover(event);
-                        }
-                        onpressure(event, item.force === 1);
-                        ongesture(event.getNative().touches, event);
+                    if (noPrimaryMove) {
+                        event.preventDefault();
                     }
                 });
             },
 
             touchend: function (event) {
-                var track = tracks[trackId];
+                dom.removeEventListener(event.target, 'touchmove', RemovedDomTouchBubble);
+                dom.removeEventListener(event.target, 'touchend', RemovedDomTouchBubble);
 
-                initTouchTracks(event);
+                var track = tracks[trackId],
+                    noPrimaryEnd = true;
 
-                Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
-                    if (item.identifier === trackId) {
-                        if (isTouchMoved) {
-                            // 产生了滚屏操作，不响应ECUI事件
-                            bubble(activedControl, 'deactivate');
-                            activedControl = undefined;
+                initTouchTracks(event, function () {
+                    Array.prototype.slice.call(event.changedTouches).forEach(function (item) {
+                        if (item.identifier === trackId) {
+                            if (isTouchMoved) {
+                                // 产生了滚屏操作，不响应ECUI事件
+                                bubble(activedControl, 'deactivate');
+                                activedControl = undefined;
+                            }
+
+                            event = core.wrapEvent(event);
+
+                            event.track = track;
+                            event.pageX = item.pageX;
+                            event.pageY = item.pageY;
+                            event.clientX = item.clientX;
+                            event.clientY = item.clientY;
+
+                            currEnv.mouseup(event);
+                            bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
+                            trackId = undefined;
+                            if (event.getNative().type === 'touchend') {
+                                onpressure(event, false);
+                                ongesture(event.getNative().changedTouches, event);
+                            }
+
+                            var target = event.target;
+                            if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+                                // 点击到非INPUT区域需要失去焦点
+                                if (isTouchClick(track)) {
+                                    document.activeElement.blur();
+                                }
+                            }
+
+                            // 记录touchend时的dom元素，阻止事件穿透
+                            touchTarget = target;
+                            noPrimaryEnd = false;
                         }
+                    });
 
-                        event = core.wrapEvent(event);
+                    if (noPrimaryEnd) {
+                        event.preventDefault();
+                    }
 
-                        event.track = track;
-                        event.pageX = item.pageX;
-                        event.pageY = item.pageY;
-                        event.clientX = item.clientX;
-                        event.clientY = item.clientY;
-                        event.target = getElementFromEvent(item);
-                        currEnv.mouseup(event);
-                        bubble(hoveredControl, 'mouseout', event, hoveredControl = null);
-                        trackId = undefined;
-                        onpressure(event, false);
-                        ongesture(event.getNative().changedTouches, event);
-
-                        if (event.target !== getElementFromEvent(item)) {
-                            // 同一个位置事件元素发生了变化，阻止事件穿透
-                            event.preventDefault();
-                        }
+                    if (trackId && !tracks[trackId]) {
+                        tracks[trackId] = track;
                     }
                 });
-
-                if (trackId && !tracks[trackId]) {
-                    tracks[trackId] = track;
-                }
             },
 
             touchcancel: function (event) {
@@ -349,14 +390,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 event = core.wrapEvent(event);
                 // 仅监听鼠标左键
                 if (event.which === 1) {
-                    if (activedControl) {
-                        // 如果按下鼠标左键后，使用ALT+TAB使浏览器失去焦点然后松开鼠标左键，
-                        // 需要恢复激活控件状态，第一次点击失效
-                        bubble(activedControl, 'deactivate');
-                        activedControl = undefined;
-                        // 这里不能return，要考虑请求来自于其它环境的情况
-                    }
-
                     // 为了兼容beforescroll事件，同时考虑到scroll执行效率问题，自己手动触发滚动条事件
                     if (isScrollClick(event)) {
                         onbeforescroll(event);
@@ -374,6 +407,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                     event.track = tracks;
                     tracks.lastMoveTime = Date.now();
+                    checkActived(event);
                     currEnv.mousedown(event);
                 }
             },
@@ -384,7 +418,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 if (scrollHandler) {
                     scrollHandler();
                     scrollHandler = null;
-                    util.timer(onscroll, 500, this, event);
+                    util.timer(onscroll, 300, this, event);
                 }
 
                 calcSpeed(tracks, event);
@@ -408,7 +442,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     if (scrollHandler) {
                         scrollHandler();
                         scrollHandler = null;
-                        util.timer(onscroll, 500, this, event);
+                        util.timer(onscroll, 300, this, event);
                     }
 
                     event.track = tracks;
@@ -418,10 +452,24 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             },
 
             // 鼠标点击时控件如果被屏弊需要取消点击事件的默认处理，此时链接将不能提交
-            click: function () {
+            click: function (event) {
                 if (activedControl !== undefined) {
                     // 如果undefined表示移动端长按导致触发了touchstart但没有触发touchend
                     activedControl = undefined;
+                }
+
+                if (touchTarget && event.target !== touchTarget) {
+                    // 要处理label产生的转发情况
+                    for (var el = touchTarget; el; el = dom.parent(el)) {
+                        if (el.tagName === 'LABEL') {
+                            if (dom.contain(el, event.target) || dom.getAttribute(el, 'for') === event.target.id) {
+                                return;
+                            }
+                        }
+                    }
+                    // 如果touch的元素不是当前click的元素，就是点击穿透，直接阻止事件
+                    document.activeElement.blur();
+                    event.preventDefault();
                 }
             },
 
@@ -472,9 +520,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     control = event.getControl(),
                     target = control;
 
-                if (!(track.lastClick && isDblClick(track))) {
-                    track.lastClick = {time: Date.now()};
-                }
+                track.startX = track.clientX;
+                track.startY = track.clientY;
+                track.startTime = Date.now();
 
                 if (control) {
                     // IE8以下的版本，如果为控件添加激活样式，原生滚动条的操作会失效
@@ -550,11 +598,12 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
                 var track = event.track,
                     control = event.getControl(),
-                    delay = track.lastClick && Date.now() - track.lastClick.time,
+                    click = isTouchClick(track),
+                    dblclick = Date.now() - lastClick.time < 500,
                     commonParent;
 
                 if (activedControl !== undefined) {
-                    if (isTouchMoved !== undefined && delay < 300) { // TouchEvent
+                    if (click) { // TouchEvent
                         core.setFocused(activedControl);
                     }
 
@@ -576,37 +625,43 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     }
 
                     if (activedControl) {
-                        commonParent = getCommonParent(control, activedControl);
-                        if (isTouchMoved === undefined || (isTouchMoved === false && delay < 300)) { // MouseEvent
-                            bubble(commonParent, 'click', event);
-
-                            if (event.cancelBubble) {
-                                // 取消冒泡要阻止A标签提交
-                                for (el = control.getMain(); el; el = dom.parent(el)) {
-                                    if (el.tagName === 'A') {
-                                        blockAhref(el);
-                                        break;
+                        // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
+                        // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题，以及移动端click延迟的问题
+                        if (event.getNative().type.indexOf('cancel') < 0) {
+                            if (dblclick) {
+                                commonParent = getCommonParent(control, lastClick.target);
+                                bubble(commonParent, 'dblclick', event);
+                            } else {
+                                commonParent = getCommonParent(control, activedControl);
+                                if (isTouchMoved === undefined || click) { // MouseEvent
+                                    bubble(commonParent, 'click', event);
+                                    if (event.cancelBubble) {
+                                        // 取消冒泡要阻止A标签提交
+                                        for (el = control.getMain(); el; el = dom.parent(el)) {
+                                            if (el.tagName === 'A') {
+                                                blockAhref(el);
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                        // 点击事件在同时响应鼠标按下与弹起周期的控件上触发(如果之间未产生鼠标移动事件)
-                        // 模拟点击事件是为了解决控件的 Element 进行了 remove/append 操作后 click 事件不触发的问题
-                        if (track.lastClick) {
-                            if (isDblClick(track) && track.lastClick.target === control) {
-                                bubble(commonParent, 'dblclick', event);
-                                track.lastClick = undefined;
-                            } else {
-                                track.lastClick.target = control;
-                            }
-                        }
+
                         bubble(activedControl, 'deactivate', event);
+                    }
+
+                    if (dblclick) {
+                        lastClick.time = 0;
+                    } else {
+                        lastClick.time = track.startTime;
+                        lastClick.target = control;
                     }
 
                     // 将 activedControl 的设置复位，此时表示没有鼠标左键点击
                     activedControl = undefined;
 
-                    if (isTouchMoved !== undefined && delay < 300) {
+                    if (click) {
                         for (control = event.target; control; control = dom.parent(control)) {
                             if (control.tagName === 'A' && control.href) {
                                 location.href = control.href;
@@ -624,13 +679,27 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             mousedown: util.blank,
 
             mousemove: function (event) {
-                dragmove(event.track, currEnv, event.clientX, event.clientY);
+                var view = util.getView();
+                dragStopHandler();
+                if (iosVersion && (event.clientX < 0 || event.clientX >= view.width || event.clientY < 0 || event.clientY >= view.height)) {
+                    // 延后500ms执行，无意中的滑出不会受到影响
+                    dragStopHandler = util.timer(function () {
+                        dragEnv.mouseup(event);
+                    }, 500);
+                } else {
+                    dragmove(event.track, currEnv, event.clientX, event.clientY);
+                }
                 event.preventDefault();
             },
 
+            mouseout: util.blank,
             mouseover: util.blank,
 
             mouseup: function (event) {
+                dragStopHandler();
+
+                disableEnv.mouseup(event);
+
                 var track = event.track,
                     target = currEnv.target,
                     uid = target.getUID(),
@@ -639,16 +708,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     start = Date.now(),
                     vx = track.speedX || 0,
                     vy = track.speedY || 0,
-                    inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0;
+                    inertia = target.$draginertia ? target.$draginertia({x: vx, y: vy}) : currEnv.decelerate ? Math.sqrt(vx * vx + vy * vy) / currEnv.decelerate : 0,
+                    dragEvent = new ECUIEvent();
+
+                dragEvent.track = track;
 
                 if (inertia) {
                     var ax = vx / inertia,
                         ay = vy / inertia,
-                        env = currEnv;
+                        env = currEnv,
+                        startX = track.x,
+                        startY = track.y;
 
                     inertiaHandles[uid] = util.timer(function () {
-                        var event = new ECUIEvent(),
-                            time = (Date.now() - start) / 1000,
+                        var time = (Date.now() - start) / 1000,
                             t = Math.min(time, inertia),
                             x = track.x,
                             y = track.y;
@@ -656,16 +729,29 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         dragmove(track, env, Math.round(mx + vx * t - ax * t * t / 2), Math.round(my + vy * t - ay * t * t / 2));
                         if (t >= inertia || (x === track.x && y === track.y)) {
                             inertiaHandles[uid]();
-                            dragend(event, env, target);
+                            if (env.event && startX === x && startY === y) {
+                                env.event.inertia = false;
+                            }
+                            dragend(dragEvent, env, target);
                         }
                     }, -20);
                 } else {
-                    dragend(event, currEnv, target);
+                    dragend(dragEvent, currEnv, target);
                 }
-                core.restore();
+                restore();
 
                 currEnv.mouseup(event);
             }
+        },
+
+        disableEnv = {
+            type: 'disable',
+            // 禁止input得到焦点
+            mousedown: util.preventEvent,
+            mousemove: util.preventEvent,
+            mouseout: util.blank,
+            mouseover: util.blank,
+            mouseup: util.blank
         };
 
     if (ieVersion < 9) {
@@ -695,8 +781,20 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
     }
 
     /**
+     * 解决touch事件中如果目标元素被移除touch事件冒泡丢失的问题。
+     * @private
+     *
+     * @param {Event} event 浏览器原生事件对象，忽略将自动填充
+     */
+    function RemovedDomTouchBubble(event) {
+        if (!dom.contain(document.body, this)) {
+            events[event.type](event);
+        }
+    }
+
+    /**
      * 创建 ECUI 事件对象。
-     * @public
+     * @private
      *
      * @param {string} type 事件类型
      * @param {Event} event 浏览器原生事件对象，忽略将自动填充
@@ -715,7 +813,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         if (!el) {
                             break outer;
                         }
-                        if (core.getCustomStyle(el.style || { 'content': '' }, 'pointer-events') === 'none') {
+                        if (core.getCustomStyle('pointer-events') === 'none') {
                             caches.push([el, el.style.visibility]);
                             el.style.visibility = 'hidden';
                             break;
@@ -735,7 +833,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         }
     }
 
-    util.extend(ECUIEvent.prototype, {
+    Object.assign(ECUIEvent.prototype, {
         /**
          * 终止全部事件操作。
          * @public
@@ -767,7 +865,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * 获取原生的事件对象。
          * @public
          *
-         * @return {Object} 原生的事件对象
+         * @return {object} 原生的事件对象
          */
         getNative: function () {
             return this._oNative;
@@ -883,6 +981,26 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     }
 
     /**
+     * 检测不正常的事件链，比如没有触发pointerup/touchend/mouseup。
+     * @private
+     *
+     * @param {ecui.ui.Control} control 控件
+     */
+    function checkActived(event) {
+        // 如果按下鼠标左键后，使用ALT+TAB使浏览器失去焦点然后松开鼠标左键，
+        // 需要恢复激活控件状态，第一次点击失效
+        if (activedControl !== undefined) {
+            if (currEnv.type === 'drag') {
+                dom.removeClass(document.body, 'ui-drag');
+                currEnv.mouseup(event);
+            } else {
+                bubble(activedControl, 'deactivate', event);
+                activedControl = undefined;
+            }
+        }
+    }
+
+    /**
      * dispose一个控件，dispose情况特殊，ondispose不能阻止$dispose函数的执行。
      * @private
      *
@@ -897,18 +1015,77 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
         } catch (ignore) {
         }
+        util.remove(singletons, control);
         core.dispatchEvent(control, 'dispose');
+    }
+
+    /**
+     * 拖拽的动画帧处理，对低版本浏览器也提供了兼容。
+     * @private
+     *
+     * @param {object} env ECUI 框架运行环境
+     * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
+     * @param {ECUIEvent} event ECUI 事件对象
+     */
+    function dragAnimationFrame(env, target, event) {
+        if (!event.reset && env.limit) {
+            var scale = 1 - 1 / (env.limitRatio || 3);
+
+            if (event.x < env.limitLeft) {
+                event.x -= Math.round((event.x - env.limitLeft) * scale);
+            } else if (event.x > env.limitRight) {
+                event.x -= Math.round((event.x - env.limitRight) * scale);
+            }
+
+            if (event.y < env.limitTop) {
+                event.y -= Math.round((event.y - env.limitTop) * scale);
+            } else if (event.y > env.limitBottom) {
+                event.y -= Math.round((event.y - env.limitBottom) * scale);
+            }
+        }
+
+        if (window.requestAnimationFrame) {
+            if (!env.event) {
+                window.requestAnimationFrame(function () {
+                    if (env.event) {
+                        if (core.dispatchEvent(target, 'dragmove', env.event)) {
+                            target.setPosition(env.event.x, env.event.y);
+                        }
+                        if (env.event.dragend) {
+                            core.dispatchEvent(target, 'dragend', env.event);
+                            dom.removeClass(document.body, 'ui-drag');
+                        }
+                        env.event = null;
+                    }
+                });
+            }
+            env.event = event;
+        } else {
+            if (core.dispatchEvent(target, 'dragmove', event)) {
+                target.setPosition(event.x, event.y);
+            }
+        }
     }
 
     /**
      * 拖拽结束事件处理。
      * @private
      *
-     * @param {ECUIEvent} ECUI 事件对象
-     * @param {Object} ECUI 框架运行环境
+     * @param {ECUIEvent} event ECUI 事件对象
+     * @param {object} env ECUI 框架运行环境
      * @param {ecui.ui.Control} target 被拖拽的 ECUI 控件
      */
     function dragend(event, env, target) {
+        function finish() {
+            if (env.event) {
+                env.event.dragend = true;
+            } else {
+                core.dispatchEvent(target, 'dragend', event);
+                dom.removeClass(document.body, 'ui-drag');
+            }
+            delete inertiaHandles[uid];
+        }
+
         if (!target.getMain()) {
             // 控件已经被销毁，不要发送事件
             return;
@@ -916,12 +1093,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         var uid = target.getUID();
 
         if (env.limit) {
-            var range = 'function' === typeof env.limit ? env.limit.call(target) : env.limit,
+            var range = env.limit,
                 el = env.el || target.getOuter(),
                 x = target.getX(),
                 y = target.getY(),
                 expectX = Math.min(range.right === undefined ? x : range.right, Math.max(range.left === undefined ? x : range.left, x)),
                 expectY = Math.min(range.bottom === undefined ? y : range.bottom, Math.max(range.top === undefined ? y : range.top, y));
+
             if (range.stepX) {
                 expectX = Math.round(expectX / range.stepX) * range.stepX;
             }
@@ -930,16 +1108,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             if (x !== expectX || y !== expectY) {
-                inertiaHandles[uid] = core.effect.grade(
+                inertiaHandles[uid] = effect.grade(
                     function (percent, options) {
                         event.x = Math.round(options.x + percent * (expectX - options.x));
                         event.y = Math.round(options.y + percent * (expectY - options.y));
                         event.inertia = true;
-                        core.dispatchEvent(target, 'dragmove', event);
+                        event.reset = true;
+
+                        dragAnimationFrame(env, target, event);
+
                         if (percent >= 1) {
                             inertiaHandles[uid]();
-                            core.dispatchEvent(target, 'dragend', event);
-                            delete inertiaHandles[uid];
+                            finish();
                         }
                     },
                     500,
@@ -952,8 +1132,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 return;
             }
         }
-        core.dispatchEvent(target, 'dragend', event);
-        delete inertiaHandles[uid];
+        finish();
     }
 
     /**
@@ -961,7 +1140,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @private
      *
      * @param {Event} track 事件跟踪对象
-     * @param {Object} env ECUI 框架运行环境
+     * @param {object} env ECUI 框架运行环境
      * @param {number} x 需要移动到的 X 坐标
      * @param {number} y 需要移动到的 Y 坐标
      */
@@ -973,15 +1152,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
         var target = env.target,
             // 计算期待移到的位置
-            expectX = env.originalX + x - track.logicX,
-            expectY = env.originalY + y - track.logicY,
+            expectX = Math.round(env.originalX + x - track.logicX),
+            expectY = Math.round(env.originalY + y - track.logicY),
             // 计算实际允许移到的位置
             realX = Math.min(Math.max(expectX, env.left), env.right),
             realY = Math.min(Math.max(expectY, env.top), env.bottom);
 
-        if (core.dispatchEvent(target, 'dragmove', {x: realX, y: realY, inertia: env !== currEnv})) {
-            target.setPosition(realX, realY);
-        }
+        dragAnimationFrame(env, target, {track: track, x: realX, y: realY, inertia: env !== currEnv});
 
         track.x = realX;
         track.y = realY;
@@ -1052,20 +1229,23 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      */
     function initEnvironment() {
         if (scrollNarrow === undefined) {
+            var el;
+
             if (isToucher) {
                 (function () {
                     var getView = util.getView;
                     util.getView = function () {
                         // 解决软键盘弹起时的高度计算问题，这个值已经被 orientationchange 写入了body的style中
                         var view = getView();
-                        view.height = util.toNumber(document.body.style.height);
+                        view.height = viewHeight;
                         return view;
                     };
                 }());
-
-                events.orientationchange();
-                util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
             }
+
+            viewWidth = document.documentElement.clientWidth;
+            viewHeight = document.documentElement.clientHeight;
+            util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
 
             // 设置全局事件处理
             for (var key in events) {
@@ -1077,38 +1257,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             }
 
-            var body = document.body,
-                el;
-
-            dom.insertHTML(body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
+            dom.insertHTML(document.body, 'BEFOREEND', '<div class="ui-valid"><div></div></div>');
             // 检测Element宽度与高度的计算方式
-            el = body.lastChild;
-            flgFixedOffset = el.lastChild.offsetTop;
+            el = document.body.lastChild;
             flgFixedSize = el.offsetWidth !== 80;
             scrollNarrow = el.offsetWidth - el.clientWidth - 2;
             dom.remove(el);
 
-            var options = core.getOptions(body, 'data-ecui') || {};
+            var options = core.getOptions(document.body, 'data-ecui') || {};
 
             ecuiName = options.name || ecuiName;
             isGlobalId = options.globalId;
 
-            if (safariVersion && iosVersion > 100) {
-                bodyElement = dom.create({
-                    id: body.id,
-                    className: 'SAFARI-BODY-FIXED'
-                });
-                bodyElement.setAttribute(ecuiName, dom.getAttribute(body, ecuiName));
-                body.removeAttribute(ecuiName);
-                for (; body.firstChild; ) {
-                    bodyElement.appendChild(body.firstChild);
-                }
-                body.appendChild(bodyElement);
-                body.id = '';
-            }
-
-            document.body.scrollTop = 100;
-            document.body.parentNode.scrollTop = 100;
             if (options.load) {
                 for (var text = options.load; /^\s*(\w+)\s*(\([^)]+\))?\s*($|,)/.test(text); ) {
                     text = RegExp['$\''];
@@ -1119,9 +1279,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             }
 
-            if (!isToucher) {
-                dom.addEventListener(window, 'resize', events.orientationchange);
-            }
+            dom.addEventListener(window, 'resize', events.orientationchange);
             dom.addEventListener(window, 'scroll', onscroll);
             dom.addEventListener(
                 window,
@@ -1133,6 +1291,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         disposeControl(item);
                     });
 
+                    singletons.forEach(function (item) {
+                        disposeControl(item);
+                    });
+
                     // 清除闭包中引用的 Element 对象
                     unmasks.forEach(function (item) {
                         item(true);
@@ -1141,8 +1303,8 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 }
             );
 
-            core.init(body);
-            body = el = null;
+            core.init(document.body);
+            el = null;
 
             return true;
         }
@@ -1154,7 +1316,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      *
      * @return {Event} event 系统事件对象
      */
-    function initTouchTracks(event) {
+    function initTouchTracks(event, callback) {
         var caches = {};
         Array.prototype.slice.call(event.touches).forEach(function (item) {
             tracks[item.identifier] = tracks[item.identifier] || {
@@ -1170,26 +1332,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             caches[item.identifier] = true;
         });
 
-        util.timer(function () {
-            for (var key in tracks) {
-                if (tracks.hasOwnProperty(key)) {
-                    if (!caches[key]) {
-                        delete tracks[key];
-                    }
+        callback();
+
+        for (var key in tracks) {
+            if (tracks.hasOwnProperty(key)) {
+                if (!caches[key]) {
+                    delete tracks[key];
                 }
             }
-        });
-    }
-
-    /**
-     * 判断是否为允许的双击时间间隔。
-     * @private
-     *
-     * @param {object} track 事件跟踪对象
-     * @return {boolean} 是否为允许的双击时间间隔
-     */
-    function isDblClick(track) {
-        return Date.now() - track.lastClick.time > 500;
+        }
     }
 
     /**
@@ -1200,6 +1351,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @return {boolean} 点击是否发生在滚动条区域
      */
     function isScrollClick(event) {
+        if (isToucher) {
+            return false;
+        }
+
         var target = event.target,
             pos = dom.getPosition(target),
             style = dom.getStyle(target),
@@ -1209,6 +1364,17 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         event.deltaX = target.clientWidth && target.clientWidth !== target.scrollWidth && y >= 0 && y < scrollNarrow ? 1 : 0;
         event.deltaY = target.clientHeight && target.clientHeight !== target.scrollHeight && x >= 0 && x < scrollNarrow ? 1 : 0;
         return event.deltaX !== event.deltaY;
+    }
+
+    /**
+     * 判断是否为移动端单击时间间隔。
+     * @private
+     *
+     * @param {object} track 事件跟踪对象
+     * @return {boolean} 是否为移动端单击时间间隔
+     */
+    function isTouchClick(track) {
+        return isTouchMoved === false && Date.now() - track.startTime < 300;
     }
 
     /**
@@ -1228,7 +1394,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
      * @private
      *
      * @param {ecui.ui.Control} control
-     * @param {Object} options 控件初始化选项
+     * @param {object} options 控件初始化选项
      */
     function oncreate(control, options) {
         if (control.oncreate) {
@@ -1238,7 +1404,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         if (options.id) {
 //{if 0}//
             if (namedControls[options.id]) {
-                console.error('The identifier("' + options.id + '") has existed.');
+                console.warn('The identifier("' + options.id + '") has existed.');
             }
 //{/if}//
             namedControls[options.id] = control;
@@ -1251,8 +1417,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         if (options.ext) {
             for (var key in options.ext) {
                 if (options.ext.hasOwnProperty(key)) {
-                    if (ext[key]) {
-                        ext[key](control, options.ext[key], options);
+                    var extend = ext[key];
+                    if (extend) {
+                        if (extend.constructor) {
+                            extend.constructor.call(control, options.ext[key], options);
+                        }
+                        if (extend.Events) {
+                            for (var name in extend.Events) {
+                                if (extend.Events.hasOwnProperty(name)) {
+                                    core.addEventListener(control, name, extend.Events[name]);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1283,11 +1459,11 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 var track = tracks[pointers[0].identifier];
                 if (track.type !== 'mouse') {
                     if (event.getNative().type.slice(-4) === 'move') {
-                        if (!track.swipe && track.lastClick && Date.now() - track.lastClick.time < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
+                        if (!track.swipe && Date.now() - track.startTime < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
                             track.swipe = true;
                             util.timer(function () {
-                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.originalX, 2) + Math.pow(track.lastY - track.originalY, 2)) > 100) {
-                                    event.angle = calcAngle(track.lastX - track.originalX, track.lastY - track.originalY);
+                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.startX, 2) + Math.pow(track.lastY - track.startY, 2)) > 30) {
+                                    event.angle = calcAngle(track.lastX - track.startX, track.lastY - track.startY);
                                     if (event.angle > 150 && event.angle < 210) {
                                         callback('swipeleft');
                                     } else if (event.angle > 330 || event.angle < 30) {
@@ -1308,7 +1484,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         event.toY = track.clientY;
                         callback('panmove');
                     } else {
-                        if (isTouchMoved === false && Date.now() - track.lastClick.time < 300 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
+                        if (track && isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
                             callback('tap');
                         }
                     }
@@ -1448,13 +1624,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             return item.getParent() === resizeList && item.isShow();
         }
 
+        // 拖拽状态时不进行窗体大小改变
+        if (currEnv.type === 'drag') {
+            return;
+        }
+
         // 隐藏所有遮罩层
         core.mask(false);
-
-        // 改变窗体大小需要清空拖拽状态
-        if (currEnv.type === 'drag') {
-            currEnv.mouseup(new ECUIEvent('mouseup'));
-        }
 
         independentControls.forEach(function (item) {
             core.dispatchEvent(item, 'repaint');
@@ -1500,17 +1676,26 @@ outer:          for (var caches = [], target = event.target, el; target; target 
     }
 
     /**
+     * 恢复当前框架的状态到上一个状态。
+     * restore 用于恢复调用特殊操作如 drag 与 disable 后改变的框架环境，包括各框架事件处理函数的恢复、控件的焦点设置等。
+     * @private
+     */
+    function restore() {
+        currEnv = envStack.pop();
+    }
+
+    /**
      * 设置 ecui 环境。
      * @private
      *
-     * @param {Object} env 环境描述对象
+     * @param {object} env 环境描述对象
      */
     function setEnv(env) {
         envStack.push(currEnv);
-        currEnv = util.extend(util.extend({}, currEnv), env);
+        currEnv = Object.assign({}, currEnv, env);
     }
 
-    util.extend(core, {
+    Object.assign(core, {
         /**
          * 使一个 Element 对象与一个 ECUI 控件 在逻辑上绑定。
          * 一个 Element 对象只能绑定一个 ECUI 控件，Element 对象通过 getControl方法获取绑定的 ECUI 控件，重复绑定会自动取消之前的绑定。
@@ -1553,7 +1738,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @protected
          *
          * @param {Function} UIClass 控件的构造函数
-         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @param {object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         $create: function (UIClass, options) {
@@ -1605,8 +1790,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
 
             oncreate(control, options);
-            allControls.push(control);
-            independentControls.push(control);
+            if (!control.constructor.singleton) {
+                allControls.push(control);
+                independentControls.push(control);
+            }
 
             // 处理所有的委托操作，参见delegate
             if (el = delegateControls[options.id]) {
@@ -1628,7 +1815,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {Function} UIClass 控件的构造函数
          * @param {HTMLElement} el 控件对应的 Element 对象
          * @param {ecui.ui.Control} parent 控件的父控件
-         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @param {object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         $fastCreate: function (UIClass, el, parent, options) {
@@ -1662,11 +1849,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @return {Array} 样式数组
          */
         $getClasses: function (UIClass, current) {
-            var classes = UIClass.TYPES.slice();
-            if (current && current !== UIClass.TYPES[0]) {
-                classes.push(current);
-            }
-            return classes;
+            return current && current !== UIClass.TYPES[0] ?
+                    UIClass.TYPES.concat([current]) :
+                    UIClass.TYPES.slice();
         },
 
         /**
@@ -1687,62 +1872,36 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {ecui.ui.Control} control ECUI 控件
-         * @param {Object} listeners 手势监听函数集合
+         * @param {object} listeners 手势监听函数集合
          */
         addGestureListeners: function (control, listeners) {
             gestureListeners.push([control, listeners]);
         },
 
         /**
-         * 获取高度修正值(即计算 padding, border 样式对 height 样式的影响)。
-         * IE 的盒子模型不完全遵守 W3C 标准，因此，需要使用 calcHeightRevise 方法计算 offsetHeight 与实际的 height 样式之间的修正值。
+         * 在元素显示时进行下级控件的缓存处理。
          * @public
          *
-         * @param {CssStyle} style CssStyle 对象
-         * @return {number} 高度修正值
+         * @param {HTMLElement} el 切换为显示状态的 DOM 元素
          */
-        calcHeightRevise: function (style) {
-            return isStrict ? util.toNumber(style.borderTopWidth) + util.toNumber(style.borderBottomWidth) + util.toNumber(style.paddingTop) + util.toNumber(style.paddingBottom)
-                : 0;
-        },
+        cacheAtShow: function (el) {
+            core.query(function (item) {
+                return dom.contain(el, item.getMain());
+            }).sort(function (a, b) {
+                var ia = 0,
+                    ib = 0,
+                    parent;
 
-        /**
-         * 获取左定位修正值(即计算 border 样式对 left 样式的影响)。
-         * opera 等浏览器，offsetLeft 与 left 样式的取值受到了 border 样式的影响，因此，需要使用 calcLeftRevise 方法计算 offsetLeft 与实际的 left 样式之间的修正值。
-         * @public
-         *
-         * @param {HTMLElement} el Element 对象
-         * @return {number} 左定位修正值
-         */
-        calcLeftRevise: function (el) {
-            var style = dom.getStyle(el.offsetParent);
-            return !firefoxVersion || (style.overflow !== 'visible' && dom.getStyle(el, 'position') === 'absolute') ? util.toNumber(style.borderLeftWidth) * flgFixedOffset : 0;
-        },
-
-        /**
-         * 获取上定位修正值(即计算 border 样式对 top 样式的影响)。
-         * opera 等浏览器，offsetTop 与 top 样式的取值受到了 border 样式的影响，因此，需要使用 calcTopRevise 方法计算 offsetTop 与实际的 top 样式之间的修正值。
-         * @public
-         *
-         * @param {HTMLElement} el Element 对象
-         * @return {number} 上定位修正值
-         */
-        calcTopRevise: function (el) {
-            var style = dom.getStyle(el.offsetParent);
-            return !firefoxVersion || (style.overflow !== 'visible' && dom.getStyle(el, 'position') === 'absolute') ? util.toNumber(style.borderTopWidth) * flgFixedOffset : 0;
-        },
-
-        /**
-         * 获取宽度修正值(即计算 padding,border 样式对 width 样式的影响)。
-         * IE 的盒子模型不完全遵守 W3C 标准，因此，需要使用 calcWidthRevise 方法计算 offsetWidth 与实际的 width 样式之间的修正值。
-         * @public
-         *
-         * @param {CssStyle} style CssStyle 对象
-         * @return {number} 宽度修正值
-         */
-        calcWidthRevise: function (style) {
-            return isStrict ? util.toNumber(style.borderLeftWidth) + util.toNumber(style.borderRightWidth) + util.toNumber(style.paddingLeft) + util.toNumber(style.paddingRight)
-                : 0;
+                for (parent = a; parent; parent = parent.getParent()) {
+                    ia++;
+                }
+                for (parent = b; parent; parent = parent.getParent()) {
+                    ib++;
+                }
+                return ib - ia;
+            }).forEach(function (item) {
+                item.cache();
+            });
         },
 
         /**
@@ -1755,7 +1914,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {Function} UIClass 控件的构造函数
-         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @param {object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         create: function (UIClass, options) {
@@ -1771,9 +1930,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {string} targetId 被委托的 ECUI 控件 标识符，即在标签的 ecui 属性中定义的 id 值
-         * @param {Object} caller 委托的对象
+         * @param {object} caller 委托的对象
          * @param {Function} func 调用的函数
-         * @param {Object} ... 调用的参数
+         * @param {object} ... 调用的参数
          */
         delegate: function (targetId, caller, func) {
             if (targetId) {
@@ -1785,6 +1944,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 } else {
                     (delegateControls[targetId] = delegateControls[targetId] || []).push({caller: caller, func: func, args: args});
                 }
+            }
+        },
+
+        /**
+         * 框架停止接收事件。
+         * @public
+         */
+        disable: function () {
+            if (currEnv.type !== 'disable') {
+                setEnv(disableEnv);
             }
         },
 
@@ -1813,7 +1982,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (event instanceof ECUIEvent) {
                     event.type = name;
                 } else {
-                    event = util.extend(new ECUIEvent(name), event);
+                    event = Object.assign(new ECUIEvent(name), event);
                 }
             } else {
                 event = new ECUIEvent(name);
@@ -1919,23 +2088,25 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          *
          * @param {ecui.ui.Control} control 需要进行拖拽的 ECUI 控件对象
          * @param {ECUIEvent} event 事件对象
-         * @param {Object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
+         * @param {object} options 控件拖拽的参数，省略参数时，控件默认只允许在 offsetParent 定义的区域内拖拽，如果 offsetParent 是 body，则只允许在当前浏览器可视范围内拖拽
          */
         drag: function (control, event, options) {
-            if (activedControl !== undefined && currEnv.type !== 'drag') {
-                // 控件之前处于惯性状态必须停止
-                var uid = control.getUID();
-                if (inertiaHandles[uid]) {
-                    inertiaHandles[uid]();
-                    delete inertiaHandles[uid];
-                }
+            // 控件之前处于惯性状态必须停止
+            var uid = control.getUID();
+            if (inertiaHandles[uid]) {
+                inertiaHandles[uid]();
+                delete inertiaHandles[uid];
+            }
+
+            if (event && activedControl !== undefined && currEnv.type !== 'drag') {
+                dom.addClass(document.body, 'ui-drag');
 
                 // 判断鼠标没有mouseup
                 var parent = control.getOuter().offsetParent || document.documentElement,
                     style = dom.getStyle(parent);
 
                 // 拖拽范围默认不超出上级元素区域
-                util.extend(
+                Object.assign(
                     dragEnv,
                     parent.tagName === 'BODY' || parent.tagName === 'HTML' ? util.getView() : {
                         top: 0,
@@ -1944,7 +2115,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         left: 0
                     }
                 );
-                util.extend(dragEnv, options);
+                Object.assign(dragEnv, options);
 
                 var x = dragEnv.x !== undefined ? dragEnv.x : control.getX(),
                     y = dragEnv.y !== undefined ? dragEnv.y : control.getY();
@@ -1956,14 +2127,38 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 dragEnv.originalX = x;
                 dragEnv.originalY = y;
 
+                if (dragEnv.limit) {
+                    dragEnv.limitRatio = dragEnv.limit.ratio || 3;
+                    dragEnv.limitLeft = dragEnv.limit.left === undefined ? dragEnv.left : dragEnv.limit.left;
+                    dragEnv.left += (dragEnv.left - dragEnv.limitLeft) * (dragEnv.limitRatio - 1);
+                    dragEnv.limitRight = dragEnv.limit.right === undefined ? dragEnv.right : dragEnv.limit.right;
+                    dragEnv.right += (dragEnv.right - dragEnv.limitRight) * (dragEnv.limitRatio - 1);
+                    dragEnv.limitTop = dragEnv.limit.top === undefined ? dragEnv.top : dragEnv.limit.top;
+                    dragEnv.top += (dragEnv.top - dragEnv.limitTop) * (dragEnv.limitRatio - 1);
+                    dragEnv.limitBottom = dragEnv.limit.bottom === undefined ? dragEnv.bottom : dragEnv.limit.bottom;
+                    dragEnv.bottom += (dragEnv.bottom - dragEnv.limitBottom) * (dragEnv.limitRatio - 1);
+                }
+
                 dragEnv.target = control;
                 setEnv(dragEnv);
+
                 event.track.logicX = event.clientX;
                 event.track.logicY = event.clientY;
-
                 if (core.dispatchEvent(control, 'dragstart', {track: event.track})) {
                     control.setPosition(x, y);
                 }
+
+                //这里不能preventDefault事件，否则input的软键盘无法出现
+            }
+        },
+
+        /**
+         * 框架恢复接收事件。
+         * @public
+         */
+        enable: function () {
+            if (currEnv.type === 'disable') {
+                restore();
             }
         },
 
@@ -2020,17 +2215,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         },
 
         /**
-         * 获取当前的 Body 区域。
-         * safari 浏览器为了屏弊高版本下默认的手势滚动，会在 BODY 标签内嵌入一个额外的层。
-         * @public
-         *
-         * @return {HTMLElement} BODY区域
-         */
-        getBody: function () {
-            return bodyElement || document.body;
-        },
-
-        /**
          * 获取自定义样式。
          * 标签自身的 content 样式没有意义，所以可以用于自定义样式的扩展。在 IE 9以下浏览器中，使用 filter 自定义样式。
          * @public
@@ -2082,10 +2266,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * 获取所有被命名的控件。
          * @public
          *
-         * @return {Object} 所有被命名的控件集合
+         * @return {object} 所有被命名的控件集合
          */
         getNamedControls: function () {
-            return util.extend({}, namedControls);
+            return Object.assign({}, namedControls);
         },
 
         /**
@@ -2094,7 +2278,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          *
          * @param {HTMLElement} el Element 对象
          * @param {string} attributeName 当前的初始化属性名(参见 getAttributeName 方法)
-         * @return {Object} 初始化选项对象
+         * @return {object} 初始化选项对象
          */
         getOptions: function (el, attributeName) {
             attributeName = attributeName || ecuiName;
@@ -2139,7 +2323,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @param {Function} UIClass 控件的构造函数
          * @param {HTMLElement} el 控件对应的 Element 对象
          * @param {ecui.ui.Control} parent 控件的父控件
-         * @param {Object} options 初始化选项(参见 ECUI 控件)
+         * @param {object} options 初始化选项(参见 ECUI 控件)
          * @return {ecui.ui.Control} ECUI 控件
          */
         getSingleton: function (UIClass, el, parent, options) {
@@ -2148,9 +2332,17 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     return item;
                 }
             }
-            item = core.$fastCreate(UIClass, el, parent, options);
-            singletons.push(item);
-            return item;
+            return core.create(UIClass, Object.assign({}, options, { main: 'function' === typeof el ? el() : el, parent: parent}));
+        },
+
+        /**
+         * 获取框架的状态。
+         * @public
+         *
+         * @return {string} 框架的状态
+         */
+        getStatus: function () {
+            return currEnv.type;
         },
 
         /**
@@ -2159,30 +2351,57 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {Function} superClass 父控件类
+         * @param {boolean} singleton 是否单例
          * @param {string} type 子控件的类型样式
          * @param {Function} constructor 子控件的标准构造函数，如果忽略将直接调用父控件类的构造函数
-         * @param {Object} ... 控件扩展的方法
+         * @param {object} ... 控件扩展的方法
          * @return {Function} 新控件的构造函数
          */
-        inherits: function (superClass, type, constructor) {
-            var index = 3,
+        inherits: function (superClass, singleton, type, constructor) {
+            var index = 4,
+                realSingleton = singleton,
                 realType = type,
                 realConstructor = constructor,
                 subClass = function (el, options) {
+                    if (subClass.singleton) {
+                        for (var i = 0, item; item = singletons[i++]; ) {
+                            if (item.constructor === subClass) {
+                                return item;
+                            }
+                        }
+                    }
+
+                    subClass.interfaces.forEach(function (imp) {
+                        this[imp.NAME + 'Data'] = {};
+                    }, this);
                     subClass.constructor.call(this, el, options);
                     el = this.getMain();
-                    subClass.interfaces.forEach(function (constructor) {
-                        constructor.call(this, el, options);
+                    subClass.interfaces.forEach(function (imp) {
+                        if (imp.constructor) {
+                            imp.constructor.call(this, el, options);
+                        }
                     }, this);
                     if (subClass.afterinterfaces) {
                         subClass.afterinterfaces.call(this, el, options);
                     }
+
+                    if (subClass.singleton) {
+                        singletons.push(this);
+                    }
                 };
+
+            if ('boolean' !== typeof realSingleton) {
+                index--;
+                realConstructor = realType;
+                realType = realSingleton;
+                realSingleton = false;
+            }
+            subClass.singleton = realSingleton;
 
             if ('string' !== typeof realType) {
                 index--;
+                realConstructor = realType;
                 realType = '';
-                realConstructor = type;
             }
 
             if (realConstructor instanceof Array) {
@@ -2224,18 +2443,16 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
             superMethods.forEach(function (item) {
                 if (item.NAME) {
-                    if (item.constructor) {
-                        subClass.interfaces.push(item.constructor);
-                    }
+                    subClass.interfaces.push(item);
                     // 对接口的处理
                     var Clazz = new Function();
                     Clazz.prototype = superClass.prototype;
                     var prototype = new Clazz();
-                    util.extend(prototype, subClass.prototype);
+                    Object.assign(prototype, subClass.prototype);
                     subClass.prototype[item.NAME] = prototype;
                     item = item.Methods;
                 }
-                util.extend(subClass.prototype, item);
+                Object.assign(subClass.prototype, item);
             });
 
             // 释放闭包占用的资源
@@ -2256,13 +2473,13 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     controls = [],
                     options;
 
-                if (!isToucher && !initRecursion) {
+                if (!initRecursion) {
                     // 第一层 init 循环的时候需要关闭resize事件监听，防止反复的重入
                     dom.removeEventListener(window, 'resize', events.orientationchange);
                 }
                 initRecursion++;
 
-                Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
+                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (dom.getAttribute(item, ecuiName)) {
                         list.push(item);
                     }
@@ -2286,7 +2503,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             controls.push({object: core.$create(item, options), options: options});
 //{if 0}//
                         } catch (e) {
-                            console.error('The type:' + options.type + ' can\'t constructor');
+                            console.warn('The type:' + options.type + ' can\'t constructor');
                             throw e;
                         }
 //{/if}//
@@ -2300,14 +2517,18 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                     item.object.init(item.options);
                 });
 
-                if (core.onready) {
-                    core.onready();
+                if (initRecursion === 1) {
+                    if (readyList) {
+                        readyList.forEach(function (item) {
+                            item();
+                        });
+                        readyList = null;
+                    }
+
+                    dom.addEventListener(window, 'resize', events.orientationchange);
                 }
 
                 initRecursion--;
-                if (!isToucher && !initRecursion) {
-                    dom.addEventListener(window, 'resize', events.orientationchange);
-                }
 
                 // 防止循环引用
                 el = null;
@@ -2317,9 +2538,15 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         /**
          * 默认的盒子模型是否为ContentBox状态
          * @public
+         *
+         * @param {HTMLElement} el DOM 对象
+         * @return {boolean} 是否为CSS2.1默认的盒子模型
          */
-        isContentBox: function () {
-            return flgFixedSize;
+        isContentBox: function (el) {
+            if (ieVersion < 8) {
+                return el.tagName === 'INPUT' || el.tagName === 'BUTTON' ? false : flgFixedSize;
+            }
+            return dom.getStyle(el, 'boxSizing') === 'content-box';
         },
 
         /**
@@ -2337,33 +2564,23 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
         /**
          * 使用或取消一个层遮罩整个浏览器可视化区域。
-         * 遮罩层的 z-index 样式默认取值为 32767，请不要将 Element 对象的 z-index 样式设置大于 32767。当框架中至少一个遮罩层工作时，body 标签将增加一个样式 ecui-mask，IE6/7 的原生 select 标签可以使用此样式进行隐藏，解决强制置顶的问题。如果不传入任何参数，将关闭最近打开的一个遮罩层，如果要关闭指定的遮罩层，请直接调用返回的函数。
+         * 遮罩层的 z-index 样式默认取值为 32000，请不要将 Element 对象的 z-index 样式设置大于 32000。当框架中至少一个遮罩层工作时，body 标签将增加一个样式 ecui-mask，IE6/7 的原生 select 标签可以使用此样式进行隐藏，解决强制置顶的问题。如果不传入任何参数，将关闭最近打开的一个遮罩层，如果要关闭指定的遮罩层，请直接调用返回的函数。
          * @public
          *
          * @param {number} opacity 透明度，如 0.5，如果省略参数将关闭遮罩层
-         * @param {number} zIndex 遮罩层的 zIndex 样式值，如果省略使用 32767
+         * @param {number} zIndex 遮罩层的 zIndex 样式值，如果省略使用 32000
          * @return {Function} 用于关闭当前遮罩层的函数
          */
         mask: function (opacity, zIndex) {
-            var el = core.getBody(),
-                view = util.getView();
-
-            if (ieVersion < 9) {
-                // 宽度向前扩展2屏，向后扩展2屏，是为了解决翻屏滚动的剧烈闪烁问题
-                // 不直接设置为整个页面的大小，是为了解决IE下过大的遮罩层不能半透明的问题
-                var top = Math.max(view.top - view.height * 2, 0),
-                    left = Math.max(view.left - view.width * 2, 0),
-                    text = ';top:' + top + 'px;left:' + left + 'px;width:' + Math.min(view.width * 5, view.pageWidth - left) + 'px;height:' + Math.min(view.height * 5, view.pageHeight - top) + 'px;display:';
-
-            } else {
-                text = ';top:' + view.top + 'px;left:' + view.left + 'px;width:' + view.width + 'px;height:' + view.height + 'px;display:';
-            }
+            var el = document.body;
 
             if ('boolean' === typeof opacity) {
+                var view = util.getView(),
+                    text = ';top:' + (view.top - view.height) + 'px;left:' + (view.left - view.width) + 'px;width:' + (view.width * 3) + 'px;height:' + (view.height * 3) + 'px;display:' + (opacity ? 'block' : 'none');
+
                 // 仅简单的显示或隐藏当前的屏蔽层，用于resize时的重绘
-                text += opacity ? 'block' : 'none';
                 maskElements.forEach(function (item) {
-                    item.style.cssText += text;
+                    item.style.display = text;
                 });
             } else if (opacity === undefined) {
                 unmasks.pop()();
@@ -2372,23 +2589,22 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 if (!maskElements.length) {
                     dom.addClass(el, 'ui-modal');
                 }
+
+                view = util.getView();
                 maskElements.push(
                     el = el.appendChild(
                         dom.create(
                             {
                                 className: 'ui-mask',
                                 style: {
-                                    cssText: text + 'block;z-index:' + (zIndex || 32767)
+                                    cssText: ';top:' + (view.top - view.height) + 'px;left:' + (view.left - view.width) + 'px;width:' + (view.width * 3) + 'px;height:' + (view.height * 3) + 'px;display:block;z-index:' + (zIndex || 32000)
                                 }
                             }
                         )
                     )
                 );
-                if (ieVersion < 9) {
-                    dom.setStyle(el, 'filter', 'alpha(opacity=50)');
-                } else {
-                    dom.setStyle(el, 'opacity', opacity);
-                }
+                dom.setStyle(el, 'opacity', opacity);
+
                 unmasks.push(
 
                     /**
@@ -2403,7 +2619,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                             util.timer(dom.remove, 1000, null, el);
                             el.style.display = 'none';
                             if (!maskElements.length) {
-                                dom.removeClass(core.getBody(), 'ui-modal');
+                                dom.removeClass(document.body, 'ui-modal');
                             }
                         }
                         el = null;
@@ -2429,11 +2645,25 @@ outer:          for (var caches = [], target = event.target, el; target; target 
          * @public
          *
          * @param {Function} fn 查询函数
-         * @param {Object} thisArg fn执行过程中的this对象
+         * @param {object} thisArg fn执行过程中的this对象
          * @return {Array} 控件列表
          */
         query: function (fn, thisArg) {
             return independentControls.filter(fn, thisArg);
+        },
+
+        /**
+         * 框架加载完成后需要调用的函数。
+         * @public
+         *
+         * @param {Function} fn 需要调用的函数
+         */
+        ready: function (fn) {
+            if (readyList) {
+                readyList.push(fn);
+            } else {
+                fn();
+            }
         },
 
         /**
@@ -2491,15 +2721,6 @@ outer:          for (var caches = [], target = event.target, el; target; target 
         },
 
         /**
-         * 恢复当前框架的状态到上一个状态。
-         * restore 用于恢复调用特殊操作如 drag 与 intercept 后改变的框架环境，包括各框架事件处理函数的恢复、控件的焦点设置等。
-         * @public
-         */
-        restore: function () {
-            currEnv = envStack.pop();
-        },
-
-        /**
          * 触发框架自动初始化，减少暂停次数，到零时触发初始化。
          * @public
          */
@@ -2538,9 +2759,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                         // 允许获得焦点的控件必须是当前激活的控件，或者它没有焦点的时候才允许获得
                         // 典型的用例是滚动条，滚动条不需要获得焦点，如果滚动条的父控件没有焦点
                         // 父控件获得焦点，否则焦点不发生变化
-                        var parent = getCommonParent(focusedControl, control);
+                        var parent = getCommonParent(focusedControl, target);
                         bubble(focusedControl, 'blur', null, parent);
-                        bubble(focusedControl = control, 'focus', null, parent);
+                        bubble(focusedControl = target, 'focus', null, parent);
                     }
                     break;
                 }

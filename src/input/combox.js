@@ -13,12 +13,27 @@
     <div ui="value:22">22</div>
 </div>
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
         ui = core.ui,
         util = core.util;
 //{/if}//
+    function refresh(combox) {
+        var text = ui.Select.prototype.getValue.call(combox);
+
+        combox.preventAlterItems();
+        combox.getItems().forEach(function (item) {
+            if (item.getContent().indexOf(text) < 0) {
+                item.hide();
+            } else {
+                item.show();
+            }
+        });
+        combox.premitAlterItems();
+        combox.alterItems();
+    }
+
     /**
      * 组合框控件。
      * 组合框可以在下拉选项中选择，也可以输入内容。
@@ -44,6 +59,15 @@
             /**
              * @override
              */
+            $click: function (event) {
+                if (!this.$getSection('Options').isShow()) {
+                    ui.Select.prototype.$click.call(this, event);
+                }
+            },
+
+            /**
+             * @override
+             */
             $disable: function () {
                 ui.Select.prototype.$disable.call(this);
                 this.getInput().style.display = 'none';
@@ -60,31 +84,47 @@
             /**
              * @override
              */
-            $initStructure: function (width, height) {
-                ui.Select.prototype.$initStructure.call(this, width, height);
+            $input: function (event) {
+                ui.Select.prototype.$input.call(this, event);
+                this.$click(event);
 
-                var style = this.getInput().style;
-                style.width = width + 'px';
-                style.height = height + 'px';
+                var text = ui.Select.prototype.getValue.call(this),
+                    selected;
+
+                this.getItems().forEach(function (item) {
+                    if (item.getContent() === text) {
+                        selected = item;
+                    }
+                });
+                this.setSelected(selected);
+                if (!selected) {
+                    this.$setValue(text);
+                }
+                refresh(this);
+                this.alterStatus(text ? '-placeholder' : '+placeholder');
             },
 
             /**
              * @override
              */
-            $input: function () {
-                ui.Select.prototype.$input.call(this);
-                this.setValue(this.getValue());
+            getValue: function () {
+                var item = this.getSelected();
+                return item ? item.getValue() : '';
             },
 
             /**
              * @override
              */
-            setValue: function (value) {
-                ui.Select.prototype.setValue.call(this, value);
-                this.$setValue(value);
+            setSelected: function (item) {
+                ui.Select.prototype.setSelected.call(this, item);
+
+                item = this.getSelected();
+                if (item) {
+                    this.$setValue(item.getContent());
+                }
+
+                refresh(this);
             }
         }
     );
-//{if 0}//
 }());
-//{/if}//

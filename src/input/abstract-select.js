@@ -11,10 +11,11 @@
 </div>
 
 @fields
+_bRequired    - 是否必须选择
+_sPlaceHolder - 为空时的提示信息内容
 _cSelected    - 当前选中的选项
 _uText        - 下拉框的文本框
 _uOptions     - 下拉选择框
-_bRequired    - 是否必须选择
 */
 (function () {
 //{if 0}//
@@ -22,9 +23,7 @@ _bRequired    - 是否必须选择
         dom = core.dom,
         ui = core.ui,
         util = core.util;
-
 //{/if}//
-
     /**
      * 下拉框控件。
      * 扩展了原生 SelectElement 的功能，允许指定下拉选项框的最大选项数量，在屏幕显示不下的时候，会自动显示在下拉框的上方。在没有选项时，下拉选项框有一个选项的高度。下拉框控件允许使用键盘与滚轮操作，在下拉选项框打开时，可以通过回车键或鼠标点击选择，上下键选择选项的当前条目，在关闭下拉选项框后，只要拥有焦点，就可以通过滚轮上下选择选项。
@@ -38,43 +37,47 @@ _bRequired    - 是否必须选择
         function (el, options) {
             util.setDefault(options, 'readOnly', true);
 
-            var oldEl = el;
-            el = dom.insertBefore(
-                dom.create(
-                    {
-                        className: el.className,
-                        style: {
-                            cssText: el.style.cssText
-                        }
-                    }
-                ),
-                el
-            );
-
-            if (oldEl.tagName === 'SELECT') {
-                options.name = oldEl.name;
-                options.value = oldEl.value;
+            if (el.tagName === 'SELECT') {
+                options.name = el.name;
+                options.value = el.value;
 
                 var optionsEl = dom.create(
-                    {
-                        innerHTML: Array.prototype.map.call(
-                            oldEl.options,
-                            function (item) {
-                                var optionText = dom.getAttribute(item, core.getAttributeName());
-                                return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
+                        {
+                            innerHTML: Array.prototype.slice.call(el.options).map(
+                                function (item) {
+                                    var optionText = dom.getAttribute(item, core.getAttributeName());
+                                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
+                                }
+                            ).join('')
+                        }
+                    );
+
+                el = dom.insertBefore(
+                    dom.create(
+                        {
+                            className: el.className,
+                            style: {
+                                cssText: el.style.cssText
                             }
-                        ).join('')
-                    }
+                        }
+                    ),
+                    el
                 );
+
+                dom.remove(el.nextSibling);
             } else {
-                optionsEl = oldEl;
-                oldEl.style.cssText = '';
+                optionsEl = dom.create('DIV');
+                var input = el.getElementsByTagName('INPUT')[0];
+                for (; el.firstChild; ) {
+                    optionsEl.appendChild(el.firstChild);
+                }
             }
+
             optionsEl.className = options.classes.join('-options ') + 'ui-popup ui-hide';
-
-            dom.remove(oldEl);
-
             el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
+            if (input) {
+                el.appendChild(input);
+            }
 
             ui.InputControl.call(this, el, options);
 
@@ -82,7 +85,8 @@ _bRequired    - 是否必须选择
             this._uOptions = core.$fastCreate(this.Options, optionsEl, this, {focusable: false});
 
             this._bRequired = !!options.required;
-            this._cSelected = null;
+            this._sPlaceHolder = dom.getAttribute(this.getInput(), 'placeholder') || '';
+            this.getInput().setAttribute('placeholder', '');
 
             this.setPopup(this._uOptions);
             this.$setBody(this._uOptions.getBody());
@@ -178,6 +182,14 @@ _bRequired    - 是否必须选择
             /**
              * @override
              */
+            $blur: function (event) {
+                this._uOptions.hide();
+                ui.InputControl.prototype.$blur.call(this, event);
+            },
+
+            /**
+             * @override
+             */
             $cache: function (style) {
                 ui.InputControl.prototype.$cache.call(this, style);
                 this._uText.cache(true);
@@ -205,7 +217,7 @@ _bRequired    - 是否必须选择
              */
             $ready: function (options) {
                 ui.InputControl.prototype.$ready.call(this, options);
-                this.setValue(this.getValue());
+                this.setValue(this.getInput().value);
                 this._bAlterItems = true;
             },
 
@@ -261,22 +273,33 @@ _bRequired    - 是否必须选择
                 item = item || null;
                 if (item !== this._cSelected) {
                     if (this._cSelected) {
-                        this._cSelected.alterClass('-selected');
+                        this._cSelected.alterStatus('-selected');
                     }
                     if (item) {
-                        item.alterClass('+selected');
-                        this._uText.setContent(item.getBody().innerHTML);
+                        item.alterStatus('+selected');
+                        this._uText.getBody().innerHTML = item.getContent();
                         ui.InputControl.prototype.setValue.call(this, item._sValue);
                         if (this._uOptions.isShow()) {
                             core.setFocused(item);
                         }
-                        this.alterClass(item._sValue === '' ? '+placeholder' : '-placeholder');
                     } else {
-                        this._uText.setContent('');
                         ui.InputControl.prototype.setValue.call(this, '');
-                        core.loseFocus(this._cSelected);
+                        if (this.contain(core.getFocused())) {
+                            core.setFocused(this);
+                        }
                     }
                     this._cSelected = item;
+                }
+
+                if (this.getInput().value) {
+                    this.alterStatus('-placeholder');
+                } else {
+                    if (this._sPlaceHolder) {
+                        this._uText.getBody().innerHTML = this._sPlaceHolder;
+                    } else if (!item) {
+                        this._uText.getBody().innerHTML = '';
+                    }
+                    this.alterStatus('+placeholder');
                 }
             },
 

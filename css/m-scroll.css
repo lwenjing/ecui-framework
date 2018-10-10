@@ -5,6 +5,6 @@
 }
 
 .ui-mobile-scroll-body {
-    position: absolute !important;
-    width: 100%;
+    overflow: visible !important;
+    .m-width100rate();
 }

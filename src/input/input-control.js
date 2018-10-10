@@ -20,23 +20,12 @@ _eInput        - INPUT对象
         ui = core.ui,
         util = core.util,
 
+        isToucher = document.ontouchstart !== undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined;
 //{/if}//
     var timer = util.blank,
         // INPUT事件集合对象
         events = {
-            /**
-             * 失去焦点事件处理。
-             * @private
-             */
-            blur: function (event) {
-                var control = core.wrapEvent(event).target.getControl();
-                // INPUT失去焦点，但控件未失去焦点，不需要触发blur
-                if (!control.contain(core.getFocused())) {
-                    control.blur();
-                }
-            },
-
             /**
              * 输入结束事件处理。
              * @private
@@ -84,25 +73,6 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 获得焦点事件处理。
-             * @private
-             */
-            focus: function (event) {
-                var el = core.wrapEvent(event).target,
-                    control = el.getControl();
-                if (control.isDisabled()) {
-                    dom.removeEventListener(el, 'blur', events.blur);
-                    try {
-                        el.blur();
-                    } catch (ignore) {
-                    }
-                    dom.addEventListener(el, 'blur', events.blur);
-                } else {
-                    control.focus();
-                }
-            },
-
-            /**
              * 输入内容事件处理。
              * @private
              */
@@ -130,6 +100,14 @@ _eInput        - INPUT对象
             }
         };
 
+    if (isToucher) {
+        events.focusin = focus;
+        events.focusout = blur;
+    } else {
+        events.blur = blur;
+        events.focus = focus;
+    }
+
     /**
      * 为控件的 INPUT 节点绑定事件。
      * @private
@@ -149,6 +127,44 @@ _eInput        - INPUT对象
     }
 
     /**
+     * INPUT 失去焦点的处理。
+     * @private
+     *
+     * @param {Event} event 事件对象
+     */
+    function blur(event) {
+        var control = core.wrapEvent(event).target.getControl();
+        // INPUT失去焦点，但控件未失去焦点，不需要触发blur，例如Select的Input失去焦点不需要触发
+        if (!control.contain(core.getFocused())) {
+            control.blur();
+        }
+    }
+
+    /**
+     * INPUT 获得焦点的处理。
+     * @private
+     *
+     * @param {Event} event 事件对象
+     */
+    function focus(event) {
+        var el = core.wrapEvent(event).target,
+            control = el.getControl();
+
+        if (control.isDisabled()) {
+            dom.removeEventListener(el, 'blur', events.blur);
+            try {
+                el.blur();
+            } catch (ignore) {
+            }
+            dom.addEventListener(el, 'blur', events.blur);
+        } else {
+            if (!isToucher || document.activeElement !== el) {
+                control.focus();
+            }
+        }
+    }
+
+    /**
      * 表单提交事件处理。
      * @private
      *
@@ -157,11 +173,17 @@ _eInput        - INPUT对象
     function submitHandler(event) {
         event = core.wrapEvent(event);
 
-        Array.prototype.forEach.call(this.elements, function (item) {
+        var elements = Array.prototype.slice.call(this.elements);
+
+        elements.forEach(function (item) {
             if (item.getControl) {
                 core.dispatchEvent(item.getControl(), 'submit', event);
             }
         });
+
+        if (event.returnValue !== false) {
+            ui.InputControl.saveToDefault(elements);
+        }
     }
 
     /**
@@ -169,7 +191,7 @@ _eInput        - INPUT对象
      * @private
      */
     function resetHandler() {
-        Array.prototype.forEach.call(this.elements, function (item) {
+        Array.prototype.slice.call(this.elements).forEach(function (item) {
             if (item.getControl) {
                 core.dispatchEvent(item.getControl(), 'reset');
             }
@@ -244,12 +266,18 @@ _eInput        - INPUT对象
             $blur: function (event) {
                 ui.Control.prototype.$blur.call(this, event);
 
-                dom.removeEventListener(this._eInput, 'blur', events.blur);
-                try {
-                    this._eInput.blur();
-                } catch (ignore) {
+                if (!isToucher) {
+                    if (events.blur) {
+                        dom.removeEventListener(this._eInput, 'blur', events.blur);
+                    }
+                    try {
+                        this._eInput.blur();
+                    } catch (ignore) {
+                    }
+                    if (events.blur) {
+                        dom.addEventListener(this._eInput, 'blur', events.blur);
+                    }
                 }
-                dom.addEventListener(this._eInput, 'blur', events.blur);
 
                 if (this._bBlur) {
                     core.dispatchEvent(this, 'validate');
@@ -317,18 +345,21 @@ _eInput        - INPUT对象
                     this.alterSubType('');
                     this._bError = false;
                 }
-                util.timer(
-                    function () {
-                        dom.removeEventListener(this._eInput, 'focus', events.focus);
-                        try {
-                            this._eInput.focus();
-                        } catch (ignore) {
-                        }
-                        dom.addEventListener(this._eInput, 'focus', events.focus);
-                    },
-                    0,
-                    this
-                );
+
+                if (!isToucher) {
+                    util.timer(
+                        function () {
+                            dom.removeEventListener(this._eInput, 'focus', events.focus);
+                            try {
+                                this._eInput.focus();
+                            } catch (ignore) {
+                            }
+                            dom.addEventListener(this._eInput, 'focus', events.focus);
+                        },
+                        0,
+                        this
+                    );
+                }
             },
 
             /**
@@ -336,6 +367,14 @@ _eInput        - INPUT对象
              * @event
              */
             $input: util.blank,
+
+            /**
+             * @override
+             */
+            $ready: function (event) {
+                ui.Control.prototype.$ready.call(this, event);
+                this.saveToDefault();
+            },
 
             /**
              * 重置事件。
@@ -396,6 +435,26 @@ _eInput        - INPUT对象
             $validate: util.blank,
 
             /**
+             * 获取控件进行提交的名称，默认使用 getName 的返回值。
+             * @public
+             *
+             * @return {string} 控件的表单名称
+             */
+            getFormName: function () {
+                return this.getName();
+            },
+
+            /**
+             * 获取控件进行提交的值，默认使用 getValue 的返回值。
+             * @public
+             *
+             * @return {string} 控件的表单值
+             */
+            getFormValue: function () {
+                return this.getValue();
+            },
+
+            /**
              * 获取控件的输入元素。
              * @public
              *
@@ -417,16 +476,6 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 获取控件进行提交的值，默认使用 getValue 的返回值。
-             * @public
-             *
-             * @return {string} 控件的表单值
-             */
-            getFormValue: function () {
-                return this.getValue();
-            },
-
-            /**
              * 获取控件的值。
              * getValue 方法返回提交时表单项的值，使用 setValue 方法设置。
              * @public
@@ -438,13 +487,11 @@ _eInput        - INPUT对象
             },
 
             /**
-             * 设置控件的默认值，供form表单的reset方法使用。
+             * 保存控件的值为默认值，供form表单的reset方法使用。
              * @public
-             *
-             * @param {string} value 是否选中
              */
-            setDefaultValue: function (value) {
-                this._eInput.defaultValue = value;
+            saveToDefault: function () {
+                this._eInput.defaultValue = this._eInput.value;
             },
 
             /**
@@ -474,4 +521,26 @@ _eInput        - INPUT对象
             }
         }
     );
+
+    /**
+     * 设置控件的默认值。
+     * 如果表单元素类型是 radio 或者 checkbox，不进行 ECUI 控件化是无法真正设置成默认值的。
+     * @public
+     *
+     * @param {Array} element 全部的表单元素
+     */
+    ui.InputControl.saveToDefault = function (elements) {
+        elements.forEach(function (item) {
+            if (item.getControl) {
+                var control = item.getControl();
+                if (control.saveToDefault) {
+                    control.saveToDefault();
+                }
+            } else if (item.type === 'radio' || item.type === 'checkbox') {
+                item.defaultChecked = item.checked;
+            } else {
+                item.defaultValue = item.value;
+            }
+        });
+    };
 }());

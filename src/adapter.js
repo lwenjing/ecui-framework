@@ -8,17 +8,18 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         //{if 1}//JAVASCRIPT = 'javascript',//{/if}//
         patch = ecui,
         fontSizeCache = [],
-        loadScriptCount = 0,
-        //{if 1}//isToucher = document.ontouchstart !== undefined,//{/if}//
+        isToucher = document.ontouchstart !== undefined,
         //{if 1}//isPointer = !!window.PointerEvent, // 使用pointer事件序列，请一定在需要滚动的元素上加上touch-action:none//{/if}//
         isStrict = document.compatMode === 'CSS1Compat',
         isWebkit = /webkit/i.test(navigator.userAgent),
-        //{if 1}//iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,//{/if}//
-        chromeVersion = /Chrome\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        iosVersion = /(iPhone|iPad).+OS (\d+)/i.test(navigator.userAgent) ?  +(RegExp.$2) : undefined,
+        isUCBrowser = /ucbrowser/i.test(navigator.userAgent),
+        chromeVersion = /(Chrome|CriOS)\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$2 : undefined,
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
         operaVersion = /opera\/(\d+\.\d)/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
-        safariVersion = /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) ? +RegExp.$1 : undefined;
+        safariVersion = !chromeVersion && !isUCBrowser && /(\d+\.\d)(\.\d)?\s+.*safari/i.test(navigator.userAgent) ? +RegExp.$1 : undefined,
+        isWebview = iosVersion && !chromeVersion && !isUCBrowser ? !/\)\s*Version\//.test(navigator.userAgent) : /\)\s*Version\//.test(navigator.userAgent);
 
     ecui = {
 //{if 0}//
@@ -42,6 +43,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         firefox: firefoxVersion,
         opera: operaVersion,
         safari: safariVersion,
+        inapp: isWebview,
 
         dom: {
             /**
@@ -61,7 +63,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 挂载事件。
              * @public
              *
-             * @param {Object} obj 响应事件的对象
+             * @param {object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
              */
@@ -142,6 +144,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {string} cssText css文本
+             * @return {HTMLElement} 创建的 style 元素
              */
             createStyleSheet: function (cssText) {
                 var el = document.createElement('STYLE');
@@ -162,6 +165,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 document.head.appendChild(el);
 
                 util.adjustFontSize([document.styleSheets[document.styleSheets.length - 1]]);
+
+                return el;
             },
 
             /**
@@ -202,7 +207,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {HTMLElement} el Element 对象
-             * @return {Object} 位置信息
+             * @return {object} 位置信息
              */
             getPosition: function (el) {
                 var top = 0,
@@ -360,7 +365,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 判断一个对象是否为 DOM 元素。
              * @public
              *
-             * @param {Object} obj 对象
+             * @param {object} obj 对象
              * @return {boolean} 是否为 DOM 元素
              */
             isElement: ieVersion < 9 ? function (obj) {
@@ -464,7 +469,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     i = oldClasses.length,
                     j = newClasses.length;
 
-                for (; i && j;) {
+                for (; i && j; ) {
                     if (oldClasses[i - 1] === newClasses[j - 1]) {
                         oldClasses.splice(--i, 1);
                     } else if (oldClasses[i - 1] < newClasses[j - 1]) {
@@ -480,7 +485,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 卸载事件。
              * @public
              *
-             * @param {Object} obj 响应事件的对象
+             * @param {object} obj 响应事件的对象
              * @param {string} type 事件类型
              * @param {Function} func 事件处理函数
              */
@@ -554,6 +559,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
             }
         },
+        effect: {},
         ext: {},
         io: {
             /**
@@ -569,7 +575,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * method    {string}   请求类型，默认为GET
              * async     {boolean}  是否异步请求，默认为true(异步)
              * data      {string}   需要发送的数据，主要用于POST
-             * headers   {Object}   要设置的http request header
+             * headers   {object}   要设置的http request header
              * timeout   {number}   超时时间
              * nocache   {boolean}  是否需要缓存，默认为false(缓存)
              * onupload  {Function} 如果xhr支持upload.onprogress，上传过程中触发
@@ -578,7 +584,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {string} url 发送请求的url
-             * @param {Object} options 选项
+             * @param {object} options 选项
              */
             ajax: function (url, options) {
                 function stateChangeHandler() {
@@ -635,6 +641,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     data = options.data || '',
                     async = options.async !== false,
                     method = (options.method || 'GET').toUpperCase(),
+                    headers = options.headers || {},
                     onerror = options.onerror || util.blank,
                     // 基本的逻辑来自lili同学提供的patch
                     stop,
@@ -711,11 +718,10 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {string} url 加载数据的url
              * @param {Function} callback 数据加载结束时调用的函数或函数名
-             * @param {Object} options 选项
+             * @param {object} options 选项
              */
             loadScript: function (url, callback, options) {
                 function removeScriptTag() {
-                    loadScriptCount--;
                     if (stop) {
                         stop();
                     }
@@ -726,7 +732,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     scr = null;
                 }
 
-                loadScriptCount++;
                 options = options || {};
 
                 if (!options.cache) {
@@ -748,7 +753,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     if (scr.readyState === undefined || scr.readyState === 'loaded' || scr.readyState === 'complete') {
                         scriptLoaded = 1;
                         try {
-                            if (callback && loadScriptCount === 1) {
+                            if (callback) {
                                 callback();
                             }
                         } finally {
@@ -786,7 +791,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @param {string} url 长连接的地址
              * @param {Function} callback 每接受一个正确的数据报文时产生的回调函数，数据报文是一个紧凑的json字符串，使用\n分隔不同的数据报文
              * @param {Function} onerror io失败时的处理
-             * @return {Object} 操作对象，使用close关闭长连接
+             * @return {object} 操作对象，使用close关闭长连接
              */
             openSocket: function (url, callback, onerror) {
                 var recvbuf = '',
@@ -794,7 +799,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 function onrecieve(event) {
                     recvbuf += event.data;
-                    for (; ;) {
+                    for (;;) {
                         var index = recvbuf.indexOf('\n');
                         if (index < 0) {
                             return;
@@ -831,7 +836,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 }
 
                 function websocket() {
-                    socket = new WebSocket('ws://' + url[0]);
+                    socket = new WebSocket((location.protocol.startsWith('https') ? 'wss://' : 'ws://') + url[0]);
                     socket.onmessage = onrecieve;
                     socket.onerror = onerror || websocketErrorHandler;
                 }
@@ -869,17 +874,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         },
         ui: {},
         util: {
-            arraySlice: function (el) {
-                try {
-                    return Array.prototype.slice.call(el);
-                } catch (e) {
-                    for (var r = [], i = 0, len = el.length; i < len; i++) {
-                        r[i] = el[i];
-                    }
-                    return r;
-                }
-            },
-
             /*
              * 自适应调整字体大小。
              * @public
@@ -890,13 +884,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 var fontSize = core.fontSize = util.toNumber(dom.getStyle(dom.parent(document.body), 'font-size'));
                 sheets.forEach(function (item) {
                     if (ieVersion) {
-                        for (i = 0, rule = item.rules || item.cssRules, item = []; value = rule[i++];) {
+                        for (i = 0, rule = item.rules || item.cssRules, item = []; value = rule[i++]; ) {
                             item.push(value);
                         }
                     } else {
                         item = Array.prototype.slice.call(item.rules || item.cssRules);
                     }
-                    for (var i = 0, rule; rule = item[i++];) {
+                    for (var i = 0, rule; rule = item[i++]; ) {
                         if (rule.cssRules && rule.cssRules.length) {
                             item = item.concat(Array.prototype.slice.call(rule.cssRules));
                         } else {
@@ -904,7 +898,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                             if (value && value.slice(-3) === 'rem') {
                                 value = +value.slice(0, -3);
                                 fontSizeCache.push([rule.style, value]);
-                                rule.style['font-size'] = (Math.round(fontSize * value / 2) * 2) + 'px';
+                                rule.style['font-size'] = Math.round(fontSize * value) + 'px';
                             }
                         }
                     }
@@ -919,20 +913,24 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             blank: new Function(),
 
             /**
-             * 对目标字符串进行 html 编码。
-             * encodeHTML 方法对四个字符进行编码，分别是 &<>"
+             * 检测表单有没有未提交的修改。
              * @public
              *
-             * @param {string} source 目标字符串
-             * @return {string} 结果字符串
+             * @param {FormElement} form 表单元素
+             * @return {boolean} 是否有更改
              */
-            encodeHTML: function (source) {
-                return source.replace(
-                    /[&<>"']/g,
-                    function (match) {
-                        return '&#' + match.charCodeAt(0) + ';';
+            checkUpdate: function (form) {
+                var update = false;
+                Array.prototype.slice.call(form.elements).forEach(function (item) {
+                    if (item.type !== 'radio' && item.type !== 'checkbox') {
+                        if (item.defaultValue !== item.value) {
+                            update = true;
+                        }
+                    } else if (item.defaultChecked !== item.checked) {
+                        update = true;
                     }
-                );
+                });
+                return update;
             },
 
             /**
@@ -955,20 +953,37 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             }()),
 
             /**
-             * 对象属性复制。
+             * 对目标字符串进行 html 编码。
+             * encodeHTML 方法对五个字符进行编码，分别是 &<>"'
              * @public
              *
-             * @param {Object} target 目标对象
-             * @param {Object} source 源对象
-             * @return {Object} 目标对象
+             * @param {string} source 目标字符串
+             * @return {string} 结果字符串
              */
-            extend: function (target, source) {
-                for (var key in source) {
-                    if (source.hasOwnProperty(key)) {
-                        target[key] = source[key];
+            encodeHTML: function (source) {
+                return source.replace(
+                    /[&<>"']/g,
+                    function (match) {
+                        return '&#' + match.charCodeAt(0) + ';';
                     }
-                }
-                return target;
+                );
+            },
+
+            /**
+             * 对目标字符串进行 js 编码。
+             * encodeJS 方法对单双引号进行编码
+             * @public
+             *
+             * @param {string} source 目标字符串
+             * @return {string} 结果字符串
+             */
+            encodeJS: function (source) {
+                return source.replace(
+                    /["']/g,
+                    function (match) {
+                        return match === '"' ? '\\x22' : '\\x27';
+                    }
+                );
             },
 
             /**
@@ -1024,7 +1039,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * pageHeight {number} 页面的高度
              * @public
              *
-             * @return {Object} 浏览器可视区域信息
+             * @return {object} 浏览器可视区域信息
              */
             getView: function () {
                 var body = document.body,
@@ -1053,14 +1068,14 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {Function} subClass 子类
              * @param {Function} superClass 父类
-             * @return {Object} subClass 的 prototype 属性
+             * @return {object} subClass 的 prototype 属性
              */
             inherits: function (subClass, superClass) {
                 var oldPrototype = subClass.prototype,
                     Clazz = new Function();
 
                 Clazz.prototype = superClass.prototype;
-                util.extend(subClass.prototype = new Clazz(), oldPrototype);
+                Object.assign(subClass.prototype = new Clazz(), oldPrototype);
                 subClass.prototype.constructor = subClass;
                 subClass.superClass = superClass.prototype;
 
@@ -1072,12 +1087,12 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * @public
              *
              * @param {string} name 描述值的字符串
-             * @param {Object} namespace 初始的命名空间，默认从window开始
-             * @return {Object} 命名空间中指定的值，如果不存在返回undefined
+             * @param {object} namespace 初始的命名空间，默认从window开始
+             * @return {object} 命名空间中指定的值，如果不存在返回undefined
              */
             parseValue: function (name, namespace) {
                 namespace = namespace || window;
-                for (var i = 0, list = name.split('.'); name = list[i++];) {
+                for (var i = 0, list = name.split('.'); name = list[i++]; ) {
                     namespace = namespace[name];
                     if (namespace === undefined || namespace === null) {
                         return undefined;
@@ -1087,14 +1102,24 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
             },
 
             /**
+             * 阻止系统默认事件的单例函数，用于阻止事件调用。
+             * @public
+             *
+             * @param {Event} event 事件对象
+             */
+            preventEvent: function (event) {
+                event.preventDefault();
+            },
+
+            /**
              * 从数组中移除对象。
              * @public
              *
              * @param {Array} array 数组对象
-             * @param {Object} obj 需要移除的对象
+             * @param {object} obj 需要移除的对象
              */
             remove: function (array, obj) {
-                for (var i = array.length; i--;) {
+                for (var i = array.length; i--; ) {
                     if (array[i] === obj) {
                         array.splice(i, 1);
                     }
@@ -1106,9 +1131,9 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * 如果对象的属性已经被设置，setDefault 方法不进行任何处理，否则将默认值设置到指定的属性上。
              * @public
              *
-             * @param {Object} obj 被设置的对象
+             * @param {object} obj 被设置的对象
              * @param {string} key 属性名
-             * @param {Object} value 属性的默认值
+             * @param {object} value 属性的默认值
              */
             setDefault: function (obj, key, value) {
                 if (!obj.hasOwnProperty(key)) {
@@ -1140,25 +1165,37 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              *
              * @param {Function} func 定时器需要调用的函数
              * @param {number} delay 定时器延迟调用的毫秒数，如果为负数表示需要连续触发
-             * @param {Object} caller 调用者，在 func 被执行时，this 指针指向的对象，可以为空
-             * @param {Object} ... 向 func 传递的参数
+             * @param {object} caller 调用者，在 func 被执行时，this 指针指向的对象，可以为空
+             * @param {object} ... 向 func 传递的参数
              * @return {Function} 用于关闭定时器的方法
              */
             timer: function (func, delay, caller) {
-                function build() {
-                    return (delay < 0 ? setInterval : setTimeout)(
-                        function () {
-                            func.apply(caller, args);
-                            // 使用delay<0而不是delay>=0，是防止delay没有值的时候，不进入分支
-                            if (!delay || delay > 0) {
-                                func = caller = args = null;
-                            }
-                        },
-                        Math.abs(delay)
-                    );
+                function callFunc() {
+                    if (func) {
+                        func.apply(caller, args);
+                    }
+                    if (delay === -1) {
+                        if (func) {
+                            handle = window.requestAnimationFrame(callFunc);
+                        }
+                    } else if (delay >= 0) {
+                        func = caller = args = null;
+                    }
                 }
 
-                delay = delay || 0;
+                function build() {
+                    return delay === -1 ?
+                            window.requestAnimationFrame(callFunc) :
+                            (delay < 0 ? setInterval : setTimeout)(callFunc, Math.abs(delay));
+                }
+
+                if (delay === -1) {
+                    if (!window.requestAnimationFrame) {
+                        delay = -20;
+                    }
+                } else {
+                    delay = delay || 0;
+                }
 
                 var args = Array.prototype.slice.call(arguments, 3),
                     handle = build(),
@@ -1171,7 +1208,11 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                  * @param {boolean} pause 是否暂时停止定时器，如果参数是 true，再次调用函数并传入参数 true 恢复运行。
                  */
                 return function (pause) {
-                    (delay < 0 ? clearInterval : clearTimeout)(handle);
+                    if (delay === -1) {
+                        window.cancelAnimationFrame(handle);
+                    } else {
+                        (delay < 0 ? clearInterval : clearTimeout)(handle);
+                    }
                     if (pause) {
                         if (pausing) {
                             handle = build();
@@ -1208,7 +1249,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              * toNumber 方法会省略数值的符号，例如字符串 9px 将当成数值的 9，不能识别的数值将默认为 0。
              * @public
              *
-             * @param {Object} obj 需要转换的对象
+             * @param {object} obj 需要转换的对象
              * @return {number} 对象的数值
              */
             toNumber: function (obj) {
@@ -1222,6 +1263,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
     var core = ecui,
         dom = core.dom,
+        //{if 1}//effect = core.effect,//{/if}//
         //{if 1}//ext = core.ext,//{/if}//
         io = core.io,
         //{if 1}//ui = core.ui,//{/if}//
@@ -1262,7 +1304,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 set: function (el, value) {
                     el.style.filter =
                         el.style.filter.replace(/alpha\([^\)]*\)/gi, '') +
-                        (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') +
+                            (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') +
                             '(opacity=' + value * 100 + ')' : '');
                 }
             } : undefined,
@@ -1294,7 +1336,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         function loadedHandler() {
             if (!hasReady) {
                 // 在处理的过程中，可能又有新的dom.ready函数被添加，需要添加到最后而不是直接执行
-                for (var i = 0, func; func = list[i++];) {
+                for (var i = 0, func; func = list[i++]; ) {
                     func();
                 }
                 list = [];
@@ -1341,18 +1383,56 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
     } catch (ignore) {
     }
 
-    (function () {
-        function extend(des, src) {
-            if (src) {
-                util.extend(des, src);
-            }
-        }
+    try {
+        new Function('let a')();
+    } catch (e) {
+        // es6 部分函数兼容
+        Object.assign = function (target) {
+            Array.prototype.slice.call(arguments, 1).forEach(function (source) {
+                if (source) {
+                    for (var key in source) {
+                        if (source.hasOwnProperty(key)) {
+                            target[key] = source[key];
+                        }
+                    }
+                }
+            });
+            return target;
+        };
 
+        String.prototype.startsWith = function (s) {
+            return this.indexOf(s) === 0;
+        };
+
+        String.prototype.endsWith = function (s) {
+            return this.lastIndexOf(s) === this.length - s.length;
+        };
+    }
+
+    /**
+     * 当前是否需要处理IOS软键盘。
+     * @public
+     *
+     * @param {HTMLElement} target 用于判断的元素对象，如果为空使用 document.activeElement
+     * @return {boolean} 是否需要处理IOS软键盘
+     */
+    util.hasIOSKeyboard = iosVersion ? function (target) {
+        target = target || document.activeElement;
+        return !target.readOnly && ((target.tagName === 'INPUT' && target.type !== 'radio' && target.type !== 'checkbox') || target.tagName === 'TEXTAREA');
+    } : function () {
+        return false;
+    };
+//{if 0}//
+    if (isToucher) {
+        dom.addEventListener(document, 'contextmenu', util.preventEvent);
+    }
+//{/if}//
+    (function () {
         if (patch) {
-            extend(core.dom, patch.dom);
-            extend(core.ext, patch.ext);
-            extend(core.io, patch.io);
-            extend(core.util, patch.util);
+            Object.assign(core.dom, patch.dom);
+            Object.assign(core.ext, patch.ext);
+            Object.assign(core.io, patch.io);
+            Object.assign(core.util, patch.util);
             patch = null;
         }
     }());

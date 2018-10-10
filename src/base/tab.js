@@ -13,6 +13,7 @@
 
 @fields
 _cSelected       - 当前选中的选项卡
+_eBar            - 下划线变量
 _eContainer      - 容器 DOM 元素
 */
 (function () {
@@ -20,7 +21,9 @@ _eContainer      - 容器 DOM 元素
     var core = ecui,
         dom = core.dom,
         ui = core.ui,
-        util = core.util;
+        util = core.util,
+
+        eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
 //{/if}//
     /**
      * 移除容器 DOM 元素。
@@ -60,12 +63,8 @@ _eContainer      - 容器 DOM 元素
             }
         }
         if (items[index] !== this._cSelected) {
-            this.setSelected(items[index]);
-            core.dispatchEvent(this, 'change');
-            var el = this._cSelected.getMain();
-            if (el && el.tagName === 'A' && el.href) {
-                location.href = el.href;
-            }
+            event.target = items[index].getBody();
+            core.dispatchEvent(items[index], 'click', event);
         }
     }
 
@@ -74,6 +73,7 @@ _eContainer      - 容器 DOM 元素
      * 每一个选项卡都包含一个头部区域与容器区域，选项卡控件存在互斥性，只有唯一的一个选项卡能被选中并显示容器区域。
      * options 属性：
      * selected    选中的选项序号，默认为0
+     * bar         是否需要下划线，默认为false
      * gesture     是否支持手势切换，默认为true
      * @control
      */
@@ -81,21 +81,14 @@ _eContainer      - 容器 DOM 元素
         ui.Control,
         'ui-tab',
         function (el, options) {
-            var titleEl = el;
-            el = dom.insertBefore(
-                dom.create(
-                    {
-                        className: el.className,
-                        style: {
-                            cssText: titleEl.style.cssText
-                        }
-                    }
-                ),
-                el
-            );
-            titleEl.className = options.classes.join('-title ');
-            titleEl.style.cssText = '';
+            var titleEl = dom.create({className: options.classes.join('-title ')});
+            for (; el.firstChild; ) {
+                titleEl.appendChild(el.firstChild);
+            }
             el.appendChild(titleEl);
+            if (options.bar) {
+                this._eBar = dom.create({className: 'ui-tab-bar'});
+            }
 
             ui.Control.call(this, el, options);
 
@@ -116,17 +109,24 @@ _eContainer      - 容器 DOM 元素
                     if (el.tagName !== 'STRONG') {
                         var containerEl = el;
                         el = dom.first(el);
+                        options.primary = el.className.trim().split(' ')[0] || options.parent.Item.TYPES[0];
                     }
 
                     ui.Item.call(this, el, options);
 
                     if (containerEl) {
                         if (options.parent) {
-                            options.parent.getBody().insertBefore(el, containerEl);
+                            if (dom.parent(containerEl)) {
+                                options.parent.getBody().insertBefore(el, containerEl);
+                            } else {
+                                options.parent.getBody().appendChild(el);
+                            }
                         } else {
                             containerEl.removeChild(el);
                         }
                         this._eContainer = containerEl;
+
+                        core.$bind(containerEl, this);
                     }
 
                     if (options.container) {
@@ -147,7 +147,10 @@ _eContainer      - 容器 DOM 元素
                      * @override
                      */
                     $dispose: function () {
-                        this._eContainer = null;
+                        if (this._eContainer) {
+                            this._eContainer.getControl = null;
+                            this._eContainer = null;
+                        }
                         ui.Item.prototype.$dispose.call(this);
                     },
 
@@ -206,6 +209,7 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $dispose: function () {
+                this._eBar = null;
                 core.removeGestureListeners(this);
                 ui.Control.prototype.$dispose.call(this);
             },
@@ -214,9 +218,15 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $itemclick: function (event) {
-                if (event.item !== this._cSelected) {
-                    this.setSelected(event.item);
-                    core.dispatchEvent(this, 'change');
+                if (dom.contain(event.item.getBody(), event.target)) {
+                    if (core.dispatchEvent(this, 'titleclick', event)) {
+                        if (event.item !== this._cSelected) {
+                            this.setSelected(event.item);
+                            core.dispatchEvent(this, 'change');
+                        }
+                    }
+                } else {
+                    core.dispatchEvent(this, 'containerclick', event);
                 }
             },
 
@@ -224,9 +234,7 @@ _eContainer      - 容器 DOM 元素
              * @override
              */
             $ready: function (event) {
-                ui.Control.prototype.$ready.call(this, event.options);
-
-                if (!this._cSelected && event.options.selected !== 'none') {
+                if (!this._cSelected) {
                     this.setSelected(+(event.options.selected) || 0);
                 }
 
@@ -236,6 +244,8 @@ _eContainer      - 容器 DOM 元素
                         swiperight: swipe
                     });
                 }
+
+                ui.Control.prototype.$ready.call(this, event.options);
             },
 
             /**
@@ -273,25 +283,63 @@ _eContainer      - 容器 DOM 元素
                     item = this.getItem(item);
                 }
 
-                if (this._cSelected !== item) {
+                if (item && this._cSelected !== item) {
                     if (this._cSelected) {
-                        this._cSelected.alterClass('-selected');
+                        this._cSelected.alterStatus('-selected');
                         if (this._cSelected._eContainer && (!item || this._cSelected._eContainer !== item._eContainer)) {
                             dom.addClass(this._cSelected._eContainer, 'ui-hide');
                         }
                     }
 
                     if (item) {
-                        item.alterClass('+selected');
+                        item.alterStatus('+selected');
                         if (item._eContainer && (!this._cSelected || this._cSelected._eContainer !== item._eContainer)) {
                             dom.removeClass(item._eContainer, 'ui-hide');
+                            core.cacheAtShow(item._eContainer);
                         }
                     }
 
                     this._cSelected = item;
+
+                    if (this._eBar) {
+                        if (this.isReady()) {
+                            var main = this.getMain(),
+                                parent = dom.parent(this._eBar),
+                                left = this._eBar.offsetLeft,
+                                top = this._eBar.offsetTop,
+                                width = this._eBar.offsetWidth;
+
+                            if (parent !== main) {
+                                this.$$barMargin = parent.getControl().getClientWidth() - width;
+                                this._eBar.style.top = top + 'px';
+                                this._eBar.style.left = left + 'px';
+                                this._eBar.style.width = width + 'px';
+                                main.appendChild(this._eBar);
+                            }
+
+                            util.timer(function () {
+                                this._eBar.style.left = (item.getX() + this.$$barMargin / 2) + 'px';
+                                this._eBar.style.width = (item.getWidth() - this.$$barMargin) + 'px';
+                            }, 0, this);
+                        } else {
+                            item.getBody().appendChild(this._eBar);
+                        }
+                    }
                 }
             }
         },
         ui.Items
     );
+
+    // 初始化事件转发信息
+    eventNames.slice(0, 7).forEach(function (item) {
+        item = item.replace('mouse', '');
+        ui.Tab.prototype['$item' + item] = ui.Tab.prototype['$item' + item] || function (event) {
+            core.dispatchEvent(
+                this,
+                (dom.contain(event.item.getBody(), event.target) ? 'title' : 'container') + item,
+                event
+            );
+        };
+    });
 }());

@@ -18,6 +18,7 @@ _nBottomIndex  - 下部隐藏的选项序号
 //{if 0}//
     var core = ecui,
         dom = core.dom,
+        effect = core.effect,
         ui = core.ui,
         util = core.util,
 
@@ -26,7 +27,7 @@ _nBottomIndex  - 下部隐藏的选项序号
     function setEnterAndLeave() {
         var range = this.getRange();
         if (range && range.bottom) {
-            range.top = this.getHeight() - this.$$bodyHeight;
+            range.top = Math.min(0, this.getHeight() - this.$$bodyHeight);
             range.bottom = 0;
         }
     }
@@ -49,15 +50,32 @@ _nBottomIndex  - 下部隐藏的选项序号
             function (el, options) {
                 var body = this.getBody();
                 this._eHeader = dom.insertBefore(dom.create({className: options.classes.join('-header ')}), body);
-                this._eFooter = dom.insertBefore(dom.create({className: options.classes.join('-footer ')}), body);
+                this._eFooter = dom.insertAfter(dom.create({className: options.classes.join('-footer ')}), body);
+                dom.insertAfter(this._eEmpty, body);
                 this._oHandle = util.blank;
+            },
+            function (el, options) {
+                if (options.customEmpty) {
+                    dom.addClass(this._eEmpty = dom.remove(dom.last(el)), options.classes.join('-empty-body '));
+                } else {
+                    this._eEmpty = dom.create({className: options.classes.join('-empty-body ')});
+                }
+                ui.Control.call(this, el, options);
             }
         ],
         {
             HTML_LOADING: '正在加载...',
             HTML_REFRESH: '下拉刷新',
+            HTML_PREPARE: '准备刷新',
+            HTML_REFRESHED: '刷新完成',
             HTML_LOADED: '加载完成',
             HTML_NODATA: '没有更多数据',
+
+            /**
+             * 选项部件
+             * @unit
+             */
+            Item: core.inherits(ui.Item),
 
             /**
              * @override
@@ -68,7 +86,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                     var items = this.getItems(),
                         body = this.getBody();
 
-                    this.alterClass(items.length ? '-empty' : '+empty');
+                    this.alterStatus(items.length ? '-empty' : '+empty');
                     this.$$bodyHeight = body.offsetHeight + this._nTopHidden + this._nBottomHidden;
                     items.map(function (item) {
                         item.cache();
@@ -106,9 +124,9 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                 );
                 if (this.isReady()) {
-                    top = Math.min(top + this._nTopHidden, 0);
-                    if (util.toNumber(body.style.top) < top) {
-                        body.style.top = top + 'px';
+                    var y = this.getY();
+                    if (y <= top || (y > 0 && !top)) {
+                        this.setPosition(0, top);
                     }
                 }
             },
@@ -138,7 +156,8 @@ _nBottomIndex  - 下部隐藏的选项序号
              * @override
              */
             $dispose: function () {
-                this._eHeader = this._eFooter = null;
+                this._oHandle();
+                this._eHeader = this._eFooter = this._eEmpty = null;
                 ui.Control.prototype.$dispose.call(this);
             },
 
@@ -146,7 +165,7 @@ _nBottomIndex  - 下部隐藏的选项序号
              * 拖拽的惯性时间计算。
              * @protected
              *
-             * @param {Object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
+             * @param {object} speed 速度对象，x/y 值分别表示 x/y 方向上的速度分量
              */
             $draginertia: function (speed) {
                 return Math.min(2, Math.abs(speed.y / 400));
@@ -205,7 +224,8 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $initStructure: function (width, height) {
                 ui.Control.prototype.$initStructure.call(this, width, height);
-                this.alterClass(this.getLength() ? '-empty' : '+empty');
+                this.alterStatus(this.getLength() ? '-empty' : '+empty');
+                this.setPosition(0, 0);
             },
 
             /**
@@ -232,6 +252,16 @@ _nBottomIndex  - 下部隐藏的选项序号
              */
             $refresh: function () {
                 return false;
+            },
+
+            /**
+             * 获取空listview元素。
+             * @public
+             *
+             * @return {Element} 空listview的 DOM 元素
+             */
+            getEmptyBody: function () {
+                return this._eEmpty;
             },
 
             /**
@@ -280,6 +310,7 @@ _nBottomIndex  - 下部隐藏的选项序号
                 }, this);
                 this.premitAlterItems();
                 this.add(data);
+                this._eHeader.innerHTML = this.HTML_REFRESHED;
                 this.reset();
                 this._eFooter.innerHTML = '';
             },
@@ -292,29 +323,31 @@ _nBottomIndex  - 下部隐藏的选项序号
             reset: function (callback) {
                 if (!this.isScrolling()) {
                     this._oHandle();
-                    var y = this.getY(),
-                        top = Math.min(0, this.getHeight() - this.$$bodyHeight + this.$$headerHeight),
+                    var status = this._sStatus.slice(0, 6),
+                        main = this.getMain(),
                         options = {
-                            $: {
-                                body: this.getBody(),
-                                head: this._eHeader,
-                                foot: this._eFooter
-                            },
-                            onfinish: callback && function () {
-                                callback();
+                            $: this,
+                            onfinish: function () {
+                                if (callback) {
+                                    callback();
+                                }
                             }
                         };
 
-                    top = top ? top - this.$$footerHeight : 0;
-                    // 解决items不够填充整个listview区域，导致footercomplete的触发，应该先判断head，
-                    if (y > 0) {
-                        this._oHandle = core.effect.grade('this.body.style.top->0;this.head.style.top->' + -this.$$headerHeight, 1000, options);
-                    } else if (y < top) {
-                        // y !== 0解决items不够填充整个listview区域的问题
-                        this._oHandle = core.effect.grade('this.body.style.top->' + (top - this.$$footerHeight + this._nTopHidden) + ';this.foot.style.bottom->' + -this.$$footerHeight, 1000, options);
-                    } else {
-                        this._eHeader.style.top = -this.$$headerHeight + 'px';
-                        this._eFooter.style.bottom = -this.$$footerHeight + 'px';
+                    if (status === 'header') {
+                        options.y = this.getY();
+                        this._oHandle = effect.grade(
+                            'this.setPosition(0,#$.y->0#)',
+                            400,
+                            options
+                        );
+                    } else if (status === 'footer') {
+                        options.y = ui.MScroll.Methods.getY.call(this);
+                        this._oHandle = effect.grade(
+                            'ecui.ui.MScroll.Methods.setPosition.call(this,0,#$.y->' + (main.clientHeight - main.scrollHeight + this.$$footerHeight) + '#)',
+                            400,
+                            options
+                        );
                     }
                 }
             }
@@ -325,26 +358,94 @@ _nBottomIndex  - 下部隐藏的选项序号
             /**
              * @override
              */
-            $dragend: function (event) {
-                ui.MScroll.Methods.$dragend.call(this, event);
-                if (!this._bLoading && this._sStatus === 'headercomplete') {
-                    // 可以选择是否需要防止重复提交
-                    if (core.dispatchEvent(this, 'refresh')) {
-                        this._bLoading = true;
-                    }
-                } else {
-                    util.timer(function () {
-                        this.reset();
-                    }.bind(this));
+            $activate: function (event) {
+                if (!this._bLoading || this._sStatus !== 'headercomplete') {
+                    ui.MScroll.Methods.$activate.call(this, event);
                 }
             },
 
             /**
              * @override
              */
-            $dragmove: function (event) {
-                var y = event.y,
-                    top = util.toNumber(this.getBody().style.top);
+            $dragend: function (event) {
+                ui.MScroll.Methods.$dragend.call(this, event);
+                if (!this._bLoading) {
+                    if (this._sStatus === 'headercomplete') {
+                        // 可以选择是否需要防止重复提交
+                        if (core.dispatchEvent(this, 'refresh')) {
+                            this._eHeader.innerHTML = this.HTML_PREPARE;
+                            this._bLoading = true;
+                        }
+                    } else if (this._sStatus === 'footercomplete') {
+                        setEnterAndLeave.call(this);
+                        this.reset();
+                    }
+                }
+            },
+
+            /**
+             * @override
+             */
+            $dragstart: function (event) {
+                ui.MScroll.Methods.$dragstart.call(this, event);
+                this._oHandle();
+                this._sStatus = '';
+            },
+
+            /**
+             * 本控件新增选项只能从顶部或底部。
+             * @override
+             */
+            add: function (item, index) {
+                this._bLoading = false;
+                var oldLength = this.getLength();
+                ui.Items.Methods.add.call(this, item, index);
+                setEnterAndLeave.call(this);
+                if (this.isReady()) {
+                    if (oldLength === this.getLength()) {
+                        this._eFooter.innerHTML = this.HTML_NODATA;
+                        this.reset();
+                    } else {
+                        this._eFooter.innerHTML = this.HTML_LOADED;
+                    }
+                }
+            },
+
+            /**
+             * @override
+             */
+            getY: function () {
+                return ui.MScroll.Methods.getY.call(this) - this._nTopHidden + this.$$headerHeight;
+            },
+
+            /**
+             * @override
+             */
+            remove: function (item) {
+                var index = 'number' === typeof item ? item : this.getItems().indexOf(item);
+                item = this.getItem(index);
+                if (item) {
+                    var height = item.getHeight();
+                    if (index < this._nTopIndex) {
+                        this._nTopIndex--;
+                        this._nTopHidden -= height;
+                    } else if (index >= this._nBottomIndex) {
+                        this._nBottomHidden -= height;
+                    }
+                    this._nBottomIndex--;
+                    this.$$bodyHeight -= height;
+                    ui.Items.Methods.remove.call(this, item);
+                    this.setPosition(0, this.getY());
+                }
+            },
+
+            /**
+             * @override
+             */
+            setPosition: function (x, y) {
+                this.preventAlterItems();
+
+                var top = ui.MScroll.Methods.getY.call(this);
 
                 if (top < -screen.availHeight * 1.5) {
                     for (; top < -screen.availHeight * 1.5; ) {
@@ -387,20 +488,19 @@ _nBottomIndex  - 下部隐藏的选项序号
                         top -= height;
                     }
                 }
-                event.y += this._nTopHidden;
 
-                ui.MScroll.Methods.$dragmove.call(this, event);
+                this._eHeader.style.transform = 'translateY(' + (y - this.$$headerHeight) + 'px)';
+                this._eFooter.style.transform = util.hasIOSKeyboard() ? 'translateY(' + (y + this._nTopHidden - this.$$headerHeight) + 'px)' : '';
+                ui.MScroll.Methods.setPosition.call(this, x, y + this._nTopHidden - this.$$headerHeight);
 
                 top = this.getHeight() - this.$$bodyHeight;
                 if (y > 0) {
-                    status = y < this.$$headerHeight ? 'headerenter' : 'headercomplete';
-                    this._eHeader.style.top = (y - this.$$headerHeight) + 'px';
+                    status = y < this.$$headerHeight || this.isInertia() ? 'headerenter' : 'headercomplete';
                 } else if (y === 0) {
                     // 解决items不够填充整个listview区域，导致footercomplete的触发
                     status = '';
-                } else if (y < top) {
+                } else if (y < top && top < 0) {
                     var status = y > top + this.$$footerHeight ? 'footerenter' : 'footercomplete';
-                    this._eFooter.style.bottom = (top - this.$$footerHeight - y) + 'px';
                 } else {
                     status = '';
                 }
@@ -413,44 +513,9 @@ _nBottomIndex  - 下部隐藏的选项序号
                     }
                     this._sStatus = status;
                 }
-            },
 
-            /**
-             * @override
-             */
-            $dragstart: function (event) {
-                ui.MScroll.Methods.$dragstart.call(this, event);
-                this._oHandle();
-                this._sStatus = '';
-            },
-
-            /**
-             * 本控件新增选项只能从顶部或底部。
-             * @override
-             */
-            add: function (item, index) {
-                this._bLoading = false;
-                var oldLength = this.getLength();
-                ui.Items.Methods.add.call(this, item, index);
-                setEnterAndLeave.call(this);
-                if (this.isReady()) {
-                    this._eFooter.style.bottom = '0px';
-                    this._eFooter.innerHTML = oldLength === this.getLength() ? this.HTML_NODATA : this.HTML_LOADED;
-                }
-            },
-
-            /**
-             * @override
-             */
-            getY: function () {
-                return ui.MScroll.Methods.getY.call(this) - this._nTopHidden;
-            },
-
-            /**
-             * 本控件不支持删除选项的操作。
-             * @override
-             */
-            remove: util.blank
+                this.premitAlterItems();
+            }
         }
     );
 }());

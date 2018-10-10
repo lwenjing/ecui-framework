@@ -41,17 +41,17 @@ cities - 地区联动下拉框控件。
         }
         // debugger
         var CITYS = [{
-                code: '全部省',
+            code: '全部省',
+            value: '000000',
+            children: [{
+                code: '全部市',
                 value: '000000',
                 children: [{
-                    code: '全部市',
-                    value: '000000',
-                    children: [{
-                        code: '全部区',
-                        value: '000000'
-                    }]
+                    code: '全部区',
+                    value: '000000'
                 }]
-            }];
+            }]
+        }];
         for (code in  PROVINCE) {
             citys = {
                 value: code,

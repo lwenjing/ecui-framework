@@ -66,7 +66,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
         var row = dom.parent(main).getControl(),
             table = row.getParent();
 
-        return core.$fastCreate(table.Cell, main, row, util.extend({}, table._aHCells[row._aElements.indexOf(main)]._oOptions));
+        return core.$fastCreate(table.Cell, main, row, Object.assign({}, table._aHCells[row._aElements.indexOf(main)]._oOptions));
     }
 
     /**
@@ -244,7 +244,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                                 }
                                 if (el) {
                                     if (i < headRowCount) {
-                                        util.extend(options, core.getOptions(el));
+                                        Object.assign(options, core.getOptions(el));
                                         cols[j] = core.$fastCreate(this.HCell, el, this);
                                     } else {
                                         el.getControl = getControlBuilder();
@@ -630,8 +630,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             /**
              * @override
              */
-            $resize: function () {
-                ui.Control.prototype.$resize.call(this);
+            $resize: function (event) {
+                ui.Control.prototype.$resize.call(this, event);
 
                 this._aHeadRows.forEach(function (item) {
                     resizeRow(item);
@@ -671,7 +671,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              * title   {string} 列的标题
              * @public
              *
-             * @param {Object} options 列的初始化选项
+             * @param {object} options 列的初始化选项
              * @param {number} index 被添加的列的位置序号，如果不合法将添加在末尾
              * @return {ecui.ui.Table.HCell} 表头单元格控件
              */
@@ -735,7 +735,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 }
 
                 col.setSize(options.width);
-                col._oOptions = util.extend({}, options);
+                col._oOptions = Object.assign({}, options);
 
                 return col;
             },

@@ -10,6 +10,11 @@
 //{/if}//
     var Calendar = core.inherits(
             ui.Calendar,
+            true,
+            function (el, options) {
+                dom.addClass(el, 'ui-popup ui-hide');
+                ui.Calendar.call(this, el, options);
+            },
             {
                 /**
                  * @override
@@ -52,9 +57,17 @@
         function (el, options) {
             ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
-            this.setPopup(core.getSingleton(Calendar, dom.create({className: Calendar.CLASS + 'ui-popup ui-hide'})));
+            this.setPopup(core.getSingleton(Calendar));
         },
         {
+            /**
+             * @override
+             */
+            $blur: function (event) {
+                ui.Text.prototype.$blur.call(this, event);
+                this.getPopup().hide();
+            },
+
             /**
              * 获取日期对象。
              * @public
@@ -74,7 +87,7 @@
                     value = new Date(value);
                 }
                 if (value instanceof Date) {
-                    value = value.getFullYear() + '-' + (value.getMonth() + 1) + '-' + value.getDate();
+                    value = value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2) + '-' + ('0' + value.getDate()).slice(-2);
                 }
                 ui.Text.prototype.setValue.call(this, value);
             }

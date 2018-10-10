@@ -30,7 +30,8 @@ queryButton - 查询按钮控件。
                 ui.Button.prototype.$click.call(this, event);
                 var route = ecui.esr.findRoute(this);
                 var children = ecui.esr.getRoute(route.children);
-				fapiao.setSearchParam(children.searchParm, this.getForm());
+                fapiao.setSearchParam(children.searchParm, this.getForm());
+				// children.searchParm.pageNo = 1;
 				ecui.esr.callRoute(route.children + '~pageNo=1', true);
             },
         }

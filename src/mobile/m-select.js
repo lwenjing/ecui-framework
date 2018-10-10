@@ -39,9 +39,7 @@ _bRequired    - 是否必须选择
 
             ui.$select.call(this, el, options);
 
-            var unit = this.$getSection('Options');
-            unit.setOptionSize(options.optionSize || 3);
-            core.ext['m-confirm'](unit);
+            this.$getSection('Options').setOptionSize(options.optionSize || 3);
         },
         {
             /**
@@ -57,13 +55,18 @@ _bRequired    - 是否必须选择
                     $show: function () {
                         ui.$select.prototype.Options.prototype.$show.call(this);
 
-                        var select = this.getParent();
+                        var select = this.getParent(),
+                            item = select.getSelected();
 
-                        this.getBody().style.top = (this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(select.getSelected()))) + 'px';
-                        core.setFocused(select.getSelected());
+                        this.setPosition(0, this.$$itemHeight * (this._nOptionSize - select.getItems().indexOf(item)));
+
+                        if (item) {
+                            core.setFocused(item);
+                        }
                     }
                 },
-                ui.MOptions
+                ui.MOptions,
+                ui.MConfirm
             ),
 
             /**
@@ -89,7 +92,7 @@ _bRequired    - 是否必须选择
              */
             $confirm: function (event) {
                 var item = core.getFocused();
-                if (this.getSelected() !== item) {
+                if ((item === null || item instanceof this.Item) && this.getSelected() !== item) {
                     this.setSelected(item);
                     core.dispatchEvent(this, 'change', event);
                 }

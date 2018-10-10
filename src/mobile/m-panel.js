@@ -2,11 +2,10 @@
 @example
 <div ui="type:m-panel"><!-- 这里放任意内容 --></div>
 */
-//{if 0}//
 (function () {
+//{if 0}//
     var core = ecui,
-        ui = core.ui,
-        util = core.util;
+        ui = core.ui;
 //{/if}//
     /**
      * 移动端容器控件。
@@ -15,13 +14,7 @@
      */
     ui.MPanel = core.inherits(
         ui.Control,
-        'ui-panel',
-        function (el, options) {
-            util.setDefault(options, 'mode', 'native');
-            ui.Control.call(this, el, options);
-        },
+        'ui-mobile-panel',
         ui.MScroll
     );
-//{if 0}//
 }());
-//{/if}//

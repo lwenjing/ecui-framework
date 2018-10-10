@@ -52,10 +52,12 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
         'ui-select',
         function (el, options) {
             // 初始化下拉区域最多显示的选项数量
-            this._nOptionSize = options.optionSize || 10;
+            this._nOptionSize = options.optionSize || this.DEFAULT_OPTION_SIZE;
             ui.$select.call(this, el, options);
         },
         {
+            DEFAULT_OPTION_SIZE: 10,
+
             /**
              * 选项框部件。
              * @unit
@@ -68,10 +70,18 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                      * @protected
                      */
                     $alterItems: function () {
-                        var select = this.getParent();
+                        var select = this.getParent(),
+                            size = 0;
+
+                        select.getItems().forEach(function (item) {
+                            // 只有处于显示状态的选项才计入高度
+                            if (item.isShow()) {
+                                size++;
+                            }
+                        });
 
                         // 设置options框的大小，如果没有元素，至少有一个单位的高度
-                        this.$setSize(select.getWidth(), (Math.min(select.getLength(), select._nOptionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
+                        this.$setSize(select.getWidth(), (Math.min(size, select._nOptionSize) || 1) * select.getClientHeight() + this.getMinimumHeight());
                     },
 
                     /**
@@ -148,6 +158,7 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                             }
                             event.exit();
                         } else if (which === 27 || (which === 13 && this._uOptions.isShow())) {
+                            this._uOptions.hide();
                             // 回车键选中，ESC键取消
                             if (which === 13) {
                                 if (focus.getParent() === this && this._cSelected !== focus) {
@@ -155,7 +166,6 @@ _bAlterItems  - 是否延迟到显示时执行alterItems
                                     core.dispatchEvent(this, 'change', event);
                                 }
                             }
-                            this._uOptions.hide();
                             event.exit();
                         }
                     }

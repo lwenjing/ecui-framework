@@ -108,41 +108,65 @@
         });
     }
 
+    function createStyle(cssText) {
+        var el = document.createElement('STYLE');
+        el.setAttribute('type', 'text/less');
+        el.setAttribute('module', '/' + moduleName);
+        if (ecui.ie < 10) {
+            var reg = ecui.ie > 6 ? new RegExp('[_' + (ecui.ie > 7 ? '\\*\\+' : '') + ']\\w+:[^;}]+[;}]', 'g') : null;
+            if (reg) {
+                cssText = cssText.replace(reg, function (match) {
+                    return match.slice(-1) === '}' ? '}' : '';
+                });
+            }
+            el.styleSheet.cssText = cssText;
+        } else {
+            el.innerHTML = cssText;
+        }
+        document.head.appendChild(el);
+    }
+
     ecui.io.loadScript = function (url, callback, options) {
-        var name = url.slice(0, -3).split('/');
-        if (name[0] === name[1]) {
-            moduleName = name[0];
+        var name = url.split('/');
+
+        if (name.pop() === '_define_.js') {
+            moduleName = name.length ? name.join('/') + '/' : '';
             moduleCallback = callback;
             moduleRoute = [];
-            callback = ecui.util.blank;
-        }
-        oldLoadScriptFn.call(this, url, callback, options);
-    };
 
-    function load() {
-        function createStyle(cssText) {
-            var el = document.createElement('STYLE');
-            el.setAttribute('type', 'text/less');
-            if (ecui.ie < 10) {
-                var reg = ecui.ie > 6 ? new RegExp('[_' + (ecui.ie > 7 ? '\\*\\+' : '') + ']\\w+:[^;}]+[;}]', 'g') : null;
-                if (reg) {
-                    cssText = cssText.replace(reg, function (match) {
-                        return match.slice(-1) === '}' ? '}' : '';
-                    });
-                }
-                if (el.styleSheet) {
-                    el.styleSheet.cssText = cssText;
-                }
-            } else {
-                el.innerHTML = cssText;
-            }
-            document.head.appendChild(el);
-        }
-        function loadRouteCss() {
-            ecui.io.ajax(moduleName + '/route.' + filename + '.css', {
+            ecui.io.ajax(moduleName + '_define_.css', {
                 cache: true,
                 onsuccess: function (cssText) {
-                    createStyle('.' + filename.replace(/\./g, '-') + '{' + cssText + '}');
+                    createStyle('.module-' + moduleName.slice(0, -1).replace(/[._]/g, '-').replace(/\//g, '_') + '{' + cssText + '}');
+                    oldLoadScriptFn.call(this, url, null, options);
+                },
+                onerror: function () {
+                    oldLoadScriptFn.call(this, url, null, options);
+                }
+            });
+        } else {
+            oldLoadScriptFn.call(this, url, callback, options);
+        }
+    };
+
+    var oldAddRoute = ecui.esr.addRoute;
+
+    function load() {
+        ecui.esr.addRoute = function (name, route) {
+            if (!route) {
+                route = name;
+                name = route.NAME;
+            }
+
+            name = filename.slice(0, index + 1) + name;
+            oldAddRoute.call(this, name, route);
+        };
+
+        function loadRouteCss() {
+            ecui.io.ajax(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'route.' + filename.slice(index + 1) + '.css', {
+                cache: true,
+                onsuccess: function (cssText) {
+                    createStyle('.' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '{' + cssText + '}');
 
                     window.less.sheets = [];
                     window.less.refresh(true, undefined, false);
@@ -150,14 +174,18 @@
                     var stop = ecui.util.timer(function () {
                         if (document.head.lastChild.getAttribute('type') !== 'text/less') {
                             stop();
-                            ecui.io.ajax(moduleName + '/route.' + filename + '.html', {
+                            ecui.io.ajax(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'route.' + filename.slice(index + 1) + '.html', {
                                 cache: true,
                                 onsuccess: function (data) {
-                                    ecui.esr.getEngine(moduleName).compile(data);
+                                    if (index >= 0) {
+                                        data = data.replace(/<!--\s*target:\s*([^>]+)-->/g, '<!-- target: ' + filename.slice(0, index + 1) + '$1 -->');
+                                    }
+                                    ecui.esr.getEngine(moduleName).compile(data.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'));
                                     moduleRoute.splice(0, 1);
                                     if (moduleRoute.length) {
                                         load();
                                     } else {
+                                        ecui.esr.addRoute = oldAddRoute;
                                         moduleCallback();
                                     }
                                 }
@@ -169,42 +197,59 @@
         }
 
         function loadLayer(url) {
-            ecui.io.ajax(url, {
-                cache: true,
-                onsuccess: function (text) {
-                    text = text.replace('<header', '<div style="display:none"');
-                    text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none"');
-                    text = text.replace('</header>', '</div>');
-                    text = text.replace('</container>', '</div>');
-                    var el = ecui.dom.last(ecui.dom.first(ecui.getBody()));
-                    ecui.dom.insertHTML(el, 'beforeBegin', text);
-                    ecui.init(el.parentNode);
-                    var children = ecui.dom.children(el.parentNode);
-                    children[children.length - 2].header = children[children.length - 3];
-                    el.appendChild(children[children.length - 2]);
-                    loadRouteCss();
-                },
-                onerror: loadRouteCss
-            });
+            oldLoadScriptFn(url.replace('.html', '.js'), loadLayerHTML, {cache: true, onerror: loadLayerHTML});
+
+            function loadLayerHTML() {
+                ecui.io.ajax(url, {
+                    cache: true,
+                    onsuccess: function (text) {
+                        if (!text) {
+                            loadRouteCss();
+                            return;
+                        }
+                        if (!/^\s*<header(>|\s).*?<\/header>\s*<container(>|\s).*?<\/container>\s*$/.test(text.replace(/\n/g, ''))) {
+                            throw new Error(url + ' 中只允许存在<header>与<container>标签');
+                        }
+                        text = text.replace('<header', '<div style="display:none"');
+                        text = text.replace('<container', '<div ui="type:ecui.esr.AppLayer" style="display:none" id="' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + filename.replace(/[._]/g, '-') + '"');
+                        text = text.replace('</header>', '</div>');
+                        text = text.replace('</container>', '</div>');
+                        var el = ecui.dom.last(ecui.dom.first(document.body));
+                        ecui.dom.insertHTML(el, 'beforeEnd', etpl.compile(text.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'))(ecui.esr.getContext()));
+                        ecui.dom.previous(el).appendChild(ecui.dom.last(el).header = ecui.dom.previous(ecui.dom.last(el)));
+                        ecui.init(el.parentNode);
+
+                        ecui.io.ajax(url.replace('.html', '.css'), {
+                            cache: true,
+                            onsuccess: function (text) {
+                                createStyle('#' + moduleName.replace(/[._]/g, '-').replace(/\//, '_') + filename.replace(/[._]/g, '-') + '{' + text + '}');
+
+                                window.less.sheets = [];
+                                window.less.refresh(true, undefined, false);
+
+                                var stop = ecui.util.timer(function () {
+                                    if (document.head.lastChild.getAttribute('type') !== 'text/less') {
+                                        stop();
+                                        loadRouteCss();
+                                    }
+                                }, -1);
+                            },
+                            onerror: loadRouteCss
+                        });
+                    },
+                    onerror: loadRouteCss
+                });
+            }
         }
 
         var filename = moduleRoute[0];
-        oldLoadScriptFn(moduleName + '/route.' + filename + '.js', null, {cache: true});
-
-        ecui.io.ajax(moduleName + '/' + moduleName + '.css', {
-            cache: true,
-            onsuccess: function (cssText) {
-                createStyle(cssText);
-                loadLayer(moduleName + '/layer.' + filename + '.html');
-            },
-            onerror: function () {
-                loadLayer(moduleName + '/layer.' + filename + '.html');
-            }
-        });
+        var index = filename.lastIndexOf('.');
+        oldLoadScriptFn(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'route.' + filename.slice(index + 1) + '.js', null, {cache: true});
+        loadLayer(moduleName + filename.slice(0, index + 1).replace(/\./g, '/') + 'layer.' + filename.slice(index + 1) + '.html');
     }
 
     ecui.esr.loadClass = function (filename) {
-        oldLoadScriptFn(moduleName + '/class.' + filename + '.js', null, {cache: true});
+        oldLoadScriptFn(moduleName + 'class.' + filename + '.js', null, {cache: true});
     };
     ecui.esr.loadRoute = function (filename) {
         moduleRoute.push(filename);

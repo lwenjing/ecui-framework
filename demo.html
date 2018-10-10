@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<meta charset="UTF-8">
 	<title>样式规范</title>
     <!--[if lte IE 8]>
@@ -9,205 +9,83 @@
     <![endif]-->
     <link rel="stylesheet/less" type="text/css" href="ecui.css" />
     <link rel="stylesheet/less" type="text/css" href="common.css">
-    <script type="text/javascript" src="options.js"></script>
+    <script type="text/javascript" src="divs.js"></script>
     <script type="text/javascript" src="ecui.js"></script>
+    <script type="text/javascript" src="common.js"></script>
+    <style>
+.ui-adjacent-calendar-left-next-month,
+.ui-adjacent-calendar-left-next-year,
+.ui-adjacent-calendar-right-prev-month,
+.ui-adjacent-calendar-right-prev-year {
+    visibility: hidden;
+}
+    </style>
     <script>
-    ecui.onready = function () {
-        ecui.get('ttt').onclick = function () {
-            document.getElementById('click').innerHTML=Date.now();
-        };
-        ecui.get('ttt').onmousedown = function () {
-            document.getElementById('mousedown').innerHTML=Date.now();
-        };
-        ecui.get('ttt').onmouseup = function () {
-            document.getElementById('touchend').innerHTML=Date.now();
-        };
-    };
+ecui.ui.AdjacentCalendar = ecui.inherits(
+    ecui.ui.Control,
+    'ui-adjacent-calendar',
+    function (el, options) {
+        el.innerHTML = '<div class="' + options.classes.join('-left ') + ecui.ui.Calendar.CLASS + '"></div><div class="' + options.classes.join('-right ') + ecui.ui.Calendar.CLASS + '"></div><div class="' + options.classes.join('-footer ') + '"></div>';
+        var elements = ecui.dom.children(el);
+        ecui.ui.Control.call(this, el, options);
+        this._uLeft = ecui.$fastCreate(this.Calendar, elements[0], this, {date: options.date});
+        this._uRight = ecui.$fastCreate(this.Calendar, elements[1], this, {date: options.date});
+        this._uRight.move(1);
+        elements[2].innerHTML = '底部的HTML，请修改后使用$fastCreate初始化控件，然后参考CalendarInput制作输入框回填与提交';
+    },
+    {
+        Calendar: ecui.inherits(
+            ecui.ui.Calendar,
+            {
+                $change: function (event) {
+                    ecui.ui.Calendar.prototype.$change.call(this, event);
+                    var parent = this.getParent();
+                    if (parent.isReady()) {
+                        if (this === parent._uLeft) {
+                            parent._uRight.setView(this.getYear(), this.getMonth() + 1);
+                        } else {
+                            parent._uLeft.setView(this.getYear(), this.getMonth() - 1);
+                        }
+                    }
+                }
+            }
+        )
+    }
+);
     </script>
     <style>
-    .ui-mobile-calendar-popup .ui-mobile-confirm-layout {
-        width: 100%;
-        display: flex;
-    }
-    .ui-mobile-calendar-popup .ui-mobile-options {
-        flex: 1;
-        height: 210px;
-        content: "item-height:30px";
-    }
-    .ui-mobile-calendar-popup .ui-mobile-options .ui-item {
-        height: 30px;
-    }
-    .ui-mobile-calendar-popup .ui-mobile-options .ui-item-focus {
-        font-weight: bold;
-    }
+input {
+    font-family: "Tahoma"
+}
     </style>
 </head>
 <body>
-    <div ui="type:m-panel" style="width:100%;height:100%">
-    <h2 ui="ext-link" href="http://www.baidu.com">事件穿透，红框是遮罩层</h2>
-    <a ui="type:control;id:ttt" href="javascript:void(document.getElementById('href').innerHTML=Date.now())"><div style="position:relative;width:200px;height:200px;border:1px solid black">
-        touchend: <span id="touchend"></span><br>
-        href: <span id="href"></span><br>
-        mousedown: <span id="mousedown"></span><br>
-        click: <span id="click"></span><br>
-    </div></a>
-    <div ui="type:control" style="position:absolute;left:30px;top:30px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:control" style="position:absolute;left:25px;top:25px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:control" style="position:absolute;left:20px;top:20px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:control" style="position:absolute;left:15px;top:15px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:control" style="position:absolute;left:10px;top:10px;width:80px;height:80px;border:1px solid red;pointer-events:none;content:'pointer-events:none';filter:pointer-events:none"></div>
-    <div ui="type:MCalendar">
-        <div ui="values:2000-2040;format:{0}年"></div>
-        <div ui="values:1-12"></div>
-        <div ui="values:1-31"></div>
+    &nbsp;<div ui="type:time;second:false"></div>
+    <div ui="type:time"></div>
+    <div ui="type:combox;option-size:5;id:test">
+        <input placeholder="请输入" value="2">
+        <div ui="value:1">北京市</div>
+        <div ui="value:2">天津市</div>
+        <div ui="value:3">河北省</div>
+        <div ui="value:4">湖南省</div>
+        <div ui="value:5">上海市</div>
+        <div ui="value:6">湖北省</div>
+        <div ui="value:7">浙江省</div>
+        <div ui="value:8">江苏省</div>
+        <div ui="value:9">江西省</div>
+        <div ui="value:10">安徽省</div>
     </div>
-    <h2>移动端select与焦点图</h2>
-    <div ui="type:m-select;name:sex;value:male">
-        <div ui="value:male">男</div>
-        <div ui="value:female">女</div>
-    </div>
-    <img ui="type:m-photo-hotspot" width="100px" src="http://www.baidu.com/img/bd_logo1.png">
-    <img ui="type:m-photo-hotspot" width="100px" src="http://img1.yixinfinance.com/taoche/yxgroup/common/images/yxgroup-logo.html.png">
-    <h2>PC端常用组件</h2>
-    <!--table-->
-    <div ui="type:table;id:test;left-lock:1;head-float:true;right-lock:1">
-      <table style="width:600px">
-        <!-- 表头区域 -->
-        <thead>
-          <tr>
-            <th style="width:25%;">公司名</th>
-            <th style="width:25%;">url</th>
-            <th style="width:25%;">地址</th>
-            <th style="width:25%;">创办时间</th>
-          </tr>
-        </thead>
-        <!-- 内容行区域 -->
-        <tbody>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-          <tr>
-            <td>百度</td>
-            <td>www.baidu.com</td>
-            <td>中国北京中关村</td>
-            <td>1999</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    
-    <br>
-    <br>
-   <!--蓝色按钮-->
-   <div ui="type:button;" class="blue-btn">normal</div>
-   <div ui="type:button;capturable:false" class="blue-btn-hover">hover</div>
-   <div ui="type:button;capturable:false" class="blue-btn-active">pressed</div>
-   <div ui="type:button;capturable:false;disabled" class="blue-btn">disabled</div>
-   <br>
-   <br>
-   <!--白色按钮-->
-   <div ui="type:button;" class="white-btn">normal</div>
-   <div ui="type:button;capturable:false" class="white-btn-hover">hover</div>
-   <div ui="type:button;capturable:false" class="white-btn-active">pressed</div>
-   <div ui="type:button;capturable:false;disabled" class="white-btn">disabled</div>
-   <br>
-   <br>
-   <!--checkbox-->
-    <input ui="type:checkbox;" class="ui-checkbox">
-    <input ui="type:checkbox;capturable:false" class="ui-checkbox-checked">
-    <input ui="type:checkbox;capturable:false;disabled">
-    <input ui="type:checkbox;capturable:false;disabled" class="ui-checkbox-checked">
-    <br>
-    <br>
-    <!--select-->
-    <select ui="type:select;" class="ui-select">
-        <option>管理员</option>
-        <option>管理员</option>
-    </select> 
-    <select ui="type:select;capturable:false" class="ui-select-hover">
-        <option>管理员</option>
-    </select>
-    <select ui="type:select;capturable:false" class="ui-select-active">
-        <option>管理员</option>
-    </select>
-    <select ui="type:select;capturable:false;disabled" class="">
-        <option>管理员</option>
-    </select>
-    <div ui="type:select">
-        <div ui="ext-anchor:a">管理员</div>
-        <div ui="ext-anchor:b">管理员</div>
-    </div>
-    <br>
-    <br>  
-    <!--text-->  
-    <input ui="type:text;" class="" placeholder="输入框">  
-    <input ui="type:text;capturable:false" class="ui-text-hover">   
-    <input ui="type:text;capturable:false" class="ui-text-active"> 
-    <input ui="type:text;capturable:false;disabled">
-    <!-- <div ui="disabled:true">  
-        <input ui="type:text;capturable:false">
-    </div>
-    <div>  
-        <input ui="type:text;valid:blur;len:2" value = "11" placeholder="请输入2char">
-    </div> -->
-    <br>
-    <br> 
-    <!--radio-->
-    <input ui="type:radio;" class="ui-radio">
-    <input ui="type:radio;capturable:false" class="ui-radio-checked">
-    <input ui="type:radio;capturable:false;disabled">
-    <input ui="type:radio;capturable:false;disabled" class="ui-radio-checked">
-    <br>
-    <br>
-    <!--dialog-->
-    <div ui="type:dialog;">
-        <strong>
-          样式规范
-        </strong>
-    </div>
-    <br>
-    <br>
-    <!--calender-->
-    <div ui="type:month-view;"></div>
-    <br>
-    <br> 
-    <div ui="type:calendar-input;"></div>
-    <br>
-    <br> 
-    <div ui="type:calendar;"></div>
-    <br>
-    <br>
-    <!--combox-->
-    <div ui="type:combox"></div>
-    <br>
-    <br>
-    <!--tab-->
-    <div ui="type:tab;selected:1;ext-anchor:test">
-        <!-- 包含容器的选项卡 -->
-        <div>
-            <strong>标题1</strong>
-            <!-- 这里是容器 -->
-            content1
-        </div>
-        <div>
-            <strong>标题2</strong>
-            <!-- 这里是容器 -->
-            content2
-        </div>
-        <!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 -->
-        <!-- <strong ui="selected:true">标题2</strong> -->
-    </div>
-    <br>
-    <br>
+    <div ui="type:combox;option-size:5">
+        <div>1</div>
+        <div>2</div>
+        <div>3</div>
+        <div>4</div>
+        <div>5</div>
+        <div>6</div>
+        <div>7</div>
+        <div>8</div>
+        <div>9</div>
+        <div>10</div>
     </div>
 </body>
 </html>

@@ -15,7 +15,7 @@
         var popupEl = this.getOuter();
         dom.remove(popupEl);
 
-        for (var el = owner.getOuter(), container = dom.parent(el); container !== core.getBody(); container = dom.parent(container)) {
+        for (var el = owner.getOuter(), container = dom.parent(el); container !== document.body; container = dom.parent(container)) {
             if (container.scrollHeight !== container.clientHeight) {
                 break;
             }
@@ -40,8 +40,7 @@
         container.appendChild(popupEl);
     }
 
-    var namedMap = {},
-        owner;
+    var owner;
 
     ui.Popup = {
         NAME: '$Popup',
@@ -52,20 +51,11 @@
 
         Methods: {
             /**
-             * 下拉框控件失去激活时，隐藏弹层。
-             * @override
-             */
-            $blur: function (event) {
-                this.$Popup.$blur.call(this, event);
-                namedMap[this.getUID()].hide();
-            },
-
-            /**
              * @override
              */
             $click: function (event) {
                 this.$Popup.$click.call(this, event);
-                var popup = namedMap[this.getUID()];
+                var popup = this.$PopupData.popup;
                 if (dom.contain(this.getOuter(), event.target)) {
                     if (popup.isShow()) {
                         owner = null;
@@ -78,7 +68,7 @@
 
                         if (!dom.parent(el)) {
                             // 第一次显示时需要进行下拉选项部分的初始化，将其挂载到 DOM 树中
-                            core.getBody().appendChild(el);
+                            document.body.appendChild(el);
                             popup.show();
                             if (this.$initPopup) {
                                 this.$initPopup();
@@ -94,7 +84,7 @@
              * @override
              */
             $dispose: function () {
-                var el = namedMap[this.getUID()].getMain();
+                var el = this.$PopupData.popup.getMain();
                 if (el) {
                     dom.remove(el);
                 }
@@ -108,9 +98,8 @@
             $repaint: function (event) {
                 this.$Popup.$repaint.call(this, event);
 
-                var popup = namedMap[this.getUID()];
-                if (popup.isShow()) {
-                    setPopupPosition.call(popup);
+                if (this.$PopupData.popup.isShow()) {
+                    setPopupPosition.call(this.$PopupData.popup);
                 }
             },
 
@@ -120,10 +109,9 @@
             $scroll: function (event) {
                 this.$Popup.$scroll.call(this, event);
 
-                var popup = namedMap[this.getUID()];
-                if (event.type === 'mousedown' && !dom.contain(popup.getOuter(), event.target)) {
+                if (event.type === 'mousedown' && !dom.contain(this.$PopupData.popup.getOuter(), event.target)) {
                     // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
-                    popup.hide();
+                    this.$PopupData.popup.hide();
                 }
             },
 
@@ -134,7 +122,7 @@
              * @return {ecui.ui.Control} 弹出层控件
              */
             getPopup: function () {
-                return namedMap[this.getUID()];
+                return this.$PopupData.popup;
             },
 
             /**
@@ -144,14 +132,13 @@
              * @param {ecui.ui.Control} control 弹出层控件
              */
             setPopup: function (control) {
-                var popup = namedMap[this.getUID()];
-                if (popup) {
-                    core.removeEventListener(popup, 'show', setPopupPosition);
-                    delete namedMap[this.getUID()];
+                if (this.$PopupData.popup) {
+                    core.removeEventListener(this.$PopupData.popup, 'show', setPopupPosition);
+                    delete this.$PopupData.popup;
                 }
                 if (control) {
                     core.addEventListener(control, 'show', setPopupPosition);
-                    namedMap[this.getUID()] = control;
+                    this.$PopupData.popup = control;
                 }
             }
         }

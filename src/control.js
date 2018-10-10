@@ -86,7 +86,7 @@ _aStatus            - 控件当前的状态集合
      * userSelect  是否允许选中内容，缺省值为 true
      * focusable   是否允许获取焦点，如果设置不允许获取焦点，控件的交互事件不会改变当前拥有焦点的控件，用于自定义滚动条，缺省值为 true
      * transparent 是否透明，如果设置透明，控件的交互事件将穿透控件由控件下方的控件处理，缺省值为 false
-     * @public
+     * @control
      */
     ui.Control = core.inherits(
         null,
@@ -117,7 +117,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $activate: function () {
-                this.alterClass('+active');
+                this.alterStatus('+active');
             },
 
             /**
@@ -138,7 +138,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $blur: function () {
-                this.alterClass('-focus');
+                this.alterStatus('-focus');
             },
 
             /**
@@ -187,7 +187,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $deactivate: function () {
-                this.alterClass('-active');
+                this.alterStatus('-active');
             },
 
             /**
@@ -197,11 +197,11 @@ _aStatus            - 控件当前的状态集合
              */
             $disable: function () {
                 dom.addClass(this.getMain(), 'ui-disabled');
-                this.alterClass('+disabled');
+                this.alterStatus('+disabled');
                 core.$clearState(this);
 
                 var el = this.getMain();
-                Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
+                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled === false) {
                         var tabIndex = dom.getAttribute(item, 'tabIndex') || '';
                         if (tabIndex !== '-1') {
@@ -252,10 +252,10 @@ _aStatus            - 控件当前的状态集合
              */
             $enable: function () {
                 dom.removeClass(this.getMain(), 'ui-disabled');
-                this.alterClass('-disabled');
+                this.alterStatus('-disabled');
 
                 var el = this.getMain();
-                Array.prototype.forEach.call(el.all || el.getElementsByTagName('*'), function (item) {
+                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (item.disabled !== undefined) {
                         var tabIndex = dom.getAttribute(item, '_tabIndex');
                         if (tabIndex !== null) {
@@ -276,7 +276,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $focus: function () {
-                this.alterClass('+focus');
+                this.alterStatus('+focus');
             },
 
             /**
@@ -387,7 +387,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $mouseout: function () {
-                this.alterClass('-hover');
+                this.alterStatus('-hover');
             },
 
             /**
@@ -396,7 +396,7 @@ _aStatus            - 控件当前的状态集合
              * @event
              */
             $mouseover: function () {
-                this.alterClass('+hover');
+                this.alterStatus('+hover');
             },
 //{if 0}//
             /**
@@ -446,7 +446,7 @@ _aStatus            - 控件当前的状态集合
                     if (style.width === 'auto' && style.display === 'block') {
                         this._eMain.style.width = '100%';
                         if (event.type !== 'repaint') {
-                            this._eMain.style.width = this._eMain.offsetWidth - (core.isContentBox() ? this.$getBasicWidth() * 2 : 0) + 'px';
+                            this._eMain.style.width = this._eMain.offsetWidth - (core.isContentBox(this._eMain) ? this.$getBasicWidth() * 2 : 0) + 'px';
                         } else {
                             event.repaint = true;
                         }
@@ -492,7 +492,7 @@ _aStatus            - 控件当前的状态集合
             $setSize: function (width, height) {
                 this.cache();
 
-                var fixedSize = core.isContentBox() && this._eMain.tagName !== 'BUTTON' && this._eMain.tagName !== 'INPUT',
+                var fixedSize = core.isContentBox(this._eMain),
                     value;
 
                 // 防止负宽度IE下出错
@@ -519,13 +519,13 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
-             * 为控件添加/移除一个扩展样式。
-             * 扩展样式分别附加在类型样式与当前样式之后(参见 getType 与 getClass 方法)，使用-号进行分隔。如果类型样式为 ui-control，当前样式为 demo，扩展样式 hover 后，控件主元素将存在四个样式，分别为 ui-control、demo、ui-control-hover 与 demo-hover。
+             * 为控件添加/移除一个状态样式。
+             * 状态样式分别附加在类型样式与当前样式之后(参见 getType 与 getClass 方法)，使用-号进行分隔。如果类型样式为 ui-control，当前样式为 demo，扩展样式 hover 后，控件主元素将存在四个样式，分别为 ui-control、demo、ui-control-hover 与 demo-hover。
              * @public
              *
-             * @param {string} className 扩展样式名，以+号开头表示添加扩展样式，以-号开头表示移除扩展样式
+             * @param {string} className 状态样式名，以+号开头表示添加扩展样式，以-号开头表示移除扩展样式
              */
-            alterClass: function (className) {
+            alterStatus: function (className) {
                 if (this._sClass) {
                     var classes = this.getClasses();
                     classes.push('');
@@ -653,6 +653,23 @@ _aStatus            - 控件当前的状态集合
             },
 
             /**
+             * 清除所有的状态样式。
+             * @public
+             */
+            clearStatus: function () {
+                if (this._sClass) {
+                    var classes = this.getClasses();
+                    classes.push('');
+
+                    this._aStatus.slice(2).forEach(function (item) {
+                        dom.removeClass(this._eMain, classes.join(item));
+                    }, this);
+
+                    this._aStatus = this._aStatus.slice(0, 2);
+                }
+            },
+
+            /**
              * 判断是否包含指定的控件。
              * contain 方法判断指定的控件是否逻辑上属于当前控件的内部区域，即当前控件是指定的控件的某一级父控件。
              * @public
@@ -671,7 +688,7 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 控件获得失效状态。
-             * 控件获得失效状态时，添加状态样式 -disabled(参见 alterClass 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 isDisabled 方法返回 true，但不会设置子控件的失效状态样式。
+             * 控件获得失效状态时，添加状态样式 -disabled(参见 alterStatus 方法)。disable 方法导致控件失去激活、悬停、焦点状态，所有子控件的 isDisabled 方法返回 true，但不会设置子控件的失效状态样式。
              * @public
              *
              * @return {boolean} 控件失效状态是否改变
@@ -696,7 +713,7 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 控件解除失效状态。
-             * 控件解除失效状态时，移除状态样式 -disabled(参见 alterClass 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，isDisabled 方法返回 true。
+             * 控件解除失效状态时，移除状态样式 -disabled(参见 alterStatus 方法)。enable 方法仅解除控件自身的失效状态，如果其父控件失效，isDisabled 方法返回 true。
              * @public
              *
              * @return {boolean} 控件失效状态是否改变
@@ -708,6 +725,22 @@ _aStatus            - 控件当前的状态集合
                     return true;
                 }
                 return false;
+            },
+
+            /**
+             * 找到指定类型的祖先控件。
+             * @public
+             *
+             * @param {Function} UIClass 控件的构造函数
+             * @return {ecui.ui.Control} 指定类型的控件，如果不存在返回 null
+             */
+            findControl: function (UIClass) {
+                for (var parent = this.getParent(); parent; parent = parent.getParent()) {
+                    if (parent instanceof UIClass) {
+                        return parent;
+                    }
+                }
+                return null;
             },
 
             /**
@@ -734,7 +767,7 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 获取控件的当前样式。
-             * getClass 方法返回控件当前使用的样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterClass 方法。当前样式与 getPrimary 方法返回的基本样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
+             * getClass 方法返回控件当前使用的样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterStatus 方法。当前样式与 getPrimary 方法返回的基本样式存在区别，在控件生成初期，当前样式等于基本样式，基本样式在初始化后无法改变，setClass 方法改变当前样式。
              * @public
              *
              * @return {string} 控件的当前样式
@@ -911,9 +944,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} X轴坐标
              */
             getX: function () {
-                var el = this.getOuter();
-
-                return this.isShow() ? el.offsetLeft - core.calcLeftRevise(el) : 0;
+                return this.isShow() ? this.getOuter().offsetLeft : 0;
             },
 
             /**
@@ -924,9 +955,7 @@ _aStatus            - 控件当前的状态集合
              * @return {number} Y轴坐标
              */
             getY: function () {
-                var el = this.getOuter();
-
-                return this.isShow() ? el.offsetTop - core.calcTopRevise(el) : 0;
+                return this.isShow() ? this.getOuter().offsetTop : 0;
             },
 
             /**
@@ -937,7 +966,7 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 显示状态是否改变
              */
             hide: function () {
-                if (this.isShow()) {
+                if (!dom.hasClass(this.getOuter(), 'ui-hide')) {
                     core.dispatchEvent(this, 'hide');
                     return true;
                 }
@@ -949,12 +978,12 @@ _aStatus            - 控件当前的状态集合
              * init 方法在控件缓存读取后调用，有关控件生成的完整过程描述请参见 基础控件。
              * @public
              *
-             * @param {Object} options 初始化选项(参见 ECUI 控件)
+             * @param {object} options 初始化选项(参见 ECUI 控件)
              */
             init: function (options) {
                 if (!this._bReady) {
                     if (this._bDisabled) {
-                        this.alterClass('+disabled');
+                        this.alterStatus('+disabled');
                         dom.addClass(this.getMain(), 'ui-disabled');
                     }
 
@@ -1133,7 +1162,7 @@ _aStatus            - 控件当前的状态集合
 
             /**
              * 设置控件的当前样式。
-             * setClass 方法改变控件的当前样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterClass 方法。控件的当前样式通过 getClass 方法获取。
+             * setClass 方法改变控件的当前样式，扩展样式分别附加在类型样式与当前样式之后，从而实现控件的状态样式改变，详细的描述请参见 alterStatus 方法。控件的当前样式通过 getClass 方法获取。
              * @public
              *
              * @param {string} currClass 控件的当前样式名称
@@ -1164,7 +1193,9 @@ _aStatus            - 控件当前的状态集合
              * @param {string} html HTML 片断
              */
             setContent: function (html) {
+                core.dispose(this._eBody, true);
                 this._eBody.innerHTML = html;
+                core.init(this._eBody);
             },
 
             /**
@@ -1229,10 +1260,22 @@ _aStatus            - 控件当前的状态集合
              * @return {boolean} 显示状态是否改变
              */
             show: function () {
-                if (!this.isShow()) {
+                if (dom.hasClass(this.getOuter(), 'ui-hide')) {
                     core.dispatchEvent(this, 'show');
                     core.query(function (item) {
                         return this.contain(item);
+                    }.bind(this)).sort(function (a, b) {
+                        var ia = 0,
+                            ib = 0,
+                            parent;
+
+                        for (parent = a; parent !== this; parent = parent.getParent()) {
+                            ia++;
+                        }
+                        for (parent = b; parent !== this; parent = parent.getParent()) {
+                            ib++;
+                        }
+                        return ib - ia;
                     }.bind(this)).forEach(function (item) {
                         item.cache();
                     });

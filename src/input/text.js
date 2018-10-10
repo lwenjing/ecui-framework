@@ -181,13 +181,42 @@ _ePlaceHolder - 为空时的提示信息标签
             $focus: function () {
                 ui.InputControl.prototype.$focus.call(this);
 
+                var el = this.getInput(),
+                    textAlign = dom.getStyle(el, 'textAlign');
+
                 if (this._sErrValue !== undefined) {
                     setPlaceHolder(this, this._sPlaceHolder);
-
-                    var el = this.getInput();
                     el.value = this._sErrValue;
                     delete this._sErrValue;
                 }
+
+                if (textAlign === 'end' || textAlign === 'right') {
+                    util.timer(function () {
+                        if (!this.getSelectionStart()) {
+                            this.setSelection(el.value.length);
+                        }
+                    }, 400, this);
+                }
+            },
+
+            /**
+             * 获取允许的最大值。
+             * @protected
+             *
+             * @return {number} 允许的最大值，如果没有限制返回undefined
+             */
+            $getMaxValue: function () {
+                return this._nMaxValue;
+            },
+
+            /**
+             * 获取允许的最小值。
+             * @protected
+             *
+             * @return {number} 允许的最大值，如果没有限制返回undefined
+             */
+            $getMinValue: function () {
+                return this._nMinValue;
             },
 
             /**
@@ -196,8 +225,6 @@ _ePlaceHolder - 为空时的提示信息标签
             $initStructure: function (width, height) {
                 ui.InputControl.prototype.$initStructure.call(this, width, height);
                 var input = this.getInput();
-                input.style.width = width + 'px';
-                input.style.height = height + 'px';
                 if (ieVersion < 9 && input.tagName === 'INPUT') {
                     input.style.lineHeight = height + 'px';
                 }
@@ -213,8 +240,9 @@ _ePlaceHolder - 为空时的提示信息标签
              */
             $input: function () {
                 ui.InputControl.prototype.$input.call(this);
+                this.getInput().placeholder = this.getValue() ? '' : this._sPlaceHolder;
                 if (this._ePlaceHolder) {
-                    this.alterClass(this.getValue() ? '-empty' : '+empty');
+                    this.alterStatus(this.getValue() ? '-empty' : '+empty');
                 }
             },
 
@@ -224,8 +252,16 @@ _ePlaceHolder - 为空时的提示信息标签
             $ready: function () {
                 ui.InputControl.prototype.$ready.call(this);
                 if (this._ePlaceHolder) {
-                    this.alterClass(this.getValue() ? '-empty' : '+empty');
+                    this.alterStatus(this.getValue() ? '-empty' : '+empty');
                 }
+            },
+
+            /**
+             * @override
+             */
+            $setValue: function (value) {
+                ui.InputControl.prototype.$setValue.call(this, value);
+                this.getInput().placeholder = value ? '' : this._sPlaceHolder;
             },
 
             /**
@@ -276,7 +312,17 @@ _ePlaceHolder - 为空时的提示信息标签
                 range.moveStart('character', -this.getInput().value.length);
                 return range.text.length;
             } : function () {
-                return this.getInput().selectionEnd;
+                var input = this.getInput(),
+                    type = input.type,
+                    ret;
+
+                if ('number' === typeof input.selectionEnd) {
+                    return input.selectionEnd;
+                }
+                input.type = 'text';
+                ret = input.selectionEnd;
+                input.type = type;
+                return ret;
             },
 
             /**
@@ -292,7 +338,17 @@ _ePlaceHolder - 为空时的提示信息标签
                 range.moveEnd('character', length);
                 return length - range.text.length;
             } : function () {
-                return this.getInput().selectionStart;
+                var input = this.getInput(),
+                    type = input.type,
+                    ret;
+
+                if ('number' === typeof input.selectionStart) {
+                    return input.selectionStart;
+                }
+                input.type = 'text';
+                ret = input.selectionStart;
+                input.type = type;
+                return ret;
             },
 
             /**
@@ -307,20 +363,35 @@ _ePlaceHolder - 为空时的提示信息标签
             },
 
             /**
-             * 设置输入框光标的位置。
+             * 设置输入框选中的区域，如果不指定结束的位置，将直接设置光标的位置。
              * @public
              *
-             * @param {number} pos 位置索引
+             * @param {number} startPos 选中区域开始位置索引
+             * @param {number} endPos 选中区域结束位置索引，如果省略，等于开始的位置
              */
-            setCaret: ieVersion ? function (pos) {
-                var range = this.getInput().createTextRange();
-                range.collapse();
-                range.select();
-                range.moveStart('character', pos);
-                range.collapse();
-                range.select();
-            } : function (pos) {
-                this.getInput().setSelectionRange(pos, pos);
+            setSelection: function (startPos, endPos) {
+                endPos = endPos === undefined ? startPos : Math.max(startPos, endPos);
+
+                var input = this.getInput();
+
+                if (ieVersion) {
+                    var range = input.createTextRange();
+                    range.collapse();
+                    range.select();
+                    range.moveStart('character', startPos);
+                    range.moveEnd('character', endPos);
+                    range.select();
+                } else {
+                    var type = input.type;
+
+                    if ('number' === typeof input.selectionStart) {
+                        input.setSelectionRange(startPos, endPos);
+                    } else {
+                        input.type = 'text';
+                        input.setSelectionRange(startPos, endPos);
+                        input.type = type;
+                    }
+                }
             }
         }
     );

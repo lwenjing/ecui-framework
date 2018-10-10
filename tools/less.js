@@ -633,7 +633,7 @@ function loadStyles(modifyVars) {
     for (var i = 0; i < styles.length; i++) {
         style = styles[i];
         if (style.type.match(typePattern)) {
-            var instanceOptions = ecui.util.extend({}, options);
+            var instanceOptions = Object.assign({}, options);
             instanceOptions.modifyVars = modifyVars;
             var lessText = style.innerHTML || '';
             instanceOptions.filename = document.location.href.replace(/#.*$/, '');
@@ -651,6 +651,7 @@ function loadStyles(modifyVars) {
                             } else {
                                 style.innerHTML = lessFuncs(style, result.css);
                             }
+                            ecui.util.adjustFontSize([document.styleSheets[document.styleSheets.length - 1]]);
                         }
                     }, null, style));
         }
@@ -659,7 +660,7 @@ function loadStyles(modifyVars) {
 
 function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
 
-    var instanceOptions = ecui.util.extend({}, options);
+    var instanceOptions = Object.assign({}, options);
     addDataAttr(instanceOptions, sheet);
     instanceOptions.mime = sheet.type;
 
@@ -723,16 +724,20 @@ function loadStyleSheet(sheet, callback, reload, remaining, modifyVars) {
 }
 
 function loadStyleSheets(callback, reload, modifyVars) {
-    for (var i = less.sheets.length; i--; ) {
-        ecui.pause();
-    }
-    for (var i = 0; i < less.sheets.length; i++) {
-        loadStyleSheet(less.sheets[i], function () {
-            callback.apply(this, arguments);
+    function loadOne(i) {
+        if (i < less.sheets.length) {
+            ecui.pause();
+            loadStyleSheet(less.sheets[i], function () {
+                callback.apply(this, arguments);
+                ecui.resume();
+                loadOne(i + 1);
+            }, reload, less.sheets.length - (i + 1), modifyVars);
+        } else {
             ecui.resume();
-        }, reload, less.sheets.length - (i + 1), modifyVars);
+        }
     }
-    ecui.resume();
+
+    loadOne(0);
 }
 
 function initRunningMode(){
@@ -807,7 +812,7 @@ less.refresh = function (reload, modifyVars, clearFileCache) {
         } else {
             less.logger.info("rendered " + sheet.href + " successfully.");
         }
-        ecui.dom.createStyleSheet(lessFuncs(sheet, css));
+        ecui.dom.createStyleSheet(lessFuncs(sheet, css)).setAttribute('link', sheet.href);
         less.logger.info("css for " + sheet.href + " generated in " + (new Date() - endTime) + 'ms');
         if (webInfo.remaining === 0) {
             totalMilliseconds = new Date() - startTime;

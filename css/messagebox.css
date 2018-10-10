@@ -1,0 +1,15 @@
+.ui-messagebox-origin {
+    visibility: 'hidden' !important;
+    .width100rate();
+    .height100rate();
+}
+
+.ui-messagebox {
+    .ui-messagebox-content {
+        .width100rate();
+    }
+
+    .ui-messagebox-block {
+        width: auto !important;
+    }
+}

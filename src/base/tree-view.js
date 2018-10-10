@@ -49,16 +49,16 @@ _aChildren     - 子控件集合
      *
      * @param {HTMLElement} el 子树的 Element 对象
      * @param {ecui.ui.TreeView} parent 父树视图控件
-     * @param {Object} options 初始化选项，参见 create 方法
+     * @param {object} options 初始化选项，参见 create 方法
      * @return {ecui.ui.TreeView} 子树视图控件
      */
     function createChild(el, parent, options) {
         el.className += parent.constructor.CLASS;
-        options = util.extend({}, options);
+        options = Object.assign({}, options);
 //{if 0}//
         delete options.id;
 //{/if}//
-        return core.$fastCreate(parent.constructor, el, null, util.extend(options, core.getOptions(el) || {}));
+        return core.$fastCreate(parent.constructor, el, null, Object.assign(options, core.getOptions(el) || {}));
     }
 
     /**
@@ -142,6 +142,7 @@ _aChildren     - 子控件集合
             $expand: function () {
                 this._bCollapsed = false;
                 dom.removeClass(this._eChildren, 'ui-hide');
+                core.cacheAtShow(this._eChildren);
                 refresh(this);
             },
 
@@ -213,9 +214,9 @@ _aChildren     - 子控件集合
 
                 if (root._cSelected !== this) {
                     if (root._cSelected) {
-                        root._cSelected.alterClass('-selected');
+                        root._cSelected.alterStatus('-selected');
                     }
-                    this.alterClass('+selected');
+                    this.alterStatus('+selected');
                     root._cSelected = this;
                 }
             },
@@ -226,7 +227,7 @@ _aChildren     - 子控件集合
              * @event
              */
             $nodeout: function () {
-                this.alterClass('-nodehover');
+                this.alterStatus('-nodehover');
             },
 
             /**
@@ -235,7 +236,7 @@ _aChildren     - 子控件集合
              * @event
              */
             $nodeover: function () {
-                this.alterClass('+nodehover');
+                this.alterStatus('+nodehover');
             },
 
             /**
@@ -248,7 +249,7 @@ _aChildren     - 子控件集合
                 if (oldParent) {
                     var root = this.getRoot();
                     if (this.contain(root._cSelected)) {
-                        root._cSelected.alterClass('-selected');
+                        root._cSelected.alterStatus('-selected');
                         root._cSelected = null;
                     }
 
@@ -282,7 +283,7 @@ _aChildren     - 子控件集合
              *
              * @param {string|ecui.ui.TreeView} item 子树视图控件的 html 内容/树视图控件
              * @param {number} index 子树视图控件需要添加的位置序号，不指定将添加在最后
-             * @param {Object} options 子树视图控件初始化选项
+             * @param {object} options 子树视图控件初始化选项
              * @return {ecui.ui.TreeView} 添加的树视图控件
              */
             add: function (item, index, options) {

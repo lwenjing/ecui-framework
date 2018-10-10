@@ -5,14 +5,25 @@
     .ui-combox-text {
         position: absolute !important;
         overflow: hidden !important;
+        .width100rate();
+        .height100rate();
     }
 
     input {
         position: absolute !important;
-        outline: none;
+        display: block !important;
+        .width100rate();
+        outline: none !important;
+    }
+}
+
+.ui-combox-placeholder {
+    .ui-combox-text {
+        z-index: 1;
     }
 }
 
 .ui-combox-options {
     overflow: auto !important;
+    overflow-x: hidden !important;
 }
