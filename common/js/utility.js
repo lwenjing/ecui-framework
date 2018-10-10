@@ -407,7 +407,7 @@ fapiao.setPageData = function (context, listNmae) {
     context.offset = data.offset;
     context.total = data.total;
     context.totalPage = data.totalPage;
-}
+};
 
 /**
  * 列表路由对象。
@@ -419,12 +419,14 @@ fapiao.TableListRoute = function (route) {
     this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
     this.main = route.NAME.slice(0, -9) + '_table';
     Object.assign(this, route);
-}
+};
+
 fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
     context.pageNo = context.pageNo || +this.searchParm.pageNo;
     context.pageSize = +this.searchParm.pageSize;
-    daikuan.setFormValue(context, document.forms[this.model[0].split('?')[1].split('&')[0]], this.searchParm);
+    fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1].split('&')[0]], this.searchParm);
 };
+
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     var pageNo = data.currentPage || 1;
@@ -475,7 +477,8 @@ fapiao.TableListRoute2 = function (route) {
     this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
     this.main = route.NAME.slice(0, -9) + '_table';
     Object.assign(this, route);
-}
+};
+
 fapiao.TableListRoute2.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     context.offset = data.offset;
