@@ -223,7 +223,7 @@ fapiao.showHint = function (type, msg) {
 fapiao.setEditFormValue = function (data, form, isDefault) {
     var elements = form.elements;
     var ignore = [], arr_obj_ignore = [];
-    for (var i = 0, item; item = elements[i++]; ) {
+    for (var i = 0, item; item = elements[i++];) {
         var name = item.name;
         // 使用ecui.util.parseValue解析数据，处理ecui.esr.CreateObject创建的对象数据的参数回填
         var value = ecui.util.parseValue(name, data);
@@ -240,7 +240,7 @@ fapiao.setEditFormValue = function (data, form, isDefault) {
                         if (value instanceof Array) {
                             _control.setChecked(value.indexOf(+_control.getValue()) !== -1);
                         } else {
-                            // 当不是复选的时候 返回的不是数组,是string 
+                            // 当不是复选的时候 返回的不是数组,是string
                             _control.setChecked(value === _control.getValue());
                         }
                     } else if (_control instanceof ecui.esr.CreateArray) {
@@ -261,7 +261,7 @@ fapiao.setEditFormValue = function (data, form, isDefault) {
                 } else {
                     item.value = value;
                 }
-            // 对象数组 数据 不做任何处理 ecui.esr.CreateArray 和 ecui.esr.CreateObject 同时使用
+                // 对象数组 数据 不做任何处理 ecui.esr.CreateArray 和 ecui.esr.CreateObject 同时使用
             } else if (arr_obj_ignore.indexOf(name.split('.')[0]) === -1) {
                 // return;
             } else {
@@ -288,7 +288,7 @@ fapiao.setEditFormValue = function (data, form, isDefault) {
 // 搜索数据回填表单数据
 fapiao.setFormValue = function (context, form, searchParm) {
     var elements = form.elements;
-    for (var i = 0, item; item = elements[i++]; ) {
+    for (var i = 0, item; item = elements[i++];) {
         var name = item.name;
         if (name) {
             if (context[name]) {
@@ -316,7 +316,7 @@ fapiao.setFormValue = function (context, form, searchParm) {
 // 清空表单数据
 fapiao.resetFormValue = function (form) {
     var elements = form.elements;
-    for (var i = 0, item; item = elements[i++]; ) {
+    for (var i = 0, item; item = elements[i++];) {
         var name = item.name;
         if (name) {
             var _control = item.getControl && item.getControl();
@@ -340,8 +340,8 @@ fapiao.resetFormValue = function (form) {
 };
 
 // 获取表单数据设置searchParam数据
-fapiao.setSearchParam = function(searchParm, form) {
-    Array.prototype.slice.call(form.elements).forEach(function(item) {
+fapiao.setSearchParam = function (searchParm, form) {
+    Array.prototype.slice.call(form.elements).forEach(function (item) {
         if (item.name) {
             var _control = item.getControl && item.getControl();
             if (_control) {
@@ -361,7 +361,7 @@ fapiao.setSearchParam = function(searchParm, form) {
                     if (_control.isChecked()) {
                         searchParm[item.name].push(_control.getValue());
                     }
-                }  else {
+                } else {
                     searchParm[item.name] = _control.getValue();
                 }
             } else {
@@ -832,17 +832,21 @@ fapiao.Gridframe.prototype = {
         tableDom.push('            <table>');
         tableDom.push('                <thead>');
         tableDom.push('                <tr>');
+        tableDom.push('<th style="width: 50px;">');
         if (self.options.checkbox) {
-            tableDom.push('<th style="width: 50px;">');
-            tableDom.push('    <div ui="type:label;for:checkbox">');
-            tableDom.push('        <div ui="type:checkbox;id:all-checked;">');
-            tableDom.push('            <input name="mxSelect" type="checkbox">');
-            tableDom.push('        </div>');
-            tableDom.push('        <span>&nbsp;</span>');
+            tableDom.push('<div ui="type:label;for:checkbox">');
+            tableDom.push('    <div ui="type:checkbox;id:all-checked;">');
+            tableDom.push('        <input name="mxSelect" type="checkbox">');
             tableDom.push('    </div>');
-            tableDom.push('</th>');
-            tableWidth += parseInt("50px");
+            tableDom.push('    <span>&nbsp;</span>');
+            tableDom.push('</div>');
         }
+        else {
+            tableDom.push('<span>&nbsp;</span>');
+        }
+        tableDom.push('</th>');
+        tableWidth += parseInt("50px");
+
         self.options.columns.forEach(function (column) {
             tableDom.push("<th");
             if (column.thClazz) {
@@ -864,16 +868,20 @@ fapiao.Gridframe.prototype = {
                 self.pageData[item[self.options.idColumn]] = item;
                 operateDom = [];
                 tableDom.push('<tr>');
+                tableDom.push('<td>');
                 if (self.options.checkbox) {
-                    tableDom.push('<td>');
-                    tableDom.push('    <div ui="type:label;for:checkbox">');
-                    tableDom.push('        <div ui="type:checkbox;subject:all-checked">');
-                    tableDom.push('            <input value="' + item[self.options.idColumn] + '" name="mxSelect" type="checkbox">');
-                    tableDom.push('        </div>');
-                    tableDom.push('        <span>' + (index + 1) + '</span>');
+                    tableDom.push('<div ui="type:label;for:checkbox">');
+                    tableDom.push('    <div ui="type:checkbox;subject:all-checked">');
+                    tableDom.push('        <input value="' + item[self.options.idColumn] + '" name="mxSelect" type="checkbox">');
                     tableDom.push('    </div>');
-                    tableDom.push('</td>');
+                    tableDom.push('    <span>' + (index + 1) + '</span>');
+                    tableDom.push('</div>');
                 }
+                else {
+                    tableDom.push('<span>' + (index + 1) + '</span>');
+                }
+                tableDom.push('</td>');
+
 
                 self.options.columns.forEach(function (column) {
                     if (column.operates) {

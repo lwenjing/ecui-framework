@@ -1353,12 +1353,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
 
             if (route.tpl) {
-                var moduleName = route.NAME.split('.')[0];
+                var moduleName = getModuleName(route.NAME);
                 engine = loadStatus[moduleName] || new etpl.Engine();
+                loadStatus[moduleName] = engine;
                 engine.options.namingConflict = "override";
                 if ('function' === typeof route.tpl) {
-                    var tpl = route.tpl(context);
-                    engine.compile(tpl);
+                    engine.compile(route.tpl(context));
                 } else {
                     engine.compile(route.tpl);
                 }
