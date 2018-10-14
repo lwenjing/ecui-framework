@@ -316,7 +316,7 @@ fapiao.setFormValue = function (context, form, searchParm) {
 // 清空表单数据
 fapiao.resetFormValue = function (form) {
     var elements = form.elements;
-    for (var i = 0, item; item = elements[i++];) {
+    for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
         if (name) {
             var _control = item.getControl && item.getControl();
@@ -341,7 +341,8 @@ fapiao.resetFormValue = function (form) {
 
 // 获取表单数据设置searchParam数据
 fapiao.setSearchParam = function (searchParm, form) {
-    Array.prototype.slice.call(form.elements).forEach(function (item) {
+    var elements = form.elements;
+    for (var i = 0, item; item = elements[i++]; ) {
         if (item.name) {
             var _control = item.getControl && item.getControl();
             if (_control) {
@@ -368,7 +369,7 @@ fapiao.setSearchParam = function (searchParm, form) {
                 searchParm[item.name] = item.value;
             }
         }
-    });
+    }
 };
 
 // 初始化dialog控件

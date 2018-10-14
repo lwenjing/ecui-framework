@@ -17,22 +17,23 @@ queryButton - 查询按钮控件。
         'ui-query-button',
         function (el, options) {
             ui.Button.call(this, el, options);
+            this.route = options.route;
         },
         {
-        	/**
+            /**
              * 输入提交事件。
              * @event
              */
             $submit: function (event) {
-                    event.preventDefault();
+                event.preventDefault();
             },
             $click: function (event) {
                 ui.Button.prototype.$click.call(this, event);
                 var route = ecui.esr.findRoute(this);
-                var children = ecui.esr.getRoute(route.children);
+                var children = ecui.esr.getRoute(this.route || route.children);
                 fapiao.setSearchParam(children.searchParm, this.getForm());
-				// children.searchParm.pageNo = 1;
-				ecui.esr.callRoute(route.children + '~pageNo=1', true);
+                // children.searchParm.pageNo = 1;
+                ecui.esr.callRoute(children.NAME + '~pageNo=1', true);
             },
         }
     );
