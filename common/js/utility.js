@@ -520,7 +520,10 @@ fapiao.Gridframe.prototype = {
     setOptions: function (options) {
         var self = this;
         ecui.util.extend(self.options, options);
-        this._name = self.options.name.replaceAll(".", "_");
+        self._name = self.options.name.replaceAll(".", "_");
+
+        // 总 target
+        self.gridframe = self._name + "Gridframe";
 
         // 搜索相关
         self.searchMain = self._name + "SearchContainer";
@@ -528,10 +531,12 @@ fapiao.Gridframe.prototype = {
         self.searchView = self._name + "SearchView";
         self.searchForm = self._name + "SearchForm";
 
+        // 按钮相关
         self.buttonMain = self._name + "ButtonContainer";
         self.buttonName = self.options.name + "Button";
         self.buttonView = self._name + "ButtonView";
 
+        // 表格相关
         self.listTableMain = self._name + "TableListContainer";
         self.listTableName = self.options.name + "TableList";
         self.listTableView = self._name + "TableListView";
@@ -541,7 +546,7 @@ fapiao.Gridframe.prototype = {
     initContain: function () {
         var self = this, html = [];
         // 路由总控
-        html.push("<!-- target: gridframe -->");
+        html.push("<!-- target: " + self.gridframe + " -->");
         html.push("<div class='stay-list-page gridframe'>");
         if (self.options.searchs) {
             html.push("<div id='" + self.searchMain + "'></div>");
@@ -556,7 +561,7 @@ fapiao.Gridframe.prototype = {
             NAME: self.options.name,
             main: "container",
             tpl: html.join(""),
-            view: "gridframe",
+            view: self.gridframe,
             onafterrender: function () {
                 if (self.options.searchs) {
                     ecui.esr.callRoute(self.searchName, true);
