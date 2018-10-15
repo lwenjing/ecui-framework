@@ -1213,6 +1213,15 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         },
 
         /**
+         * 设置模板引擎。
+         * @public
+         *
+         * @param {string} moduleName 模块名称，如果不指定模块名称使用当前模块
+         */
+        setEngine: function (moduleName) {
+            return loadStatus[moduleName] = new etpl.Engine();
+        },
+        /**
          * 获取常量数据。
          * @public
          *

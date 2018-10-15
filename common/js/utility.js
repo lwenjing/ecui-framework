@@ -890,7 +890,6 @@ fapiao.Gridframe.prototype = {
                 }
                 tableDom.push('</td>');
 
-
                 self.options.columns.forEach(function (column) {
                     if (column.operates) {
                         if (!self.operates) {
@@ -957,4 +956,8 @@ fapiao.Gridframe.prototype = {
     reload: function () {
         ecui.esr.callRoute(this.listTableName, true);
     }
+};
+
+fapiao.ModalDialog = function (options) {
+
 };
