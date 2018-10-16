@@ -723,9 +723,9 @@ fapiao.Gridframe.prototype = {
                                             }
                                         );
                                     }
-                                    button.clickAction.call(this, rowDatas)
+                                    button.clickAction.call(self, rowDatas)
                                 } else {
-                                    button.clickAction.call(this, self)
+                                    button.clickAction.call(self)
                                 }
                             }
                         }

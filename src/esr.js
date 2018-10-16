@@ -686,6 +686,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             });
             return;
         }
+
+        // 动态模板更新，每次渲染前都需要更新
+        if (route.tpl) {
+            engine.options.namingConflict = "override";
+            if ('function' === typeof route.tpl) {
+                engine.compile(route.tpl(context));
+            } else {
+                engine.compile(route.tpl);
+            }
+        }
+
         beforerender(route);
 
         var el = core.$(route.main),
@@ -1354,15 +1365,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         engine = loadStatus[moduleName] = new etpl.Engine();
                         engine.compile(data);
 
-                        if (route.tpl) {
-                            engine.options.namingConflict = "override";
-                            if ('function' === typeof route.tpl) {
-                                engine.compile(route.tpl(context));
-                            } else {
-                                engine.compile(route.tpl);
-                            }
-                        }
-
                         render(route);
                     },
                     onerror: function () {
@@ -1393,15 +1395,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                 if (engine instanceof etpl.Engine) {
                     // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
-                    if (engine.getRenderer(route.view)) {
-                        render(route);
-                    } else if (route.tpl) {
-                        engine.options.namingConflict = "override";
-                        if ('function' === typeof route.tpl) {
-                            engine.compile(route.tpl(context));
-                        } else {
-                            engine.compile(route.tpl);
-                        }
+                    if (engine.getRenderer(route.view) || route.tpl) {
                         render(route);
                     }
                 } else {
