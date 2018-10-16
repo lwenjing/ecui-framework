@@ -450,7 +450,7 @@ fapiao.TableListRoute.prototype.onafterrender = function (context) {
 
 function calHeight() {
     var route = ecui.esr.getLocation().split('~')[0];
-    if (route === 'query.bill') {
+    if (route === '/invoice/query/bill') {
         var containerH = ecui.$('container').offsetHeight;
         var searchConditionsH = ecui.$('searchConditions').offsetHeight;
         var search_table = ecui.$('billSearch_table');
@@ -466,7 +466,25 @@ function calHeight() {
 
 window.onresize = function () {
     calHeight();
+    if (document.getElementsByClassName("gridframe").length) {
+        girdCalcHeight();
+    }
 };
+
+function girdCalcHeight() {
+    var containerHeight = ecui.$('container').offsetHeight;
+    var searchHeight = document.getElementsByClassName("grid-search")[0].offsetHeight;
+    var buttonHeight = document.getElementsByClassName("grid-button")[0].offsetHeight;
+
+    var listTableMain = document.getElementsByClassName("grid-table")[0];
+    var listTableContent = document.getElementsByClassName("grid-content")[0];
+    var tableHeight = containerHeight - searchHeight - buttonHeight - 10;
+    var tableContentHeight = tableHeight - 60;
+    listTableMain.style.height = tableHeight + 'px';
+    if (listTableContent) {
+        listTableContent.style.height = tableContentHeight + 'px';
+    }
+}
 
 /**
  * 列表路由对象。
@@ -549,12 +567,12 @@ fapiao.Gridframe.prototype = {
         html.push("<!-- target: " + self.gridframe + " -->");
         html.push("<div class='stay-list-page gridframe'>");
         if (self.options.searchs) {
-            html.push("<div id='" + self.searchMain + "'></div>");
+            html.push("<div id='" + self.searchMain + "' class='grid-search'></div>");
         }
         if (self.options.buttons) {
-            html.push("<div id='" + self.buttonMain + "'></div>");
+            html.push("<div id='" + self.buttonMain + "' class='grid-button'></div>");
         }
-        html.push("<div id='" + self.listTableMain + "'></div>");
+        html.push("<div id='" + self.listTableMain + "' class='grid-table'></div>");
         html.push("</div>");
 
         ecui.esr.addRoute(self.options.name, {
@@ -583,13 +601,6 @@ fapiao.Gridframe.prototype = {
         }
 
         self.initTableList();
-
-        window.onresize = function () {
-            if (self.options.fullHeight) {
-                self.calcHeight.call(self);
-            }
-            self.reRenderSearch.call(self);
-        };
     },
     initSearch: function () {
         var self = this, route = {
@@ -835,7 +846,7 @@ fapiao.Gridframe.prototype = {
         self.pageData = {};
         tableDom.push('<!-- target: ' + self.listTableView + ' -->');
         tableDom.push('<div class="list-table-container">');
-        tableDom.push('    <div class="table-container" id="' + self.listTableView + '">');
+        tableDom.push('    <div class="table-container grid-content" id="' + self.listTableView + '">');
         tableDom.push('        <div class="list-table ui-table gridframe-table">');
         tableDom.push('            <table>');
         tableDom.push('                <thead>');
@@ -956,8 +967,4 @@ fapiao.Gridframe.prototype = {
     reload: function () {
         ecui.esr.callRoute(this.listTableName, true);
     }
-};
-
-fapiao.ModalDialog = function (options) {
-
 };
