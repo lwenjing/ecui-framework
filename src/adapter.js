@@ -874,6 +874,17 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
         },
         ui: {},
         util: {
+            arraySlice: function (el) {
+                try {
+                    return Array.prototype.slice.call(el);
+                } catch (e) {
+                    for (var r = [], i = 0, len = el.length; i < len; i++) {
+                        r[i] = el[i];
+                    }
+                    return r;
+                }
+            },
+
             /*
              * 自适应调整字体大小。
              * @public
