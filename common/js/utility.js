@@ -519,6 +519,8 @@ fapiao.Gridframe = function (options) {
         checkbox: true, // 是否需要 checkbox
         idColumn: "id", // 行对象主键属性名称
         name: "",// 表单名称
+        main: "container", // 渲染目标ID
+        method: "FORM", // 请求数据方法
         viewPrefix: "",// target前缀
         searchs: false, // 查询条件
         buttons: null, // 表头按钮
@@ -590,7 +592,7 @@ fapiao.Gridframe.prototype = {
         var route = {
             NAME: self.options.name,
             model: [],
-            main: "container",
+            main: self.options.main,
             tpl: html.join(""),
             view: self.gridframe,
             onafterrender: function () {
@@ -796,7 +798,7 @@ fapiao.Gridframe.prototype = {
             fullHeight: self.options.fullHeight,
             NAME: self.listTableName,
             main: self.listTableMain,
-            model: [self.listTableData + '@FORM ' + self.options.url + "?" + self.searchForm],
+            model: [self.listTableData + '@' + self.options.method + " " + self.options.url + "?" + self.searchForm],
             tpl: function (context) {
                 return self.initTableView.call(self, context);
             },
