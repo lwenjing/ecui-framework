@@ -59,4 +59,29 @@ queryButton - 查询按钮控件。
             },
         }
     );
+
+    /**
+     * 弹窗查询列表按钮
+     * */
+    ui.DialogQueryButton = core.inherits(
+        ui.Button,
+        'ui-query-button',
+        {
+            /**
+             * 输入提交事件。
+             * @event,billSearch_table
+             */
+            $submit: function (event) {
+                event.preventDefault();
+            },
+            $click: function (event) {
+                ui.Button.prototype.$click.call(this, event);
+                var formVal = {};
+                console.log(this.getForm().elements);
+                // var paramStr = '?currentPage=1&pageSize=5';
+                // fapiao.getBuyList(paramStr);
+            },
+        }
+    );
+
 }());
