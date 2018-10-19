@@ -259,7 +259,7 @@ a {
 /*暂无样式*/
 
 
-/* 
+/*
  * calendar
 */
 
@@ -302,7 +302,7 @@ a {
 }
 
 
-/* 
+/*
  * ui-checktree
 */
 
@@ -310,7 +310,7 @@ a {
 /*暂无样式*/
 
 
-/* 
+/*
  * checkbox
 */
 
@@ -341,7 +341,7 @@ a {
 }
 
 
-/* 
+/*
  * combox
 */
 
@@ -398,7 +398,7 @@ a {
 }
 
 
-/* 
+/*
  * control
 */
 
@@ -406,7 +406,7 @@ a {
 /*暂不修改*/
 
 
-/* 
+/*
  * core
 */
 
@@ -414,7 +414,7 @@ a {
 /*暂不修改*/
 
 
-/* 
+/*
  * dialog
 */
 
@@ -572,7 +572,7 @@ a {
             line-height: 24px;
             text-align: center;
             vertical-align: middle;
-            font: 12px;
+            font-size: 12px;
             cursor: pointer;
             border-radius: 2px;
             padding: 0px;
