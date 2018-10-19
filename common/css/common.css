@@ -154,7 +154,7 @@ a {
 
 .blue-btn {
     width: auto;
-    padding: 0 10px;
+    padding: 0 12px!important;
     height: 30px;
     line-height: 30px;
     display: inline-block;
@@ -206,7 +206,7 @@ a {
  */
 
 .white-btn {
-    width: 80px;
+    width: auto;
     height: 30px;
     line-height: 30px;
     background-color: #fff;
@@ -216,6 +216,7 @@ a {
     text-align: center;
     cursor: pointer;
     font-size: 14px;
+    padding: 0 12px!important;
 }
 
 .white-btn-hover {
