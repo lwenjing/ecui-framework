@@ -737,7 +737,7 @@ Gridframe.prototype = {
             onafterrender: function () {
                 if (self.options.buttons) {
                     self.options.buttons.forEach(function (button) {
-                        var buttonDoms = document.querySelector("." + button.name);
+                        var buttonDoms = document.querySelectorAll("." + button.name);
                         for (var i = 0; i < buttonDoms.length; i++) {
                             buttonDoms[i].onclick = function () {
                                 if (self.options.checkbox) {
