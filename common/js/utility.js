@@ -370,6 +370,7 @@ fapiao.setSearchParam = function (searchParm, form) {
             }
         }
     }
+    console.log(searchParm);
 };
 
 // 初始化dialog控件
@@ -466,25 +467,7 @@ function calHeight() {
 
 window.onresize = function () {
     calHeight();
-    if (document.getElementsByClassName("gridframe").length) {
-        girdCalcHeight();
-    }
 };
-
-function girdCalcHeight() {
-    var containerHeight = ecui.$('container').offsetHeight;
-    var searchHeight = document.getElementsByClassName("grid-search")[0].offsetHeight;
-    var buttonHeight = document.getElementsByClassName("grid-button")[0].offsetHeight;
-
-    var listTableMain = document.getElementsByClassName("grid-table")[0];
-    var listTableContent = document.getElementsByClassName("grid-content")[0];
-    var tableHeight = containerHeight - searchHeight - buttonHeight - 10;
-    var tableContentHeight = tableHeight - 60;
-    listTableMain.style.height = tableHeight + 'px';
-    if (listTableContent) {
-        listTableContent.style.height = tableContentHeight + 'px';
-    }
-}
 
 /**
  * 列表路由对象。
@@ -511,13 +494,15 @@ fapiao.TableListRoute2.prototype.onbeforerender = function (context) {
  *
  * @param {Object} options 请求参数
  */
-fapiao.Gridframe = function (options) {
+var Gridframe = function (options) {
     this.options = {
         fullHeight: false, // 是否满屏
         initBlank: false, // 是否初始化为空
         checkbox: true, // 是否需要 checkbox
         idColumn: "id", // 行对象主键属性名称
         name: "",// 表单名称
+        main: "container", // 渲染目标ID
+        method: "FORM", // 请求数据方法
         viewPrefix: "",// target前缀
         searchs: false, // 查询条件
         buttons: null, // 表头按钮
@@ -535,7 +520,7 @@ fapiao.Gridframe = function (options) {
     this.initContain();
 };
 
-fapiao.Gridframe.prototype = {
+Gridframe.prototype = {
     setOptions: function (options) {
         var self = this;
         ecui.util.extend(self.options, options);
@@ -558,6 +543,10 @@ fapiao.Gridframe.prototype = {
         self.searchView = self.prefixName + "SearchView";
         self.searchForm = self.name + "SearchForm";
 
+        // 查询更多相关
+        self.seeMoreBtn = self.name + "SeeMoreBtn";
+        self.seeMoreContainer = self.name + "SeeMoreContainer";
+
         // 按钮相关
         self.buttonMain = self.name + "ButtonContainer";
         self.buttonName = self.name + "Button";
@@ -569,6 +558,7 @@ fapiao.Gridframe.prototype = {
         self.listTableView = self.prefixName + "TableListView";
         self.listTableContent = self.name + "TableListContent";
         self.listTableData = self.name + "TableData";
+        self.allChecked = self.name + "allChecked";
 
         self.blankTableName = self.name + "BlankTableList";
     },
@@ -588,8 +578,7 @@ fapiao.Gridframe.prototype = {
 
         var route = {
             NAME: self.options.name,
-            model: [],
-            main: "container",
+            main: self.options.main,
             tpl: html.join(""),
             view: self.gridframe,
             onafterrender: function () {
@@ -608,6 +597,13 @@ fapiao.Gridframe.prototype = {
                 } else {
                     ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
                 }
+
+                window.onresize = function () {
+                    calHeight();
+                    if (self.options.fullHeight) {
+                        self.calcHeight();
+                    }
+                };
             }
         };
 
@@ -622,13 +618,6 @@ fapiao.Gridframe.prototype = {
 
         self.initTableList();
         self.initBlankTable();
-
-        window.onresize = function () {
-            calHeight();
-            if (document.getElementsByClassName("gridframe").length) {
-                self.calcHeight();
-            }
-        };
     },
     initSearch: function () {
         var self = this, route = {
@@ -663,9 +652,9 @@ fapiao.Gridframe.prototype = {
     reRenderSearch: function () {
         var self = this;
         // 查询条件过多时，换行处理
-        var maxWidth = document.getElementsByClassName("search-line")[0].offsetWidth - 200;
-        var moreSearch = ecui.$("seeMoreSearchContain");
-        var searchItems = document.getElementsByClassName("search-item");
+        var maxWidth = document.querySelector("#" + self.searchMain + " .search-line").offsetWidth - 200;
+        var moreSearch = ecui.$(self.seeMoreContainer);
+        var searchItems = document.querySelectorAll("#" + self.searchMain + " .search-item");
         var nextLine = [];
         for (var i = 0; i < searchItems.length; i++) {
             var searchItem = searchItems[i];
@@ -675,8 +664,8 @@ fapiao.Gridframe.prototype = {
             }
         }
         if (nextLine.length) {
-            var seeMoreSearchBtn = ecui.$("seeMoreSearchBtn");
-            document.getElementsByClassName("search-btn")[0].style.right = "100px";
+            var seeMoreSearchBtn = ecui.$(self.seeMoreBtn);
+            document.querySelector("#" + self.searchMain + " .search-btn").style.right = "100px";
             ecui.dom.removeClass(seeMoreSearchBtn, 'ui-hide');
             seeMoreSearchBtn.onclick = function () {
                 self.seeMore.call(self);
@@ -689,7 +678,7 @@ fapiao.Gridframe.prototype = {
     initSearchView: function (context) {
         var self = this, searchDom = [];
         searchDom.push('<!-- target: ' + self.searchView + ' -->');
-        searchDom.push('<div class="stay-search search-items" id="' + self.searchView + '">');
+        searchDom.push('<div class="stay-search search-items">');
         searchDom.push('    <form name="' + self.searchForm + '">');
         searchDom.push('        <div class="search_form">');
         searchDom.push('            <div class="search-line">');
@@ -729,9 +718,9 @@ fapiao.Gridframe.prototype = {
         } else {
             searchDom.push('            <div class="search-btn" ui="type: QueryButton;" style="margin: 0;">查询</div>');
         }
-        searchDom.push('                <div class="search-btn ui-hide" id="seeMoreSearchBtn" style="margin-right:0">更多条件</div>');
+        searchDom.push('                <div class="search-btn ui-hide" id="' + self.seeMoreBtn + '" style="margin-right:0">更多条件</div>');
         searchDom.push('            </div>');
-        searchDom.push('            <div id="seeMoreSearchContain" class="ui-hide"></div>');
+        searchDom.push('            <div id="' + self.seeMoreContainer + '" class="ui-hide"></div>');
         searchDom.push('       </div>');
         searchDom.push('   </form>');
         searchDom.push('</div>');
@@ -749,11 +738,11 @@ fapiao.Gridframe.prototype = {
             onafterrender: function () {
                 if (self.options.buttons) {
                     self.options.buttons.forEach(function (button) {
-                        var buttonDoms = document.getElementsByClassName(button.name);
+                        var buttonDoms = document.querySelector("." + button.name);
                         for (var i = 0; i < buttonDoms.length; i++) {
                             buttonDoms[i].onclick = function () {
                                 if (self.options.checkbox) {
-                                    var all = ecui.get('all-checked');
+                                    var all = ecui.get(self.allChecked);
                                     var rowDatas = [];
                                     if (all) {
                                         all.getDependents().forEach(function (item) {
@@ -830,7 +819,7 @@ fapiao.Gridframe.prototype = {
             },
             onafterrender: function (context) {
                 if (context.tableWidth > 50) {
-                    var gridTable = document.getElementsByClassName("gridframe-table")[0];
+                    var gridTable = document.querySelector(".gridframe-table");
                     gridTable.style.minWidth = context.tableWidth + "px";
                     gridTable.style.width = context.tableWidth + "px";
                 }
@@ -839,7 +828,7 @@ fapiao.Gridframe.prototype = {
                 }
                 if (self.operates) {
                     self.operates.forEach(function (operate) {
-                        var operateDoms = document.getElementsByClassName(operate.name);
+                        var operateDoms = document.querySelectorAll("." + operate.name);
                         for (var i = 0; i < operateDoms.length; i++) {
                             var operateDom = operateDoms[i];
                             operateDom.onclick = function () {
@@ -849,7 +838,7 @@ fapiao.Gridframe.prototype = {
                         }
                     });
                 }
-                var linkDoms = document.getElementsByClassName("row-link");
+                var linkDoms = document.querySelectorAll(".row-link");
                 if (linkDoms.length) {
                     for (var i = 0; i < linkDoms.length; i++) {
                         var linkDom = linkDoms[i];
@@ -902,7 +891,7 @@ fapiao.Gridframe.prototype = {
             },
             onafterrender: function (context) {
                 if (context.tableWidth > 50) {
-                    var gridTable = document.getElementsByClassName("gridframe-table")[0];
+                    var gridTable = document.querySelector(".gridframe-table");
                     gridTable.style.minWidth = context.tableWidth + "px";
                     gridTable.style.width = context.tableWidth + "px";
                 }
@@ -915,11 +904,13 @@ fapiao.Gridframe.prototype = {
         ecui.esr.addRoute(this.blankTableName, route);
     },
     calcHeight: function () {
-        var self = this, containerHeight = ecui.$('container').offsetHeight;
+        var self = this, containerHeight = ecui.$("container").offsetHeight;
+        var gridTop = ecui.$(self.options.main).offsetTop;
+        containerHeight = containerHeight - gridTop;
         var searchHeight = ecui.$(self.searchMain).offsetHeight;
         var buttonHeight = ecui.$(self.buttonMain).offsetHeight;
 
-        var listTableContent = document.getElementsByClassName("grid-content")[0];
+        var listTableContent = ecui.$(self.listTableContent);
         var tableHeight = containerHeight - searchHeight - buttonHeight - 10;
         var tableContentHeight = tableHeight - 60;
         ecui.$(self.listTableMain).style.height = tableHeight + 'px';
@@ -932,7 +923,7 @@ fapiao.Gridframe.prototype = {
         self.pageData = {};
         tableDom.push('<!-- target: ' + self.listTableView + ' -->');
         tableDom.push('<div class="list-table-container">');
-        tableDom.push('    <div class="table-container grid-content" id="' + self.listTableView + '">');
+        tableDom.push('    <div class="table-container grid-content" id="' + self.listTableContent + '">');
         tableDom.push('        <div class="list-table ui-table gridframe-table">');
         tableDom.push('            <table>');
         tableDom.push('                <thead>');
@@ -940,7 +931,7 @@ fapiao.Gridframe.prototype = {
         tableDom.push('<th style="width: 50px;">');
         if (self.options.checkbox) {
             tableDom.push('<div ui="type:label;for:checkbox">');
-            tableDom.push('    <div ui="type:checkbox;id:all-checked;">');
+            tableDom.push('    <div ui="type:checkbox;id:' + self.allChecked + '">');
             tableDom.push('        <input name="mxSelect" type="checkbox">');
             tableDom.push('    </div>');
             tableDom.push('    <span>&nbsp;</span>');
@@ -976,7 +967,7 @@ fapiao.Gridframe.prototype = {
                 tableDom.push('<td>');
                 if (self.options.checkbox) {
                     tableDom.push('<div ui="type:label;for:checkbox">');
-                    tableDom.push('    <div ui="type:checkbox;subject:all-checked">');
+                    tableDom.push('    <div ui="type:checkbox;subject:' + self.allChecked + '">');
                     tableDom.push('        <input value="' + item[self.options.idColumn] + '" name="mxSelect" type="checkbox">');
                     tableDom.push('    </div>');
                     tableDom.push('    <span>' + (index + 1) + '</span>');
@@ -1054,3 +1045,101 @@ fapiao.Gridframe.prototype = {
         ecui.esr.callRoute(this.viewPrefix + this.listTableName, true);
     }
 };
+
+fapiao.Gridframe = Gridframe;
+fapiao.gridrame = function (options) {
+    return new Gridframe(options);
+};
+
+var CustomTab = function (options) {
+    this.options = {
+        name: "",
+        main: "container",
+        viewPrefix: "",// target前缀
+        tabs: [{
+            label: "", // tab 显示名称
+            id: "", // tabId
+            targetRoute: "", // tab 点击目标路由，如果没有，认为innerDom 方法处理内容是往dom 中渲染html
+            innerDom: function (id) { // tab内容路由渲染,可以往 id 的 dom 中渲染 route、静态 html
+
+            }
+        }, {
+            label: "",
+            id: "",
+            targetRoute: "",
+            innerDom: function (id) {
+
+            }
+        }]
+    };
+    this.setOptions(options);
+    this.initContain();
+};
+
+CustomTab.prototype = {
+    setOptions: function (options) {
+        var self = this;
+        ecui.util.extend(self.options, options);
+
+        self.prefix = "";
+        self.viewPrefix = "";
+        if (self.options.viewPrefix) {
+            self.viewPrefix = self.options.viewPrefix + ".";
+            self.prefix = self.options.viewPrefix.replaceAll(".", "_");
+        }
+        self.name = self.prefix + self.options.name;
+        self.prefixName = self.viewPrefix + self.options.name;
+
+        // 总 target
+        self.customTab = self.prefixName + "CustomTab";
+    },
+    initContain: function () {
+        var self = this, html = [];
+        // 路由总控
+        html.push("<!-- target: " + self.customTab + " -->");
+        html.push("<div ui='type:tab' class='custom-tab'>");
+        for (var i = 0; i < self.options.tabs.length; i++) {
+            var tab = self.options.tabs[i];
+            html.push("<div");
+            if (i === 0) {
+                self.firstTab = tab.id;
+                html.push(" ui='selected:true'");
+            }
+            html.push("><strong id='" + tab.id + "'>" + tab.label + "</strong>");
+            html.push("<div id='" + self.name + tab.id + "' class='custom-tab-content'></div>");
+            html.push("</div>");
+        }
+        html.push("</div>");
+
+
+        var route = {
+            NAME: self.options.name,
+            model: [],
+            main: self.options.main,
+            tpl: html.join(""),
+            view: self.customTab,
+            onafterrender: function () {
+                self.options.tabs.forEach(function (tab) {
+                    if (tab.targetRoute) {
+                        ecui.$(tab.id).onclick = function () {
+                            ecui.esr.callRoute(self.viewPrefix + tab.targetRoute, true);
+                        }
+                    }
+                });
+
+                ecui.$(self.firstTab).click();
+            }
+        };
+
+        ecui.esr.addRoute(self.options.name, route);
+
+        self.options.tabs.forEach(function (tab) {
+            tab.innerDom.call(self, self.name + tab.id, tab.id);
+        });
+    }
+};
+
+fapiao.customTab = function (options) {
+    return new CustomTab(options);
+};
+
