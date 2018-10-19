@@ -1058,8 +1058,8 @@ var CustomTab = function (options) {
         tabs: [{
             label: "", // tab 显示名称
             id: "", // tabId
-            targetRoute: "", // tab 点击目标路由
-            innerDom: function (id) { // tab内容路由渲染
+            targetRoute: "", // tab 点击目标路由，如果没有，认为innerDom 方法处理内容是往dom 中渲染html
+            innerDom: function (id) { // tab内容路由渲染,可以往 id 的 dom 中渲染 route、静态 html
 
             }
         }, {
