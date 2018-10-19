@@ -370,7 +370,6 @@ fapiao.setSearchParam = function (searchParm, form) {
             }
         }
     }
-    console.log(searchParm);
 };
 
 // 初始化dialog控件
