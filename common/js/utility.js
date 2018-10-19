@@ -903,7 +903,9 @@ Gridframe.prototype = {
         ecui.esr.addRoute(this.blankTableName, route);
     },
     calcHeight: function () {
-        var self = this, containerHeight = ecui.$(self.options.main).offsetHeight;
+        var self = this, containerHeight = ecui.$("container").offsetHeight;
+        var gridTop = ecui.$(self.options.main).offsetTop;
+        containerHeight = containerHeight - gridTop;
         var searchHeight = ecui.$(self.searchMain).offsetHeight;
         var buttonHeight = ecui.$(self.buttonMain).offsetHeight;
 
@@ -1103,7 +1105,7 @@ CustomTab.prototype = {
                 html.push(" ui='selected:true'");
             }
             html.push("><strong id='" + tab.id + "'>" + tab.label + "</strong>");
-            html.push("<div id='" + self.name + tab.id + "'></div>");
+            html.push("<div id='" + self.name + tab.id + "' class='custom-tab-content'></div>");
             html.push("</div>");
         }
         html.push("</div>");
