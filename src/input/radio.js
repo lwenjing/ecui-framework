@@ -190,7 +190,8 @@ _bRequired - 是否必须选择
                 }
                 if (inputEl.form) {
                     // 必须 name 也不为空，否则 form[o] 的值在部分浏览器下将是空
-                    Array.prototype.slice.call(inputEl.form[inputEl.name]).forEach(function (item) {
+                    var inputEls = inputEl.form[inputEl.name];
+                    Array.prototype.slice.call(inputEls.length ? inputEls : [inputEls]).forEach(function (item) {
                         if (item.getControl) {
                             result.push(item.getControl());
                         }
@@ -200,6 +201,33 @@ _bRequired - 是否必须选择
                 return core.query(function (item) {
                     return item instanceof ui.Radio && !item.getInput().form && item.getName() === inputEl.name;
                 });
+            },
+
+            /**
+             * 获取与当前单选框同组的全部单选框。
+             * getItems 方法返回包括当前单选框在内的与当前单选框同组的全部单选框，同组的单选框选中状态存在唯一性。
+             * @public
+             *
+             * @return {Array} 单选框控件数组
+             */
+            getChecked: function () {
+                var inputEl = this.getInput(),
+                    checked;
+
+                if (!inputEl.name) {
+                    return [this];
+                }
+                if (inputEl.form) {
+                    // 必须 name 也不为空，否则 form[o] 的值在部分浏览器下将是空
+                    var inputEls = inputEl.form[inputEl.name];
+                    inputEls = inputEls.length ? inputEls : [inputEls];
+                    for (var i = 0, item; item = inputEls[i++]; ) {
+                        if (item.getControl && item.getControl().isChecked()) {
+                            checked = item.getControl();
+                        }
+                    }
+                }
+                return checked;
             },
 
             /**

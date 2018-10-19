@@ -923,6 +923,33 @@ a {
     text-align: center;
 }
 
+.ui-tip {
+    position: absolute;
+    z-index: 65555;
+}
+
+.ui-tip >div {
+    min-width: 210px;
+    max-width: 522px;
+    padding: 35px;
+    border-radius: 4px;
+    line-height: 30px;
+    color: #FFFFFF;
+    font-size: 18px;
+    text-align: center;
+}
+.ui-tip .tip-success {
+    background: rgba(58, 183, 106, 0.70);
+}
+
+.ui-tip .tip-error {
+    background: rgba(213, 18, 0, 0.70);
+}
+
+.ui-tip .tip-warn {
+    background: rgba(43, 43, 59, 0.95);
+}
+
 #hintContainer .successHint {
     background: rgba(58, 183, 106, 0.70);
 }
