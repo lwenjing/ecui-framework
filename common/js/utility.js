@@ -524,6 +524,17 @@ Gridframe.prototype = {
         var self = this;
         ecui.util.extend(self.options, options);
 
+
+        if (self.options.searchs) {
+            self.searchShow = false;
+            self.options.searchs.forEach(function (search) {
+                if ("hide" !== search.type) {
+                    self.searchShow = true;
+                    return;
+                }
+            });
+        }
+
         self.prefix = "";
         self.viewPrefix = "";
         if (self.options.viewPrefix) {
@@ -567,12 +578,12 @@ Gridframe.prototype = {
         html.push("<!-- target: " + self.gridframe + " -->");
         html.push("<div class='stay-list-page gridframe'>");
         if (self.options.searchs) {
-            html.push("<div id='" + self.searchMain + "' class='grid-search'></div>");
+            html.push("<div id='" + self.searchMain + "'></div>");
         }
         if (self.options.buttons) {
-            html.push("<div id='" + self.buttonMain + "' class='grid-button'></div>");
+            html.push("<div id='" + self.buttonMain + "' class='grid-buttons'></div>");
         }
-        html.push("<div id='" + self.listTableMain + "' class='grid-table'></div>");
+        html.push("<div id='" + self.listTableMain + "'></div>");
         html.push("</div>");
 
         var route = {
@@ -616,7 +627,9 @@ Gridframe.prototype = {
         }
 
         self.initTableList();
-        self.initBlankTable();
+        if (!self.searchHide) {
+            self.initBlankTable();
+        }
     },
     initSearch: function () {
         var self = this, route = {
@@ -640,7 +653,7 @@ Gridframe.prototype = {
                 }
             });
         };
-        if (self.options.initBlank) {
+        if (self.options.initBlank && self.searchShow) {
             route.targetRoute = self.viewPrefix + self.listTableName;
         } else {
             route.children = self.viewPrefix + self.listTableName;
@@ -649,7 +662,11 @@ Gridframe.prototype = {
             route.searchParm = self.options.searchParm;
             route.onafterrender = function (context) {
                 fapiao.setFormValue(context, document.forms[self.searchForm], self.options.searchParm);
-                self.reRenderSearch.call(self);
+                if (!self.searchShow) {
+                    ecui.dom.addClass(ecui.$(self.searchMain), 'ui-hide');
+                } else {
+                    self.reRenderSearch.call(self);
+                }
             }
         }
 
@@ -932,7 +949,7 @@ Gridframe.prototype = {
         self.pageData = {};
         tableDom.push('<!-- target: ' + self.listTableView + ' -->');
         tableDom.push('<div class="list-table-container">');
-        tableDom.push('    <div class="table-container grid-content" id="' + self.listTableContent + '">');
+        tableDom.push('    <div class="table-container" id="' + self.listTableContent + '">');
         tableDom.push('        <div class="list-table ui-table gridframe-table">');
         tableDom.push('            <table>');
         tableDom.push('                <thead>');
