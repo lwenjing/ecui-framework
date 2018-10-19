@@ -897,7 +897,7 @@ Gridframe.prototype = {
             },
             onafterrender: function (context) {
                 if (context.tableWidth > 50) {
-                    var gridTable = document.querySelector(".gridframe-table");
+                    var gridTable = document.querySelector("#" + self.listTableContent + " .gridframe-table");
                     gridTable.style.minWidth = context.tableWidth + "px";
                     gridTable.style.width = context.tableWidth + "px";
                 }
@@ -912,6 +912,9 @@ Gridframe.prototype = {
     calcHeight: function () {
         var self = this, containerHeight = ecui.$("container").offsetHeight;
         var gridTop = ecui.$(self.options.main).offsetTop;
+        if ("container" === self.options.main) {
+            gridTop = 0;
+        }
         containerHeight = containerHeight - gridTop;
         var searchHeight = ecui.$(self.searchMain).offsetHeight;
         var buttonHeight = ecui.$(self.buttonMain).offsetHeight;
