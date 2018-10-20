@@ -522,6 +522,17 @@ Gridframe.prototype = {
         var self = this;
         ecui.util.extend(self.options, options);
 
+
+        if (self.options.searchs) {
+            self.searchShow = false;
+            self.options.searchs.forEach(function (search) {
+                if ("hide" !== search.type) {
+                    self.searchShow = true;
+                    return;
+                }
+            });
+        }
+
         self.prefix = "";
         self.viewPrefix = "";
         if (self.options.viewPrefix) {
@@ -565,12 +576,12 @@ Gridframe.prototype = {
         html.push("<!-- target: " + self.gridframe + " -->");
         html.push("<div class='stay-list-page gridframe'>");
         if (self.options.searchs) {
-            html.push("<div id='" + self.searchMain + "' class='grid-search'></div>");
+            html.push("<div id='" + self.searchMain + "'></div>");
         }
         if (self.options.buttons) {
-            html.push("<div id='" + self.buttonMain + "' class='grid-button'></div>");
+            html.push("<div id='" + self.buttonMain + "' class='grid-buttons'></div>");
         }
-        html.push("<div id='" + self.listTableMain + "' class='grid-table'></div>");
+        html.push("<div id='" + self.listTableMain + "'></div>");
         html.push("</div>");
 
         var route = {
@@ -614,7 +625,9 @@ Gridframe.prototype = {
         }
 
         self.initTableList();
-        self.initBlankTable();
+        if (!self.searchHide) {
+            self.initBlankTable();
+        }
     },
     initSearch: function () {
         var self = this, route = {
@@ -631,7 +644,14 @@ Gridframe.prototype = {
                 route.model.push(search.dataName + "@" + search.url);
             }
         });
-        if (self.options.initBlank) {
+        route.onbeforerender = function (context) {
+            self.options.searchs.forEach(function (search) {
+                if ("Select" === search.type && !search.url) {
+                    context[search.dataName] = search.options;
+                }
+            });
+        };
+        if (self.options.initBlank && self.searchShow) {
             route.targetRoute = self.viewPrefix + self.listTableName;
         } else {
             route.children = self.viewPrefix + self.listTableName;
@@ -640,7 +660,11 @@ Gridframe.prototype = {
             route.searchParm = self.options.searchParm;
             route.onafterrender = function (context) {
                 fapiao.setFormValue(context, document.forms[self.searchForm], self.options.searchParm);
-                self.reRenderSearch.call(self);
+                if (!self.searchShow) {
+                    ecui.dom.addClass(ecui.$(self.searchMain), 'ui-hide');
+                } else {
+                    self.reRenderSearch.call(self);
+                }
             }
         }
 
@@ -735,7 +759,7 @@ Gridframe.prototype = {
             onafterrender: function () {
                 if (self.options.buttons) {
                     self.options.buttons.forEach(function (button) {
-                        var buttonDoms = document.querySelector("." + button.name);
+                        var buttonDoms = document.querySelectorAll("." + button.name);
                         for (var i = 0; i < buttonDoms.length; i++) {
                             buttonDoms[i].onclick = function () {
                                 if (self.options.checkbox) {
@@ -781,7 +805,7 @@ Gridframe.prototype = {
             fullHeight: self.options.fullHeight,
             NAME: self.listTableName,
             main: self.listTableMain,
-            model: [self.listTableData + '@GET ' + self.options.url + "?" + self.searchForm],
+            model: [self.listTableData + '@FORM ' + self.options.url + "?" + self.searchForm],
             tpl: function (context) {
                 return self.initTableView.call(self, context);
             },
@@ -888,7 +912,7 @@ Gridframe.prototype = {
             },
             onafterrender: function (context) {
                 if (context.tableWidth > 50) {
-                    var gridTable = document.querySelector(".gridframe-table");
+                    var gridTable = document.querySelector("#" + self.listTableContent + " .gridframe-table");
                     gridTable.style.minWidth = context.tableWidth + "px";
                     gridTable.style.width = context.tableWidth + "px";
                 }
@@ -903,6 +927,9 @@ Gridframe.prototype = {
     calcHeight: function () {
         var self = this, containerHeight = ecui.$("container").offsetHeight;
         var gridTop = ecui.$(self.options.main).offsetTop;
+        if ("container" === self.options.main) {
+            gridTop = 0;
+        }
         containerHeight = containerHeight - gridTop;
         var searchHeight = ecui.$(self.searchMain).offsetHeight;
         var buttonHeight = ecui.$(self.buttonMain).offsetHeight;
@@ -920,7 +947,7 @@ Gridframe.prototype = {
         self.pageData = {};
         tableDom.push('<!-- target: ' + self.listTableView + ' -->');
         tableDom.push('<div class="list-table-container">');
-        tableDom.push('    <div class="table-container grid-content" id="' + self.listTableContent + '">');
+        tableDom.push('    <div class="table-container" id="' + self.listTableContent + '">');
         tableDom.push('        <div class="list-table ui-table gridframe-table">');
         tableDom.push('            <table>');
         tableDom.push('                <thead>');
@@ -1032,7 +1059,7 @@ Gridframe.prototype = {
         return tableDom.join("");
     },
     seeMore: function () {
-        var self = this, el = ecui.$("seeMoreSearchContain");
+        var self = this, el = ecui.$(self.seeMoreContainer);
         ecui.dom[ecui.dom.hasClass(el, 'ui-hide') ? 'removeClass' : 'addClass'](el, 'ui-hide');
         if (self.options.fullHeight) {
             self.calcHeight();
