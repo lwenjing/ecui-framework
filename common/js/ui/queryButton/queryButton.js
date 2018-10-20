@@ -60,29 +60,4 @@ queryButton - 查询按钮控件。
         }
     );
 
-    /**
-     * 弹窗查询列表按钮
-     * */
-    ui.DialogQueryButton = core.inherits(
-        ui.Button,
-        'ui-query-button',
-        function (el, options) {
-            ui.Button.call(this, el, options);
-            this.route = options.route;
-        },
-        {
-            /**
-             * 输入提交事件。
-             * @event,billSearch_table
-             */
-            $submit: function (event) {
-                event.preventDefault();
-            },
-            $click: function (event) {
-                ui.Button.prototype.$click.call(this, event);
-                ecui.esr.callRoute(this.route + '~pageNo=1', true)
-            },
-        }
-    );
-
 }());
