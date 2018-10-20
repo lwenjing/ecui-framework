@@ -66,6 +66,10 @@ queryButton - 查询按钮控件。
     ui.DialogQueryButton = core.inherits(
         ui.Button,
         'ui-query-button',
+        function (el, options) {
+            ui.Button.call(this, el, options);
+            this.route = options.route;
+        },
         {
             /**
              * 输入提交事件。
@@ -76,10 +80,7 @@ queryButton - 查询按钮控件。
             },
             $click: function (event) {
                 ui.Button.prototype.$click.call(this, event);
-                var formVal = {};
-                console.log(this.getForm().elements);
-                // var paramStr = '?currentPage=1&pageSize=5';
-                // fapiao.getBuyList(paramStr);
+                ecui.esr.callRoute(this.route + '~pageNo=1', true)
             },
         }
     );
