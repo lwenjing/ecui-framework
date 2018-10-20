@@ -5,9 +5,11 @@
         ui = core.ui;
     ui.SelectTree = ecui.inherits(
         ui.TreeView,
+        'ui-select-tree',
         function (el, options) {
             ui.TreeView.call(this, el, options);
             this._sValue = options.value;
+            this._sText = options.text;
         },
         {
             getValue: function () {
@@ -18,6 +20,9 @@
                     this.getRoot().getParent().getParent().setSelected(this);
                     this.getRoot().getParent().hide();
                 }
+            },
+            getText: function () {
+                return this._sText;
             }
         }
     );
@@ -43,20 +48,21 @@
                 var value = item.getValue() || '',
                     content = item.getContent();
                 if ((value && value.indexOf(text) >= 0) || content.indexOf(text) >= 0) {
-                    html.push('<div ui="type:ecui.ui.TreeSelectItem;value:' + value + '">' + content + '</div>');
+                    html.push('<div ui="type:ecui.ui.TreeSelectItem;value:' + value + ';text:' + item.getBody().innerText.trim() + ';">' + content + '</div>');
                 }
             });
             dom.insertHTML(el, 'BeforeEnd', html.join(''));
-            // core.init(el); // 做好TreeSelectItem后再取消注释
+            core.init(el); // 做好TreeSelectItem后再取消注释
         } else {
             dom.first(el).getControl().show();
         }
     }
     ui.TreeCombox = core.inherits(
         ui.InputControl,
+        'ui-tree-combox',
         function (el, options) {
             var popupEl = dom.remove(dom.first(el));
-            dom.addClass(popupEl, 'ui-popup ui-hide');
+            dom.addClass(popupEl, 'ui-tree-combox-popup ui-popup ui-hide');
             ui.InputControl.call(this, el, options);
             this.setPopup(this._uOptions = core.$fastCreate(ui.Control, popupEl, this));
         },
@@ -105,7 +111,7 @@
             },
 
             setSelected: function (treenode) {
-                this.$setValue(treenode.getContent());
+                this.$setValue(treenode.getText());
                 this._oSelected = treenode;
                 refresh(this);
             }
@@ -118,6 +124,7 @@
         function (el, options) {
             ui.Control.call(this, el, options);
             this._sValue = options.value === undefined ? dom.getText(el) : String(options.value);
+            this._sText = options.text;
         },
         {
             /**
@@ -143,6 +150,9 @@
              */
             getValue: function () {
                 return this._sValue;
+            },
+            getText: function () {
+                return this._sText;
             },
 
             /**
