@@ -259,7 +259,7 @@ a {
 /*暂无样式*/
 
 
-/* 
+/*
  * calendar
 */
 
@@ -302,7 +302,7 @@ a {
 }
 
 
-/* 
+/*
  * ui-checktree
 */
 
@@ -310,7 +310,7 @@ a {
 /*暂无样式*/
 
 
-/* 
+/*
  * checkbox
 */
 
@@ -341,7 +341,7 @@ a {
 }
 
 
-/* 
+/*
  * combox
 */
 
@@ -398,7 +398,7 @@ a {
 }
 
 
-/* 
+/*
  * control
 */
 
@@ -406,7 +406,7 @@ a {
 /*暂不修改*/
 
 
-/* 
+/*
  * core
 */
 
@@ -414,7 +414,7 @@ a {
 /*暂不修改*/
 
 
-/* 
+/*
  * dialog
 */
 
@@ -572,7 +572,7 @@ a {
             line-height: 24px;
             text-align: center;
             vertical-align: middle;
-            font: 12px;
+            font-size: 12px;
             cursor: pointer;
             border-radius: 2px;
             padding: 0px;
@@ -921,6 +921,33 @@ a {
     color: #FFFFFF;
     font-size: 18px;
     text-align: center;
+}
+
+.ui-tip {
+    position: absolute;
+    z-index: 65555;
+}
+
+.ui-tip >div {
+    min-width: 210px;
+    max-width: 522px;
+    padding: 35px;
+    border-radius: 4px;
+    line-height: 30px;
+    color: #FFFFFF;
+    font-size: 18px;
+    text-align: center;
+}
+.ui-tip .tip-success {
+    background: rgba(58, 183, 106, 0.70);
+}
+
+.ui-tip .tip-error {
+    background: rgba(213, 18, 0, 0.70);
+}
+
+.ui-tip .tip-warn {
+    background: rgba(43, 43, 59, 0.95);
 }
 
 #hintContainer .successHint {
