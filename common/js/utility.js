@@ -305,7 +305,6 @@ fapiao.setFormValue = function (context, form, searchParm) {
                 } else {
                     _control.setValue(searchParm[name] || '');
                 }
-
             } else {
                 item.value = searchParm[name] || '';
             }
@@ -441,7 +440,6 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
         start: (pageNo - 1) * pageSize + 1,
         end: pageNo * pageSize
     };
-
 };
 
 fapiao.TableListRoute.prototype.onafterrender = function (context) {
