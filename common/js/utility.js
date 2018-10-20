@@ -424,7 +424,7 @@ fapiao.TableListRoute = function (route) {
 
 fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
     context.pageNo = context.pageNo || +this.searchParm.pageNo;
-    context.pageSize = +this.searchParm.pageSize;
+    context.pageSize = context.pageSize || +this.searchParm.pageSize;
     fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1].split('&')[0]], this.searchParm);
 };
 
