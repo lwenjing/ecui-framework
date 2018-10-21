@@ -1,5 +1,7 @@
 .ui-tree-combox {
     position: relative;
+    border: 1px solid #acbaca;
+
     input {
         display: inline-block;
         width: 100%;
@@ -14,6 +16,7 @@
     min-width: 150px;
     max-height: 300px;
     overflow: auto;
+    font-size: 14px !important;
 
     & > .ui-treeview {
         display: none;

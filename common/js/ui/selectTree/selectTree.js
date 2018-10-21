@@ -19,6 +19,7 @@
                 if ('string' === typeof this._sValue) {
                     this.getRoot().getParent().getParent().setSelected(this);
                     this.getRoot().getParent().hide();
+                    core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
                 }
             },
             getText: function () {
