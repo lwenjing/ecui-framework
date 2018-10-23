@@ -812,9 +812,9 @@ Gridframe.prototype = {
             view: self.listTableView,
             searchParm: self.options.searchParm,
             onbeforerequest: function (context) {
+                context.pageNo = context.pageNo || +this.searchParm.currentPage;
+                context.pageSize = context.pageSize || +this.searchParm.pageSize;
                 if (self.options.searchs) {
-                    context.pageNo = context.pageNo || +this.searchParm.currentPage;
-                    context.pageSize = context.pageSize || +this.searchParm.pageSize;
                     fapiao.setFormValue(context, document.forms[self.searchForm], this.searchParm);
                 }
             },
@@ -828,7 +828,7 @@ Gridframe.prototype = {
                 var data = ecui.util.parseValue(self.listTableData, context);
                 var pageNo = data.currentPage || 1;
                 var total = data.count || 0;
-                var pageSize = data.pageSize || 10;
+                var pageSize = context.pageSize || 10;
                 context.page = {
                     total: total,
                     totalPage: Math.ceil(total / pageSize),
@@ -900,7 +900,7 @@ Gridframe.prototype = {
                 var data = ecui.util.parseValue(self.listTableData, context);
                 var pageNo = data.currentPage || 1;
                 var total = data.count || 0;
-                var pageSize = data.pageSize || 10;
+                var pageSize = context.pageSize || 10;
                 context.page = {
                     total: total,
                     totalPage: Math.ceil(total / pageSize),
