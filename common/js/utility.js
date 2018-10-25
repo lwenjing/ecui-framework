@@ -416,7 +416,31 @@ fapiao.setPageData = function (context, listNmae) {
  * @param {object} route 路由对象
  */
 fapiao.TableListRoute = function (route) {
-    this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
+    // if (route.method === 'GET') {
+    //     this.model = function (context, callback) {
+    //         var params = {},
+    //             paramStr = '';
+    //         route.url.split('?')[1].split('&').forEach(function (item) {
+    //             if (item.indexOf('=') < 0) {
+    //                 ecui.esr.parseObject(document.forms[item], params, false);
+    //             }
+    //         });
+    //         for (var key in params) {
+    //             if (params.hasOwnProperty(key)) {
+    //                 paramStr += '&' + key + '=' + params[key];
+    //             }
+    //         }
+    //         ecui.esr.request(route.NAME.slice(0, -5) + '@GET ' + route.url.split('?')[0] + paramStr.slice(1), function () {
+    //             callback();
+    //         }, function () {
+    //             callback();
+    //         });
+    //         return false;
+    //     };
+    // } else {
+    //     this.model = [route.NAME.slice(0, -5) + '@FORM ' + route.url];
+    // }
+    this.model = [route.NAME.slice(0, -5) + '@' + (route.method === 'GET' ? 'GET' : '') + 'FORM ' + route.url];
     this.main = route.NAME.slice(0, -9) + '_table';
     Object.assign(this, route);
 };

@@ -1333,6 +1333,51 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         },
 
         /**
+         * 将一个 Form 表单转换成对象。
+         * @public
+         *
+         * @param {Form} form Form元素
+         * @return {String} url参数
+         */
+        parseUrl: function (form) {
+            var params = [],
+                data = {},
+                elements = Array.prototype.slice.call(form.elements);
+
+            elements.forEach(function (item) {
+                if (item.name) {
+                    if (item.getControl) {
+                        var control = item.getControl();
+                        if (control.getFormName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
+                            var formName = control.getFormName(),
+                                formValue = control.getFormValue();
+
+                            if (formName) {
+                                params.push();
+                                setCacheData(data, formName, formValue);
+                            } else if (formName !== undefined) {
+                                for (var key in formValue) {
+                                    if (formValue.hasOwnProperty(key)) {
+                                        setCacheData(data, key, formValue[key]);
+                                    }
+                                }
+                            }
+                        }
+                    } else if (!item.disabled && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
+                        setCacheData(data, item.name, item.value);
+                    }
+                }
+            });
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    params.push(key + '=' + data[key]);
+                }
+
+            }
+            return params.join('&');
+        },
+
+        /**
          * 控制定位器转向。
          * @private
          *
@@ -1475,6 +1520,19 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     method = 'POST';
                     url = url[0];
                     data = JSON.stringify(data);
+                } else if (method[0] === 'GETFORM') {
+                    url = method[1].split('?');
+                    method = 'GET';
+                    var params = [];
+                    url[1].split('&').forEach(function (item) {
+                        item = item.split('=');
+                        if (item.length > 1) {
+                            params.push(item);
+                        } else {
+                            params.push(ecui.esr.parseUrl(document.forms[item[0]]));
+                        }
+                    });
+                    url = url[0] + '?' + params.join('&');
                 } else if (method[0] === 'POST') {
                     url = method[1].split('?');
                     method = 'POST';
