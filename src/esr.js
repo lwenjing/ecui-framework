@@ -1445,7 +1445,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         data = {},
                         valid = true;
 
-                    headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+                    headers['Content-Type'] = 'multipart/form-data;boundary=${bound};charset=UTF-8';
                     url[1].split('&').forEach(function (item) {
                         item = item.split('=');
                         if (item.length > 1) {
