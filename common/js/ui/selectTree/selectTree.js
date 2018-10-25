@@ -28,7 +28,7 @@
         }
     );
 
-    function refresh(combox) {
+    function refresh(combox, isFocus) {
         var text = ui.Select.prototype.getValue.call(combox),
             el = combox._uOptions.getMain();
 
@@ -39,7 +39,7 @@
             }
         });
 
-        if (text) {
+        if (!isFocus && text) {
             dom.first(el).getControl().hide();
             for (var i = 0, tree = [dom.first(el).getControl()], node; node = tree[i++]; ) {
                 Array.prototype.push.apply(tree, node.getChildren());
@@ -74,6 +74,8 @@
             onclick: function (event) {
                 if (this._uOptions.isShow()) {
                     event.preventDefault();
+                } else {
+                    refresh(this, true);
                 }
             },
 
