@@ -1452,7 +1452,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         if (item.length > 1) {
                             setCacheData(data, item[0], replace(decodeURIComponent(item[1])));
                         } else if (method[0] === 'FORM') {
-                            valid = esr.parseObject(document.forms[item[0]], data);
+                            var form = document.forms[item[0]];
+                            if (dom.getAttribute(form, 'enctype') !== '') {
+                                headers['Content-Type'] = form.enctype;
+                            }
+                            valid = esr.parseObject(form, data);
                         } else {
                             Object.assign(data, replace(item[0]));
                         }
