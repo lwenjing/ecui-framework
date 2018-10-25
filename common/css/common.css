@@ -301,10 +301,12 @@ a {
     }
 }
 
+.ui-quarter-view,
 .ui-month-view {
     background-color: #ffffff;
 
-    .ui-month-view-header  {
+    .ui-quarter-view-header,
+    .ui-month-view-header {
         position: relative;
         width: 224px;
         height: 32px;
@@ -313,7 +315,8 @@ a {
         text-align: center;
         background: #ffffff;
 
-        .ui-month-view-title  {
+        .ui-quarter-view-title,
+        .ui-month-view-title {
             width: 130px;
             height: 100%;
             margin: 0px auto;
@@ -329,19 +332,25 @@ a {
             cursor: pointer;
         }
 
+        .ui-quarter-view-prev-year,
         .ui-month-view-prev-year {
             left: 22px;
         }
 
+        .ui-quarter-view-next-year,
         .ui-month-view-next-year {
             right: 22px;
         }
     }
 }
+.ui-quarter-view .ui-quarter-view-header {
+    width: 168px;
+}
 
-
+.ui-quarter-view,
 .ui-month-view {
-    .inline-block();
+    display: inline-block;
+    vertical-align: middle;
 
     table {
         padding: 0px 12px 7px 12px;
@@ -363,6 +372,12 @@ a {
         }
     }
 }
+.ui-quarter-view table td {
+
+    width: 60px;
+    height: 60px;
+}
+.ui-quarter-view,
 .ui-month-view {
     table {
         thead {
