@@ -753,6 +753,7 @@ a {
  * select
 */
 
+.ui-multi-select,
 .ui-select {
     width: 110px;
     height: 30px;
@@ -799,7 +800,7 @@ a {
         cursor: pointer;
     }
 }
-
+.ui-multi-select-options,
 .ui-select-options {
     border: 1px solid #d7d8d9;
     background: #fff;

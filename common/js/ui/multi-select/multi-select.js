@@ -21,7 +21,7 @@ cities - 地区联动下拉框控件。
      *
      * @param {object} options 初始化选项
      */
-    ui.MultiSelect = core.inherits(
+    ui.MultilevelSelect = core.inherits(
         ui.Text,
         'ui-multi-select',
         function (el, options) {

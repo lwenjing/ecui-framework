@@ -22,14 +22,16 @@ _eInput - 选项对应的input，form提交时使用
      * @control
      */
     ui.MultiSelect = core.inherits(
-        ui.Control,
+        ui.InputControl,
         'ui-multi-select',
         function (el, options) {
             var optionsEl = dom.create({className: this.Options.CLASS + options.classes.join('-options ') + 'ui-popup ui-hide'});
             for (; el.firstChild; ) {
                 optionsEl.appendChild(el.firstChild);
             }
-            ui.Control.call(this, el, options);
+            el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
+            ui.InputControl.call(this, el, options);
+            this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
             this.setPopup(core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
             this._sName = options.name || '';
         },
@@ -65,10 +67,13 @@ _eInput - 选项对应的input，form提交时使用
              * @event
              */
             $change: function () {
+                var text = [];
                 var items = this.getSelected().map(function (item) {
+                    text.push(item.getMain().innerText);
                     return item.getValue();
                 });
-                this.getBody().innerHTML = items.length ? items.join(',') : '';
+                this._uText.getBody().innerHTML = text.length ? text.join(',') : '';
+                this.getInput().value = items.length ? items.join(',') : '';
             },
 
             /**
