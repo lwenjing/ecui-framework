@@ -805,7 +805,7 @@ Gridframe.prototype = {
             fullHeight: self.options.fullHeight,
             NAME: self.listTableName,
             main: self.listTableMain,
-            model: [self.listTableData + '@FORM ' + self.options.url + "?" + self.searchForm],
+            model: [self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm],
             tpl: function (context) {
                 return self.initTableView.call(self, context);
             },
