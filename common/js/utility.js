@@ -546,7 +546,6 @@ Gridframe.prototype = {
         var self = this;
         ecui.util.extend(self.options, options);
 
-
         if (self.options.searchs) {
             self.searchShow = false;
             self.options.searchs.forEach(function (search) {
@@ -609,7 +608,10 @@ Gridframe.prototype = {
         html.push("</div>");
 
         var route = {
+            //{if 1}// NAME: self.prefixName,
+            //{else}//
             NAME: self.options.name,
+            //{/if}//
             main: self.options.main,
             tpl: html.join(""),
             view: self.gridframe,
@@ -639,7 +641,10 @@ Gridframe.prototype = {
             }
         };
 
+        //{if 1}// ecui.esr.addRoute(self.prefixName, route);
+        //{else}//
         ecui.esr.addRoute(self.options.name, route);
+        //{/if}//
 
         if (self.options.searchs) {
             self.initSearch();
@@ -692,7 +697,10 @@ Gridframe.prototype = {
             }
         }
 
-        ecui.esr.addRoute(route.NAME, route);
+        //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.searchName, route);
+        //{else}//
+        ecui.esr.addRoute(self.searchName, route);
+        //{/if}//
     },
     reRenderSearch: function () {
         var self = this;
@@ -808,7 +816,10 @@ Gridframe.prototype = {
             }
         };
 
-        ecui.esr.addRoute(route.NAME, route);
+        //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.buttonName, route);
+        //{else}//
+        ecui.esr.addRoute(self.buttonName, route);
+        //{/if}//
     },
     initButtonView: function () {
         var self = this, buttonDom = [];
@@ -896,7 +907,10 @@ Gridframe.prototype = {
             }
         };
 
-        ecui.esr.addRoute(this.listTableName, route);
+        //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.listTableName, route);
+        //{else}//
+        ecui.esr.addRoute(self.listTableName, route);
+        //{/if}//
     },
     initBlankTable: function () {
         var self = this, route = {
@@ -946,7 +960,10 @@ Gridframe.prototype = {
             }
         };
 
-        ecui.esr.addRoute(this.blankTableName, route);
+        //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.blankTableName, route);
+        //{else}//
+        ecui.esr.addRoute(self.blankTableName, route);
+        //{/if}//
     },
     calcHeight: function () {
         var self = this, containerHeight = ecui.$("container").offsetHeight;
@@ -1159,9 +1176,11 @@ CustomTab.prototype = {
         }
         html.push("</div>");
 
-
         var route = {
+            //{if 1}// NAME: self.prefixName,
+            //{else}//
             NAME: self.options.name,
+            //{/if}//
             model: [],
             main: self.options.main,
             tpl: html.join(""),
@@ -1179,7 +1198,10 @@ CustomTab.prototype = {
             }
         };
 
+        //{if 1}// ecui.esr.addRoute(self.prefixName, route);
+        //{else}//
         ecui.esr.addRoute(self.options.name, route);
+        //{/if}//
 
         self.options.tabs.forEach(function (tab) {
             tab.innerDom.call(self, self.name + tab.id, tab.id);
