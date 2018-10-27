@@ -749,7 +749,7 @@ Gridframe.prototype = {
                             context[search.dataName] = search.options;
                         }
                         context[search.dataName].forEach(function (option) {
-                            searchDom.push('<div ui="value:' + (option.id || option.CODE) + ';">' + (option.text || option.NAME) + '</div>');
+                            searchDom.push('<div ui="value:' + (option.id || option.CODE || option.code) + ';">' + (option.text || option.NAME || option.name) + '</div>');
                         });
                     }
                     searchDom.push('</div>');
