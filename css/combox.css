@@ -14,6 +14,7 @@
         display: block !important;
         .width100rate();
         outline: none !important;
+        height: 100%;
     }
 }
 

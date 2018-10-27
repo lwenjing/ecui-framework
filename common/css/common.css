@@ -770,6 +770,10 @@ a {
         /*background-color: #fff;*/
         color: #495362;
     }
+    input {
+        width: 100%;
+        height: 100%;
+    }
 }
 
 .ui-select-placeholder {

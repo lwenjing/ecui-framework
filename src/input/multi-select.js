@@ -32,7 +32,16 @@ _eInput - 选项对应的input，form提交时使用
             el.innerHTML = '<div class="' + options.classes.join('-text ') + '"></div>';
             ui.InputControl.call(this, el, options);
             this._uText = core.$fastCreate(ui.Item, el.firstChild, this, {capturable: false});
-            this.setPopup(core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
+            this.setPopup(core.$fastCreate(this.Options, optionsEl, this, {name: options.name, value: options.value}));
+            // 设置初始值value对应的text
+            var value = options.value.split(','),
+                text = [];
+            this.getPopup().getItems().forEach(function (item) {
+                if (value.indexOf(item.getValue()) >= 0) {
+                    text.push(item.getMain().innerText);
+                }
+            });
+            this._uText.setContent(text.join(','));
             this._sName = options.name || '';
         },
         {
@@ -74,6 +83,10 @@ _eInput - 选项对应的input，form提交时使用
                 });
                 this._uText.getBody().innerHTML = text.length ? text.join(',') : '';
                 this.getInput().value = items.length ? items.join(',') : '';
+            },
+            $blur: function (event) {
+                ui.InputControl.prototype.$blur.call(this, event);
+                this.getPopup().hide();
             },
 
             /**

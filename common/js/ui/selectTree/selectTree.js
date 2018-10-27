@@ -10,13 +10,14 @@
             ui.TreeView.call(this, el, options);
             this._sValue = options.value;
             this._sText = options.text;
+            this._sChildren = JSON.parse(options.children || '[]');
         },
         {
             getValue: function () {
                 return this._sValue;
             },
             onnodeclick: function (event) {
-                if ('string' === typeof this._sValue) {
+                if ('string' === typeof this._sValue && event.target.tagName !== 'EM') {
                     this.getRoot().getParent().getParent().setSelected(this);
                     this.getRoot().getParent().hide();
                     core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
@@ -24,6 +25,30 @@
             },
             getText: function () {
                 return this._sText;
+            },
+            getChildrenData: function () {
+                return this._sChildren;
+            },
+            ready: function (event) {
+                var value = this.getRoot().getParent().getParent().getInput().value;
+                if (value === this._sValue) {
+                    this.getRoot().getParent().getParent().setSelected(this);
+                    console.log(event);
+                    core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
+                }
+            },
+            onready: function (event) {
+                ecui.util.timer(function () {
+                    if (this.getRoot().getParent().getParent().getInput()) {
+                                
+                        var value = this.getRoot().getParent().getParent().getInput().value;
+                        if (value === this._sValue) {
+                            this.getRoot().getParent().getParent().setSelected(this);
+                            console.log(event);
+                            core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
+                        }
+                    }
+                }.bind(this), 0);
             }
         }
     );
@@ -92,7 +117,6 @@
              */
             oninput: function (event) {
                 this._uOptions.show();
-
                 for (var i = 0, tree = [dom.first(this._uOptions.getMain()).getControl()], node; node = tree[i++]; ) {
                     Array.prototype.push.apply(tree, node.getChildren());
                 }
@@ -136,8 +160,13 @@
             $click: function (event) {
                 ui.Control.prototype.$click.call(this, event);
                 var parent = this.getParent().getParent();
-                ui.TreeCombox.prototype.oninput.call(parent, event);
-                parent._uOptions.hide();
+                // ui.TreeCombox.prototype.oninput.call(parent, event);
+                console.log(parent);
+                if (parent._uOptions) {
+                    parent._uOptions.hide();
+                } else {
+                    parent = parent.getParent().getParent().getParent();
+                }
                 if (this._cSelected !== this) {
                     parent.setSelected(this);
                     core.dispatchEvent(parent, 'change', event);

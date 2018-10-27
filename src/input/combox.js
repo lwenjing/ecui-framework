@@ -44,6 +44,7 @@
         '*ui-combox',
         function (el, options) {
             util.setDefault(options, 'readOnly', false);
+            console.log(options, options.value);
             ui.Select.call(this, el, options);
         },
         {
