@@ -514,6 +514,7 @@ fapiao.TableListRoute2.prototype.onbeforerender = function (context) {
  * @public
  *
  * @param {Object} options 请求参数
+ *
  */
 var Gridframe = function (options) {
     this.options = {
@@ -528,7 +529,7 @@ var Gridframe = function (options) {
         searchs: false, // 查询条件
         buttons: null, // 表头按钮
         url: "", // 表单访问 url
-        topTips: null,// 表格顶部提示函数
+        topTips: null,// 表格顶部提示函数,是一个funcation(containId, context){},函数体可以往containId对应 dom 里写入要提示的 html
         searchParm: null, // 初始化查询参数
         columns: [], // 表格熟悉对象数组
         rowClick: function (rowData) { // 行点击事件
