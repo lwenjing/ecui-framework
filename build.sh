@@ -79,7 +79,7 @@ done
 
 find . -type f -name "layer.*.css" | awk '{input=$1;sub(/\/layer\./,"/");gsub(/(^\.\/|\.css$)/,"");gsub(/[\._]/,"-");gsub(/\//,"_");print "#"$1" {\n    @import (less) \""input"\";\n}"}' > .layers.css
 
-echo -e "(function (NS) {" > .layers.js
+echo "(function (NS) {" > .layers.js
 for file in `find . -type f -name "layer.*.js"`
 do
     name=${file%/*}"/"
@@ -89,12 +89,15 @@ do
     name="_"${name//\//_}
     if [ ! "$name" = "$last" ]
     then
-        echo -e "    NS = ecui.ns['$name'] = ecui.ns['$name'] || {};\n    NS.data = NS.data || {};\n    NS.ui = NS.ui || {};\n" >> .layers.js
+        echo "    NS = ecui.ns['$name'] = ecui.ns['$name'] || {};
+    NS.data = NS.data || {};
+    NS.ui = NS.ui || {};
+" >> .layers.js
     fi
     last=name
     cat $file >> .layers.js
 done
-echo -e "}());" >> .layers.js
+echo "}());" >> .layers.js
 
 for module in `find . -type f -name "_define_.js"`
 do
@@ -127,13 +130,16 @@ do
     reg=${module//\//\\/}
     if [ -f "_define_.css" ]
     then
-        file=".module-${ns%_*}{\n//{include file=\"_define_.css\"}//\n}"
+        file=".module-${ns%_*}{
+//{include file=\"_define_.css\"}//}
+"
     else
         file=""
     fi
 
     text=`echo "$text" | awk '{gsub(/ecui\.esr\.loadRoute\("([^"]*)"\)([,;])?/,"&\n");print}' | grep "ecui.esr.loadRoute("`
-    echo -e "$file\n$text" | sed -e "s/.*ecui\.esr\.loadRoute(\"\([^\"]*\)\").*/$reg\1 \1/" | awk '{if(substr($1,1,2)!="//" && $2){gsub(/[\._]/,"-",$1);gsub(/\//,"_",$1);printf "."$1"{//{include file=\"";if(match($2,/.*\./)){gsub(/\./,"/",$2);printf substr($2,1,RLENGTH)"route."substr($2,RLENGTH+1)}else{printf "route."$2}print ".css\"}//}"}else{print}}' | eval $js_merge | eval $css_compile > "$outpath/${module}_define_.css"
+    echo "$file
+$text" | sed -e "s/.*ecui\.esr\.loadRoute(\"\([^\"]*\)\").*/$reg\1 \1/" | awk '{if(substr($1,1,2)!="//" && $2){gsub(/[\._]/,"-",$1);gsub(/\//,"_",$1);printf "."$1"{//{include file=\"";if(match($2,/.*\./)){gsub(/\./,"/",$2);printf substr($2,1,RLENGTH)"route."substr($2,RLENGTH+1)}else{printf "route."$2}print ".css\"}//}"}else{print}}' | eval $js_merge | eval $css_compile > "$outpath/${module}_define_.css"
     echo "$text" | awk '{if(gsub(/(.*ecui\.esr\.loadRoute\("|"\)([,;])*$)/,"")){match($1,/.*\./);value=$1;gsub(/\./,"/");print "//{include file=\""substr($1,1,RLENGTH)"route."substr($1,RLENGTH+1)".html\" assign=\"tpl\"}////{\$tpl|regex_replace:\"<!--\\s*target:\\s*([^>]+)\\s*-->\":\"<!-- target: "substr(value,1,RLENGTH)"\$1 -->\"}//"}else{print "//{include file=\""$1".html\"}//"}}' | sed -e "s/.*ecui.esr.loadRoute(\"\([^\"]*\)\").*/\/\/{include file='route.\1.html'}\/\//g" | eval $js_merge | sed -e "s/ui=\"type:NS\./ui=\"type:ecui.ns._$ns.ui./g" | eval $html_compress > "$outpath/${module}_define_.html"
 
     if [ $module ]
@@ -235,8 +241,10 @@ then
     rm "common"
 
     cd $output
+    cp index.html home.html
     tar -zcvf "../$1.tar.gz" *
 else
     cd $output
+    cp index.html home.html
     tar -zcvf "../output.tar.gz" *
 fi
