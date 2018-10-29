@@ -528,6 +528,7 @@ var Gridframe = function (options) {
         searchs: false, // 查询条件
         buttons: null, // 表头按钮
         url: "", // 表单访问 url
+        topTips: null,// 表格顶部提示函数
         searchParm: null, // 初始化查询参数
         columns: [], // 表格熟悉对象数组
         rowClick: function (rowData) { // 行点击事件
@@ -587,6 +588,7 @@ Gridframe.prototype = {
         self.listTableMain = self.name + "TableListContainer";
         self.listTableName = self.name + "TableList";
         self.listTableView = self.prefixName + "TableListView";
+        self.topTips = self.name + "TopTips";
         self.listTableContent = self.name + "TableListContent";
         self.listTableData = self.name + "TableData";
         self.allChecked = self.name + "allChecked";
@@ -599,10 +601,13 @@ Gridframe.prototype = {
         html.push("<!-- target: " + self.gridframe + " -->");
         html.push("<div class='stay-list-page gridframe'>");
         if (self.options.searchs) {
-            html.push("<div id='" + self.searchMain + "'></div>");
+            html.push("<div id='" + self.searchMain + "' class='grid-search'></div>");
         }
         if (self.options.buttons) {
-            html.push("<div id='" + self.buttonMain + "' class='grid-buttons'></div>");
+            html.push("<div id='" + self.buttonMain + "'></div>");
+        }
+        if (!!self.options.topTips) {
+            html.push("<div id='" + self.topTips + "' class='grid-top-tips'></div>");
         }
         html.push("<div id='" + self.listTableMain + "'></div>");
         html.push("</div>");
@@ -872,6 +877,13 @@ Gridframe.prototype = {
                     start: (pageNo - 1) * pageSize + 1,
                     end: pageNo * pageSize
                 };
+
+                if (!!self.options.topTips) {
+                    var topTips = self.options.topTips.call(self, self.topTips, context);
+                    if (topTips) {
+                        ecui.$(self.topTips).innerHTML = topTips;
+                    }
+                }
             },
             onafterrender: function (context) {
                 if (context.tableWidth > 50) {
@@ -947,6 +959,13 @@ Gridframe.prototype = {
                     start: (pageNo - 1) * pageSize + 1,
                     end: pageNo * pageSize
                 };
+
+                if (!!self.options.topTips) {
+                    var topTips = self.options.topTips.call(self, self.topTips, context);
+                    if (topTips) {
+                        ecui.$(self.topTips).innerHTML = topTips;
+                    }
+                }
             },
             onafterrender: function (context) {
                 if (context.tableWidth > 50) {
@@ -967,16 +986,25 @@ Gridframe.prototype = {
     },
     calcHeight: function () {
         var self = this, containerHeight = ecui.$("container").offsetHeight;
+        var searchHeight = 0, buttonHeight = 0, topTipsHeight = 0;
+        var searchMain = ecui.$(self.searchMain), buttonMain = ecui.$(self.buttonMain), topTips = ecui.$(self.topTips);
         var gridTop = ecui.$(self.options.main).offsetTop;
         if ("container" === self.options.main) {
             gridTop = 0;
         }
         containerHeight = containerHeight - gridTop;
-        var searchHeight = ecui.$(self.searchMain).offsetHeight;
-        var buttonHeight = ecui.$(self.buttonMain).offsetHeight;
+        if (searchMain) {
+            searchHeight = searchMain.offsetHeight;
+        }
+        if (buttonMain) {
+            buttonHeight = buttonMain.offsetHeight;
+        }
+        if (topTips) {
+            topTipsHeight = topTips.offsetHeight;
+        }
 
         var listTableContent = ecui.$(self.listTableContent);
-        var tableHeight = containerHeight - searchHeight - buttonHeight - 10;
+        var tableHeight = containerHeight - searchHeight - buttonHeight - topTipsHeight - 10;
         var tableContentHeight = tableHeight - 60;
         ecui.$(self.listTableMain).style.height = tableHeight + 'px';
         if (listTableContent) {
