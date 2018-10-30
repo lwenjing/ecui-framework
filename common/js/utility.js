@@ -794,7 +794,7 @@ Gridframe.prototype = {
                 return self.initButtonView.call(self, context);
             },
             view: self.buttonView,
-            onafterrender: function () {
+            onafterrender: function (context) {
                 if (self.options.buttons) {
                     self.options.buttons.forEach(function (button) {
                         var buttonDoms = document.querySelectorAll("." + button.name);
@@ -811,9 +811,9 @@ Gridframe.prototype = {
                                             }
                                         );
                                     }
-                                    button.clickAction.call(self, rowDatas)
+                                    button.clickAction.call(self, rowDatas, context)
                                 } else {
-                                    button.clickAction.call(self)
+                                    button.clickAction.call(self, context)
                                 }
                             }
                         }
@@ -902,7 +902,7 @@ Gridframe.prototype = {
                             var operateDom = operateDoms[i];
                             operateDom.onclick = function () {
                                 var id = this.getAttribute("data-id");
-                                operate.clickAction.call(self, self.pageData[id], this);
+                                operate.clickAction.call(self, self.pageData[id], context, this);
                             }
                         }
                     });
@@ -913,7 +913,7 @@ Gridframe.prototype = {
                         var linkDom = linkDoms[i];
                         linkDom.onclick = function () {
                             var id = this.getAttribute("data-id");
-                            self.options.rowClick.call(self, self.pageData[id], this);
+                            self.options.rowClick.call(self, self.pageData[id], context, this);
                         }
                     }
                 }
