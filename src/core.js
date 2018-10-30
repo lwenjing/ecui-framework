@@ -828,6 +828,7 @@ outer:          for (var caches = [], target = event.target, el; target; target 
                 this.target = event.target;
             }
             this._oNative = event;
+            this.active = activedControl;
         } else {
             this.which = keyCode;
         }
@@ -948,9 +949,9 @@ outer:          for (var caches = [], target = event.target, el; target; target 
             }
         } else if (x < 0) {
             angle = 180 + Math.atan(y / x) / Math.PI * 180;
-        } else if (y > 0) {
-            angle = 90;
         } else if (y < 0) {
+            angle = 90;
+        } else if (y > 0) {
             angle = 270;
         }
         return angle;
