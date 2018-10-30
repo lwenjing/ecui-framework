@@ -42,15 +42,15 @@ _uOptions     - 下拉选择框
                 options.value = el.value;
 
                 var optionsEl = dom.create(
-                        {
-                            innerHTML: Array.prototype.slice.call(el.options).map(
-                                function (item) {
-                                    var optionText = dom.getAttribute(item, core.getAttributeName());
-                                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
-                                }
-                            ).join('')
-                        }
-                    );
+                    {
+                        innerHTML: Array.prototype.slice.call(el.options).map(
+                            function (item) {
+                                var optionText = dom.getAttribute(item, core.getAttributeName());
+                                return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
+                            }
+                        ).join('')
+                    }
+                );
 
                 el = dom.insertBefore(
                     dom.create(
@@ -182,6 +182,14 @@ _uOptions     - 下拉选择框
             /**
              * @override
              */
+            $blur: function (event) {
+                this._uOptions.hide();
+                ui.InputControl.prototype.$blur.call(this, event);
+            },
+
+            /**
+             * @override
+             */
             $cache: function (style) {
                 ui.InputControl.prototype.$cache.call(this, style);
                 this._uText.cache(true);
@@ -234,20 +242,11 @@ _uOptions     - 下拉选择框
             },
 
             /**
-             * 设置底层的选中项。
-             * @protected
-             *
-             * @param {ecui.ui.Item} item 选项控件
-             */
-            $setSelected: function (item) {
-                this._cSelected = item || null;
-            },
-
-            /**
              * @override
              */
             $validate: function () {
                 ui.InputControl.prototype.$validate.call(this);
+
                 if (this.getValue() === '' &&  this._bRequired) {
                     core.dispatchEvent(this, 'error');
                     return false;
@@ -323,12 +322,12 @@ _uOptions     - 下拉选择框
              */
             setValue: function (value) {
                 if (this.getItems().every(function (item) {
-                        if (item._sValue === value) {
-                            this.setSelected(item);
-                            return false;
-                        }
-                        return true;
-                    }, this)) {
+                    if (item._sValue === value) {
+                        this.setSelected(item);
+                        return false;
+                    }
+                    return true;
+                }, this)) {
                     // 找不到满足条件的项，将选中的值清除
                     this.setSelected();
                 }

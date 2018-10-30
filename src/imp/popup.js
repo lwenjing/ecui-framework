@@ -33,11 +33,9 @@
         }
 
         var popupTop = top + owner.getHeight(),
-            popupLeft = left,
-            height = this.getHeight(),
-            width = this.getWidth();
+            height = this.getHeight();
 
-        popupEl.style.left = (popupLeft + width <= container.scrollWidth ? popupLeft : Math.max(left - width + owner.getWidth(), 0)) + 'px';
+        popupEl.style.left = left + 'px';
         popupEl.style.top = (popupTop + height <= container.scrollHeight ? popupTop : Math.max(top - height, 0)) + 'px';
         container.appendChild(popupEl);
     }
@@ -55,21 +53,13 @@
             /**
              * @override
              */
-            $blur: function (event) {
-                this.$Popup.$blur.call(this, event);
-                owner = null;
-                this.$PopupData.popup.hide();
-            },
-
-            /**
-             * @override
-             */
             $click: function (event) {
                 this.$Popup.$click.call(this, event);
                 var popup = this.$PopupData.popup;
                 if (dom.contain(this.getOuter(), event.target)) {
                     if (popup.isShow()) {
                         owner = null;
+
                         popup.hide();
                     } else {
                         owner = this;
@@ -121,7 +111,6 @@
 
                 if (event.type === 'mousedown' && !dom.contain(this.$PopupData.popup.getOuter(), event.target)) {
                     // ie6/7/8下有可能scroll事件是由mousedown点击滚动条触发的
-                    owner = null;
                     this.$PopupData.popup.hide();
                 }
             },

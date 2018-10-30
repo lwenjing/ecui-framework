@@ -16,20 +16,21 @@
 (function () {
 //{if 0}//
     var core = ecui,
-        dom = core.dom,
         ui = core.ui,
         util = core.util;
 //{/if}//
     function refresh(combox) {
         var text = ui.Select.prototype.getValue.call(combox);
 
+        combox.preventAlterItems();
         combox.getItems().forEach(function (item) {
             if (item.getContent().indexOf(text) < 0) {
-                dom.addClass(item.getMain(), 'ui-hide');
+                item.hide();
             } else {
-                dom.removeClass(item.getMain(), 'ui-hide');
+                item.show();
             }
         });
+        combox.premitAlterItems();
         combox.alterItems();
     }
 
@@ -43,6 +44,7 @@
         '*ui-combox',
         function (el, options) {
             util.setDefault(options, 'readOnly', false);
+            console.log(options, options.value);
             ui.Select.call(this, el, options);
         },
         {
@@ -58,20 +60,9 @@
             /**
              * @override
              */
-            $blur: function (event) {
-                ui.Select.prototype.$blur.call(this, event);
-            },
-
-            /**
-             * @override
-             */
             $click: function (event) {
                 if (!this.$getSection('Options').isShow()) {
                     ui.Select.prototype.$click.call(this, event);
-                    this.getItems().forEach(function (item) {
-                        dom.removeClass(item.getMain(), 'ui-hide');
-                    });
-                    this.alterItems();
                 }
             },
 
@@ -106,12 +97,11 @@
                         selected = item;
                     }
                 });
-                if (selected) {
-                    this.setSelected(selected);
-                } else {
-                    this.$setSelected();
-                    refresh(this);
+                this.setSelected(selected);
+                if (!selected) {
+                    this.$setValue(text);
                 }
+                refresh(this);
                 this.alterStatus(text ? '-placeholder' : '+placeholder');
             },
 
