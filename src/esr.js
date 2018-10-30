@@ -39,7 +39,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         engine = etpl,
         requestVersion = 0,     // 请求的版本号，主路由切换时会更新，在多次提交时保证只有最后一次提交会触发渲染
 
-        localStorage,
         metaVersion,
         meta,
 
@@ -67,10 +66,10 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             iframeDoc.open('text/html');
             iframeDoc.write(
                 '<html><body><script type="text/javascript">' +
-                'var loc="' + loc.replace(/\\/g, '\\\\').replace(/\"/g, '\\\"') + '";' +
-                'parent.ecui.esr.setLocation(loc);' +
-                'parent.ecui.esr.callRoute(loc);' +
-                '</script></body></html>'
+                    'var loc="' + loc.replace(/\\/g, '\\\\').replace(/\"/g, '\\\"') + '";' +
+                    'parent.ecui.esr.setLocation(loc);' +
+                    'parent.ecui.esr.callRoute(loc);' +
+                    '</script></body></html>'
             );
             iframeDoc.close();
             return true;
@@ -101,7 +100,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         }
 
         if (route.onafterrender) {
-            route.onafterrender(context);
+            try {
+                route.onafterrender(context);
+            } catch (e) {
+                if (esr.onexception) {
+                    esr.onexception(e);
+                }
+            }
         }
 
         if (route.NAME) {
@@ -150,7 +155,13 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
         }
         if (route.onbeforerender) {
-            route.onbeforerender(context);
+            try {
+                route.onbeforerender(context);
+            } catch (e) {
+                if (esr.onexception) {
+                    esr.onexception(e);
+                }
+            }
         }
     }
 
@@ -218,10 +229,22 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         }
                     }
                     if (route.oncached) {
-                        route.oncached(context);
+                        try {
+                            route.oncached(context);
+                        } catch (e) {
+                            if (esr.onexception) {
+                                esr.onexception(e);
+                            }
+                        }
                     }
                     if (route.TYPE === 'frame' && route.children.oncached) {
-                        route.children.oncached(context);
+                        try {
+                            route.children.oncached(context);
+                        } catch (e) {
+                            if (esr.onexception) {
+                                esr.onexception(e);
+                            }
+                        }
                     }
                     return;
                 }
@@ -245,18 +268,30 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     esr.render(route);
                 } else if ('function' === typeof route.model) {
                     if (route.onbeforerequest) {
-                        route.onbeforerequest(context);
+                        try {
+                            route.onbeforerequest(context);
+                        } catch (e) {
+                            if (esr.onexception) {
+                                esr.onexception(e);
+                            }
+                        }
                     }
                     if (route.model(context, function () {
-                        esr.render(route);
-                    }) !== false) {
+                            esr.render(route);
+                        }) !== false) {
                         esr.render(route);
                     }
                 } else if (!route.model.length) {
                     esr.render(route);
                 } else {
                     if (route.onbeforerequest) {
-                        route.onbeforerequest(context);
+                        try {
+                            route.onbeforerequest(context);
+                        } catch (e) {
+                            if (esr.onexception) {
+                                esr.onexception(e);
+                            }
+                        }
                     }
                     esr.request(route.model, function () {
                         esr.render(route);
@@ -658,7 +693,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         }, -10);
                         return;
                     }
+                    pauseStatus = true;
                     util.timer(function () {
+                        pauseStatus = false;
                         history.replaceState('', '', '#' + loc);
                         // ie下使用中间iframe作为中转控制
                         // 其他浏览器直接调用控制器方法
@@ -686,26 +723,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             });
             return;
         }
-
-        // 动态模板更新，每次渲染前都需要更新
-        if (route.tpl) {
-            engine.options.namingConflict = "override";
-            if ('function' === typeof route.tpl) {
-                engine.compile(route.tpl(context));
-            } else {
-                engine.compile(route.tpl);
-            }
-        }
-
         beforerender(route);
 
-        var el = core.$(route.main),
-            flag = !dom.hasClass(el, 'ui-hide');
+        var el = core.$(route.main);
 
-        if (flag) {
-            dom.addClass(el, 'ui-hide');
-        }
-//        el.style.visibility = 'hidden';
+        el.style.visibility = 'hidden';
 
         if (el.route) {
             var elRoute = routes[el.route];
@@ -779,10 +801,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             core.init(el);
         }
 
-        if (flag) {
-            dom.removeClass(el, 'ui-hide');
-        }
-//        el.style.visibility = '';
+        el.style.visibility = '';
         afterrender(route);
     }
 
@@ -1028,7 +1047,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             if (name.indexOf('/') !== 0) {
                 name = '/' + getModuleName(esr.getLocation()) + name;
             }
-
 //{if 1}//            if (!route.main) {//{/if}//
 //{if 1}//                var main = name.slice(1).replace(/[._]/g, '-').replace(/\//g, '_');//{/if}//
 //{if 1}//                route.main = core.$(main) ? main : esr.DEFAULT_MAIN;//{/if}//
@@ -1212,7 +1230,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          * @param {string} moduleName 模块名称，如果不指定模块名称使用当前模块
          */
         getEngine: function (moduleName) {
-            if (!moduleName) {
+            if (moduleName === undefined) {
                 return engine;
             }
             if (!loadStatus[moduleName]) {
@@ -1222,15 +1240,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             return loadStatus[moduleName];
         },
 
-        /**
-         * 设置模板引擎。
-         * @public
-         *
-         * @param {string} moduleName 模块名称，如果不指定模块名称使用当前模块
-         */
-        setEngine: function (moduleName) {
-            return loadStatus[moduleName] = new etpl.Engine();
-        },
         /**
          * 获取常量数据。
          * @public
@@ -1408,7 +1417,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                         pauseStatus = false;
                         engine = loadStatus[moduleName] = new etpl.Engine();
                         engine.compile(data);
-
                         render(route);
                     },
                     onerror: function () {
@@ -1423,12 +1431,12 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             } else if ('function' === typeof route.view) {
                 beforerender(route);
                 if (route.view(context, function (name) {
-                    if (name) {
-                        render(route, name);
-                    } else {
-                        afterrender(route);
-                    }
-                }) !== false) {
+                        if (name) {
+                            render(route, name);
+                        } else {
+                            afterrender(route);
+                        }
+                    }) !== false) {
                     afterrender(route);
                 }
             } else if (etpl.getRenderer(route.view)) {
@@ -1437,11 +1445,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 var moduleName = getModuleName(route.NAME);
                 engine = loadStatus[moduleName];
 
-                if (engine instanceof etpl.Engine) {
+                if (engine instanceof etpl.Engine && engine.getRenderer(route.view)) {
                     // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
-                    if (engine.getRenderer(route.view) || route.tpl) {
-                        render(route);
-                    }
+                    render(route);
                 } else {
                     if (engine === true) {
                         loadTPL();
@@ -1623,7 +1629,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 for (var key in data.meta.record) {
                                     if (data.meta.record.hasOwnProperty(key)) {
                                         meta[key] = meta[key] || {};
-                                        for (var i = 0, items = data.meta.record[key], item; item = items[i++];) {
+                                        for (var i = 0, items = data.meta.record[key], item; item = items[i++]; ) {
                                             meta[key][item.id] = item;
                                         }
                                     }
@@ -1631,8 +1637,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 if (data.meta.version) {
                                     metaVersion = data.meta.version;
                                 }
-                                localStorage.setItem('esr_meta', JSON.stringify(meta));
-                                localStorage.setItem('esr_meta_version', metaVersion);
+                                util.setLocalStorage('esr_meta', JSON.stringify(meta));
+                                util.setLocalStorage('esr_meta_version', metaVersion);
                                 handle();
                             },
                             onerror: function () {
@@ -1880,24 +1886,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             historyCacheSize = esrOptions.cache || 1000;
 
             if (esrOptions.meta) {
-                if (window.localStorage) {
-                    localStorage = window.localStorage;
-                } else {
-                    localStorage = dom.setInput(null, null, 'hidden');
-                    localStorage.addBehavior('#default#userData');
-                    document.body.appendChild(localStorage);
-                    localStorage.getItem = function (key) {
-                        localStorage.load('ecui');
-                        return localStorage.getAttribute(key);
-                    };
-                    localStorage.setItem = function (key, value) {
-                        localStorage.setAttribute(key, value);
-                        localStorage.save('ecui');
-                    };
-                }
-
-                metaVersion = localStorage.getItem('esr_meta_version') || '0';
-                meta = JSON.parse(localStorage.getItem('esr_meta')) || {};
+                metaVersion = util.getLocalStorage('esr_meta_version') || '0';
+                meta = JSON.parse(util.getLocalStorage('esr_meta')) || {};
             }
 //{if 0}//
             var tplList = [];
@@ -1952,7 +1942,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     loadInit();
                 }
             }
-
 //{else}//            loadInit();
 //{/if}//
             for (var i = 0, links = document.getElementsByTagName('A'), el; el = links[i++]; i++) {
