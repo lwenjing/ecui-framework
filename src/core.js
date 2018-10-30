@@ -828,6 +828,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 this.target = event.target;
             }
             this._oNative = event;
+            this.active = activedControl;
         } else {
             this.which = keyCode;
         }
@@ -948,9 +949,9 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             }
         } else if (x < 0) {
             angle = 180 + Math.atan(y / x) / Math.PI * 180;
-        } else if (y > 0) {
-            angle = 90;
         } else if (y < 0) {
+            angle = 90;
+        } else if (y > 0) {
             angle = 270;
         }
         return angle;

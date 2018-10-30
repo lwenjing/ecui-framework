@@ -85,7 +85,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             ui.Control.call(this, el, options);
 
             this._aCells = Array.prototype.slice.call(el.getElementsByTagName('TD')).map(function (item, index) {
-                return core.$fastCreate(index < 7 ? ui.Control : this.Date, item, this);
+                return core.$fastCreate(index < 7 ? ui.Control : this.Cell, item, this);
             }, this);
 
             this.WEEKNAMES.forEach(function (item, index) {
@@ -104,7 +104,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              * 日期部件。
              * @unit
              */
-            Date: core.inherits(
+            Cell: core.inherits(
                 ui.Control,
                 {
                     /**
@@ -112,13 +112,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                      * @override
                      */
                     $click: function (event) {
-                        var parent = this.getParent();
-
-                        event.date = new Date(parent._nYear, parent._nMonth, this._nDay);
-                        if (core.dispatchEvent(parent, 'dateclick', event)) {
-                            parent._oDate = event.date;
-                            setSelected(parent, this);
-                        }
+                        event.item = this;
+                        core.dispatchEvent(this.getParent(), 'dateclick', event);
                     },
 
                     /**
@@ -145,7 +140,10 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              * date  点击的日期
              * @event
              */
-            $dateclick: util.blank,
+            $dateclick: function (event) {
+                this._oDate = new Date(this._nYear, this._nMonth, event.item._nDay);
+                setSelected(this, event.item);
+            },
 
             /**
              * @override
@@ -183,6 +181,16 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
              */
             getMonth: function () {
                 return this._nMonth + 1;
+            },
+
+            /**
+             * 获取日历控件当前选中的项。
+             * @public
+             *
+             * @return {ecui.ui.MonthView.Cell} 选中的控件
+             */
+            getSelected: function () {
+                return this._cSelected;
             },
 
             /**
