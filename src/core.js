@@ -1245,7 +1245,10 @@ outer:          for (var caches = [], target = event.target, el; target; target 
 
             viewWidth = document.documentElement.clientWidth;
             viewHeight = document.documentElement.clientHeight;
-            util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+
+            if (isToucher) {
+                util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
+            }
 
             // 设置全局事件处理
             for (var key in events) {
