@@ -29,11 +29,11 @@ queryButton - 查询按钮控件。
             },
             $click: function (event) {
                 ui.Button.prototype.$click.call(this, event);
-                var route = ecui.esr.findRoute(this);
+                // var route = ecui.esr.findRoute(this);
                 var children = ecui.esr.getRoute(this.route || route.children);
                 fapiao.setSearchParam(children.searchParm, this.getForm());
                 // children.searchParm.pageNo = 1;
-                ecui.esr.callRoute(children.NAME + '~pageNo=1', true);
+                ecui.esr.callRoute(children.NAME + '~currentPage=1', true);
             },
         }
     );
