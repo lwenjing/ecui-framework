@@ -514,6 +514,7 @@ fapiao.TableListRoute2.prototype.onbeforerender = function (context) {
  * @public
  *
  * @param {Object} options 请求参数
+ *
  */
 var Gridframe = function (options) {
     this.options = {
@@ -528,7 +529,7 @@ var Gridframe = function (options) {
         searchs: false, // 查询条件
         buttons: null, // 表头按钮
         url: "", // 表单访问 url
-        topTips: null,// 表格顶部提示函数
+        topTips: null,// 表格顶部提示函数,是一个funcation(containId, context){},函数体可以往containId对应 dom 里写入要提示的 html
         searchParm: null, // 初始化查询参数
         columns: [], // 表格熟悉对象数组
         rowClick: function (rowData) { // 行点击事件
@@ -793,7 +794,7 @@ Gridframe.prototype = {
                 return self.initButtonView.call(self, context);
             },
             view: self.buttonView,
-            onafterrender: function () {
+            onafterrender: function (context) {
                 if (self.options.buttons) {
                     self.options.buttons.forEach(function (button) {
                         var buttonDoms = document.querySelectorAll("." + button.name);
@@ -810,9 +811,9 @@ Gridframe.prototype = {
                                             }
                                         );
                                     }
-                                    button.clickAction.call(self, rowDatas)
+                                    button.clickAction.call(self, rowDatas, context)
                                 } else {
-                                    button.clickAction.call(self)
+                                    button.clickAction.call(self, context)
                                 }
                             }
                         }
@@ -901,7 +902,7 @@ Gridframe.prototype = {
                             var operateDom = operateDoms[i];
                             operateDom.onclick = function () {
                                 var id = this.getAttribute("data-id");
-                                operate.clickAction.call(self, self.pageData[id], this);
+                                operate.clickAction.call(self, self.pageData[id], context, this);
                             }
                         }
                     });
@@ -912,7 +913,7 @@ Gridframe.prototype = {
                         var linkDom = linkDoms[i];
                         linkDom.onclick = function () {
                             var id = this.getAttribute("data-id");
-                            self.options.rowClick.call(self, self.pageData[id], this);
+                            self.options.rowClick.call(self, self.pageData[id], context, this);
                         }
                     }
                 }
