@@ -407,7 +407,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                 if (elements) {
                     if (elements.length) {
-                        elements = Array.prototype.slice.call(elements);
+                        elements = Array.apply(null, elements);
                         el = elements[0];
                     } else {
                         el = elements;
@@ -648,7 +648,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 unloadNames.forEach(function (name) {
                     delete loadStatus[name];
                     name = '/' + name;
-                    Array.prototype.slice.call(document.getElementsByTagName('STYLE')).forEach(function (item) {
+                    Array.apply(null, document.getElementsByTagName('STYLE')).forEach(function (item) {
                         if (dom.getAttribute(item, 'module') === name) {
                             dom.remove(item);
                         }
@@ -680,7 +680,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     loc += '~HISTORY=' + historyIndex;
                     if (ieVersion < 9) {
                         pauseStatus = true;
-                        if (historyIndex === 1) {
+                        if (historyIndex > 1) {
                             // IE第一次进入，不能back，否则会退出框架
                             history.back();
                         }
@@ -772,7 +772,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
             el.route = null;
         }
-        Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
+        Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
             if (item.route && routes[item.route].ondispose) {
                 routes[item.route].ondispose();
             }
@@ -1318,7 +1318,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          */
         parseObject: function (form, data, validate) {
             var errControl,
-                elements = Array.prototype.slice.call(form.elements);
+                elements = Array.apply(null, form.elements);
 
             elements.forEach(function (item) {
                 if (validate !== false && item.name && item.getControl && !item.getControl().isDisabled()) {
@@ -1371,7 +1371,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         parseUrl: function (form) {
             var params = [],
                 data = {},
-                elements = Array.prototype.slice.call(form.elements);
+                elements = Array.apply(null, form.elements);
 
             elements.forEach(function (item) {
                 if (item.name) {

@@ -2483,7 +2483,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
                 initRecursion++;
 
-                Array.prototype.slice.call(el.all || el.getElementsByTagName('*')).forEach(function (item) {
+                Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (dom.getAttribute(item, ecuiName)) {
                         list.push(item);
                     }

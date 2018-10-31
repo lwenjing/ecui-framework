@@ -119,7 +119,7 @@
 
             ui.Control.call(this, el, options);
 
-            this._aCells = Array.prototype.slice.call(el.getElementsByTagName('TD')).map(function (item, index) {
+            this._aCells = Array.apply(null, el.getElementsByTagName('TD')).map(function (item, index) {
                 return core.$fastCreate(index < 4 ? ui.Control : this.Month, item, this, { value: index - 4 });
             }, this);
 
@@ -379,7 +379,7 @@
 
             ui.Control.call(this, el, options);
 
-            this._aCells = Array.prototype.slice.call(el.getElementsByTagName('TD')).map(function (item, index) {
+            this._aCells = Array.apply(null, el.getElementsByTagName('TD')).map(function (item, index) {
                 return core.$fastCreate(index < 2 ? ui.Control : this.Quarter, item, this, { value: (index - 1) * 3 - 1 });
             }, this);
 

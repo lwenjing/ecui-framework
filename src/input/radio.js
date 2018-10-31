@@ -191,7 +191,7 @@ _bRequired - 是否必须选择
                 if (inputEl.form) {
                     // 必须 name 也不为空，否则 form[o] 的值在部分浏览器下将是空
                     var inputEls = inputEl.form[inputEl.name];
-                    Array.prototype.slice.call(inputEls.length ? inputEls : [inputEls]).forEach(function (item) {
+                    Array.apply(null, inputEls.length ? inputEls : [inputEls]).forEach(function (item) {
                         if (item.getControl) {
                             result.push(item.getControl());
                         }
