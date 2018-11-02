@@ -640,7 +640,7 @@ Gridframe.prototype = {
 
                 window.onresize = function () {
                     calHeight();
-                    if (self.options.fullHeight) {
+                    if (ecui.$(self.listTableMain) && self.options.fullHeight) {
                         self.calcHeight();
                     }
                 };
@@ -763,7 +763,7 @@ Gridframe.prototype = {
                             context[search.dataName] = search.options;
                         }
                         context[search.dataName].forEach(function (option) {
-                            searchDom.push('<div ui="value:' + (option.id || option.CODE || option.code) + ';">' + (option.text || option.NAME || option.name) + '</div>');
+                            searchDom.push('<div ui="value:' + (option.id || option.code) + ';">' + (option.text || option.name) + '</div>');
                         });
                     }
                     searchDom.push('</div>');
