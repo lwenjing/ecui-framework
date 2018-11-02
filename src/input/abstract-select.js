@@ -42,15 +42,15 @@ _uOptions     - 下拉选择框
                 options.value = el.value;
 
                 var optionsEl = dom.create(
-                    {
-                        innerHTML: Array.apply(null, el.options).map(
-                            function (item) {
-                                var optionText = dom.getAttribute(item, core.getAttributeName());
-                                return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
-                            }
-                        ).join('')
-                    }
-                );
+                        {
+                            innerHTML: dom.toArray(el.options).map(
+                                function (item) {
+                                    var optionText = dom.getAttribute(item, core.getAttributeName());
+                                    return '<div ' + core.getAttributeName() + '="value:' + util.encodeHTML(item.value) + (optionText ? ';' + util.encodeHTML(optionText) : '') + '">' + util.encodeHTML(item.text) + '</div>';
+                                }
+                            ).join('')
+                        }
+                    );
 
                 el = dom.insertBefore(
                     dom.create(
@@ -323,12 +323,12 @@ _uOptions     - 下拉选择框
              */
             setValue: function (value) {
                 if (this.getItems().every(function (item) {
-                    if (item._sValue === value) {
-                        this.setSelected(item);
-                        return false;
-                    }
-                    return true;
-                }, this)) {
+                        if (item._sValue === value) {
+                            this.setSelected(item);
+                            return false;
+                        }
+                        return true;
+                    }, this)) {
                     // 找不到满足条件的项，将选中的值清除
                     this.setSelected();
                 }

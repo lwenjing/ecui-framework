@@ -151,7 +151,7 @@ _nTotalPage       - 总页数
                 }
             },
             go: function (pageNo) {
-                ecui.esr.callRoute(ecui.esr.findRoute(this).NAME + '~currentPage=' + pageNo, true);
+                ecui.esr.callRoute(ecui.esr.findRoute(this).NAME + '~pageNo=' + pageNo, true);
                 this._nCurrentPage = pageNo;
             }
         }

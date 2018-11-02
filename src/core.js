@@ -124,17 +124,17 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                     event = core.wrapEvent(event);
 
                     var track = event.track = {
-                        identifier: pointerId,
-                        type: pointerType,
-                        pageX: event.pageX,
-                        pageY: event.pageY,
-                        clientX: event.clientX,
-                        clientY: event.clientY,
-                        target: event.target,
-                        lastMoveTime: Date.now(),
-                        speedX: 0,
-                        speedY: 0
-                    };
+                            identifier: pointerId,
+                            type: pointerType,
+                            pageX: event.pageX,
+                            pageY: event.pageY,
+                            clientX: event.clientX,
+                            clientY: event.clientY,
+                            target: event.target,
+                            lastMoveTime: Date.now(),
+                            speedX: 0,
+                            speedY: 0
+                        };
 
                     pointers.push(track);
 
@@ -808,7 +808,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
             this.clientY = event.clientY;
             this.which = event.which;
             if (ieVersion <= 10) {
-                outer:          for (var caches = [], target = event.target, el; target; target = getElementFromEvent(event)) {
+outer:          for (var caches = [], target = event.target, el; target; target = getElementFromEvent(event)) {
                     for (el = target;; el = dom.parent(el)) {
                         if (!el) {
                             break outer;
@@ -1246,7 +1246,6 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
             viewWidth = document.documentElement.clientWidth;
             viewHeight = document.documentElement.clientHeight;
-
             if (isToucher) {
                 util.adjustFontSize(Array.prototype.slice.call(document.styleSheets));
             }
@@ -1459,73 +1458,73 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
 
         if (gestureListeners.length) {
             switch (pointers.length) {
-                case 1:
-                    var track = tracks[pointers[0].identifier];
-                    if (track.type !== 'mouse') {
-                        if (event.getNative().type.slice(-4) === 'move') {
-                            if (!track.swipe && Date.now() - track.startTime < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
-                                track.swipe = true;
-                                util.timer(function () {
-                                    if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.startX, 2) + Math.pow(track.lastY - track.startY, 2)) > 30) {
-                                        event.angle = calcAngle(track.lastX - track.startX, track.lastY - track.startY);
-                                        if (event.angle > 150 && event.angle < 210) {
-                                            callback('swipeleft');
-                                        } else if (event.angle > 330 || event.angle < 30) {
-                                            callback('swiperight');
-                                        } else if (event.angle > 60 && event.angle < 120) {
-                                            callback('swipeup');
-                                        } else if (event.angle > 240 && event.angle < 300) {
-                                            callback('swipedown');
-                                        }
-                                        callback('swipe');
+            case 1:
+                var track = tracks[pointers[0].identifier];
+                if (track.type !== 'mouse') {
+                    if (event.getNative().type.slice(-4) === 'move') {
+                        if (!track.swipe && Date.now() - track.startTime < 500 && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) > HIGH_SPEED) {
+                            track.swipe = true;
+                            util.timer(function () {
+                                if (tracks[track.identifier] !== track && Math.sqrt(Math.pow(track.lastX - track.startX, 2) + Math.pow(track.lastY - track.startY, 2)) > 30) {
+                                    event.angle = calcAngle(track.lastX - track.startX, track.lastY - track.startY);
+                                    if (event.angle > 150 && event.angle < 210) {
+                                        callback('swipeleft');
+                                    } else if (event.angle > 330 || event.angle < 30) {
+                                        callback('swiperight');
+                                    } else if (event.angle > 60 && event.angle < 120) {
+                                        callback('swipeup');
+                                    } else if (event.angle > 240 && event.angle < 300) {
+                                        callback('swipedown');
                                     }
-                                }, 300);
-                            }
-
-                            event.fromX = track.lastX;
-                            event.fromY = track.lastY;
-                            event.toX = track.clientX;
-                            event.toY = track.clientY;
-                            callback('panmove');
-                        } else {
-                            if (track && isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
-                                callback('tap');
-                            }
-                        }
-                    }
-                    break;
-                case 2:
-                    var track1 = tracks[pointers[0].identifier],
-                        track2 = tracks[pointers[1].identifier];
-                    // 两指操作的时间间隔足够小
-                    if (Math.abs(track2.lastMoveTime - track1.lastMoveTime) < 100) {
-                        var angle = Math.abs(track1.angle - track2.angle);
-                        if (Math.abs(angle - 180) < 60) {
-                            angle = calcAngle(track2.lastX - track1.lastX, track2.lastY - track1.lastY);
-                            if (angle > 180) {
-                                angle -= 180;
-                            }
-                            angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
-                            // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
-                            if (angle < 60) {
-                                event.clientX = (track1.clientX + track2.clientX) / 2;
-                                event.clientY = (track1.clientY + track2.clientY) / 2;
-                                event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
-                                event.to = Math.sqrt(Math.pow(track2.clientX - track1.clientX, 2) + Math.pow(track2.clientY - track1.clientY, 2));
-                                if (event.from < event.to) {
-                                    callback('pinchout');
-                                } else if (event.from > event.to) {
-                                    callback('pinchin');
+                                    callback('swipe');
                                 }
-                            } else if (Math.abs(angle - 90) < 60 &&
-                                Math.sqrt(Math.pow(track2.clientX - track1.clientX, 2) + Math.pow(track2.clientY - track1.clientY, 2)) -
-                                Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
-                                event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
-                                callback('rotate');
-                            }
+                            }, 300);
+                        }
+
+                        event.fromX = track.lastX;
+                        event.fromY = track.lastY;
+                        event.toX = track.clientX;
+                        event.toY = track.clientY;
+                        callback('panmove');
+                    } else {
+                        if (track && isTouchClick(track) && Math.sqrt(track.speedX * track.speedX + track.speedY * track.speedY) < HIGH_SPEED) {
+                            callback('tap');
                         }
                     }
-                    break;
+                }
+                break;
+            case 2:
+                var track1 = tracks[pointers[0].identifier],
+                    track2 = tracks[pointers[1].identifier];
+                // 两指操作的时间间隔足够小
+                if (Math.abs(track2.lastMoveTime - track1.lastMoveTime) < 100) {
+                    var angle = Math.abs(track1.angle - track2.angle);
+                    if (Math.abs(angle - 180) < 60) {
+                        angle = calcAngle(track2.lastX - track1.lastX, track2.lastY - track1.lastY);
+                        if (angle > 180) {
+                            angle -= 180;
+                        }
+                        angle = Math.abs((track1.angle + track2.angle - 180) / 2 - angle);
+                        // 对last夹角的计算判断运动是不是在两指的一个延长线上，否则可能是旋转产生的效果
+                        if (angle < 60) {
+                            event.clientX = (track1.clientX + track2.clientX) / 2;
+                            event.clientY = (track1.clientY + track2.clientY) / 2;
+                            event.from = Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2));
+                            event.to = Math.sqrt(Math.pow(track2.clientX - track1.clientX, 2) + Math.pow(track2.clientY - track1.clientY, 2));
+                            if (event.from < event.to) {
+                                callback('pinchout');
+                            } else if (event.from > event.to) {
+                                callback('pinchin');
+                            }
+                        } else if (Math.abs(angle - 90) < 60 &&
+                                Math.sqrt(Math.pow(track2.clientX - track1.clientX, 2) + Math.pow(track2.clientY - track1.clientY, 2)) -
+                                    Math.sqrt(Math.pow(track2.lastX - track1.lastX, 2) + Math.pow(track2.lastY - track1.lastY, 2)) < 10) {
+                            event.angle = (track2.angle + track1.angle) / 2 - (calcAngle(track2.lastX, track2.lastY) + calcAngle(track1.lastX, track1.lastY)) / 2;
+                            callback('rotate');
+                        }
+                    }
+                }
+                break;
             }
         }
     }
@@ -1854,8 +1853,8 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
          */
         $getClasses: function (UIClass, current) {
             return current && current !== UIClass.TYPES[0] ?
-                UIClass.TYPES.concat([current]) :
-                UIClass.TYPES.slice();
+                    UIClass.TYPES.concat([current]) :
+                    UIClass.TYPES.slice();
         },
 
         /**
@@ -2483,7 +2482,7 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                 }
                 initRecursion++;
 
-                Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
+                dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
                     if (dom.getAttribute(item, ecuiName)) {
                         list.push(item);
                     }
@@ -2497,10 +2496,10 @@ ECUI核心的事件控制器与状态控制器，用于屏弊不同浏览器交�
                         }
                         options.main = item;
                         item = options.type ?
-                            options.type.indexOf('.') < 0 ?
-                                ui[util.toCamelCase(options.type.charAt(0).toUpperCase() + options.type.slice(1))] :
-                                util.parseValue(options.type, ui) || util.parseValue(options.type) :
-                            ui.Control;
+                                options.type.indexOf('.') < 0 ?
+                                        ui[util.toCamelCase(options.type.charAt(0).toUpperCase() + options.type.slice(1))] :
+                                        util.parseValue(options.type, ui) || util.parseValue(options.type) :
+                                ui.Control;
 //{if 0}//
                         try {
 //{/if}//

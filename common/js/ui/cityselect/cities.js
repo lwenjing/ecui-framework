@@ -24,44 +24,44 @@ cities - 地区联动下拉框控件。
             PROVINCE = {},
             CITY = {},
             AREA = {};
-        for (code in fapiao.cities) {
+        for (code in daikuan.cities) {
             if (code.slice(2) == '0000') {
-                PROVINCE[code] = fapiao.cities[code];
+                PROVINCE[code] = daikuan.cities[code];
             } else if (code.slice(4) == '00') {
                 if (!CITY[code.slice(0, 2) + '0000']) {
                     CITY[code.slice(0, 2) + '0000'] = {};
                 }
-                CITY[code.slice(0, 2) + '0000'][code] = fapiao.cities[code];
+                CITY[code.slice(0, 2) + '0000'][code] = daikuan.cities[code];
             } else {
                 if (!AREA[code.slice(0, 4) + '00']) {
                     AREA[code.slice(0, 4) + '00'] = {};
                 }
-                AREA[code.slice(0, 4) + '00'][code] = fapiao.cities[code];
+                AREA[code.slice(0, 4) + '00'][code] = daikuan.cities[code];
             }
         }
         // debugger
         var CITYS = [{
-            code: '全部省',
-            value: '000000',
-            children: [{
-                code: '全部市',
-                value: '000000',
+                code: this.PLACEHOLDER[0] || '全部省',
+                value: this.PLACEHOLDER_CODE || '000000',
                 children: [{
-                    code: '全部区',
-                    value: '000000'
+                    code: this.PLACEHOLDER[1] || '全部市',
+                    value: this.PLACEHOLDER_CODE || '000000',
+                    children: [{
+                        code: this.PLACEHOLDER[2] || '全部区',
+                        value: this.PLACEHOLDER_CODE || '000000'
+                    }]
                 }]
-            }]
-        }];
+            }];
         for (code in  PROVINCE) {
             citys = {
                 value: code,
                 code: PROVINCE[code],
                 children: [{
-                    value: '000000',
-                    code: '全部市',
+                    value: this.PLACEHOLDER_CODE || '000000',
+                    code: this.PLACEHOLDER[1] || '全部市',
                     children: [{
-                        code: '全部区',
-                        value: '000000'
+                        code: this.PLACEHOLDER[2] || '全部区',
+                        value: this.PLACEHOLDER_CODE || '000000'
                     }]
                 }]
             };
@@ -72,8 +72,8 @@ cities - 地区联动下拉框控件。
                         value: key,
                         code: item[key],
                         children: [{
-                            value: '000000',
-                            code: '全部区'
+                            value: this.PLACEHOLDER_CODE || '000000',
+                            code: this.PLACEHOLDER[2] || '全部区'
                         }]
                     };
                     item2 = AREA[key];
@@ -126,9 +126,11 @@ cities - 地区联动下拉框控件。
 
         },
         {
+            PLACEHOLDER_CODE: '000000',
+            PLACEHOLDER: ['全部省', '全部市', '全部区'],
             init: function (options) {
                 ui.MultilevelSelect.prototype.init.call(this, options);
-                this.setData(getCITYS(options.multi));
+                this.setData(getCITYS.bind(this)(options.multi));
                 var value = String(options.value);
                 if (!options.value || options.value.length !== 6) {
                     value = '000000';

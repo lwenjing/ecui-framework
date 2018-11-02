@@ -407,7 +407,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
 
                 if (elements) {
                     if (elements.length) {
-                        elements = Array.apply(null, elements);
+                        elements = dom.toArray(elements);
                         el = elements[0];
                     } else {
                         el = elements;
@@ -648,7 +648,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 unloadNames.forEach(function (name) {
                     delete loadStatus[name];
                     name = '/' + name;
-                    Array.apply(null, document.getElementsByTagName('STYLE')).forEach(function (item) {
+                    dom.toArray(document.getElementsByTagName('STYLE')).forEach(function (item) {
                         if (dom.getAttribute(item, 'module') === name) {
                             dom.remove(item);
                         }
@@ -680,7 +680,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     loc += '~HISTORY=' + historyIndex;
                     if (ieVersion < 9) {
                         pauseStatus = true;
-                        if (historyIndex > 1) {
+                        if (historyIndex === 1) {
                             // IE第一次进入，不能back，否则会退出框架
                             history.back();
                         }
@@ -723,17 +723,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             });
             return;
         }
-
-        // 动态模板更新，每次渲染前都需要更新
-        if (route.tpl) {
-            engine.options.namingConflict = "override";
-            if ('function' === typeof route.tpl) {
-                engine.compile(route.tpl(context));
-            } else {
-                engine.compile(route.tpl);
-            }
-        }
-
         beforerender(route);
 
         var el = core.$(route.main);
@@ -772,7 +761,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             }
             el.route = null;
         }
-        Array.apply(null, el.all || el.getElementsByTagName('*')).forEach(function (item) {
+        dom.toArray(el.all || el.getElementsByTagName('*')).forEach(function (item) {
             if (item.route && routes[item.route].ondispose) {
                 routes[item.route].ondispose();
             }
@@ -1252,16 +1241,6 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         },
 
         /**
-         * 设置模板引擎。
-         * @public
-         *
-         * @param {string} moduleName 模块名称，如果不指定模块名称使用当前模块
-         */
-        setEngine: function (moduleName) {
-            return loadStatus[moduleName] = new etpl.Engine();
-        },
-
-        /**
          * 获取常量数据。
          * @public
          *
@@ -1318,7 +1297,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
          */
         parseObject: function (form, data, validate) {
             var errControl,
-                elements = Array.apply(null, form.elements);
+                elements = dom.toArray(form.elements);
 
             elements.forEach(function (item) {
                 if (validate !== false && item.name && item.getControl && !item.getControl().isDisabled()) {
@@ -1466,11 +1445,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 var moduleName = getModuleName(route.NAME);
                 engine = loadStatus[moduleName];
 
-                if (engine instanceof etpl.Engine) {
+                if (engine instanceof etpl.Engine && engine.getRenderer(route.view)) {
                     // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
-                    if (engine.getRenderer(route.view) || route.tpl) {
-                        render(route);
-                    }
+                    render(route);
                 } else {
                     if (engine === true) {
                         loadTPL();

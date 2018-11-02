@@ -491,10 +491,10 @@
      */
     function autoCloseCommand(context, CommandType) {
         var closeEnd = CommandType ? context.stack.find(
-            function (item) {
-                return item instanceof CommandType;
-            }
-        ) : context.stack[0];
+                function (item) {
+                    return item instanceof CommandType;
+                }
+            ) : context.stack[0];
 
         if (closeEnd) {
             var node;
@@ -895,14 +895,14 @@
         context.target = target;
         if (context.engine.targets[target.name]) {
             switch (context.engine.options.namingConflict) {
-                case 'override':
-                    context.engine.targets[target.name] = target;
-                    context.targets.push(target.name);
-                    break;
-                case 'ignore':
-                    break;
-                default:
-                    throw new Error('Target exists: ' + target.name);
+            case 'override':
+                context.engine.targets[target.name] = target;
+                context.targets.push(target.name);
+                break;
+            case 'ignore':
+                break;
+            default:
+                throw new Error('Target exists: ' + target.name);
             }
         } else {
             context.engine.targets[target.name] = target;
@@ -1141,10 +1141,10 @@
     ForCommand.prototype.getRendererBody = function () {
         return util.stringFormat(
             'var {0}={1};' +
-            'if({0} instanceof Array)' +
-            'for(var {4}=0,{5}={0}.length;{4}<{5};{4}++){v[{2}]={4};v[{3}]={0}[{4}];{6}}' +
-            'else if(typeof {0}==="object")' +
-            'for(var {4} in {0}){v[{2}]={4};v[{3}]={0}[{4}];{6}}',
+                'if({0} instanceof Array)' +
+                'for(var {4}=0,{5}={0}.length;{4}<{5};{4}++){v[{2}]={4};v[{3}]={0}[{4}];{6}}' +
+                'else if(typeof {0}==="object")' +
+                'for(var {4} in {0}){v[{2}]={4};v[{3}]={0}[{4}];{6}}',
             generateGUID(),
             compileVariable(this.list, this.engine),
             JSON.stringify(this.index || generateGUID()),
@@ -1225,8 +1225,7 @@
             commandSyntax: /^\s*(\/)?([a-z]+)\s*(?::([\s\S]*))?$/,
             variableOpen: '${',
             variableClose: '}',
-            defaultFilter: 'html',
-            namingConflict: "override"
+            defaultFilter: 'html'
         };
 
         this.config(options);
@@ -1250,7 +1249,7 @@
         Object.assign(this.options, options);
     };
 
-    /**
+   /**
      * 解析模板并编译，返回第一个target编译后的renderer函数。
      * parse该方法的存在为了兼容老模板引擎
      *

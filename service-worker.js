@@ -39,8 +39,8 @@
                 return this.fetch(cloneRequest).then(
                     function (netResponse) {
                         var cloneResponse = netResponse.clone();
-                        if (!netResponse || netResponse.status !== 200 || netResponse.url.lastIndexOf('/') > response.url.lastIndexOf('.')) {
-                            // 如果网络错误或者是动态请求，不进行缓存
+                        if (!netResponse || netResponse.status !== 200 || netResponse.headers.get('Content-type').match(/image/) || netResponse.url.lastIndexOf('/') > netResponse.url.lastIndexOf('.')) {
+                            // 如果网络错误或者是图片资源或者是动态请求，不进行缓存
                             return netResponse;
                         }
 

@@ -557,6 +557,13 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 } else {
                     el.style[fixer || name] = value;
                 }
+            },
+
+            toArray: function (elements) {
+                for (var i = 0, ret = [], el; el = elements[i++]; ) {
+                    ret.push(el);
+                }
+                return ret;
             }
         },
         effect: {},
@@ -932,7 +939,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
              */
             checkUpdate: function (form) {
                 var update = false;
-                Array.apply(null, form.elements).forEach(function (item) {
+                dom.toArray(form.elements).forEach(function (item) {
                     if (item.type !== 'radio' && item.type !== 'checkbox') {
                         if (item.defaultValue !== item.value) {
                             update = true;
@@ -1196,8 +1203,8 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
 
                 function build() {
                     return delay === -1 ?
-                        window.requestAnimationFrame(callFunc) :
-                        (delay < 0 ? setInterval : setTimeout)(callFunc, Math.abs(delay));
+                            window.requestAnimationFrame(callFunc) :
+                            (delay < 0 ? setInterval : setTimeout)(callFunc, Math.abs(delay));
                 }
 
                 if (delay === -1) {
@@ -1315,7 +1322,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                 set: function (el, value) {
                     el.style.filter =
                         el.style.filter.replace(/alpha\([^\)]*\)/gi, '') +
-                        (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') +
+                            (value === '' ? (ieVersion < 8 ? 'alpha' : 'progid:DXImageTransform.Microsoft.Alpha') +
                             '(opacity=' + value * 100 + ')' : '');
                 }
             } : undefined,

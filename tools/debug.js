@@ -180,11 +180,7 @@
                                     if (index >= 0) {
                                         data = data.replace(/<!--\s*target:\s*([^>]+)-->/g, '<!-- target: ' + filename.slice(0, index + 1) + '$1 -->');
                                     }
-                                    var engine = ecui.esr.getEngine(moduleName);
-                                    if (engine === true) {
-                                        engine = ecui.esr.setEngine(moduleName);
-                                    }
-                                    engine.compile(data.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'));
+                                    ecui.esr.getEngine(moduleName).compile(data.replace(/ui="type:NS\./g, 'ui="type:ecui.ns._' + moduleName.replace(/[._]/g, '-').replace(/\//g, '_') + '.ui.'));
                                     moduleRoute.splice(0, 1);
                                     if (moduleRoute.length) {
                                         load();
