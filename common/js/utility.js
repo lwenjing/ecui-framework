@@ -640,7 +640,7 @@ Gridframe.prototype = {
 
                 window.onresize = function () {
                     calHeight();
-                    if (self.options.fullHeight) {
+                    if (ecui.$(self.listTableMain) && self.options.fullHeight) {
                         self.calcHeight();
                     }
                 };
