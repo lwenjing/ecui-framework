@@ -723,6 +723,17 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
             });
             return;
         }
+
+        // 动态模板更新，每次渲染前都需要更新
+        if (route.tpl) {
+            engine.options.namingConflict = "override";
+            if ('function' === typeof route.tpl) {
+                engine.compile(route.tpl(context));
+            } else {
+                engine.compile(route.tpl);
+            }
+        }
+
         beforerender(route);
 
         var el = core.$(route.main);
@@ -1445,9 +1456,11 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 var moduleName = getModuleName(route.NAME);
                 engine = loadStatus[moduleName];
 
-                if (engine instanceof etpl.Engine && engine.getRenderer(route.view)) {
+                if (engine instanceof etpl.Engine) {
                     // 如果在当前引擎找不到模板，有可能是主路由切换，也可能是主路由不存在
-                    render(route);
+                    if (engine.getRenderer(route.view) || route.tpl) {
+                        render(route);
+                    }
                 } else {
                     if (engine === true) {
                         loadTPL();
