@@ -1350,7 +1350,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         parseUrl: function (form) {
             var params = [],
                 data = {},
-                elements = Array.apply(null, form.elements);
+                elements = dom.toArray(form.elements);
 
             elements.forEach(function (item) {
                 if (item.name) {
