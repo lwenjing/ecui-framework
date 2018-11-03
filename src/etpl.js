@@ -1226,7 +1226,7 @@
             variableOpen: '${',
             variableClose: '}',
             defaultFilter: 'html',
-            namingConflict: "override"
+            namingConflict: 'override'
         };
 
         this.config(options);
