@@ -679,18 +679,22 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     historyCache = historyCache.slice(0, historyIndex - historyOffset - 1);
                     loc += '~HISTORY=' + historyIndex;
                     if (ieVersion < 9) {
-                        pauseStatus = true;
                         if (historyIndex > 1) {
                             // IE第一次进入，不能back，否则会退出框架
+                            pauseStatus = true;
                             history.back();
+                            var handle = util.timer(function () {
+                                if (/~HISTORY=(\d+)/.test(location.href)) {
+                                    esr.setLocation(loc);
+                                    esr.callRoute(loc);
+                                    pauseStatus = false;
+                                    handle();
+                                }
+                            }, -10);
+                        } else {
+                            esr.setLocation(loc);
+                            esr.callRoute(loc);
                         }
-                        var handle = util.timer(function () {
-                            if (/~HISTORY=(\d+)/.test(location.href)) {
-                                esr.setLocation(loc);
-                                pauseStatus = false;
-                                handle();
-                            }
-                        }, -10);
                         return;
                     }
                     pauseStatus = true;
