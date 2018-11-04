@@ -66,7 +66,7 @@ _eInput - 选项对应的input，form提交时使用
              */
             $change: function () {
                 var items = this.getSelected().map(function (item) {
-                    return item.getValue();
+                    return item.getBody().innerText.trim();
                 });
                 this.getBody().innerHTML = items.length ? items.join(',') : '';
             },
@@ -90,6 +90,11 @@ _eInput - 选项对应的input，form提交时使用
              */
             getSelected: function () {
                 return this.getPopup().getSelected();
+            },
+            getValue: function () {
+                return this.getSelected().map(function (item) {
+                    return item.getValue();
+                });
             },
 
             /**
