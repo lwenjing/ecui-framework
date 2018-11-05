@@ -648,7 +648,6 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                     data = options.data || '',
                     async = options.async !== false,
                     method = (options.method || 'GET').toUpperCase(),
-                    headers = options.headers || {},
                     onerror = options.onerror || util.blank,
                     // 基本的逻辑来自lili同学提供的patch
                     stop,
@@ -687,6 +686,7 @@ ECUI框架的适配器，用于保证ECUI与第三方库的兼容性，目前ECU
                         xhr.onreadystatechange = stateChangeHandler;
                     }
 
+                    headers = options.headers || {};
                     for (var key in headers) {
                         if (headers.hasOwnProperty(key)) {
                             xhr.setRequestHeader(key, headers[key]);
