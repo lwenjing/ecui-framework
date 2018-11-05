@@ -27,7 +27,10 @@
     .ui-item {
         display: inline-block;
     }
-    .ui-multi-select-options-operate  {
+    .ui-item-selected {
+        color: #368cda;
+    }
+    .ui-multi-select-options-operate {
         display: block;
         .ui-button {
             display: inline-block;
