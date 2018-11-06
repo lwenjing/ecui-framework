@@ -635,8 +635,11 @@ function loadStyles(modifyVars) {
         if (style.type.match(typePattern)) {
             var instanceOptions = Object.assign({}, options);
             instanceOptions.modifyVars = modifyVars;
-            var lessText = style.innerHTML || '';
+            var lessText = style.getAttribute('lessText') || style.innerHTML || '';
+            style.removeAttribute('lessText');
             instanceOptions.filename = document.location.href.replace(/#.*$/, '');
+
+            
 
             /*jshint loopfunc:true */
             // use closure to store current style
