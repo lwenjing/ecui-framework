@@ -40,7 +40,6 @@
             onready: function (event) {
                 ecui.util.timer(function () {
                     if (this.getRoot().getParent().getParent().getInput()) {
-                                
                         var value = this.getRoot().getParent().getParent().getInput().value;
                         if (value === this._sValue) {
                             this.getRoot().getParent().getParent().setSelected(this);
@@ -136,7 +135,24 @@
                 }
                 this.alterStatus(text ? '-placeholder' : '+placeholder');
             },
-
+            setChecked: function (tree, value) {
+                if (tree.getValue() === value) {
+                    this.setSelected(tree);
+                    return false;
+                }
+                var trees = tree.getChildren();
+                for (var i = 0, item; item = trees[i++]; ) {
+                    if (!this.setChecked(item)) {
+                        return false;
+                    }
+                }
+            },
+            setValue: function (value) {
+                var tree = ecui.dom.children(this._uOptions.getBody())[0].getControl();
+                if (tree && tree instanceof ui.SelectTree) {
+                    this.setChecked(tree, value.toString());
+                }
+            },
             setSelected: function (treenode) {
                 this.$setValue(treenode.getText());
                 this._oSelected = treenode;
