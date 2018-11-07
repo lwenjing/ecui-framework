@@ -755,7 +755,14 @@ Gridframe.prototype = {
                         searchDom.push('<span class="span-style">&nbsp;- </span>');
                         searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
                     }
-                } else {
+                } else if ("MonthInput" === search.type) {
+                    var names = search.name.split(":");
+                    searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
+                    if (names.length > 1) {
+                        searchDom.push('<span class="span-style">&nbsp;- </span>');
+                        searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
+                    }
+                } else{
                     searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input">');
                     if ("Select" === search.type) {
                         searchDom.push('<div ui="value:;">全部</div>');
