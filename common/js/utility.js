@@ -510,6 +510,80 @@ fapiao.TableListRoute2.prototype.onbeforerender = function (context) {
 };
 
 /**
+ * GridButton
+ * @type {*|Function|Object|void}
+ */
+ui.GridButton = ecui.inherits(
+    ecui.ui.Button,
+    function (el, options) {
+        ecui.ui.Button.call(this, el, options);
+        this.id = options.id;
+        this.gridName = options.gridName;
+    },
+    {
+        onclick: function () {
+            var context = ecui.esr.getContext();
+            var gridframe = context[this.gridName];
+            if (gridframe.options.checkbox) {
+                var all = ecui.get(gridframe.allChecked);
+                var rowDatas = [];
+                if (all) {
+                    all.getDependents().forEach(function (item) {
+                            if (item.isChecked()) {
+                                rowDatas.push(self.pageData[item.getValue()]);
+                            }
+                        }
+                    );
+                }
+                gridframe.buttons[this.id].clickAction.call(gridframe, rowDatas, context)
+            } else {
+                gridframe.buttons[this.id].clickAction.call(gridframe, context)
+            }
+        }
+    }
+);
+
+/**
+ * GridRowButton
+ * @type {*|Function|Object|void}
+ */
+ui.GridRowButton = ecui.inherits(
+    ecui.ui.Button,
+    function (el, options) {
+        ecui.ui.Button.call(this, el, options);
+        this.id = options.id;
+        this.dataId = options.dataId;
+        this.gridName = options.gridName;
+    },
+    {
+        onclick: function () {
+            var context = ecui.esr.getContext();
+            var gridframe = context[this.gridName];
+            gridframe.rowButtons[this.id].clickAction.call(gridframe, gridframe.pageData[this.dataId], context);
+        }
+    }
+);
+
+/**
+ * GridRowLink
+ * @type {*|Function|Object|void}
+ */
+ui.GridRowLink = ecui.inherits(
+    ecui.ui.Control,
+    function (el, options) {
+        ecui.ui.Control.call(this, el, options);
+        this.dataId = options.dataId;
+        this.gridName = options.gridName;
+    },
+    {
+        onclick: function () {
+            var context = ecui.esr.getContext();
+            var gridframe = context[this.gridName];
+            gridframe.options.rowClick.call(gridframe, gridframe.pageData[this.dataId], context);
+        }
+    }
+);
+/**
  *  网格列表组件。
  * @public
  *
@@ -538,6 +612,8 @@ var Gridframe = function (options) {
     };
 
     this.pageData = {};
+    this.buttons = {};
+    this.rowButtons = {};
 
     this.setOptions(options);
     this.initContain();
@@ -547,6 +623,16 @@ Gridframe.prototype = {
     setOptions: function (options) {
         var self = this;
         ecui.util.extend(self.options, options);
+        if (self.options.buttons) {
+            for (var i = 0; i < self.options.buttons.length; i++) {
+                var button = self.options.buttons[i];
+                if (self.prefix) {
+                    self.buttons[self.prefix + "_" + button.name] = button;
+                } else {
+                    self.buttons["_" + button.name] = button;
+                }
+            }
+        }
 
         if (self.options.searchs) {
             self.searchShow = false;
@@ -621,7 +707,7 @@ Gridframe.prototype = {
             main: self.options.main,
             tpl: html.join(""),
             view: self.gridframe,
-            onafterrender: function () {
+            onafterrender: function (context) {
                 if (self.options.searchs) {
                     ecui.esr.callRoute(self.viewPrefix + self.searchName, true);
                 }
@@ -637,6 +723,9 @@ Gridframe.prototype = {
                 } else {
                     ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
                 }
+
+                // 将gridfram实例存入当前context
+                context[self.name] = self;
 
                 window.onresize = function () {
                     calHeight();
@@ -744,8 +833,9 @@ Gridframe.prototype = {
         self.options.searchs.forEach(function (search) {
             if ("hide" === search.type) {
                 searchDom.push('<input name="' + search.name + '" value="" class="ui-hide"/>');
-            }
-            else {
+            } else  if ("input-group" === search.type) {
+
+            } else {
                 searchDom.push('<div class="search-item">');
                 searchDom.push('   <div class="search-label">' + search.label + '</div>');
                 if ("calendar-input" === search.type) {
@@ -762,7 +852,7 @@ Gridframe.prototype = {
                         searchDom.push('<span class="span-style">&nbsp;- </span>');
                         searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
                     }
-                } else{
+                } else {
                     searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input">');
                     if ("Select" === search.type) {
                         searchDom.push('<div ui="value:;">全部</div>');
@@ -800,33 +890,7 @@ Gridframe.prototype = {
             tpl: function (context) {
                 return self.initButtonView.call(self, context);
             },
-            view: self.buttonView,
-            onafterrender: function (context) {
-                if (self.options.buttons) {
-                    self.options.buttons.forEach(function (button) {
-                        var buttonDoms = document.querySelectorAll("." + button.name);
-                        for (var i = 0; i < buttonDoms.length; i++) {
-                            buttonDoms[i].onclick = function () {
-                                if (self.options.checkbox) {
-                                    var all = ecui.get(self.allChecked);
-                                    var rowDatas = [];
-                                    if (all) {
-                                        all.getDependents().forEach(function (item) {
-                                                if (item.isChecked()) {
-                                                    rowDatas.push(self.pageData[item.getValue()]);
-                                                }
-                                            }
-                                        );
-                                    }
-                                    button.clickAction.call(self, rowDatas, context)
-                                } else {
-                                    button.clickAction.call(self, context)
-                                }
-                            }
-                        }
-                    });
-                }
-            }
+            view: self.buttonView
         };
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.buttonName, route);
@@ -835,16 +899,21 @@ Gridframe.prototype = {
         //{/if}//
     },
     initButtonView: function () {
-        var self = this, buttonDom = [];
+        var self = this, buttonDom = [], buttons = self.options.buttons;
         buttonDom.push('<!-- target: ' + self.buttonView + ' -->');
         buttonDom.push('<div class="list-button-container">');
-        self.options.buttons.forEach(function (button) {
-            buttonDom.push("<div class='blue-btn grid-button ");
-            buttonDom.push(button.name);
-            buttonDom.push("'>");
-            buttonDom.push(button.label);
-            buttonDom.push("</div>");
-        });
+        if (buttons && buttons.length) {
+            for (var i = 0; i < buttons.length; i++) {
+                var button = buttons[i];
+                buttonDom.push("<div class='blue-btn grid-button' ui='type:ui.GridButton;id:");
+                buttonDom.push(self.prefix + "_" + button.name);
+                buttonDom.push(";gridName:");
+                buttonDom.push(self.name);
+                buttonDom.push("'>");
+                buttonDom.push(button.label);
+                buttonDom.push("</div>");
+            }
+        }
         buttonDom.push("</div>");
         return buttonDom.join("");
     },
@@ -901,28 +970,6 @@ Gridframe.prototype = {
                 }
                 if (self.options.fullHeight) {
                     self.calcHeight();
-                }
-                if (self.operates) {
-                    self.operates.forEach(function (operate) {
-                        var operateDoms = document.querySelectorAll("." + operate.name);
-                        for (var i = 0; i < operateDoms.length; i++) {
-                            var operateDom = operateDoms[i];
-                            operateDom.onclick = function () {
-                                var id = this.getAttribute("data-id");
-                                operate.clickAction.call(self, self.pageData[id], context, this);
-                            }
-                        }
-                    });
-                }
-                var linkDoms = document.querySelectorAll(".row-link");
-                if (linkDoms.length) {
-                    for (var i = 0; i < linkDoms.length; i++) {
-                        var linkDom = linkDoms[i];
-                        linkDom.onclick = function () {
-                            var id = this.getAttribute("data-id");
-                            self.options.rowClick.call(self, self.pageData[id], context, this);
-                        }
-                    }
                 }
             }
         };
@@ -1081,18 +1128,24 @@ Gridframe.prototype = {
 
                 self.options.columns.forEach(function (column) {
                     if (column.operates) {
-                        if (!self.operates) {
-                            self.operates = column.operates;
-                        }
                         operateDom.push("<td class='operate' style='text-align:left'>");
                         column.operates.forEach(function (operate) {
+                            if (self.prefix) {
+                                self.rowButtons[self.prefix + "_" + operate.name] = operate;
+                            } else {
+                                self.rowButtons["_" + operate.name] = operate;
+                            }
                             var show = operate.isShow || true;
                             if ('function' === typeof operate.isShow) {
                                 show = operate.isShow.call(self, item);
                             }
                             if (show) {
-                                operateDom.push("<div class='oprate-btn " + operate.name);
-                                operateDom.push("' data-id='" + item[self.options.idColumn]);
+                                operateDom.push("<div class='oprate-btn' ui='type:ui.GridRowButton;id:");
+                                operateDom.push(self.prefix + "_" + operate.name);
+                                operateDom.push(";gridName:");
+                                operateDom.push(self.name);
+                                operateDom.push(";dataId:");
+                                operateDom.push(item[self.options.idColumn]);
                                 operateDom.push("'>");
                                 operateDom.push(operate.label);
                                 operateDom.push("</div>");
@@ -1106,7 +1159,11 @@ Gridframe.prototype = {
                         }
                         tableDom.push(">");
                         if (column.link) {
-                            tableDom.push("<a class='row-link' href='javascript:void(0);' data-id='" + item[self.options.idColumn] + "'>")
+                            tableDom.push("<a class='row-link' ui='type:ui.GridRowLink;gridName:");
+                            tableDom.push(self.name);
+                            tableDom.push(";dataId:");
+                            tableDom.push(item[self.options.idColumn]);
+                            tableDom.push("'>");
                         }
                         if (column.custom) {
                             tableDom.push(column.custom(item))
