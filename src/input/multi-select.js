@@ -34,7 +34,7 @@ _eInput - 选项对应的input，form提交时使用
                 this._eText = dom.create('DIV', { className: options.classes.join('-text ') }),
                 dom.last(el)
             );
-            this.setPopup(core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
+            this.setPopup(this._uPopups = core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
             this._sName = options.name || '';
         },
         {
@@ -100,10 +100,13 @@ _eInput - 选项对应的input，form提交时使用
                 return this.getPopup().getSelected();
             },
             getValue: function () {
-                var value = this._eInput.value.split(',');
-                return value.map(function (item) { return item; });
+                return this._eInput.value.split(',');
             },
-
+            getFormValue: function () {
+                return this._eInput.value.split(',');
+                // var value = this._eInput.value.split(',');
+                // return value.map(function (item) { return item; });
+            },
             /**
              * 选中所有的选项。
              * 某些场景下，需要多选框控件的内容都可以被提交，可以在表单的 onsubmit 事件中调用 selectAll 方法全部选择。
@@ -122,6 +125,26 @@ _eInput - 选项对应的input，form提交时使用
              */
             setName: function (name) {
                 this.getPopup().setName(name);
+            },
+
+            /**
+             * @override
+             */
+            $ready: function (options) {
+                ui.InputControl.prototype.$ready.call(this, options);
+                this.setValue(this.getInput().value);
+            },
+            setValue: function (value) {
+                var text = [];
+                value = JSON.parse(value);
+                this._uPopups.getItems().forEach(function (item) {
+                    if (value.indexOf(item.getValue()) >= 0) {
+                        item.setSelected(true);
+                        text.push(item.getMain().innerText.trim());
+                    }
+                });
+                this._eText.innerHTML = text.join(',');
+                this._eInput.value = value.join(',');
             }
         },
         ui.Popup
