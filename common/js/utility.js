@@ -522,8 +522,7 @@ ui.GridButton = ecui.inherits(
     },
     {
         onclick: function () {
-            var context = ecui.esr.getContext();
-            var gridframe = context[this.gridName];
+            var gridframe = ecui.esr.getData(this.gridName);
             if (gridframe.options.checkbox) {
                 var all = ecui.get(gridframe.allChecked);
                 var rowDatas = [];
@@ -535,9 +534,9 @@ ui.GridButton = ecui.inherits(
                         }
                     );
                 }
-                gridframe.buttons[this.id].clickAction.call(gridframe, rowDatas, context)
+                gridframe.buttons[this.id].clickAction.call(gridframe, rowDatas)
             } else {
-                gridframe.buttons[this.id].clickAction.call(gridframe, context)
+                gridframe.buttons[this.id].clickAction.call(gridframe)
             }
         }
     }
@@ -557,9 +556,8 @@ ui.GridRowButton = ecui.inherits(
     },
     {
         onclick: function () {
-            var context = ecui.esr.getContext();
-            var gridframe = context[this.gridName];
-            gridframe.rowButtons[this.id].clickAction.call(gridframe, gridframe.pageData[this.dataId], context);
+            var gridframe = ecui.esr.getData(this.gridName);
+            gridframe.rowButtons[this.id].clickAction.call(gridframe, gridframe.pageData[this.dataId]);
         }
     }
 );
@@ -577,9 +575,8 @@ ui.GridRowLink = ecui.inherits(
     },
     {
         onclick: function () {
-            var context = ecui.esr.getContext();
-            var gridframe = context[this.gridName];
-            gridframe.options.rowClick.call(gridframe, gridframe.pageData[this.dataId], context);
+            var gridframe = ecui.esr.getData(this.gridName);
+            gridframe.options.rowClick.call(gridframe, gridframe.pageData[this.dataId]);
         }
     }
 );
