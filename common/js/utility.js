@@ -614,6 +614,7 @@ var Gridframe = function (options) {
     this.pageData = {};
     this.buttons = {};
     this.rowButtons = {};
+    this.searchData = {};
 
     this.setOptions(options);
     this.initContain();
@@ -834,7 +835,7 @@ Gridframe.prototype = {
         self.options.searchs.forEach(function (search) {
             if ("hide" === search.type) {
                 searchDom.push('<input name="' + search.name + '" value="" class="ui-hide"/>');
-            } else  if ("input-group" === search.type) {
+            } else if ("input-group" === search.type) {
 
             } else {
                 searchDom.push('<div class="search-item">');
@@ -932,6 +933,7 @@ Gridframe.prototype = {
             onbeforerequest: function (context) {
                 context.pageNo = context.pageNo || +this.searchParm.currentPage;
                 context.pageSize = context.pageSize || +this.searchParm.pageSize;
+
                 if (self.options.searchs) {
                     fapiao.setFormValue(context, document.forms[self.searchForm], this.searchParm);
                 }
@@ -943,6 +945,9 @@ Gridframe.prototype = {
                         list: []
                     };
                 }
+                self.searchData = {};
+                ecui.esr.parseObject(document.forms[self.searchForm], self.searchData, true);
+
                 var data = ecui.util.parseValue(self.listTableData, context);
                 var pageNo = data.currentPage || 1;
                 var total = data.count || 0;
