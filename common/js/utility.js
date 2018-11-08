@@ -530,7 +530,7 @@ ui.GridButton = ecui.inherits(
                 if (all) {
                     all.getDependents().forEach(function (item) {
                             if (item.isChecked()) {
-                                rowDatas.push(self.pageData[item.getValue()]);
+                                rowDatas.push(gridframe.pageData[item.getValue()]);
                             }
                         }
                     );
