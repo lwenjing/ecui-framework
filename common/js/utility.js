@@ -623,16 +623,6 @@ Gridframe.prototype = {
     setOptions: function (options) {
         var self = this;
         ecui.util.extend(self.options, options);
-        if (self.options.buttons) {
-            for (var i = 0; i < self.options.buttons.length; i++) {
-                var button = self.options.buttons[i];
-                if (self.prefix) {
-                    self.buttons[self.prefix + "_" + button.name] = button;
-                } else {
-                    self.buttons["_" + button.name] = button;
-                }
-            }
-        }
 
         if (self.options.searchs) {
             self.searchShow = false;
@@ -681,6 +671,17 @@ Gridframe.prototype = {
         self.allChecked = self.name + "allChecked";
 
         self.blankTableName = self.name + "BlankTableList";
+
+        if (self.options.buttons) {
+            for (var i = 0; i < self.options.buttons.length; i++) {
+                var button = self.options.buttons[i];
+                if (self.prefix) {
+                    self.buttons[self.prefix + "_" + button.name] = button;
+                } else {
+                    self.buttons["_" + button.name] = button;
+                }
+            }
+        }
     },
     initContain: function () {
         var self = this, html = [];
