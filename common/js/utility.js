@@ -1008,6 +1008,10 @@ Gridframe.prototype = {
                     code: "0000",
                     list: []
                 };
+
+                self.searchData = {};
+                ecui.esr.parseObject(document.forms[self.searchForm], self.searchData, true);
+
                 var data = ecui.util.parseValue(self.listTableData, context);
                 var pageNo = data.currentPage || 1;
                 var total = data.count || 0;
