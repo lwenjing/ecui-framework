@@ -136,7 +136,7 @@ _eInput - 选项对应的input，form提交时使用
             },
             setValue: function (value) {
                 var text = [];
-                value = JSON.parse(value);
+                value = value.split(',');
                 this._uPopups.getItems().forEach(function (item) {
                     if (value.indexOf(item.getValue()) >= 0) {
                         item.setSelected(true);
