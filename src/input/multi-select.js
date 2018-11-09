@@ -26,12 +26,12 @@ _eInput - 选项对应的input，form提交时使用
         'ui-multi-select',
         function (el, options) {
             var optionsEl = dom.create({className: this.Options.CLASS + options.classes.join('-options ') + 'ui-popup ui-hide'});
-            for (; el.firstChild; ) {
+            for (; el.firstChild;) {
                 optionsEl.appendChild(el.firstChild);
             }
             ui.InputControl.call(this, el, options);
             dom.insertBefore(
-                this._eText = dom.create('DIV', { className: options.classes.join('-text ') }),
+                this._eText = dom.create('DIV', {className: options.classes.join('-text ')}),
                 dom.last(el)
             );
             this.setPopup(this._uPopups = core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
@@ -136,15 +136,16 @@ _eInput - 选项对应的input，form提交时使用
             },
             setValue: function (value) {
                 var text = [];
-                value = JSON.parse(value);
-                this._uPopups.getItems().forEach(function (item) {
-                    if (value.indexOf(item.getValue()) >= 0) {
-                        item.setSelected(true);
-                        text.push(item.getMain().innerText.trim());
-                    }
-                });
-                this._eText.innerHTML = text.join(',');
-                this._eInput.value = value.join(',');
+                if (value) {
+                    this._uPopups.getItems().forEach(function (item) {
+                        if (value.indexOf(item.getValue()) >= 0) {
+                            item.setSelected(true);
+                            text.push(item.getMain().innerText.trim());
+                        }
+                    });
+                    this._eText.innerHTML = text.join(',');
+                    this._eInput.value = value;
+                }
             }
         },
         ui.Popup
