@@ -580,6 +580,23 @@ ui.GridRowLink = ecui.inherits(
         }
     }
 );
+
+/**
+ * 机构联动组件
+ * @type {*|Function|Object|void|h}
+ */
+ui.GridTreeCombox = ecui.inherits(
+    ecui.ui.TreeCombox,
+    function (el, options) {
+        ecui.ui.TreeCombox.call(this, el, options);
+        this.target = options.target;
+    },
+    {
+        onchange: function () {
+        }
+    }
+);
+
 /**
  *  网格列表组件。
  * @public
@@ -605,7 +622,8 @@ var Gridframe = function (options) {
         columns: [], // 表格熟悉对象数组
         rowClick: function (rowData) { // 行点击事件
             alert(JSON.stringify(rowData));
-        }
+        },
+        appendRowData: null // 列表后追加数据,和单行数据的格式必须一致，可以是个 data，也可以是 function
     };
 
     this.pageData = {};
@@ -763,7 +781,14 @@ Gridframe.prototype = {
             view: self.searchView
         };
         self.options.searchs.forEach(function (search) {
-            if ("Select" === search.type && search.url) {
+            if ("SearchGroup" === search.type) {
+                if (search.items && search.items.length) {
+                    var item = search.items[0];
+                    if (item.url) {
+                        route.model.push(item.dataName + "@" + item.url);
+                    }
+                }
+            } else if ("Select" === search.type && search.url) {
                 route.model.push(search.dataName + "@" + search.url);
             }
         });
@@ -832,8 +857,39 @@ Gridframe.prototype = {
         self.options.searchs.forEach(function (search) {
             if ("hide" === search.type) {
                 searchDom.push('<input name="' + search.name + '" value="" class="ui-hide"/>');
-            } else if ("input-group" === search.type) {
-
+            } else if ("SearchGroup" === search.type) {
+                if (search.items && search.items.length) {
+                    for (var i = 0; i < search.items.length; i++) {
+                        var item = search.items[i];
+                        searchDom.push('<div class="search-item" ui="type:input-group">');
+                        searchDom.push('   <div class="search-label">' + item.label + '</div>');
+                        if (item.isTree) {
+                            searchDom.push('<div ui="type:ui.GridTreeCombox;name:' + item.name + ';id:' + item.id + ';target:' + item.target + ';regexp:.+ " class="search-input ui-text">');
+                            searchDom.push('<div>');
+                            searchDom.push('<ul ui="type:SelectTree">');
+                            searchDom.push('<div class="root">root</div>');
+                            if (context[item.dataName] && context[item.dataName].length) {
+                                context[item.dataName].forEach(function (tree) {
+                                    self.initTreeDom(searchDom, tree, item);
+                                });
+                            }
+                            searchDom.push('</ul>');
+                            searchDom.push('</div>');
+                            searchDom.push('</div>');
+                        } else {
+                            searchDom.push('<div ui="type:Select;name:' + search.name + '" class="search-input">');
+                            searchDom.push('<div ui="value:">全部</div>');
+                            if (item.options instanceof Array) {
+                                context[item.dataName] = item.options;
+                            }
+                            context[item.dataName].forEach(function (option) {
+                                searchDom.push('<div ui="value:' + option[search.idColumn] + '">' + option[search.nameColumn] + '</div>');
+                            });
+                            searchDom.push('</div>');
+                        }
+                        searchDom.push('</div>');
+                    }
+                }
             } else {
                 searchDom.push('<div class="search-item">');
                 searchDom.push('   <div class="search-label">' + search.label + '</div>');
@@ -882,6 +938,26 @@ Gridframe.prototype = {
 
         return searchDom.join("");
     },
+    initTreeDom: function (doms, tree, column) {
+        var self = this;
+        if (tree.children && tree.children.length) {
+            doms.push('<ul ui="value:' + tree[column.idColumn] + ';text:' + tree[column.nameColumn] + '">');
+            doms.push('<div>');
+            doms.push('<em class="folder"></em>');
+            doms.push('<div>' + tree[column.nameColumn] + '</div>');
+            doms.push('</div>');
+            tree.children.forEach(function (ctree) {
+                self.initTreeDom(doms, ctree, column);
+            });
+            doms.push('</ul>');
+        }
+        else {
+            doms.push('<li ui="value:' + tree[column.idColumn] + ';text:' + tree[column.nameColumn] + '" class="ui-checktree-nochildren">');
+            doms.push('<em class="folder"></em>');
+            doms.push('<span>' + tree[column.nameColumn] + '</span>');
+            doms.push('</li>');
+        }
+    },
     initButton: function () {
         var self = this, route = {
             NAME: self.buttonName,
@@ -923,6 +999,15 @@ Gridframe.prototype = {
             main: self.listTableMain,
             model: [self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm],
             tpl: function (context) {
+                if (self.options.appendRowData) {
+                    var appendRowData = self.options.appendRowData;
+                    if ('function' === typeof appendRowData) {
+                        appendRowData = appendRowData.call(self, self.searchData);
+                    }
+                    if (appendRowData) {
+                        context[self.listTableData].list.push(appendRowData);
+                    }
+                }
                 return self.initTableView.call(self, context);
             },
             view: self.listTableView,
@@ -989,6 +1074,19 @@ Gridframe.prototype = {
             main: self.listTableMain,
             model: [],
             tpl: function (context) {
+                context[self.listTableData] = {
+                    code: "0000",
+                    list: []
+                };
+                if (self.options.appendRowData) {
+                    var appendRowData = self.options.appendRowData;
+                    if ('function' === typeof appendRowData) {
+                        appendRowData = appendRowData.call(self, self.searchData);
+                    }
+                    if (appendRowData) {
+                        context[self.listTableData].list.push(appendRowData);
+                    }
+                }
                 return self.initTableView.call(self, context);
             },
             view: self.listTableView,
@@ -1001,11 +1099,6 @@ Gridframe.prototype = {
                 }
             },
             onbeforerender: function (context) {
-                context[self.listTableData] = {
-                    code: "0000",
-                    list: []
-                };
-
                 self.searchData = {};
                 ecui.esr.parseObject(document.forms[self.searchForm], self.searchData, true);
 
