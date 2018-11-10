@@ -288,7 +288,7 @@ fapiao.setEditFormValue = function (data, form, isDefault) {
 // 搜索数据回填表单数据
 fapiao.setFormValue = function (context, form, searchParm) {
     var elements = form.elements;
-    for (var i = 0, item; item = elements[i++];) {
+    for (var i = 0, item; item = elements[i++]; ) {
         var name = item.name;
         if (name) {
             if (context[name]) {
@@ -449,6 +449,7 @@ fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
     context.currentPage = context.currentPage || +this.searchParm.currentPage;
     context.pageSize = context.pageSize || +this.searchParm.pageSize;
     fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1].split('&')[0]], this.searchParm);
+    console.log('context: ', JSON.stringify(this.searchParm));
 };
 
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {

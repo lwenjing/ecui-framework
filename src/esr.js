@@ -1520,8 +1520,9 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             setCacheData(data, item[0], replace(decodeURIComponent(item[1])));
                         } else if (method[0] === 'FORM') {
                             var form = document.forms[item[0]];
-                            if (dom.getAttribute(form, 'enctype') !== '') {
-                                headers['Content-Type'] = form.enctype;
+                            var contentType = dom.getAttribute(form, 'contentType');
+                            if (dom.getAttribute(form, 'contentType') !== '') {
+                                headers['Content-Type'] = contentType;
                             }
                             valid = esr.parseObject(form, data);
                         } else {
