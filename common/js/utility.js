@@ -790,6 +790,8 @@ Gridframe.prototype = {
                 }
             } else if ("Select" === search.type && search.url) {
                 route.model.push(search.dataName + "@" + search.url);
+            } else if ("MultiSelect" === search.type && search.url) {
+                route.model.push(search.dataName + "@" + search.url);
             }
         });
         route.onbeforerender = function (context) {
@@ -909,13 +911,14 @@ Gridframe.prototype = {
                     }
                 } else {
                     searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input">');
-                    if ("Select" === search.type) {
+                    if ("Select" === search.type || "MultiSelect" === search.type || "Combox" === search.type) {
                         searchDom.push('<div ui="value:;">全部</div>');
                         if (search.options instanceof Array) {
                             context[search.dataName] = search.options;
                         }
                         context[search.dataName].forEach(function (option) {
-                            searchDom.push('<div ui="value:' + (option.id || option.code) + ';">' + (option.text || option.name) + '</div>');
+                            var idColumn = search.idColumn || "id", nameColumn = search.nameColumn || "text";
+                            searchDom.push('<div ui="value:' + (option[idColumn] || option.code) + ';">' + (option[nameColumn] || option.name) + '</div>');
                         });
                     }
                     searchDom.push('</div>');
