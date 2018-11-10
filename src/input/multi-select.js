@@ -136,15 +136,17 @@ _eInput - 选项对应的input，form提交时使用
             },
             setValue: function (value) {
                 var text = [];
-                value = value.split(',');
-                this._uPopups.getItems().forEach(function (item) {
-                    if (value.indexOf(item.getValue()) >= 0) {
-                        item.setSelected(true);
-                        text.push(item.getMain().innerText.trim());
-                    }
-                });
-                this._eText.innerHTML = text.join(',');
-                this._eInput.value = value.join(',');
+                if (value) {
+                    value = value.split(',');
+                    this._uPopups.getItems().forEach(function (item) {
+                        if (value.indexOf(item.getValue()) >= 0) {
+                            item.setSelected(true);
+                            text.push(item.getMain().innerText.trim());
+                        }
+                    });
+                    this._eText.innerHTML = text.join(',');
+                    this._eInput.value = value.join(',');
+                }
             }
         },
         ui.Popup
