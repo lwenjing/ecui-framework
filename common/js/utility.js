@@ -205,7 +205,7 @@ fapiao.showHint = function (type, msg) {
         error: 'errorHint',
         warn: 'warnHint'
     }[type];
-    var hintContainer = ecui.$('hintContainer') || ecui.dom.create({id: 'hintContainer'});
+    var hintContainer = ecui.$('hintContainer') || ecui.dom.create({ id: 'hintContainer', className: (ecui.ie < 9 ? 'ie8' : '') });
     ecui.dom.removeClass(hintContainer, 'ui-hide');
     hintContainer.innerHTML = ecui.util.stringFormat('<div class="{0}">{1}</div>', className, msg);
     ecui.dom.insertAfter(hintContainer, ecui.dom.last(document.body));

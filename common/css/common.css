@@ -1004,7 +1004,6 @@ a {
     }
 }
 
-
 /*
  * 提示框样式
  */
@@ -1022,7 +1021,6 @@ a {
     min-width: 210px;
     max-width: 522px;
     padding: 35px;
-    background: rgba(43, 43, 59, 0.95);
     border-radius: 4px;
     line-height: 30px;
     color: #FFFFFF;
@@ -1046,25 +1044,49 @@ a {
     text-align: center;
 }
 .ui-tip .tip-success {
-    background: rgba(58, 183, 106, 0.70);
+    background-color: rgba(58, 183, 106, 0.70);
 }
 
 .ui-tip .tip-error {
-    background: rgba(213, 18, 0, 0.70);
+    background-color: rgba(213, 18, 0, 0.70);
 }
 
 .ui-tip .tip-warn {
-    background: rgba(43, 43, 59, 0.95);
+    background-color: rgba(43, 43, 59, 0.95);
 }
 
 #hintContainer .successHint {
-    background: rgba(58, 183, 106, 0.70);
+    background-color: rgba(58, 183, 106, 0.70);
 }
 
 #hintContainer .errorHint {
-    background: rgba(213, 18, 0, 0.70);
+    background-color: rgba(213, 18, 0, 0.70);
 }
 
 #hintContainer .warnHint {
-    background: rgba(43, 43, 59, 0.95);
+    background-color: rgba(43, 43, 59, 0.95);
+}
+
+.ui-tip.ie8 .tip-success {
+    background-color: rgb(58, 183, 106);
+}
+
+.ui-tip.ie8 .tip-error {
+    background-color: rgb(213, 18, 0);
+}
+
+.ui-tip.ie8 .tip-warn {
+    background-color: rgb(43, 43, 59);
+}
+
+#hintContainer.ie8 .successHint {
+    background-color: rgb(58, 183, 106);
+}
+
+#hintContainer.ie8 .errorHint {
+    background-color: rgb(213, 18, 0);
+}
+
+#hintContainer.ie8 .warnHint {
+    background-color: rgb(43, 43, 59);
 }

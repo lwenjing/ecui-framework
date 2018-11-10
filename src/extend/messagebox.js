@@ -30,9 +30,12 @@
         Tip = core.inherits(
             ui.Control,
             true,
-            'ui-tip',
+            'ui-tip ie',
             function (el, options) {
-                el.innerHTML = '<div></div>';
+                el.innerHTML = '<div class="ie"></div>';
+                if (ecui.ie < 9) {
+                    dom.addClass(el, 'ie8');
+                }
                 ui.Control.call(this, el, options);
             }
         ),
