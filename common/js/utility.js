@@ -205,7 +205,10 @@ fapiao.showHint = function (type, msg) {
         error: 'errorHint',
         warn: 'warnHint'
     }[type];
-    var hintContainer = ecui.$('hintContainer') || ecui.dom.create({ id: 'hintContainer', className: (ecui.ie < 9 ? 'ie8' : '') });
+    var hintContainer = ecui.$('hintContainer') || ecui.dom.create({
+        id: 'hintContainer',
+        className: (ecui.ie < 9 ? 'ie8' : '')
+    });
     ecui.dom.removeClass(hintContainer, 'ui-hide');
     hintContainer.innerHTML = ecui.util.stringFormat('<div class="{0}">{1}</div>', className, msg);
     ecui.dom.insertAfter(hintContainer, ecui.dom.last(document.body));
@@ -288,7 +291,7 @@ fapiao.setEditFormValue = function (data, form, isDefault) {
 // 搜索数据回填表单数据
 fapiao.setFormValue = function (context, form, searchParm) {
     var elements = form.elements;
-    for (var i = 0, item; item = elements[i++]; ) {
+    for (var i = 0, item; item = elements[i++];) {
         var name = item.name;
         if (name) {
             if (context[name]) {
@@ -583,17 +586,26 @@ ui.GridRowLink = ecui.inherits(
 );
 
 /**
- * 机构联动组件
+ * 公司段选择，切换责任中心段
  * @type {*|Function|Object|void|h}
  */
-ui.GridTreeCombox = ecui.inherits(
-    ecui.ui.TreeCombox,
+ui.GridTOrgCombox = ecui.inherits(
+    ecui.ui.Combox,
     function (el, options) {
-        ecui.ui.TreeCombox.call(this, el, options);
+        ecui.ui.Combox.call(this, el, options);
         this.target = options.target;
+        this.targetUrl = options.targetUrl;
     },
     {
         onchange: function () {
+            var val = this.getMain().getControl().getValue();
+            ecui.esr.request('data@GET ' + this.targetUrl + val, function () {
+                var data = ecui.esr.getData('data');
+                if (data) {
+                    ecui.get(this.target).removeAll(true);
+                    ecui.get(this.target).add(data);
+                }
+            });
         }
     }
 );
@@ -860,39 +872,21 @@ Gridframe.prototype = {
         self.options.searchs.forEach(function (search) {
             if ("hide" === search.type) {
                 searchDom.push('<input name="' + search.name + '" value="" class="ui-hide"/>');
-            } else if ("SearchGroup" === search.type) {
-                if (search.items && search.items.length) {
-                    for (var i = 0; i < search.items.length; i++) {
-                        var item = search.items[i];
-                        searchDom.push('<div class="search-item" ui="type:input-group">');
-                        searchDom.push('   <div class="search-label">' + item.label + '</div>');
-                        if (item.isTree) {
-                            searchDom.push('<div ui="type:ui.GridTreeCombox;name:' + item.name + ';id:' + item.id + ';target:' + item.target + ';regexp:.+ " class="search-input ui-text">');
-                            searchDom.push('<div>');
-                            searchDom.push('<ul ui="type:SelectTree">');
-                            searchDom.push('<div class="root">root</div>');
-                            if (context[item.dataName] && context[item.dataName].length) {
-                                context[item.dataName].forEach(function (tree) {
-                                    self.initTreeDom(searchDom, tree, item);
-                                });
-                            }
-                            searchDom.push('</ul>');
-                            searchDom.push('</div>');
-                            searchDom.push('</div>');
-                        } else {
-                            searchDom.push('<div ui="type:Select;name:' + search.name + '" class="search-input">');
-                            searchDom.push('<div ui="value:">全部</div>');
-                            if (item.options instanceof Array) {
-                                context[item.dataName] = item.options;
-                            }
-                            context[item.dataName].forEach(function (option) {
-                                searchDom.push('<div ui="value:' + option[search.idColumn] + '">' + option[search.nameColumn] + '</div>');
-                            });
-                            searchDom.push('</div>');
-                        }
-                        searchDom.push('</div>');
-                    }
-                }
+            } else if ("GridTOrgCombox" === search.type) {
+                searchDom.push('<div class="search-item" ui="type:input-group">');
+                searchDom.push('    <div class="search-label">' + search.orgLabel + '</div>');
+                searchDom.push('<div ui="type:GridTOrgCombox;name:' + search.orgName + ';target:' + search.deptName + ';taregtUrl:' + search.deptUrl + '" class="search-input">');
+                context[search.orgDataName].forEach(function (option) {
+                    searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '">' + option[search.orgNameColumn] + '</div>');
+                });
+                searchDom.push('    </div>');
+                searchDom.push('</div>');
+                searchDom.push('<div class="search-item" ui="type:input-group">');
+                searchDom.push('    <div class="search-label">' + search.deptLabel + '</div>');
+                searchDom.push('    <div ui="type:Combox;name:' + search.deptName + '" class="search-input">');
+                searchDom.push('        <div ui="value:;">全部</div>');
+                searchDom.push('    </div>');
+                searchDom.push('</div>');
             } else {
                 searchDom.push('<div class="search-item">');
                 searchDom.push('   <div class="search-label">' + search.label + '</div>');
