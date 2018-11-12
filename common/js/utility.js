@@ -589,21 +589,21 @@ ui.GridRowLink = ecui.inherits(
  * 公司段选择，切换责任中心段
  * @type {*|Function|Object|void|h}
  */
-ui.GridTOrgCombox = ecui.inherits(
-    ecui.ui.Combox,
+ui.GridOrgCombox = ecui.inherits(
+    ecui.ui.Select,
     function (el, options) {
-        ecui.ui.Combox.call(this, el, options);
+        ecui.ui.Select.call(this, el, options);
         this.target = options.target;
         this.targetUrl = options.targetUrl;
     },
     {
         onchange: function () {
-            var val = this.getMain().getControl().getValue();
+            var val = this.getMain().getControl().getValue(), self = this;
             ecui.esr.request('data@GET ' + this.targetUrl + val, function () {
                 var data = ecui.esr.getData('data');
                 if (data) {
-                    ecui.get(this.target).removeAll(true);
-                    ecui.get(this.target).add(data);
+                    ecui.get(self.target).removeAll(true);
+                    ecui.get(self.target).add(data);
                 }
             });
         }
@@ -794,13 +794,11 @@ Gridframe.prototype = {
             view: self.searchView
         };
         self.options.searchs.forEach(function (search) {
-            if ("SearchGroup" === search.type) {
-                if (search.items && search.items.length) {
-                    var item = search.items[0];
-                    if (item.url) {
-                        route.model.push(item.dataName + "@" + item.url);
-                    }
+            if ("GridOrgCombox" === search.type) {
+                if (search.url) {
+                    route.model.push(search.orgDataName + "@" + search.url);
                 }
+                self.gridOrgCombox = search;
             } else if ("Select" === search.type && search.url) {
                 route.model.push(search.dataName + "@" + search.url);
             } else if ("MultiSelect" === search.type && search.url) {
@@ -827,6 +825,9 @@ Gridframe.prototype = {
                     ecui.dom.addClass(ecui.$(self.searchMain), 'ui-hide');
                 } else {
                     self.reRenderSearch.call(self);
+                }
+                if (self.gridOrgCombox) {
+                    ecui.get(self.name + self.gridOrgCombox.orgName).setValue(context[self.gridOrgCombox.orgDataName][0][self.gridOrgCombox.orgIdColumn]);
                 }
             }
         }
@@ -872,18 +873,18 @@ Gridframe.prototype = {
         self.options.searchs.forEach(function (search) {
             if ("hide" === search.type) {
                 searchDom.push('<input name="' + search.name + '" value="" class="ui-hide"/>');
-            } else if ("GridTOrgCombox" === search.type) {
-                searchDom.push('<div class="search-item" ui="type:input-group">');
+            } else if ("GridOrgCombox" === search.type) {
+                searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.orgLabel + '</div>');
-                searchDom.push('<div ui="type:GridTOrgCombox;name:' + search.orgName + ';target:' + search.deptName + ';taregtUrl:' + search.deptUrl + '" class="search-input">');
+                searchDom.push('    <div ui="type:ui.GridOrgCombox;id:' + self.name +search.orgName + ';name:' + search.orgName + ';target:' + self.name + search.deptName + ';targetUrl:' + search.deptUrl + '" class="search-input">');
                 context[search.orgDataName].forEach(function (option) {
                     searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '">' + option[search.orgNameColumn] + '</div>');
                 });
                 searchDom.push('    </div>');
                 searchDom.push('</div>');
-                searchDom.push('<div class="search-item" ui="type:input-group">');
+                searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.deptLabel + '</div>');
-                searchDom.push('    <div ui="type:Combox;name:' + search.deptName + '" class="search-input">');
+                searchDom.push('    <div ui="type:combox;name:' + search.deptName + ';id:' + self.name + search.deptName + '" class="search-input">');
                 searchDom.push('        <div ui="value:;">全部</div>');
                 searchDom.push('    </div>');
                 searchDom.push('</div>');
