@@ -301,6 +301,20 @@ a {
     }
 }
 
+.ui-calendar-input {
+    position: relative;
+    .ui-calendar-input-close {
+        position: absolute;
+        z-index: 1;
+        top: 7px;
+        right: 7px;
+        width: 20px;
+        height: 20px;
+        background: url('images/icon-close.png') no-repeat no-repeat center center;
+        background-size: 100% 100%;
+    }
+}
+
 .ui-quarter-view,
 .ui-month-view {
     background-color: #ffffff;

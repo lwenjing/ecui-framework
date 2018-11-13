@@ -79,6 +79,11 @@
                 var list = this.getValue().split('-');
                 return list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]);
             },
+            onready: function () {
+                var el = ecui.dom.create({ className: 'ui-calendar-input-close' });
+                dom.insertAfter(el, this.getInput());
+                core.$fastCreate(this.Close, el, this, {});
+            },
 
             /**
              * @override
@@ -91,7 +96,17 @@
                     value = value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2) + '-' + ('0' + value.getDate()).slice(-2);
                 }
                 ui.Text.prototype.setValue.call(this, value);
-            }
+            },
+            Close: core.inherits(
+                ui.Control,
+                {
+                    onclick: function (event) {
+                        this.getParent().setValue('');
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                }
+            )
         },
         ui.Popup
     );
