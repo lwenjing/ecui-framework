@@ -80,9 +80,9 @@
                 return list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]);
             },
             onready: function () {
-                var el = ecui.dom.create({ className: 'ui-calendar-input-close' });
+                var el = ecui.dom.create({ className: 'ui-calendar-input-clear' });
                 dom.insertAfter(el, this.getInput());
-                core.$fastCreate(this.Close, el, this, {});
+                core.$fastCreate(this.Clear, el, this, {});
             },
 
             /**
@@ -97,7 +97,7 @@
                 }
                 ui.Text.prototype.setValue.call(this, value);
             },
-            Close: core.inherits(
+            Clear: core.inherits(
                 ui.Control,
                 {
                     onclick: function (event) {

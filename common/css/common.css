@@ -303,7 +303,7 @@ a {
 
 .ui-calendar-input {
     position: relative;
-    .ui-calendar-input-close {
+    .ui-calendar-input-clear {
         position: absolute;
         z-index: 1;
         top: 7px;
