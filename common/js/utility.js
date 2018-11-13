@@ -452,6 +452,7 @@ fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
     context.currentPage = context.currentPage || +this.searchParm.currentPage;
     context.pageSize = context.pageSize || +this.searchParm.pageSize;
     fapiao.setFormValue(context, document.forms[this.model[0].split('?')[1].split('&')[0]], this.searchParm);
+    console.log('context: ', JSON.stringify(this.searchParm));
 };
 
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {
@@ -595,27 +596,34 @@ ui.GridOrgCombox = ecui.inherits(
         this.target = options.target;
         this.targetUrl = options.targetUrl;
         this.values = options.values;
+        this.idColumn = options.idColumn;
+        this.nameColumn = options.nameColumn;
     },
     {
         onchange: function () {
             var val = this.getMain().getControl().getValue(), self = this;
             ecui.esr.request('data@GET ' + this.targetUrl + val, function () {
                 var data = ecui.esr.getData('data');
+                var options = [];
                 if (data) {
-                    var allData = "";
-                    if (self.values) {
-                        var allDataArr = [];
-                        data.forEach(function (option) {
-                            allDataArr.push(option.code)
+                    var allDataArr = [];
+                    data.forEach(function (option) {
+                        options.push({
+                            "code": option.code,
+                            "value": option.name
                         });
-                        allData = allDataArr.join(",");
-                    }
-                    data.unshift({
-                        "code": allData,
-                        "name": "全部"
+                        if (self.values) {
+                            allDataArr.push(option.code);
+                        }
                     });
+                    if (self.values) {
+                        options.unshift({
+                            "code": allDataArr.join(","),
+                            "value": "全部"
+                        });
+                    }
                     ecui.get(self.target).removeAll(true);
-                    ecui.get(self.target).add(data);
+                    ecui.get(self.target).add(options);
                 }
             });
         }
@@ -838,9 +846,6 @@ Gridframe.prototype = {
                 } else {
                     self.reRenderSearch.call(self);
                 }
-                if (self.gridOrgCombox) {
-                    ecui.get(self.name + self.gridOrgCombox.orgName).setValue(context[self.gridOrgCombox.orgDataName][0][self.gridOrgCombox.orgIdColumn]);
-                }
             }
         }
 
@@ -897,9 +902,13 @@ Gridframe.prototype = {
                 }
                 searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.orgLabel + '</div>');
-                searchDom.push('    <div ui="type:ui.GridOrgCombox;id:' + self.name + search.orgName + ';name:' + search.orgName + ';target:' + self.name + search.deptName + ';targetUrl:' + search.deptUrl + ';values:'+search.values+'" class="search-input">');
+                searchDom.push('    <div ui="type:ui.GridOrgCombox;id:' + self.name + search.orgName + ';name:' + search.orgName + ';target:' + self.name + search.deptName + ';targetUrl:' + search.deptUrl + ';values:' + search.values + '" class="search-input">');
                 searchDom.push('<div ui="value:' + allData + ';">全部</div>');
-                context[search.orgDataName].forEach(function (option) {
+                context[search.orgName] = allData;
+                context[search.orgDataName].forEach(function (option, i) {
+                    if (search.defaultFirst && i === 0) {
+                        context[search.orgName] = option[search.orgIdColumn];
+                    }
                     searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '">' + option[search.orgNameColumn] + '</div>');
                 });
                 searchDom.push('    </div>');
@@ -952,7 +961,8 @@ Gridframe.prototype = {
                 }
                 searchDom.push('</div>');
             }
-        });
+        })
+        ;
 
         if (self.options.initBlank) {
             searchDom.push('            <div class="search-btn" ui="type: CustomQueryButton;" style="margin: 0;">查询</div>');
@@ -987,7 +997,8 @@ Gridframe.prototype = {
             doms.push('<span>' + tree[column.nameColumn] + '</span>');
             doms.push('</li>');
         }
-    },
+    }
+    ,
     initButton: function () {
         var self = this, route = {
             NAME: self.buttonName,
@@ -1002,7 +1013,8 @@ Gridframe.prototype = {
         //{else}//
         ecui.esr.addRoute(self.buttonName, route);
         //{/if}//
-    },
+    }
+    ,
     initButtonView: function () {
         var self = this, buttonDom = [], buttons = self.options.buttons;
         buttonDom.push('<!-- target: ' + self.buttonView + ' -->');
@@ -1021,7 +1033,8 @@ Gridframe.prototype = {
         }
         buttonDom.push("</div>");
         return buttonDom.join("");
-    },
+    }
+    ,
     initTableList: function () {
         var self = this, route = {
             fullHeight: self.options.fullHeight,
@@ -1057,8 +1070,6 @@ Gridframe.prototype = {
                         list: []
                     };
                 }
-                self.searchData = {};
-                ecui.esr.parseObject(document.forms[self.searchForm], self.searchData, true);
 
                 var data = ecui.util.parseValue(self.listTableData, context);
                 var pageNo = data.currentPage || 1;
@@ -1096,7 +1107,8 @@ Gridframe.prototype = {
         //{else}//
         ecui.esr.addRoute(self.listTableName, route);
         //{/if}//
-    },
+    }
+    ,
     initBlankTable: function () {
         var self = this, route = {
             fullHeight: self.options.fullHeight,
@@ -1125,6 +1137,7 @@ Gridframe.prototype = {
                 if (self.options.searchs) {
                     context.pageNo = context.pageNo || +this.searchParm.currentPage;
                     context.pageSize = context.pageSize || +this.searchParm.pageSize;
+
                     fapiao.setFormValue(context, document.forms[self.searchForm], this.searchParm);
                 }
             },
@@ -1168,7 +1181,8 @@ Gridframe.prototype = {
         //{else}//
         ecui.esr.addRoute(self.blankTableName, route);
         //{/if}//
-    },
+    }
+    ,
     calcHeight: function () {
         var self = this, containerHeight = ecui.$("container").offsetHeight;
         var searchHeight = 0, buttonHeight = 0, topTipsHeight = 0;
@@ -1195,7 +1209,8 @@ Gridframe.prototype = {
         if (listTableContent) {
             listTableContent.style.height = tableContentHeight + 'px';
         }
-    },
+    }
+    ,
     initTableView: function (context) {
         var self = this, tableDom = [], operateDom = [], tableWidth = 0;
         self.pageData = {};
@@ -1321,18 +1336,21 @@ Gridframe.prototype = {
         tableDom.push('</div>');
 
         return tableDom.join("");
-    },
+    }
+    ,
     seeMore: function () {
         var self = this, el = ecui.$(self.seeMoreContainer);
         ecui.dom[ecui.dom.hasClass(el, 'ui-hide') ? 'removeClass' : 'addClass'](el, 'ui-hide');
         if (self.options.fullHeight) {
             self.calcHeight();
         }
-    },
+    }
+    ,
     reload: function () {
         ecui.esr.callRoute(this.viewPrefix + this.listTableName, true);
     }
-};
+}
+;
 
 fapiao.Gridframe = Gridframe;
 fapiao.gridrame = function (options) {
