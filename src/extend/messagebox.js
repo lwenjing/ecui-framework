@@ -32,7 +32,7 @@
             true,
             'ui-tip ie',
             function (el, options) {
-                el.innerHTML = '<div class="ie"></div>';
+                el.innerHTML = '<div></div>';
                 if (ecui.ie < 9) {
                     dom.addClass(el, 'ie8');
                 }
