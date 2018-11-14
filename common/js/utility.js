@@ -593,6 +593,7 @@ ui.GridOrgCombox = ecui.inherits(
     ecui.ui.Select,
     function (el, options) {
         ecui.ui.Select.call(this, el, options);
+        this.targetName = options.targetName;
         this.target = options.target;
         this.targetUrl = options.targetUrl;
         this.values = options.values;
@@ -616,14 +617,18 @@ ui.GridOrgCombox = ecui.inherits(
                             allDataArr.push(option.code);
                         }
                     });
+                    var allData = allDataArr.join(",");
                     if (self.values) {
                         options.unshift({
-                            "value": allDataArr.join(","),
-                            "code": "全部"
+                            "value": allData,
+                            "code": "全部",
+                            "selected": true
                         });
                     }
+                    ecui.esr.setData(self.targetName, allData);
                     ecui.get(self.target).removeAll(true);
                     ecui.get(self.target).add(options);
+                    ecui.get(self.target).setValue(allData);
                 }
             });
         }
@@ -834,20 +839,24 @@ Gridframe.prototype = {
         };
         if (self.options.initBlank && self.searchShow) {
             route.targetRoute = self.viewPrefix + self.listTableName;
-        } else {
-            route.children = self.viewPrefix + self.listTableName;
         }
-        if (self.options.searchParm) {
-            route.searchParm = self.options.searchParm;
-            route.onafterrender = function (context) {
+
+        route.onafterrender = function (context) {
+            if (self.options.searchParm) {
+                route.searchParm = self.options.searchParm;
                 fapiao.setFormValue(context, document.forms[self.searchForm], self.options.searchParm);
+                ecui.triggerEvent(ecui.get(self.name + self.gridOrgCombox.orgName), 'change');
                 if (!self.searchShow) {
                     ecui.dom.addClass(ecui.$(self.searchMain), 'ui-hide');
                 } else {
                     self.reRenderSearch.call(self);
                 }
             }
-        }
+            setTimeout(function () {
+                ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
+            }, 100);
+
+        };
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.searchName, route);
         //{else}//
@@ -891,6 +900,7 @@ Gridframe.prototype = {
             if ("hide" === search.type) {
                 searchDom.push('<input name="' + search.name + '" value="" class="ui-hide"/>');
             } else if ("GridOrgCombox" === search.type) {
+                self.gridOrgCombox = search;
                 var allData = "";
                 if (search.values) {
                     var allDataArr = [];
@@ -902,7 +912,7 @@ Gridframe.prototype = {
                 }
                 searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.orgLabel + '</div>');
-                searchDom.push('    <div ui="type:ui.GridOrgCombox;id:' + self.name + search.orgName + ';name:' + search.orgName + ';target:' + self.name + search.deptName + ';targetUrl:' + search.deptUrl + ';values:' + search.values + ';idColumn:' + search.deptIdColumn + ';values:' + search.deptNameColumn + '" class="search-input">');
+                searchDom.push('    <div ui="type:ui.GridOrgCombox;id:' + self.name + search.orgName + ';name:' + search.orgName + ';target:' + self.name + search.deptName + ';targetName:' + search.deptName + ';targetUrl:' + search.deptUrl + ';values:' + search.values + ';idColumn:' + search.deptIdColumn + ';values:' + search.deptNameColumn + '" class="search-input">');
                 if (search.values || !search.required) {
                     searchDom.push('<div ui="value:' + allData + ';">全部</div>');
                 }
@@ -968,14 +978,9 @@ Gridframe.prototype = {
                 }
                 searchDom.push('</div>');
             }
-        })
-        ;
+        });
 
-        if (self.options.initBlank) {
-            searchDom.push('            <div class="search-btn" ui="type: CustomQueryButton;" style="margin: 0;">查询</div>');
-        } else {
-            searchDom.push('            <div class="search-btn" ui="type: QueryButton;" style="margin: 0;">查询</div>');
-        }
+        searchDom.push('            <div class="search-btn" ui="type: CustomQueryButton;" style="margin: 0;">查询</div>');
         searchDom.push('                <div class="search-btn ui-hide" id="' + self.seeMoreBtn + '" style="margin-right:0">更多条件</div>');
         searchDom.push('            </div>');
         searchDom.push('            <div id="' + self.seeMoreContainer + '" class="ui-hide"></div>');
@@ -1065,10 +1070,8 @@ Gridframe.prototype = {
             onbeforerequest: function (context) {
                 context.pageNo = context.pageNo || +this.searchParm.currentPage;
                 context.pageSize = context.pageSize || +this.searchParm.pageSize;
-
-                if (self.options.searchs) {
-                    fapiao.setFormValue(context, document.forms[self.searchForm], this.searchParm);
-                }
+                document.forms[self.searchForm]["currentPage"] = context.pageNo;
+                document.forms[self.searchForm]["pageSize"] = context.pageSize;
             },
             onbeforerender: function (context) {
                 if (context[self.listTableData] === undefined) {
@@ -1114,8 +1117,7 @@ Gridframe.prototype = {
         //{else}//
         ecui.esr.addRoute(self.listTableName, route);
         //{/if}//
-    }
-    ,
+    },
     initBlankTable: function () {
         var self = this, route = {
             fullHeight: self.options.fullHeight,
@@ -1141,12 +1143,10 @@ Gridframe.prototype = {
             view: self.listTableView,
             searchParm: self.options.searchParm,
             onbeforerequest: function (context) {
-                if (self.options.searchs) {
-                    context.pageNo = context.pageNo || +this.searchParm.currentPage;
-                    context.pageSize = context.pageSize || +this.searchParm.pageSize;
-
-                    fapiao.setFormValue(context, document.forms[self.searchForm], this.searchParm);
-                }
+                context.pageNo = context.pageNo || +this.searchParm.currentPage;
+                context.pageSize = context.pageSize || +this.searchParm.pageSize;
+                document.forms[self.searchForm]["currentPage"] = context.pageNo;
+                document.forms[self.searchForm]["pageSize"] = context.pageSize;
             },
             onbeforerender: function (context) {
                 self.searchData = {};
