@@ -1220,7 +1220,7 @@ Gridframe.prototype = {
         }
 
         var listTableContent = ecui.$(self.listTableContent);
-        var tableHeight = containerHeight - searchHeight - buttonHeight - topTipsHeight - 10;
+        var tableHeight = containerHeight - searchHeight - buttonHeight - topTipsHeight - 20;
         var tableContentHeight = tableHeight - 60;
         ecui.$(self.listTableMain).style.height = tableHeight + 'px';
         if (listTableContent) {
