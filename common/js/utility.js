@@ -603,6 +603,7 @@ ui.GridOrgCombox = ecui.inherits(
             self.target = gridframe.name + gridframe.gridOrgCombox.deptName;
             self.targetUrl = gridframe.gridOrgCombox.deptUrl;
             self.values = gridframe.gridOrgCombox.values;
+            self.deptValues = gridframe.gridOrgCombox.deptValues;
             self.idColumn = gridframe.gridOrgCombox.deptIdColumn;
             self.nameColumn = gridframe.gridOrgCombox.deptNameColumn;
             self.targetInput = gridframe.gridOrgCombox.targetInput;
@@ -619,12 +620,12 @@ ui.GridOrgCombox = ecui.inherits(
                             "value": option[self.idColumn] || option.code,
                             "code": option[self.nameColumn] || option.name
                         });
-                        if (self.values) {
+                        if (self.deptValues) {
                             allDataArr.push(option.code);
                         }
                     });
                     var allData = allDataArr.join(",");
-                    if (self.values) {
+                    if (self.deptValues) {
                         options.unshift({
                             "value": allData,
                             "code": "全部",
