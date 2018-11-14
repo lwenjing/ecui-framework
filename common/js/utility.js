@@ -1080,8 +1080,8 @@ Gridframe.prototype = {
             onbeforerequest: function (context) {
                 context.pageNo = context.pageNo || +this.searchParm.currentPage;
                 context.pageSize = context.pageSize || +this.searchParm.pageSize;
-                document.forms[self.searchForm]["currentPage"] = context.pageNo;
-                document.forms[self.searchForm]["pageSize"] = context.pageSize;
+                document.forms[self.searchForm]["currentPage"].value = context.pageNo;
+                document.forms[self.searchForm]["pageSize"].value = context.pageSize;
             },
             onbeforerender: function (context) {
                 if (context[self.listTableData] === undefined) {
@@ -1155,8 +1155,8 @@ Gridframe.prototype = {
             onbeforerequest: function (context) {
                 context.pageNo = context.pageNo || +this.searchParm.currentPage;
                 context.pageSize = context.pageSize || +this.searchParm.pageSize;
-                document.forms[self.searchForm]["currentPage"] = context.pageNo;
-                document.forms[self.searchForm]["pageSize"] = context.pageSize;
+                document.forms[self.searchForm]["currentPage"].value = context.pageNo;
+                document.forms[self.searchForm]["pageSize"].value = context.pageSize;
             },
             onbeforerender: function (context) {
                 self.searchData = {};
