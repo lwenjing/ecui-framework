@@ -608,7 +608,8 @@ ui.GridOrgCombox = ecui.inherits(
             self.nameColumn = gridframe.gridOrgCombox.deptNameColumn;
             self.targetInput = gridframe.gridOrgCombox.targetInput;
             if (self.targetInput) {
-                document.forms[gridframe.searchForm][self.targetInput].value = val;
+                var targetVal = gridframe[gridframe.gridOrgCombox.orgName][val][gridframe.gridOrgCombox.targetColumn];
+                document.forms[gridframe.searchForm][self.targetInput].value = targetVal;
             }
             ecui.esr.request('data@GET ' + this.targetUrl + val, function () {
                 var data = ecui.esr.getData('data');
@@ -907,6 +908,7 @@ Gridframe.prototype = {
             if ("hide" === search.type) {
                 searchDom.push('<input name="' + search.name + '" value="" class="ui-hide"/>');
             } else if ("GridOrgCombox" === search.type) {
+                self[search.orgName] = {};
                 var allData = "";
                 if (search.values) {
                     var allDataArr = [];
@@ -930,6 +932,7 @@ Gridframe.prototype = {
                     if (!search.values && search.required && i === 0) {
                         context[search.orgName] = option[search.orgIdColumn];
                     }
+                    self[search.orgName][option[search.orgIdColumn]] = option;
                     searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '">' + option[search.orgNameColumn] + '</div>');
                 });
                 searchDom.push('    </div>');
