@@ -843,15 +843,15 @@ Gridframe.prototype = {
                 }
             });
         };
-        if (self.options.initBlank && self.searchShow) {
-            route.targetRoute = self.viewPrefix + self.listTableName;
-        }
+        route.targetRoute = self.viewPrefix + self.listTableName;
 
         route.onafterrender = function (context) {
             if (self.options.searchParm) {
                 route.searchParm = self.options.searchParm;
                 fapiao.setFormValue(context, document.forms[self.searchForm], self.options.searchParm);
-                ecui.triggerEvent(ecui.get(self.name + self.gridOrgCombox.orgName), 'change');
+                if (self.gridOrgCombox) {
+                    ecui.triggerEvent(ecui.get(self.name + self.gridOrgCombox.orgName), 'change');
+                }
                 if (!self.searchShow) {
                     ecui.dom.addClass(ecui.$(self.searchMain), 'ui-hide');
                 } else {
