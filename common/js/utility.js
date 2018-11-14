@@ -609,8 +609,8 @@ ui.GridOrgCombox = ecui.inherits(
                     var allDataArr = [];
                     data.forEach(function (option) {
                         options.push({
-                            "code": option.code,
-                            "value": option.name
+                            "value": option[self.idColumn] || option.code,
+                            "code": option[self.nameColumn] || option.name
                         });
                         if (self.values) {
                             allDataArr.push(option.code);
@@ -618,8 +618,8 @@ ui.GridOrgCombox = ecui.inherits(
                     });
                     if (self.values) {
                         options.unshift({
-                            "code": allDataArr.join(","),
-                            "value": "全部"
+                            "value": allDataArr.join(","),
+                            "code": "全部"
                         });
                     }
                     ecui.get(self.target).removeAll(true);
@@ -902,11 +902,15 @@ Gridframe.prototype = {
                 }
                 searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.orgLabel + '</div>');
-                searchDom.push('    <div ui="type:ui.GridOrgCombox;id:' + self.name + search.orgName + ';name:' + search.orgName + ';target:' + self.name + search.deptName + ';targetUrl:' + search.deptUrl + ';values:' + search.values + '" class="search-input">');
-                searchDom.push('<div ui="value:' + allData + ';">全部</div>');
-                context[search.orgName] = allData;
+                searchDom.push('    <div ui="type:ui.GridOrgCombox;id:' + self.name + search.orgName + ';name:' + search.orgName + ';target:' + self.name + search.deptName + ';targetUrl:' + search.deptUrl + ';values:' + search.values + ';idColumn:' + search.deptIdColumn + ';values:' + search.deptNameColumn + '" class="search-input">');
+                if (search.values || !search.required) {
+                    searchDom.push('<div ui="value:' + allData + ';">全部</div>');
+                }
+                if (search.values) {
+                    context[search.orgName] = allData;
+                }
                 context[search.orgDataName].forEach(function (option, i) {
-                    if (search.defaultFirst && i === 0) {
+                    if (!search.values && search.required && i === 0) {
                         context[search.orgName] = option[search.orgIdColumn];
                     }
                     searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '">' + option[search.orgNameColumn] + '</div>');
@@ -939,21 +943,24 @@ Gridframe.prototype = {
                 } else {
                     searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input">');
                     if ("Select" === search.type || "MultiSelect" === search.type || "Combox" === search.type) {
-                        var allData = "";
+                        var allDataArr = [];
                         if (search.values) {
-                            var allDataArr = [];
                             context[search.dataName].forEach(function (option) {
                                 var idColumn = search.idColumn || "id";
                                 allDataArr.push(option[idColumn] || option.code)
                             });
-                            allData = allDataArr.join(",");
                         }
-                        searchDom.push('<div ui="value:' + allData + ';">全部</div>');
+                        if (!search.required) {
+                            searchDom.push('<div ui="value:' + allDataArr.join(",") + ';">全部</div>');
+                        }
                         if (search.options instanceof Array) {
                             context[search.dataName] = search.options;
                         }
-                        context[search.dataName].forEach(function (option) {
+                        context[search.dataName].forEach(function (option, i) {
                             var idColumn = search.idColumn || "id", nameColumn = search.nameColumn || "text";
+                            if (search.required && i === 0) {
+                                context[search.name] = option[idColumn] || option.code;
+                            }
                             searchDom.push('<div ui="value:' + (option[idColumn] || option.code) + ';">' + (option[nameColumn] || option.name) + '</div>');
                         });
                     }
