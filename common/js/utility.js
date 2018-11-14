@@ -779,11 +779,7 @@ Gridframe.prototype = {
                     ecui.esr.callRoute(self.viewPrefix + self.buttonName, true);
                 }
 
-                if (self.options.searchs) {
-                    if (self.options.initBlank) {
-                        ecui.esr.callRoute(self.viewPrefix + self.blankTableName, true);
-                    }
-                } else {
+                if (!self.options.searchs) {
                     ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
                 }
 
@@ -861,7 +857,11 @@ Gridframe.prototype = {
                 }
             }
             setTimeout(function () {
-                ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
+                if (self.options.initBlank) {
+                    ecui.esr.callRoute(self.viewPrefix + self.blankTableName, true);
+                } else {
+                    ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
+                }
             }, 100);
 
         };
@@ -1084,6 +1084,9 @@ Gridframe.prototype = {
                 document.forms[self.searchForm]["pageSize"].value = context.pageSize;
             },
             onbeforerender: function (context) {
+                self.searchData = {};
+                ecui.esr.parseObject(document.forms[self.searchForm], self.searchData, true);
+
                 if (context[self.listTableData] === undefined) {
                     context[self.listTableData] = {
                         code: "0000",
@@ -1474,7 +1477,7 @@ fapiao.customTab = function (options) {
 /**
  * 比较日期
  * */
-fapiao.dateCompare = function(oldStartDOM, oldendDOM) {
+fapiao.dateCompare = function (oldStartDOM, oldendDOM) {
     var oldStartTime = oldStartDOM.getMain().getControl().getValue();
     var oldendTime = oldendDOM.getMain().getControl().getValue();
     if (Number(oldStartTime.replace(/-/g, '')) > Number(oldendTime.replace(/-/g, ''))) {
