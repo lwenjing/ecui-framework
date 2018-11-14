@@ -1471,3 +1471,18 @@ fapiao.customTab = function (options) {
     return new CustomTab(options);
 };
 
+/**
+ * 比较日期
+ * */
+fapiao.dateCompare = function(oldStartDOM, oldendDOM) {
+    var oldStartTime = oldStartDOM.getMain().getControl().getValue();
+    var oldendTime = oldendDOM.getMain().getControl().getValue();
+    if (Number(oldStartTime.replace(/-/g, '')) > Number(oldendTime.replace(/-/g, ''))) {
+        oldendDOM.getMain().getControl().setValue(oldStartTime);
+        oldStartDOM.getMain().getControl().setValue(oldendTime);
+    } else {
+        oldendDOM.getMain().getControl().setValue(oldendTime);
+        oldStartDOM.getMain().getControl().setValue(oldStartTime);
+    }
+};
+
