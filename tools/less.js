@@ -639,8 +639,6 @@ function loadStyles(modifyVars) {
             style.removeAttribute('lessText');
             instanceOptions.filename = document.location.href.replace(/#.*$/, '');
 
-            
-
             /*jshint loopfunc:true */
             // use closure to store current style
             less.render(lessText, instanceOptions,
