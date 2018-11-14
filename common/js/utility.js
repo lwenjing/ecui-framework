@@ -593,16 +593,22 @@ ui.GridOrgCombox = ecui.inherits(
     ecui.ui.Select,
     function (el, options) {
         ecui.ui.Select.call(this, el, options);
-        this.targetName = options.targetName;
-        this.target = options.target;
-        this.targetUrl = options.targetUrl;
-        this.values = options.values;
-        this.idColumn = options.idColumn;
-        this.nameColumn = options.nameColumn;
+        this.gridName = options.gridName;
     },
     {
         onchange: function () {
             var val = this.getMain().getControl().getValue(), self = this;
+            var gridframe = ecui.esr.getData(self.gridName);
+            self.targetName = gridframe.gridOrgCombox.deptName;
+            self.target = gridframe.name + gridframe.gridOrgCombox.deptName;
+            self.targetUrl = gridframe.gridOrgCombox.deptUrl;
+            self.values = gridframe.gridOrgCombox.values;
+            self.idColumn = gridframe.gridOrgCombox.deptIdColumn;
+            self.nameColumn = gridframe.gridOrgCombox.deptNameColumn;
+            self.targetInput = gridframe.gridOrgCombox.targetInput;
+            if (self.targetInput) {
+                document.forms[gridframe.searchForm][self.targetInput].value = val;
+            }
             ecui.esr.request('data@GET ' + this.targetUrl + val, function () {
                 var data = ecui.esr.getData('data');
                 var options = [];
@@ -900,7 +906,6 @@ Gridframe.prototype = {
             if ("hide" === search.type) {
                 searchDom.push('<input name="' + search.name + '" value="" class="ui-hide"/>');
             } else if ("GridOrgCombox" === search.type) {
-                self.gridOrgCombox = search;
                 var allData = "";
                 if (search.values) {
                     var allDataArr = [];
@@ -912,7 +917,8 @@ Gridframe.prototype = {
                 }
                 searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.orgLabel + '</div>');
-                searchDom.push('    <div ui="type:ui.GridOrgCombox;id:' + self.name + search.orgName + ';name:' + search.orgName + ';target:' + self.name + search.deptName + ';targetName:' + search.deptName + ';targetUrl:' + search.deptUrl + ';values:' + search.values + ';idColumn:' + search.deptIdColumn + ';values:' + search.deptNameColumn + '" class="search-input">');
+                searchDom.push('    <div ui="type:ui.GridOrgCombox;id:' + self.name + search.orgName + ';name:' + search.orgName + ';gridName:' + self.name + '" class="search-input">');
+
                 if (search.values || !search.required) {
                     searchDom.push('<div ui="value:' + allData + ';">全部</div>');
                 }
