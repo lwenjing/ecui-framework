@@ -1041,18 +1041,23 @@ Gridframe.prototype = {
         var self = this, buttonDom = [], buttons = self.options.buttons;
         buttonDom.push('<!-- target: ' + self.buttonView + ' -->');
         buttonDom.push('<div class="list-button-container">');
+        buttonDom.push('<div class="list-header" style="overflow: visible!important;">');
         if (buttons && buttons.length) {
             for (var i = 0; i < buttons.length; i++) {
                 var button = buttons[i];
-                buttonDom.push("<div class='blue-btn grid-button' ui='type:ui.GridButton;id:");
+                buttonDom.push("<div class='white-border-btn grid-button' ui='type:ui.GridButton;id:");
                 buttonDom.push(self.prefix + "_" + button.name);
                 buttonDom.push(";gridName:");
                 buttonDom.push(self.name);
                 buttonDom.push("'>");
+                if (button.image) {
+                    buttonDom.push("<img src='" + button.image + "'>");
+                }
                 buttonDom.push(button.label);
                 buttonDom.push("</div>");
             }
         }
+        buttonDom.push("</div>");
         buttonDom.push("</div>");
         return buttonDom.join("");
     }
