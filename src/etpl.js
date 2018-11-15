@@ -1225,7 +1225,8 @@
             commandSyntax: /^\s*(\/)?([a-z]+)\s*(?::([\s\S]*))?$/,
             variableOpen: '${',
             variableClose: '}',
-            defaultFilter: 'html'
+            defaultFilter: 'html',
+            namingConflict: 'override'
         };
 
         this.config(options);
