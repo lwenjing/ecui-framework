@@ -1083,9 +1083,9 @@ Gridframe.prototype = {
             view: self.listTableView,
             searchParm: self.options.searchParm,
             onbeforerequest: function (context) {
-                context.pageNo = context.pageNo || +this.searchParm.currentPage;
+                context.currentPage = context.currentPage || +this.searchParm.currentPage;
                 context.pageSize = context.pageSize || +this.searchParm.pageSize;
-                document.forms[self.searchForm]["currentPage"].value = context.pageNo;
+                document.forms[self.searchForm]["currentPage"].value = context.currentPage;
                 document.forms[self.searchForm]["pageSize"].value = context.pageSize;
             },
             onbeforerender: function (context) {
@@ -1098,7 +1098,6 @@ Gridframe.prototype = {
                         list: []
                     };
                 }
-
                 var data = ecui.util.parseValue(self.listTableData, context);
                 var pageNo = data.currentPage || 1;
                 var total = data.count || 0;
@@ -1161,9 +1160,9 @@ Gridframe.prototype = {
             view: self.listTableView,
             searchParm: self.options.searchParm,
             onbeforerequest: function (context) {
-                context.pageNo = context.pageNo || +this.searchParm.currentPage;
+                context.currentPage = context.currentPage || +this.searchParm.currentPage;
                 context.pageSize = context.pageSize || +this.searchParm.pageSize;
-                document.forms[self.searchForm]["currentPage"].value = context.pageNo;
+                document.forms[self.searchForm]["currentPage"].value = context.currentPage;
                 document.forms[self.searchForm]["pageSize"].value = context.pageSize;
             },
             onbeforerender: function (context) {
