@@ -1121,13 +1121,12 @@ Gridframe.prototype = {
                     }
                 }
             },
-            onafterrender: function (context) {
-                if (context.tableWidth > 50) {
-                    var gridTable = ecui.$(self.listTableWrapper);
-                    gridTable.style.width = context.tableWidth + "px";
-                }
+            onafterrender: function () {
                 if (self.options.fullHeight) {
                     self.calcHeight();
+                }
+                else if (self.tableWidth > 50) {
+                    ecui.$(self.listTableWrapper).getControl().setSize(self.tableWidth);
                 }
             }
         };
@@ -1191,13 +1190,12 @@ Gridframe.prototype = {
                     }
                 }
             },
-            onafterrender: function (context) {
-                if (context.tableWidth > 50) {
-                    var gridTable = ecui.$(self.listTableWrapper);
-                    gridTable.style.width = context.tableWidth + "px";
-                }
+            onafterrender: function () {
                 if (self.options.fullHeight) {
                     self.calcHeight();
+                }
+                else if (self.tableWidth > 50) {
+                    ecui.$(self.listTableWrapper).getControl().setSize(self.tableWidth);
                 }
             }
         };
@@ -1234,14 +1232,13 @@ Gridframe.prototype = {
         var tableContentHeight = tableHeight - 60;
         ecui.$(self.listTableMain).style.height = tableHeight + 'px';
         if (listTableContent) {
-            listTableContent.style.height = tableContentHeight + 'px';
-            var dom = ecui.$(self.listTableWrapper).getControl().getBody();
-            ecui.dom.parent(ecui.dom.parent(dom)).style.height = (tableContentHeight - 45) + 'px';
+            ecui.$(self.listTableWrapper).getControl().setSize(self.tableWidth, tableContentHeight);
         }
     }
     ,
     initTableView: function (context) {
-        var self = this, tableDom = [], operateDom = [], tableWidth = 0;
+        var self = this, tableDom = [], operateDom = [];
+        self.tableWidth = 0;
         self.pageData = {};
         tableDom.push('<!-- target: ' + self.listTableView + ' -->');
         tableDom.push('<div class="list-table-container">');
@@ -1263,7 +1260,7 @@ Gridframe.prototype = {
             tableDom.push('<span>&nbsp;</span>');
         }
         tableDom.push('</th>');
-        tableWidth += parseInt("50px");
+        self.tableWidth += parseInt("50px");
 
         self.options.columns.forEach(function (column) {
             tableDom.push("<th");
@@ -1272,11 +1269,10 @@ Gridframe.prototype = {
             }
             if (column.width) {
                 tableDom.push(" style='width:" + column.width + "'");
-                tableWidth += parseInt(column.width);
+                self.tableWidth += parseInt(column.width);
             }
             tableDom.push(">" + column.label + "</th>")
         });
-        context.tableWidth = tableWidth;
         tableDom.push('                </tr>');
         tableDom.push('                </thead>');
         tableDom.push('                <tbody>');
