@@ -607,7 +607,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     initRow(this, item);
                 }, this);
 
-                var narrow = core.getScrollNarrow(),
+                //var narrow = core.getScrollNarrow(),
+                var narrow = 0,
                     cell = this._aHCells[this._aHCells.length - 1],
                     el = dom.parent(dom.parent(this.getBody()));
 

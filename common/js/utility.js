@@ -470,7 +470,7 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     };
 };
 
-fapiao.TableListRoute.prototype.onafterrender = function (context) {
+fapiao.TableListRoute.prototype.onafterrender = function () {
     calHeight();
 };
 
@@ -1126,7 +1126,10 @@ Gridframe.prototype = {
                     self.calcHeight();
                 }
                 else if (self.tableWidth > 50) {
-                    ecui.$(self.listTableWrapper).getControl().setSize(self.tableWidth);
+                    var tableControl = ecui.$(self.listTableWrapper).getControl();
+                    ecui.dom.parent(tableControl._uHead.getBody()).style.width = self.tableWidth + "px";
+                    ecui.dom.parent(tableControl.getBody()).style.width = self.tableWidth + "px";
+                    tableControl.setSize(self.tableWidth);
                 }
             }
         };
@@ -1195,7 +1198,10 @@ Gridframe.prototype = {
                     self.calcHeight();
                 }
                 else if (self.tableWidth > 50) {
-                    ecui.$(self.listTableWrapper).getControl().setSize(self.tableWidth);
+                    var tableControl = ecui.$(self.listTableWrapper).getControl();
+                    ecui.dom.parent(tableControl._uHead.getBody()).style.width = self.tableWidth + "px";
+                    ecui.dom.parent(tableControl.getBody()).style.width = self.tableWidth + "px";
+                    tableControl.setSize(self.tableWidth);
                 }
             }
         };
@@ -1236,7 +1242,10 @@ Gridframe.prototype = {
             if (listTableContent.scrollWidth === listTableContent.clientWidth) {
                 narrow = 0;
             }
-            ecui.$(self.listTableWrapper).getControl().setSize(self.tableWidth, tableContentHeight - narrow);
+            var tableControl = ecui.$(self.listTableWrapper).getControl();
+            ecui.dom.parent(tableControl._uHead.getBody()).style.width = self.tableWidth + "px";
+            ecui.dom.parent(tableControl.getBody()).style.width = self.tableWidth + "px";
+            tableControl.setSize(self.tableWidth, tableContentHeight - narrow);
         }
     },
     initTableView: function (context) {
