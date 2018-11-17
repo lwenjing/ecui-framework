@@ -487,6 +487,9 @@ function calHeight() {
         search_table.style.height = billSearch_tableH + 'px';
         if (tableContainer) {
             tableContainer.style.height = tableContainerH + 'px';
+            if (tableContainer.scrollWidth === tableContainer.clientWidth) {
+                narrow = 0;
+            }
             ecui.get("bill-search-list-table").setSize(undefined, tableContainerH - narrow);
         }
     }
@@ -1230,6 +1233,9 @@ Gridframe.prototype = {
         ecui.$(self.listTableMain).style.height = tableHeight + 'px';
         if (listTableContent) {
             listTableContent.style.height = tableContentHeight + 'px';
+            if (listTableContent.scrollWidth === listTableContent.clientWidth) {
+                narrow = 0;
+            }
             ecui.$(self.listTableWrapper).getControl().setSize(self.tableWidth, tableContentHeight - narrow);
         }
     },
@@ -1358,7 +1364,7 @@ Gridframe.prototype = {
         tableDom.push('</div>');
 
         return tableDom.join("");
-    } ,
+    },
     seeMore: function () {
         var self = this, el = ecui.$(self.seeMoreContainer);
         ecui.dom[ecui.dom.hasClass(el, 'ui-hide') ? 'removeClass' : 'addClass'](el, 'ui-hide');
