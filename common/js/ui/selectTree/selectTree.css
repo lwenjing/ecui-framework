@@ -37,7 +37,7 @@
             width: 16px;
             height: 16px;
             background: url('images/treeStandard.png') no-repeat no-repeat;
-            background-position: -110px 0;
+            background-position: -75px -2px;
         }
         .file {
             position: absolute;
@@ -48,6 +48,9 @@
             height: 16px;
             background: url('images/treeStandard.png') no-repeat no-repeat;
             background-position: -110px -32px;
+        }
+        &.ui-treeview-expanded .folder {
+            background-position: -93px -2px;
         }
     }
     .ui-treeview-children .ui-treeview {
