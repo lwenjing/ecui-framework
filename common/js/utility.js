@@ -481,11 +481,13 @@ function calHeight() {
         var searchConditionsH = ecui.$('searchConditions').offsetHeight;
         var search_table = ecui.$('billSearch_table');
         var tableContainer = ecui.$('tableContainer');
-        var billSearch_tableH = containerH - searchConditionsH - 10;
+        var billSearch_tableH = containerH - searchConditionsH - 50;
         var tableContainerH = billSearch_tableH - 110;
         search_table.style.height = billSearch_tableH + 'px';
         if (tableContainer) {
             tableContainer.style.height = tableContainerH + 'px';
+            var dom = ecui.get("bill-search-list-table").getBody();
+            ecui.dom.parent(ecui.dom.parent(dom)).style.height = (tableContainerH - 50) + 'px';
         }
     }
 }
@@ -729,6 +731,7 @@ Gridframe.prototype = {
         self.listTableView = self.prefixName + "TableListView";
         self.topTips = self.name + "TopTips";
         self.listTableContent = self.name + "TableListContent";
+        self.listTableWrapper = self.name + "TableListWrapper";
         self.listTableData = self.name + "TableData";
         self.allChecked = self.name + "allChecked";
 
@@ -1120,8 +1123,7 @@ Gridframe.prototype = {
             },
             onafterrender: function (context) {
                 if (context.tableWidth > 50) {
-                    var gridTable = document.querySelector(".gridframe-table");
-                    gridTable.style.minWidth = context.tableWidth + "px";
+                    var gridTable = ecui.$(self.listTableWrapper);
                     gridTable.style.width = context.tableWidth + "px";
                 }
                 if (self.options.fullHeight) {
@@ -1191,8 +1193,7 @@ Gridframe.prototype = {
             },
             onafterrender: function (context) {
                 if (context.tableWidth > 50) {
-                    var gridTable = document.querySelector("#" + self.listTableContent + " .gridframe-table");
-                    gridTable.style.minWidth = context.tableWidth + "px";
+                    var gridTable = ecui.$(self.listTableWrapper);
                     gridTable.style.width = context.tableWidth + "px";
                 }
                 if (self.options.fullHeight) {
@@ -1227,11 +1228,15 @@ Gridframe.prototype = {
         }
 
         var listTableContent = ecui.$(self.listTableContent);
-        var tableHeight = containerHeight - searchHeight - buttonHeight - topTipsHeight - 20;
+        var tableHeight = containerHeight - searchHeight - buttonHeight - topTipsHeight - 30;
+        if (tableHeight < 400)
+            tableHeight = 400;
         var tableContentHeight = tableHeight - 60;
         ecui.$(self.listTableMain).style.height = tableHeight + 'px';
         if (listTableContent) {
             listTableContent.style.height = tableContentHeight + 'px';
+            var dom = ecui.$(self.listTableWrapper).getControl().getBody();
+            ecui.dom.parent(ecui.dom.parent(dom)).style.height = (tableContentHeight - 45) + 'px';
         }
     }
     ,
@@ -1241,7 +1246,7 @@ Gridframe.prototype = {
         tableDom.push('<!-- target: ' + self.listTableView + ' -->');
         tableDom.push('<div class="list-table-container">');
         tableDom.push('    <div class="table-container" id="' + self.listTableContent + '">');
-        tableDom.push('        <div class="list-table ui-table gridframe-table">');
+        tableDom.push('        <div ui="type:table" class="list-table ui-table gridframe-table" id="' + self.listTableWrapper + '">');
         tableDom.push('            <table>');
         tableDom.push('                <thead>');
         tableDom.push('                <tr>');
