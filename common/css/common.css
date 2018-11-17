@@ -832,10 +832,10 @@ a {
         background-color: #368cda;
         color: #fff;
     }
-    .ui-item-focus {
-        background-color: #fff;
-        color: #368cda;
-    }
+    // .ui-item-focus {
+    //     background-color: #fff;
+    //     color: #368cda;
+    // }
 }
 
 .ui-select-error {
