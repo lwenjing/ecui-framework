@@ -481,11 +481,13 @@ function calHeight() {
         var searchConditionsH = ecui.$('searchConditions').offsetHeight;
         var search_table = ecui.$('billSearch_table');
         var tableContainer = ecui.$('tableContainer');
+        var narrow = ecui.getScrollNarrow();
         var billSearch_tableH = containerH - searchConditionsH - 50;
-        var tableContainerH = billSearch_tableH - 110;
+        var tableContainerH = billSearch_tableH - 120;
         search_table.style.height = billSearch_tableH + 'px';
         if (tableContainer) {
-            ecui.get("bill-search-list-table").setSize(undefined, tableContainerH);
+            tableContainer.style.height = tableContainerH + 'px';
+            ecui.get("bill-search-list-table").setSize(undefined, tableContainerH - narrow);
         }
     }
 }
@@ -1020,8 +1022,7 @@ Gridframe.prototype = {
             doms.push('<span>' + tree[column.nameColumn] + '</span>');
             doms.push('</li>');
         }
-    }
-    ,
+    },
     initButton: function () {
         var self = this, route = {
             NAME: self.buttonName,
@@ -1036,8 +1037,7 @@ Gridframe.prototype = {
         //{else}//
         ecui.esr.addRoute(self.buttonName, route);
         //{/if}//
-    }
-    ,
+    },
     initButtonView: function () {
         var self = this, buttonDom = [], buttons = self.options.buttons;
         buttonDom.push('<!-- target: ' + self.buttonView + ' -->');
@@ -1061,8 +1061,7 @@ Gridframe.prototype = {
         buttonDom.push("</div>");
         buttonDom.push("</div>");
         return buttonDom.join("");
-    }
-    ,
+    },
     initTableList: function () {
         var self = this, route = {
             fullHeight: self.options.fullHeight,
@@ -1202,12 +1201,12 @@ Gridframe.prototype = {
         //{else}//
         ecui.esr.addRoute(self.blankTableName, route);
         //{/if}//
-    }
-    ,
+    },
     calcHeight: function () {
         var self = this, containerHeight = ecui.$("container").offsetHeight;
         var searchHeight = 0, buttonHeight = 0, topTipsHeight = 0;
         var searchMain = ecui.$(self.searchMain), buttonMain = ecui.$(self.buttonMain), topTips = ecui.$(self.topTips);
+        var narrow = ecui.getScrollNarrow();
         var gridTop = ecui.$(self.options.main).offsetTop;
         if ("container" === self.options.main) {
             gridTop = 0;
@@ -1230,10 +1229,10 @@ Gridframe.prototype = {
         var tableContentHeight = tableHeight - 60;
         ecui.$(self.listTableMain).style.height = tableHeight + 'px';
         if (listTableContent) {
-            ecui.$(self.listTableWrapper).getControl().setSize(self.tableWidth, tableContentHeight);
+            listTableContent.style.height = tableContentHeight + 'px';
+            ecui.$(self.listTableWrapper).getControl().setSize(self.tableWidth, tableContentHeight - narrow);
         }
-    }
-    ,
+    },
     initTableView: function (context) {
         var self = this, tableDom = [], operateDom = [];
         self.tableWidth = 0;
@@ -1359,21 +1358,18 @@ Gridframe.prototype = {
         tableDom.push('</div>');
 
         return tableDom.join("");
-    }
-    ,
+    } ,
     seeMore: function () {
         var self = this, el = ecui.$(self.seeMoreContainer);
         ecui.dom[ecui.dom.hasClass(el, 'ui-hide') ? 'removeClass' : 'addClass'](el, 'ui-hide');
         if (self.options.fullHeight) {
             self.calcHeight();
         }
-    }
-    ,
+    },
     reload: function () {
         ecui.esr.callRoute(this.viewPrefix + this.listTableName, true);
     }
-}
-;
+};
 
 fapiao.Gridframe = Gridframe;
 fapiao.gridrame = function (options) {
