@@ -153,12 +153,11 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 this._eLayout = dom.create(
                     {
                         className: options.classes.join('-layout '),
-                        innerHTML: '<div class="ui-table-head"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
+                        innerHTML: '<div class="ui-table-body"></div><div class="ui-table-head"><table cellspacing="0" class="' + table.className + '" style="' + table.style.cssText + '"><tbody></tbody></table></div>'
                     }
                 )
             );
-            dom.insertBefore(table, this._eLayout.lastChild);
-            dom.addClass(table, 'ui-table-body');
+            this._eLayout.firstChild.appendChild(table);
 
             var i = 0,
                 list = dom.children(table),
@@ -559,10 +558,6 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 var table = dom.parent(this.getBody());
                 this.$$tableWidth = table.offsetWidth;
                 this.$$tableHeight = table.offsetHeight;
-
-                this._aHCells.forEach(function (item) {
-                    item.cache(true);
-                });
             },
 
             /**
@@ -613,7 +608,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 }, this);
 
                 dom.insertBefore(this._uHead.getBody(), this._uHead.getMain().lastChild.lastChild);
-                dom.parent(this.getBody()).style.marginTop = this.$$paddingTop + 'px';
+                dom.parent(dom.parent(this.getBody())).style.marginTop = this.$$paddingTop + 'px';
                 if (this.getMain().style.height) {
                     this._eLayout.style.height = height + 'px';
                 }
@@ -644,7 +639,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 });
 
                 dom.insertBefore(this._uHead.getBody(), this.getBody());
-                dom.parent(this.getBody()).style.marginTop = '';
+                dom.parent(dom.parent(this.getBody())).style.marginTop = '';
                 this._eLayout.style.height = '';
             },
 
@@ -807,6 +802,16 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 row._aElements = rowCols;
                 return row;
+            },
+
+            /**
+             * @override
+             */
+            cache: function (force) {
+                this._aHCells.forEach(function (item) {
+                    item.cache(force);
+                });
+                ui.Control.prototype.cache.call(this, force);
             },
 
             /**
