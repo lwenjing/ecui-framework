@@ -485,9 +485,7 @@ function calHeight() {
         var tableContainerH = billSearch_tableH - 110;
         search_table.style.height = billSearch_tableH + 'px';
         if (tableContainer) {
-            tableContainer.style.height = tableContainerH + 'px';
-            var dom = ecui.get("bill-search-list-table").getBody();
-            ecui.dom.parent(ecui.dom.parent(dom)).style.height = (tableContainerH - 50) + 'px';
+            ecui.get("bill-search-list-table").setSize(undefined, tableContainerH);
         }
     }
 }
