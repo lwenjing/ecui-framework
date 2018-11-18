@@ -149,6 +149,12 @@
                 var tree = ecui.dom.children(this._uOptions.getBody())[0].getControl();
                 if (tree && tree instanceof ui.SelectTree) {
                     this.setChecked(tree, value.toString());
+                    // if (this.setChecked(tree, value.toString()) === false) {
+                    // } else {
+                    //     console.log('setChecked: ', this.getValue());
+                    //     this.getInput().value = this.getValue();
+                    //     console.log(this.getInput().value);
+                    // }
                 }
             },
             setSelected: function (treenode) {

@@ -13,80 +13,11 @@
     <script type="text/javascript" src="ecui.js"></script>
     <script type="text/javascript" src="common.js"></script>
     <style>
-.ui-adjacent-calendar-left-next-month,
-.ui-adjacent-calendar-left-next-year,
-.ui-adjacent-calendar-right-prev-month,
-.ui-adjacent-calendar-right-prev-year {
-    visibility: hidden;
-}
     </style>
     <script>
-ecui.ui.AdjacentCalendar = ecui.inherits(
-    ecui.ui.Control,
-    'ui-adjacent-calendar',
-    function (el, options) {
-        el.innerHTML = '<div class="' + options.classes.join('-left ') + ecui.ui.Calendar.CLASS + '"></div><div class="' + options.classes.join('-right ') + ecui.ui.Calendar.CLASS + '"></div><div class="' + options.classes.join('-footer ') + '"></div>';
-        var elements = ecui.dom.children(el);
-        ecui.ui.Control.call(this, el, options);
-        this._uLeft = ecui.$fastCreate(this.Calendar, elements[0], this, {date: options.date});
-        this._uRight = ecui.$fastCreate(this.Calendar, elements[1], this, {date: options.date});
-        this._uRight.move(1);
-        elements[2].innerHTML = '底部的HTML，请修改后使用$fastCreate初始化控件，然后参考CalendarInput制作输入框回填与提交';
-    },
-    {
-        Calendar: ecui.inherits(
-            ecui.ui.Calendar,
-            {
-                $change: function (event) {
-                    ecui.ui.Calendar.prototype.$change.call(this, event);
-                    var parent = this.getParent();
-                    if (parent.isReady()) {
-                        if (this === parent._uLeft) {
-                            parent._uRight.setView(this.getYear(), this.getMonth() + 1);
-                        } else {
-                            parent._uLeft.setView(this.getYear(), this.getMonth() - 1);
-                        }
-                    }
-                }
-            }
-        )
-    }
-);
     </script>
-    <style>
-input {
-    font-family: "Tahoma"
-}
-    </style>
 </head>
 <body>
-    &nbsp;<div ui="type:time;second:false"></div>
-    <div ui="type:time"></div>
-    <div ui="type:combox;option-size:5;id:test">
-        <input placeholder="请输入" value="2">
-        <div ui="value:1">北京市</div>
-        <div ui="value:2">天津市</div>
-        <div ui="value:3">河北省</div>
-        <div ui="value:4">湖南省</div>
-        <div ui="value:5">上海市</div>
-        <div ui="value:6">湖北省</div>
-        <div ui="value:7">浙江省</div>
-        <div ui="value:8">江苏省</div>
-        <div ui="value:9">江西省</div>
-        <div ui="value:10">安徽省</div>
-    </div>
-    <div ui="type:combox;option-size:5">
-        <div>1</div>
-        <div>2</div>
-        <div>3</div>
-        <div>4</div>
-        <div>5</div>
-        <div>6</div>
-        <div>7</div>
-        <div>8</div>
-        <div>9</div>
-        <div>10</div>
-    </div>
 </body>
 </html>
 
