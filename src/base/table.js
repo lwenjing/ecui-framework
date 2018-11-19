@@ -625,13 +625,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     this._eLayout.lastChild.style.height = this.$$tableHeight + 'px';
 
                     style.top = this.$$paddingTop + 'px';
-                    if (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width)) {
-                        this._uHead.getMain().style.width = (width - narrow) + 'px';
-                        style.width = (width - narrow) + 'px';
-                    }
-                    if (this.$$tableWidth > width || (this.$$tableWidth + narrow > width && this.$$tableHeight > height)) {
-                        style.height = (height - this.$$paddingTop - narrow) + 'px';
-                    }
+                    style.width = this._uHead.getMain().style.width = (width - (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width) ? narrow : 0)) + 'px';
+                    style.height = (height - this.$$paddingTop - (this.$$tableWidth > width || (this.$$tableWidth + narrow > width && this.$$tableHeight > height) ? narrow : 0)) + 'px';
                 } else {
                     style.marginTop = this.$$paddingTop + 'px';
                     style.width = this.$$tableWidth + 'px';
@@ -656,11 +651,15 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              */
             $mousewheel: function (event) {
                 ui.Control.prototype.$mousewheel.call(this, event);
-                this._eLayout.scrollLeft -= event.deltaX;
-                this._eLayout.scrollTop -= event.deltaY;
-                if ((event.deltaX < 0 && this._eLayout.scrollLeft !== this._eLayout.scrollWidth - this._eLayout.clientWidth) || (event.deltaX > 0 && this._eLayout.scrollLeft) || (event.deltaY < 0 && this._eLayout.scrollTop !== this._eLayout.scrollHeight - this._eLayout.clientHeight) || (event.deltaY > 0 && this._eLayout.scrollTop)) {
-                    event.preventDefault();
+                if (navigator.userAgent.indexOf(' Mac OS X ') > 0) {
+                    event.deltaX = -event.deltaX;
+                    event.deltaY = -event.deltaY;
                 }
+                var left = this._eLayout.scrollLeft - event.deltaX,
+                    top = this._eLayout.scrollTop - event.deltaY;
+                this._eLayout.scrollLeft = Math.min(this._eLayout.scrollWidth - this._eLayout.clientWidth, Math.max(0, left));
+                this._eLayout.scrollTop = Math.min(this._eLayout.scrollHeight - this._eLayout.clientHeight, Math.max(0, top));
+                event.preventDefault();
             },
 
             /**
