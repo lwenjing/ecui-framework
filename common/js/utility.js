@@ -1244,8 +1244,9 @@ Gridframe.prototype = {
             }
             var tableControl = ecui.$(self.listTableWrapper).getControl();
             ecui.dom.parent(tableControl._uHead.getBody()).style.width = self.tableWidth + "px";
+            tableControl._uHead.getMain().style.width = self.tableWidth + "px";
             ecui.dom.parent(tableControl.getBody()).style.width = self.tableWidth + "px";
-            tableControl.setSize(self.tableWidth, tableContentHeight - narrow);
+            tableControl.setSize(undefined, tableContentHeight - narrow);
             tableControl.resize();
         }
     },
