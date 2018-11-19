@@ -45,6 +45,6 @@
         position: absolute;
         left: 0px;
         overflow: hidden !important;
-        pointer-events: none !important;
+        // pointer-events: none !important;
     }
 }
