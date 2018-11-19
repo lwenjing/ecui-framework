@@ -1102,7 +1102,7 @@ Gridframe.prototype = {
                     };
                 }
                 var data = ecui.util.parseValue(self.listTableData, context);
-                var pageNo = data.currentPage || 1;
+                var pageNo = context.currentPage || 1;
                 var total = data.count || 0;
                 var pageSize = context.pageSize || 10;
                 context.page = {
@@ -1174,7 +1174,7 @@ Gridframe.prototype = {
                 ecui.esr.parseObject(document.forms[self.searchForm], self.searchData, true);
 
                 var data = ecui.util.parseValue(self.listTableData, context);
-                var pageNo = data.currentPage || 1;
+                var pageNo = context.currentPage || 1;
                 var total = data.count || 0;
                 var pageSize = context.pageSize || 10;
                 context.page = {
