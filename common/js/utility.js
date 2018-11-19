@@ -1246,6 +1246,7 @@ Gridframe.prototype = {
             ecui.dom.parent(tableControl._uHead.getBody()).style.width = self.tableWidth + "px";
             ecui.dom.parent(tableControl.getBody()).style.width = self.tableWidth + "px";
             tableControl.setSize(self.tableWidth, tableContentHeight - narrow);
+            tableControl.resize();
         }
     },
     initTableView: function (context) {
