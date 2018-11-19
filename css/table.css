@@ -20,7 +20,7 @@
 
         .ui-table-body {
             position: static;
-            overflow: auto !important;
+            overflow: visible !important;
         }
     }
 
