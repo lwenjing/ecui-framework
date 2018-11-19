@@ -627,7 +627,7 @@ ui.GridOrgCombox = ecui.inherits(
                             "code": option[self.nameColumn] || option.name
                         });
                         if (self.deptValues) {
-                            allDataArr.push(option.code);
+                            allDataArr.push(option[self.idColumn] || option.code);
                         }
                     });
                     var allData = allDataArr.join(",");
