@@ -1261,7 +1261,7 @@ Gridframe.prototype = {
         tableDom.push('            <table>');
         tableDom.push('                <thead>');
         tableDom.push('                <tr>');
-        tableDom.push('<th style="width: 50px;">');
+        tableDom.push('<th style="width: 60px;">');
         if (self.options.checkbox) {
             tableDom.push('<div ui="type:label;for:checkbox">');
             tableDom.push('    <div ui="type:checkbox;id:' + self.allChecked + '">');
@@ -1274,7 +1274,7 @@ Gridframe.prototype = {
             tableDom.push('<span>&nbsp;</span>');
         }
         tableDom.push('</th>');
-        self.tableWidth += parseInt("50px");
+        self.tableWidth += parseInt("60px");
 
         self.options.columns.forEach(function (column) {
             tableDom.push("<th");
