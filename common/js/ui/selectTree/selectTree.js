@@ -38,11 +38,12 @@
             },
             onready: function (event) {
                 ecui.util.timer(function () {
-                    if (this.getRoot().getParent().getParent().getInput()) {
-                        var value = this.getRoot().getParent().getParent().getInput().value;
+                    var combox = this.getRoot().getParent().getParent();
+                    if (combox.getInput && combox.getInput()) {
+                        var value = combox.getInput().value;
                         if (value === this._sValue) {
-                            this.getRoot().getParent().getParent().setSelected(this);
-                            core.dispatchEvent(this.getRoot().getParent().getParent(), 'change', event);
+                            combox.setSelected(this);
+                            core.dispatchEvent(combox, 'change', event);
                         }
                     }
                 }.bind(this), 0);
