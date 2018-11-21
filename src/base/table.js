@@ -42,6 +42,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
         ieVersion = /(msie (\d+\.\d)|IEMobile\/(\d+\.\d))/i.test(navigator.userAgent) ? document.documentMode || +(RegExp.$2 || RegExp.$3) : undefined,
 
         eventNames = ['mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup', 'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate'];
+
 //{/if}//
     /**
      * 初始化单元格。
@@ -77,7 +78,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
      * @param {ecui.ui.Table.Row} row 行控件
      */
     function initRow(table, row) {
-        for (var i = 0, list = table._aHCells, el, item; item = list[i]; ) {
+        for (var i = 0, list = table._aHCells, el, item; item = list[i];) {
             if ((el = row._aElements[i++]) && el !== item.getMain()) {
                 var width = item.getWidth() - item.getMinimumWidth();
                 while (row._aElements[i] === null) {
@@ -108,14 +109,14 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
      * @return {Function} 初始化单元格函数
      */
     var getControlBuilder = ieVersion === 8 ? function () {
-            // 为了防止写入getControl属性而导致的reflow如此处理
-            var control;
-            return function () {
-                return (control = control || createCell(this));
-            };
-        } : function () {
-            return initCell;
+        // 为了防止写入getControl属性而导致的reflow如此处理
+        var control;
+        return function () {
+            return (control = control || createCell(this));
         };
+    } : function () {
+        return initCell;
+    };
 
     /**
      * 表格控件。
@@ -184,9 +185,9 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             }
 
             // 以下初始化所有的行控件
-            for (; o = list[i++]; ) {
+            for (; o = list[i++];) {
                 o.className += rowClass;
-                for (var j = 0, colList = dom.children(o); o = colList[j++]; ) {
+                for (var j = 0, colList = dom.children(o); o = colList[j++];) {
                     o.className += i <= headRowCount ? hcellClass : cellClass;
                 }
             }
@@ -212,7 +213,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 (rows[i] = core.$fastCreate(this.Row, o, this))._aElements = [];
             }
 
-            for (j = 0;; j++) {
+            for (j = 0; ; j++) {
                 for (i = 0; o = rows[i]; i++) {
                     if (colspans[i] > 0) {
                         colspans[i]--;
@@ -233,14 +234,14 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                                 } else {
                                     colspan--;
                                 }
-                                for (o = colspan; o--; ) {
+                                for (o = colspan; o--;) {
                                     rows[i + rowspan]._aElements.push(rowspan ? false : null);
                                 }
                             }
                         }
                     } else {
                         // 当前行处理完毕，list[i]不再保存行内需要处理的下一个元素
-                        for (j = 0;; j++) {
+                        for (j = 0; ; j++) {
                             options = {};
                             for (i = 0; o = rows[i]; i++) {
                                 el = o._aElements[j];
@@ -327,7 +328,8 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                                 item.style[name] = value;
                             }
                             if (item !== false) {
-                                for (var i = index; !(item = body[i]); i--) {}
+                                for (var i = index; !(item = body[i]); i--) {
+                                }
 
                                 var width = -cols[i].getMinimumWidth(),
                                     colspan = 0;
@@ -441,7 +443,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                             } else if (o && (j = +dom.getAttribute(o, 'rowSpan')) > 1) {
                                 // 如果单元格包含rowSpan属性，需要将属性添加到其它行去
                                 o.setAttribute('rowSpan', j - 1);
-                                for (var j = i + 1;; ) {
+                                for (var j = i + 1; ;) {
                                     cell = nextRow._aElements[j++];
                                     if (cell || cell === undefined) {
                                         break;
@@ -477,7 +479,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                             } else if (o && nextRow && nextRow._aElements[i] === false) {
                                 // 如果单元格包含rowSpan属性，需要从其它行恢复
                                 o.setAttribute('rowSpan', +dom.getAttribute(o, 'rowSpan') + 1);
-                                for (var j = i + 1;; ) {
+                                for (var j = i + 1; ;) {
                                     cell = this._aElements[j++];
                                     if (cell || cell === undefined) {
                                         break;
@@ -510,7 +512,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                      * @return {Array} 单元格控件数组
                      */
                     getCells: function () {
-                        for (var i = this._aElements.length, result = []; i--; ) {
+                        for (var i = this._aElements.length, result = []; i--;) {
                             result[i] = this.getCell(i);
                         }
                         return result;
@@ -520,7 +522,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                      * @override
                      */
                     setSize: function (width, height) {
-                        for (var i = this._aElements.length; i--; ) {
+                        for (var i = this._aElements.length; i--;) {
                             if (this._aElements[i]) {
                                 this._aElements[i].getControl().$setSize(null, height);
                             }
@@ -596,8 +598,10 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 if (col === undefined) {
                     col = null;
                 } else if (!col) {
-                    for (; col === false; col = (cols = rows[--rowIndex]._aElements)[colIndex]) {}
-                    for (; !col; col = cols[--colIndex]) {}
+                    for (; col === false; col = (cols = rows[--rowIndex]._aElements)[colIndex]) {
+                    }
+                    for (; !col; col = cols[--colIndex]) {
+                    }
                 }
                 return col;
             },
@@ -606,6 +610,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              * @override
              */
             $initStructure: function (width, height) {
+                height = height || this.$$tableHeight;
                 ui.Control.prototype.$initStructure.call(this, width, height);
 
                 this._aHCells.forEach(function (item) {
@@ -748,7 +753,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     o = row._aElements[index];
                     if (o !== null) {
                         // 没有出现跨列的插入列操作
-                        for (j = index; !o; ) {
+                        for (j = index; !o;) {
                             o = row._aElements[++j];
                             if (o === undefined) {
                                 break;
@@ -782,7 +787,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                         cell.setAttribute('colSpan', +dom.getAttribute(cell, 'colSpan') + 1);
                         row._aElements.splice(index, 0, o);
-                        for (; --j; ) {
+                        for (; --j;) {
                             rows[++i]._aElements.splice(index, 0, false);
                         }
                     }
@@ -814,14 +819,14 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                     index = this._aRows.length;
                 }
 
-                for (var i = 0; col = this._aHCells[i]; ) {
+                for (var i = 0; col = this._aHCells[i];) {
                     if ((row && row._aElements[i] === false) || data[i] === false) {
                         rowCols[i++] = false;
                     } else {
                         // 如果部分列被隐藏，colspan/width 需要动态计算
                         rowCols[i] = true;
                         html[j++] = '<td class="' + this._sCellClass + '" style="';
-                        for (var o = i, colspan = col.isShow() ? 1 : 0, width = col.getWidth() - col.getMinimumWidth(); (col = this._aHCells[++i]) && data[i] === null; ) {
+                        for (var o = i, colspan = col.isShow() ? 1 : 0, width = col.getWidth() - col.getMinimumWidth(); (col = this._aHCells[++i]) && data[i] === null;) {
                             rowCols[i] = null;
                             if (col.isShow()) {
                                 colspan++;
@@ -835,10 +840,10 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 html[j] = '</tr></tbody></table>';
                 var el = dom.create(
-                        {
-                            innerHTML: html.join('')
-                        }
-                    ).lastChild.lastChild.lastChild;
+                    {
+                        innerHTML: html.join('')
+                    }
+                ).lastChild.lastChild.lastChild;
 
                 body.insertBefore(el, row ? row.getOuter() : null);
                 row = core.$fastCreate(this.Row, el, this);
@@ -976,7 +981,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              * @param {number} index 列序号，从0开始计数
              */
             removeAll: function () {
-                for (var i = this._aRows.length; i--; ) {
+                for (var i = this._aRows.length; i--;) {
                     this.removeRow(i);
                 }
             },
@@ -1038,7 +1043,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                         if (o = row._aElements[i]) {
                             if (dom.parent(o) !== body) {
                                 rowNext._aElements[i] = o;
-                                for (; row._aElements[++i] === null; ) {
+                                for (; row._aElements[++i] === null;) {
                                     rowNext._aElements[i] = null;
                                 }
                                 i--;
