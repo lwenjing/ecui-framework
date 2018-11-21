@@ -674,7 +674,7 @@ var Gridframe = function (options) {
         rowClick: function (rowData) { // 行点击事件
             alert(JSON.stringify(rowData));
         },
-        initData : null,
+        initData: null,
         appendRowData: null // 列表后追加数据,和单行数据的格式必须一致，可以是个 data，也可以是 function
     };
 
@@ -1082,7 +1082,7 @@ Gridframe.prototype = {
                         context[self.listTableData].list.push(appendRowData);
                     }
                 }
-                if(self.options.initData){
+                if (self.options.initData) {
                     context[self.listTableData] = self.options.initData;
                 }
                 return self.initTableView.call(self, context);
@@ -1096,7 +1096,7 @@ Gridframe.prototype = {
                 document.forms[self.searchForm]["pageSize"].value = context.pageSize;
             },
             onbeforerender: function (context) {
-                if(self.options.initData){
+                if (self.options.initData) {
                     context[self.listTableData] = self.options.initData;
                 }
                 self.searchData = {};
@@ -1385,7 +1385,14 @@ Gridframe.prototype = {
     },
     seeMore: function () {
         var self = this, el = ecui.$(self.seeMoreContainer);
-        ecui.dom[ecui.dom.hasClass(el, 'ui-hide') ? 'removeClass' : 'addClass'](el, 'ui-hide');
+        if (ecui.dom.hasClass(el, 'ui-hide')) {
+            ecui.$(self.seeMoreBtn).innerHTML = "收起条件";
+            ecui.dom.removeClass(el, 'ui-hide');
+        } else {
+            ecui.$(self.seeMoreBtn).innerHTML = "更多条件";
+            ecui.dom.addClass(el, 'ui-hide');
+        }
+
         if (self.options.fullHeight) {
             self.calcHeight();
         }
