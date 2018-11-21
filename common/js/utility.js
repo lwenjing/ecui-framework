@@ -674,6 +674,7 @@ var Gridframe = function (options) {
         rowClick: function (rowData) { // 行点击事件
             alert(JSON.stringify(rowData));
         },
+        initData : null,
         appendRowData: null // 列表后追加数据,和单行数据的格式必须一致，可以是个 data，也可以是 function
     };
 
@@ -1081,6 +1082,9 @@ Gridframe.prototype = {
                         context[self.listTableData].list.push(appendRowData);
                     }
                 }
+                if(self.options.initData){
+                    context[self.listTableData] = self.options.initData;
+                }
                 return self.initTableView.call(self, context);
             },
             view: self.listTableView,
@@ -1092,6 +1096,9 @@ Gridframe.prototype = {
                 document.forms[self.searchForm]["pageSize"].value = context.pageSize;
             },
             onbeforerender: function (context) {
+                if(self.options.initData){
+                    context[self.listTableData] = self.options.initData;
+                }
                 self.searchData = {};
                 ecui.esr.parseObject(document.forms[self.searchForm], self.searchData, true);
 
@@ -1383,7 +1390,8 @@ Gridframe.prototype = {
             self.calcHeight();
         }
     },
-    reload: function () {
+    reload: function (data) {
+        this.options.initData = data;
         ecui.esr.callRoute(this.viewPrefix + this.listTableName, true);
     }
 };
