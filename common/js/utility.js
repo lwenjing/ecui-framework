@@ -130,28 +130,25 @@ fapiao.util = {
     DX: function (n) {
         var fraction = ['角', '分'];
         var digit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
-        var unit = [ ['元', '万', '亿'], ['', '拾', '佰', '仟']  ];
-        var head = n < 0? '负': '';
+        var unit = [['元', '万', '亿'], ['', '拾', '佰', '仟']];
+        var head = n < 0 ? '负' : '';
         n = Math.abs(n);
 
         var s = '';
 
-        for (var i = 0; i < fraction.length; i++)
-        {
+        for (var i = 0; i < fraction.length; i++) {
             s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '');
         }
         s = s || '整';
         n = Math.floor(n);
 
-        for (var i = 0; i < unit[0].length && n > 0; i++)
-        {
+        for (var i = 0; i < unit[0].length && n > 0; i++) {
             var p = '';
-            for (var j = 0; j < unit[1].length && n > 0; j++)
-            {
+            for (var j = 0; j < unit[1].length && n > 0; j++) {
                 p = digit[n % 10] + unit[1][j] + p;
                 n = Math.floor(n / 10);
             }
-            s = p.replace(/(零.)*零$/, '').replace(/^$/, '零')  + unit[0][i] + s;
+            s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
         }
         return head + s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '');
     }
@@ -699,6 +696,7 @@ var Gridframe = function (options) {
     this.buttons = {};
     this.rowButtons = {};
     this.searchData = {};
+    this.searchParm = {};
 
     this.setOptions(options);
     this.initContain();
@@ -715,6 +713,13 @@ Gridframe.prototype = {
                 if ("hide" !== search.type) {
                     self.searchShow = true;
                     return;
+                }
+            });
+            self.options.searchs.forEach(function (search) {
+                if (self.options.searchParm[search.name]) {
+                    self.searchParm[search.name] = self.options.searchParm[search.name];
+                } else {
+                    self.searchParm[search.name] = "";
                 }
             });
         }
@@ -868,9 +873,9 @@ Gridframe.prototype = {
         route.targetRoute = self.viewPrefix + self.listTableName;
 
         route.onafterrender = function (context) {
-            if (self.options.searchParm) {
-                route.searchParm = self.options.searchParm;
-                fapiao.setFormValue(context, document.forms[self.searchForm], self.options.searchParm);
+            if (self.searchParm) {
+                route.searchParm = self.searchParm;
+                fapiao.setFormValue(context, document.forms[self.searchForm], route.searchParm);
                 if (self.gridOrgCombox) {
                     ecui.triggerEvent(ecui.get(self.name + self.gridOrgCombox.orgName), 'change');
                 }
