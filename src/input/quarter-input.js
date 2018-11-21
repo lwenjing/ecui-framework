@@ -260,6 +260,11 @@
                 var list = this.getValue().split('-');
                 return list.length < 2 ? undefined : new Date(+list[0], +list[1] - 1);
             },
+            onready: function () {
+                var el = ecui.dom.create({ className: 'ui-calendar-input-clear' });
+                dom.insertAfter(el, this.getInput());
+                core.$fastCreate(this.Clear, el, this, {});
+            },
 
             /**
              * @override
@@ -272,7 +277,17 @@
                     value = value.getFullYear() + '-' + ('0' + (value.getMonth() + 1)).slice(-2);
                 }
                 ui.Text.prototype.setValue.call(this, value);
-            }
+            },
+            Clear: core.inherits(
+                ui.Control,
+                {
+                    onclick: function (event) {
+                        this.getParent().setValue('');
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                }
+            )
         },
         ui.Popup
     );
