@@ -565,6 +565,10 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
                 var table = dom.parent(this.getBody());
                 this.$$tableWidth = table.offsetWidth;
                 this.$$tableHeight = table.offsetHeight;
+
+                if (!this.getClientHeight()) {
+                    this.$$height = this.$$tableHeight + (this.$$tableWidth > this.getClientWidth() ? core.getScrollNarrow() : 0);
+                }
             },
 
             /**
@@ -618,6 +622,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 var narrow = core.getScrollNarrow(),
                     style = dom.parent(dom.parent(this.getBody())).style;
+
                 if (narrow) {
                     this._eLayout.style.width = width + 'px';
                     this._eLayout.style.height = height + 'px';
@@ -626,7 +631,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                     style.top = this.$$paddingTop + 'px';
                     style.width = this._uHead.getMain().style.width = (width - (this.$$tableHeight > height || (this.$$tableHeight + narrow > height && this.$$tableWidth > width) ? narrow : 0)) + 'px';
-                    style.height = Math.max(0, height - this.$$paddingTop - (this.$$tableWidth > width || (this.$$tableWidth + narrow > width && this.$$tableHeight > height) ? narrow : 0)) + 'px';
+                    style.height = (height - this.$$paddingTop - (this.$$tableWidth > width || (this.$$tableWidth + narrow > width && this.$$tableHeight > height) ? narrow : 0)) + 'px';
                 } else {
                     style.marginTop = this.$$paddingTop + 'px';
                     style.width = this.$$tableWidth + 'px';
@@ -651,11 +656,16 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
              */
             $mousewheel: function (event) {
                 ui.Control.prototype.$mousewheel.call(this, event);
-                var left = this._eLayout.scrollLeft + event.deltaX,
-                    top = this._eLayout.scrollTop + event.deltaY;
-                this._eLayout.scrollLeft = Math.min(this._eLayout.scrollWidth - this._eLayout.clientWidth, Math.max(0, left));
-                this._eLayout.scrollTop = Math.min(this._eLayout.scrollHeight - this._eLayout.clientHeight, Math.max(0, top));
-                event.preventDefault();
+
+                var el = this._eLayout,
+                    left = Math.min(el.scrollWidth - el.clientWidth, Math.max(0, el.scrollLeft + event.deltaX)),
+                    top = Math.min(el.scrollHeight - el.clientHeight, Math.max(0, el.scrollTop + event.deltaY));
+
+                if (el.scrollLeft !== left || el.scrollTop !== top) {
+                    el.scrollLeft = left;
+                    el.scrollTop = top;
+                    event.preventDefault();
+                }
             },
 
             /**

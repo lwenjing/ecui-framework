@@ -1524,7 +1524,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                             if (dom.getAttribute(form, 'contentType') !== '') {
                                 headers['Content-Type'] = contentType;
                             }
-                            valid = esr.parseObject(form, data);
+                            valid = valid && esr.parseObject(form, data);
                         } else {
                             Object.assign(data, replace(item[0]));
                         }
