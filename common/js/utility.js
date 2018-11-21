@@ -147,7 +147,7 @@ fapiao.util = {
         for (var i = 0; i < n.length; i++) {
             str += '零壹贰叁肆伍陆柒捌玖'.charAt(n.charAt(i)) + unit.charAt(i);
         }
-        str = str.replace(/零(千|百|拾|角)/g, '零').replace(/(零)+/g, '零').replace(/零(万|亿|元)/g, '$1').replace(/(亿)万|壹(拾)/g, '$1$2').replace(/^元零?|零分/g, '').replace(/元$/g, '元整');
+        str = str.replace(/零(千|百|拾|角|分)/g, '零').replace(/(零)+/g, '零').replace(/零(万|亿|元)/g, '$1').replace(/(亿)万|壹(拾)/g, '$1$2').replace(/^元零?|零分/g, '').replace(/元$/g, '元整');
         // 判断正负数
         if (oldN.substr(0, 1) == '-') {
             n = n.substr(1);
