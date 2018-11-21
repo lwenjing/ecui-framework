@@ -322,11 +322,12 @@ a {
 
 .ui-input-group {
     .ui-tip {
+        width: 260px;
+        left: 120px;
+        color: red;
         position: absolute;
         display: none;
-        left: 80px;
-        width: 260px;
-        color: red;
+        top: 40px;
     }
 }
 

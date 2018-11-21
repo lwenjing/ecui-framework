@@ -593,10 +593,11 @@ a {
 .ui-input-group {
     .ui-tip {
         width: 260px;
-        left: 80px;
+        left: 120px;
         color: red;
         position: absolute;
         display: none;
+        top: 40px;
     }
 }
 
