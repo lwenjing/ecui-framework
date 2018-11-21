@@ -590,6 +590,21 @@ ui.GridRowLink = ecui.inherits(
     }
 );
 
+//  日期控件
+ui.GridQueryDate = ecui.inherits(
+    ecui.ui.CalendarInput,
+    function (el, options) {
+        ecui.ui.CalendarInput.call(this, el, options);
+    },
+    {
+        oninput: function () {
+            var oldStartDOM = ecui.get('startTime');
+            var oldendDOM = ecui.get('endTime');
+            fapiao.dateCompare(oldStartDOM, oldendDOM);
+        }
+    }
+);
+
 /**
  * 公司段选择，切换责任中心段
  * @type {*|Function|Object|void|h}
@@ -955,10 +970,13 @@ Gridframe.prototype = {
                 searchDom.push('   <div class="search-label">' + search.label + '</div>');
                 if ("calendar-input" === search.type) {
                     var names = search.name.split(":");
-                    searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     if (names.length > 1) {
+                        searchDom.push('<input ui="type:ui.GridQueryDate;name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                         searchDom.push('<span class="span-style">&nbsp;- </span>');
-                        searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
+                        searchDom.push('<input ui="type:ui.GridQueryDate;name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
+                    }
+                    else {
+                        searchDom.push('<input ui="type:calendar-input;name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     }
                 } else if ("MonthInput" === search.type) {
                     var names = search.name.split(":");
