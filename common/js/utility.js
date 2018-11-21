@@ -595,12 +595,14 @@ ui.GridQueryDate = ecui.inherits(
     ecui.ui.CalendarInput,
     function (el, options) {
         ecui.ui.CalendarInput.call(this, el, options);
+        this.t1name = options.t1name;
+        this.t2name = options.t2name;
     },
     {
         oninput: function () {
-            var oldStartDOM = ecui.get('startTime');
-            var oldendDOM = ecui.get('endTime');
-            fapiao.dateCompare(oldStartDOM, oldendDOM);
+            var t1name = ecui.get(this.t1name);
+            var t2name = ecui.get(this.t2name);
+            fapiao.dateCompare(t1name, t2name);
         }
     }
 );
@@ -971,9 +973,9 @@ Gridframe.prototype = {
                 if ("calendar-input" === search.type) {
                     var names = search.name.split(":");
                     if (names.length > 1) {
-                        searchDom.push('<input ui="type:ui.GridQueryDate;name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
+                        searchDom.push('<input ui="type:ui.GridQueryDate;id:' + names[0] + ';name:' + names[0] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[0] + '">');
                         searchDom.push('<span class="span-style">&nbsp;- </span>');
-                        searchDom.push('<input ui="type:ui.GridQueryDate;name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
+                        searchDom.push('<input ui="type:ui.GridQueryDate;id:' + names[1] + ';name:' + names[1] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[1] + '">');
                     }
                     else {
                         searchDom.push('<input ui="type:calendar-input;name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
@@ -1527,14 +1529,14 @@ fapiao.customTab = function (options) {
  * 比较日期
  * */
 fapiao.dateCompare = function (oldStartDOM, oldendDOM) {
-    var oldStartTime = oldStartDOM.getMain().getControl().getValue();
-    var oldendTime = oldendDOM.getMain().getControl().getValue();
+    var oldStartTime = oldStartDOM.getValue();
+    var oldendTime = oldendDOM.getValue();
     if (Number(oldStartTime.replace(/-/g, '')) > Number(oldendTime.replace(/-/g, ''))) {
-        oldendDOM.getMain().getControl().setValue(oldStartTime);
-        oldStartDOM.getMain().getControl().setValue(oldendTime);
+        oldendDOM.setValue(oldStartTime);
+        oldStartDOM.setValue(oldendTime);
     } else {
-        oldendDOM.getMain().getControl().setValue(oldendTime);
-        oldStartDOM.getMain().getControl().setValue(oldStartTime);
+        oldendDOM.setValue(oldendTime);
+        oldStartDOM.setValue(oldStartTime);
     }
 };
 
