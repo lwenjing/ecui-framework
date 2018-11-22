@@ -1536,12 +1536,14 @@ fapiao.customTab = function (options) {
 fapiao.dateCompare = function (oldStartDOM, oldendDOM) {
     var oldStartTime = oldStartDOM.getValue();
     var oldendTime = oldendDOM.getValue();
-    if (Number(oldStartTime.replace(/-/g, '')) > Number(oldendTime.replace(/-/g, ''))) {
-        oldendDOM.setValue(oldStartTime);
-        oldStartDOM.setValue(oldendTime);
-    } else {
-        oldendDOM.setValue(oldendTime);
-        oldStartDOM.setValue(oldStartTime);
+    if (oldStartTime && oldendTime) {
+        if (Number(oldStartTime.replace(/-/g, '')) > Number(oldendTime.replace(/-/g, ''))) {
+            oldendDOM.setValue(oldStartTime);
+            oldStartDOM.setValue(oldendTime);
+        } else {
+            oldendDOM.setValue(oldendTime);
+            oldStartDOM.setValue(oldStartTime);
+        }
     }
 };
 
