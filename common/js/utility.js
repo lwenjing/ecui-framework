@@ -1134,9 +1134,15 @@ Gridframe.prototype = {
                     };
                 }
                 var data = ecui.util.parseValue(self.listTableData, context);
-                var pageNo = context.currentPage || 1;
                 var total = data.count || 0;
                 var pageSize = context.pageSize || 10;
+                var totalPage = Math.ceil(total / pageSize);
+                var pageNo = context.currentPage || 1;
+                if (pageNo >= totalPage) {
+                    pageNo = 1;
+                    context.currentPage = 1;
+                }
+
                 context.page = {
                     total: total,
                     totalPage: Math.ceil(total / pageSize),
