@@ -609,6 +609,14 @@ a {
     .ui-select-text {
         background-color: #FFEAD6;
     }
+    .ui-multi-select,
+    .ui-text {
+        border-color: #D0021B !important;
+        input {
+            background: #FFEAD6 !important;
+            opacity: 1 !important;
+        }
+    }
     .ui-text {
         border-color: #D0021B;
         input {

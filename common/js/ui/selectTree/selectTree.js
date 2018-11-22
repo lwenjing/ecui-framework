@@ -88,9 +88,30 @@
             var popupEl = dom.remove(dom.first(el));
             dom.addClass(popupEl, 'ui-tree-combox-popup ui-popup ui-hide');
             ui.InputControl.call(this, el, options);
+            if (options.regexp) {
+                this._oRegExp = new RegExp('^' + options.regexp + '$');
+            }
             this.setPopup(this._uOptions = core.$fastCreate(ui.Control, popupEl, this));
         },
         {
+            /**
+             * @override
+             */
+            $validate: function () {
+                ui.InputControl.prototype.$validate.call(this);
+
+                var value = this.getValue(),
+                    result = true;
+
+                if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(+value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
+                    result = false;
+                }
+
+                if (!result) {
+                    core.dispatchEvent(this, 'error');
+                }
+                return result;
+            },
             /**
              * @override
              */

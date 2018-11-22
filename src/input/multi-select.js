@@ -26,7 +26,7 @@ _eInput - 选项对应的input，form提交时使用
         'ui-multi-select',
         function (el, options) {
             var optionsEl = dom.create({className: this.Options.CLASS + options.classes.join('-options ') + 'ui-popup ui-hide'});
-            for (; el.firstChild;) {
+            for (; el.firstChild; ) {
                 optionsEl.appendChild(el.firstChild);
             }
             ui.InputControl.call(this, el, options);
@@ -34,6 +34,9 @@ _eInput - 选项对应的input，form提交时使用
                 this._eText = dom.create('DIV', {className: options.classes.join('-text ')}),
                 dom.last(el)
             );
+            if (options.regexp) {
+                this._oRegExp = new RegExp('^' + options.regexp + '$');
+            }
             this.setPopup(this._uPopups = core.$fastCreate(this.Options, optionsEl, this, {name: options.name}));
             this._sName = options.name || '';
         },
@@ -77,6 +80,25 @@ _eInput - 选项对应的input，form提交时使用
                 });
                 this._eText.innerHTML = text.join(',');
                 this._eInput.value = value.join(',');
+            },
+
+            /**
+             * @override
+             */
+            $validate: function () {
+                ui.InputControl.prototype.$validate.call(this);
+
+                var value = this.getValue(),
+                    result = true;
+
+                if ((this._oRegExp && !this._oRegExp.test(value)) || (isNaN(+value) && (this._nMinValue !== undefined || this._nMaxValue !== undefined))) {
+                    result = false;
+                }
+
+                if (!result) {
+                    core.dispatchEvent(this, 'error');
+                }
+                return result;
             },
 
             /**
