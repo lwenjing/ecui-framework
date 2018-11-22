@@ -455,9 +455,8 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
     var total = data.count || 0;
     var pageSize = data.pageSize || 10;
-    var totalPage = Math.ceil(total / pageSize);
     var pageNo = context.currentPage || 1;
-    if (pageNo >= totalPage) {
+    if (context.page && context.page.total && context.page.total !== total) {
         pageNo = 1;
         context.currentPage = 1;
     }
@@ -1146,9 +1145,8 @@ Gridframe.prototype = {
                 var data = ecui.util.parseValue(self.listTableData, context);
                 var total = data.count || 0;
                 var pageSize = context.pageSize || 10;
-                var totalPage = Math.ceil(total / pageSize);
                 var pageNo = context.currentPage || 1;
-                if (pageNo >= totalPage) {
+                if (context.page && context.page.total && context.page.total !== total) {
                     pageNo = 1;
                     context.currentPage = 1;
                 }
