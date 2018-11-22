@@ -719,10 +719,26 @@ Gridframe.prototype = {
                 }
             });
             self.options.searchs.forEach(function (search) {
-                if (self.options.searchParm[search.name]) {
-                    self.searchParm[search.name] = self.options.searchParm[search.name];
+                if ("calendar-input" === search.type || "MonthInput" === search.type) {
+                    var names = search.name.split(":");
+                    if (self.options.searchParm[names[0]]) {
+                        self.searchParm[names[0]] = self.options.searchParm[names[0]];
+                    } else {
+                        self.searchParm[names[0]] = "";
+                    }
+                    if (names.length > 1) {
+                        if (self.options.searchParm[names[1]]) {
+                            self.searchParm[names[1]] = self.options.searchParm[names[1]];
+                        } else {
+                            self.searchParm[names[1]] = "";
+                        }
+                    }
                 } else {
-                    self.searchParm[search.name] = "";
+                    if (self.options.searchParm[search.name]) {
+                        self.searchParm[search.name] = self.options.searchParm[search.name];
+                    } else {
+                        self.searchParm[search.name] = "";
+                    }
                 }
             });
         }
