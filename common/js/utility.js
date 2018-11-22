@@ -778,6 +778,12 @@ Gridframe.prototype = {
                 }
             }
         }
+
+        // 表格总宽度计算
+        self.tableWidth = 60;
+        self.options.columns.forEach(function (column) {
+            self.tableWidth += parseInt(column.width || "120px");
+        });
     },
     initContain: function () {
         var self = this, html = [];
@@ -1168,12 +1174,6 @@ Gridframe.prototype = {
                 if (self.options.fullHeight) {
                     self.calcHeight();
                 }
-                else if (self.tableWidth > 50) {
-                    var tableControl = ecui.$(self.listTableWrapper).getControl();
-                    ecui.dom.parent(tableControl._uHead.getBody()).style.width = self.tableWidth + "px";
-                    ecui.dom.parent(tableControl.getBody()).style.width = self.tableWidth + "px";
-                    tableControl.setSize(self.tableWidth);
-                }
             }
         };
 
@@ -1240,12 +1240,6 @@ Gridframe.prototype = {
                 if (self.options.fullHeight) {
                     self.calcHeight();
                 }
-                else if (self.tableWidth > 50) {
-                    var tableControl = ecui.$(self.listTableWrapper).getControl();
-                    ecui.dom.parent(tableControl._uHead.getBody()).style.width = self.tableWidth + "px";
-                    ecui.dom.parent(tableControl.getBody()).style.width = self.tableWidth + "px";
-                    tableControl.setSize(self.tableWidth);
-                }
             }
         };
 
@@ -1286,22 +1280,18 @@ Gridframe.prototype = {
                 narrow = 0;
             }
             var tableControl = ecui.$(self.listTableWrapper).getControl();
-            ecui.dom.parent(tableControl._uHead.getBody()).style.width = self.tableWidth + "px";
-            tableControl._uHead.getMain().style.width = self.tableWidth + "px";
-            ecui.dom.parent(tableControl.getBody()).style.width = self.tableWidth + "px";
             tableControl.setSize(undefined, tableContentHeight - narrow);
             tableControl.resize();
         }
     },
     initTableView: function (context) {
         var self = this, tableDom = [], operateDom = [];
-        self.tableWidth = 0;
         self.pageData = {};
         tableDom.push('<!-- target: ' + self.listTableView + ' -->');
         tableDom.push('<div class="list-table-container">');
         tableDom.push('    <div class="table-container" id="' + self.listTableContent + '">');
         tableDom.push('        <div ui="type:table" class="list-table ui-table gridframe-table" id="' + self.listTableWrapper + '">');
-        tableDom.push('            <table>');
+        tableDom.push('            <table style="width:' + self.tableWidth + 'px">');
         tableDom.push('                <thead>');
         tableDom.push('                <tr>');
         tableDom.push('<th style="width: 60px;">');
@@ -1317,7 +1307,6 @@ Gridframe.prototype = {
             tableDom.push('<span>&nbsp;</span>');
         }
         tableDom.push('</th>');
-        self.tableWidth += parseInt("60px");
 
         self.options.columns.forEach(function (column) {
             tableDom.push("<th");
@@ -1326,7 +1315,8 @@ Gridframe.prototype = {
             }
             if (column.width) {
                 tableDom.push(" style='width:" + column.width + "'");
-                self.tableWidth += parseInt(column.width);
+            } else {
+                tableDom.push(" style='width:120px'");
             }
             tableDom.push(">" + column.label + "</th>")
         });
