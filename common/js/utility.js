@@ -454,9 +454,14 @@ fapiao.TableListRoute.prototype.onbeforerequest = function (context) {
 
 fapiao.TableListRoute.prototype.onbeforerender = function (context) {
     var data = ecui.util.parseValue(this.model[0].split('@')[0], context);
-    var pageNo = context.currentPage || 1;
     var total = data.count || 0;
     var pageSize = data.pageSize || 10;
+    var totalPage = Math.ceil(total / pageSize);
+    var pageNo = context.currentPage || 1;
+    if (pageNo >= totalPage) {
+        pageNo = 1;
+        context.currentPage = 1;
+    }
     context.page = {
         total: total,
         totalPage: Math.ceil(total / pageSize),
