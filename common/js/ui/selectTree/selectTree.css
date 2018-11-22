@@ -17,6 +17,8 @@
     max-height: 300px;
     overflow: auto;
     font-size: 14px !important;
+    padding: 5px;
+    min-height: 100px;
 
     & > .ui-treeview {
         display: none;
