@@ -1006,8 +1006,7 @@ Gridframe.prototype = {
                         searchDom.push('<input ui="type:ui.GridQueryDate;id:' + names[0] + ';name:' + names[0] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[0] + '">');
                         searchDom.push('<span class="span-style">&nbsp;- </span>');
                         searchDom.push('<input ui="type:ui.GridQueryDate;id:' + names[1] + ';name:' + names[1] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[1] + '">');
-                    }
-                    else {
+                    } else {
                         searchDom.push('<input ui="type:calendar-input;name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     }
                 } else if ("MonthInput" === search.type) {
@@ -1069,8 +1068,7 @@ Gridframe.prototype = {
                 self.initTreeDom(doms, ctree, column);
             });
             doms.push('</ul>');
-        }
-        else {
+        } else {
             doms.push('<li ui="value:' + tree[column.idColumn] + ';text:' + tree[column.nameColumn] + '" class="ui-checktree-nochildren">');
             doms.push('<em class="folder"></em>');
             doms.push('<span>' + tree[column.nameColumn] + '</span>');
@@ -1121,7 +1119,6 @@ Gridframe.prototype = {
             fullHeight: self.options.fullHeight,
             NAME: self.listTableName,
             main: self.listTableMain,
-            model: [self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm],
             tpl: function (context) {
                 if (self.options.appendRowData) {
                     var appendRowData = self.options.appendRowData;
@@ -1190,6 +1187,13 @@ Gridframe.prototype = {
             }
         };
 
+        if (self.options.model) {
+            route.model = self.options.model;
+            route.model.push(self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm);
+        } else {
+            route.model = [self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm];
+        }
+
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.listTableName, route);
         //{else}//
         ecui.esr.addRoute(self.listTableName, route);
@@ -1200,7 +1204,6 @@ Gridframe.prototype = {
             fullHeight: self.options.fullHeight,
             NAME: self.blankTableName,
             main: self.listTableMain,
-            model: [],
             tpl: function (context) {
                 context[self.listTableData] = {
                     code: "0000",
@@ -1255,6 +1258,12 @@ Gridframe.prototype = {
                 }
             }
         };
+
+        if (self.options.model) {
+            route.model = self.options.model;
+        } else {
+            route.model = [];
+        }
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.blankTableName, route);
         //{else}//
@@ -1315,8 +1324,7 @@ Gridframe.prototype = {
             tableDom.push('    </div>');
             tableDom.push('    <span>&nbsp;</span>');
             tableDom.push('</div>');
-        }
-        else {
+        } else {
             tableDom.push('<span>&nbsp;</span>');
         }
         tableDom.push('</th>');
@@ -1350,8 +1358,7 @@ Gridframe.prototype = {
                     tableDom.push('    </div>');
                     tableDom.push('    <span>' + (index + 1) + '</span>');
                     tableDom.push('</div>');
-                }
-                else {
+                } else {
                     tableDom.push('<span>' + (index + 1) + '</span>');
                 }
                 tableDom.push('</td>');
@@ -1397,8 +1404,7 @@ Gridframe.prototype = {
                         }
                         if (column.custom) {
                             tableDom.push(column.custom(item))
-                        }
-                        else {
+                        } else {
                             tableDom.push(item[column.column])
                         }
                         if (column.link) {
