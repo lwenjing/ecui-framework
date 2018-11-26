@@ -54,6 +54,15 @@
         &.ui-treeview-expanded .folder {
             background-position: -93px -2px;
         }
+        &.empty {
+            /*padding-left: 0px;*/
+
+            .folder,
+            .file {
+                display: none;
+                background: none;
+            }
+        }
     }
     .ui-treeview-children .ui-treeview {
         padding-left: 20px;
