@@ -17,6 +17,8 @@
     max-height: 300px;
     overflow: auto;
     font-size: 14px !important;
+    padding: 5px;
+    min-height: 100px;
 
     & > .ui-treeview {
         display: none;
@@ -51,6 +53,15 @@
         }
         &.ui-treeview-expanded .folder {
             background-position: -93px -2px;
+        }
+        &.empty {
+            /*padding-left: 0px;*/
+
+            .folder,
+            .file {
+                display: none;
+                background: none;
+            }
         }
     }
     .ui-treeview-children .ui-treeview {
