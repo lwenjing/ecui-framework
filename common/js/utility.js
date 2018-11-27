@@ -916,7 +916,7 @@ Gridframe.prototype = {
                 } else {
                     ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
                 }
-            }, 1000);
+            }, 100);
         };
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.searchName, route);
