@@ -916,8 +916,7 @@ Gridframe.prototype = {
                 } else {
                     ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
                 }
-            }, 100);
-
+            }, 1000);
         };
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.searchName, route);
@@ -994,7 +993,7 @@ Gridframe.prototype = {
                 searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.deptLabel + '</div>');
                 searchDom.push('    <div ui="type:Select;name:' + search.deptName + ';id:' + self.name + search.deptName + '" class="search-input">');
-                searchDom.push('        <div ui="value:;">全部</div>');
+                searchDom.push('        <div ui="value:-1;">全部</div>');
                 searchDom.push('    </div>');
                 searchDom.push('</div>');
             } else {
