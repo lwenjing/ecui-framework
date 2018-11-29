@@ -626,6 +626,7 @@ ui.GridOrgCombox = ecui.inherits(
             self.targetUrl = gridframe.gridOrgCombox.deptUrl;
             self.values = gridframe.gridOrgCombox.values;
             self.deptValues = gridframe.gridOrgCombox.deptValues;
+            self.deptRequired = gridframe.gridOrgCombox.deptRequired;
             self.idColumn = gridframe.gridOrgCombox.deptIdColumn;
             self.nameColumn = gridframe.gridOrgCombox.deptNameColumn;
             self.targetInput = gridframe.gridOrgCombox.targetInput;
@@ -651,6 +652,12 @@ ui.GridOrgCombox = ecui.inherits(
                     if (self.deptValues) {
                         options.unshift({
                             "value": allData,
+                            "code": "全部",
+                            "selected": true
+                        });
+                    } else if (self.deptRequired) {
+                        options.unshift({
+                            "value": "",
                             "code": "全部",
                             "selected": true
                         });
