@@ -626,6 +626,7 @@ ui.GridOrgCombox = ecui.inherits(
             self.targetUrl = gridframe.gridOrgCombox.deptUrl;
             self.values = gridframe.gridOrgCombox.values;
             self.deptValues = gridframe.gridOrgCombox.deptValues;
+            self.deptRequired = gridframe.gridOrgCombox.deptRequired;
             self.idColumn = gridframe.gridOrgCombox.deptIdColumn;
             self.nameColumn = gridframe.gridOrgCombox.deptNameColumn;
             self.targetInput = gridframe.gridOrgCombox.targetInput;
@@ -651,6 +652,12 @@ ui.GridOrgCombox = ecui.inherits(
                     if (self.deptValues) {
                         options.unshift({
                             "value": allData,
+                            "code": "全部",
+                            "selected": true
+                        });
+                    } else if (self.deptRequired) {
+                        options.unshift({
+                            "value": "",
                             "code": "全部",
                             "selected": true
                         });
@@ -917,7 +924,6 @@ Gridframe.prototype = {
                     ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
                 }
             }, 100);
-
         };
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.searchName, route);
@@ -994,7 +1000,7 @@ Gridframe.prototype = {
                 searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.deptLabel + '</div>');
                 searchDom.push('    <div ui="type:Select;name:' + search.deptName + ';id:' + self.name + search.deptName + '" class="search-input">');
-                searchDom.push('        <div ui="value:;">全部</div>');
+                searchDom.push('        <div ui="value:-1;">全部</div>');
                 searchDom.push('    </div>');
                 searchDom.push('</div>');
             } else {
@@ -1189,9 +1195,13 @@ Gridframe.prototype = {
 
         if (self.options.model) {
             route.model = self.options.model;
-            route.model.push(self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm);
+            if (self.options.url) {
+                route.model.push(self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm);
+            }
         } else {
-            route.model = [self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm];
+            if (self.options.url) {
+                route.model = [self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm];
+            }
         }
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.listTableName, route);

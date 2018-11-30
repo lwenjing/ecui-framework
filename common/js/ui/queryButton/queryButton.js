@@ -39,7 +39,7 @@ queryButton - 查询按钮控件。
                 fapiao.setSearchParam(children.searchParm, this.getForm());
                 // children.searchParm.pageNo = 1;
                 ecui.esr.callRoute(children.NAME + '~currentPage=1', true);
-            },
+            }
         }
     );
 
@@ -61,7 +61,7 @@ queryButton - 查询按钮控件。
                 fapiao.setSearchParam(targetRoute.searchParm, this.getForm());
                 targetRoute.searchParm.pageSize = 20;
                 ecui.esr.callRoute(route.targetRoute, true);
-            },
+            }
         }
     );
 
