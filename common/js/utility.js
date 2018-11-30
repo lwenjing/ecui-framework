@@ -1195,9 +1195,13 @@ Gridframe.prototype = {
 
         if (self.options.model) {
             route.model = self.options.model;
-            route.model.push(self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm);
+            if (self.options.url) {
+                route.model.push(self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm);
+            }
         } else {
-            route.model = [self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm];
+            if (self.options.url) {
+                route.model = [self.listTableData + '@' + self.options.method + ' ' + self.options.url + "?" + self.searchForm];
+            }
         }
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.listTableName, route);
