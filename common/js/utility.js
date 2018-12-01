@@ -1033,7 +1033,8 @@ Gridframe.prototype = {
                             });
                         }
                         if (!search.required) {
-                            searchDom.push('<div ui="value:' + allDataArr.join(",") + ';">全部</div>');
+                            var blankTip = search.blankTip || "全部";
+                            searchDom.push('<div ui="value:' + allDataArr.join(",") + ';">' + blankTip + '</div>');
                         }
                         if (search.options instanceof Array) {
                             context[search.dataName] = search.options;
