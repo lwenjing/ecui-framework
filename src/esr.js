@@ -1315,7 +1315,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 elements = dom.toArray(form.elements);
 
             elements.forEach(function (item) {
-                if (validate !== false && item.name && item.getControl && !item.getControl().isDisabled()) {
+                // if (validate !== false && item.name && item.getControl && !item.getControl().isDisabled()) {
+                if (validate !== false && item.name && item.getControl) {
                     if (!core.dispatchEvent(item.getControl(), 'validate')) {
                         if (!errControl) {
                             errControl = item;
@@ -1325,7 +1326,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                 if (item.name) {
                     if (item.getControl) {
                         var control = item.getControl();
-                        if (control.getFormName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
+                        // if (control.getFormName && control.getFormValue && !control.isDisabled() && (!control.isFormChecked || control.isFormChecked())) {
+                        if (control.getFormName && control.getFormValue && (!control.isFormChecked || control.isFormChecked())) {
                             var formName = control.getFormName(),
                                 formValue = control.getFormValue();
 
@@ -1339,7 +1341,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                                 }
                             }
                         }
-                    } else if (!item.disabled && ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked)) {
+                    } else if ((item.type !== 'radio' && item.type !== 'checkbox') || item.checked) {
                         setCacheData(data, item.name, item.value);
                     }
                 }

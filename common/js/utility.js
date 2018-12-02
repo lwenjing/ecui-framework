@@ -279,7 +279,7 @@ fapiao.setEditFormValue = function (data, form, isDefault) {
             }
         }
 
-        if (isDefault && item.getControl && item.name) {
+        if (isDefault && item.getControl && item.name && item.getControl().saveToDefault) {
             item.getControl().saveToDefault();
         }
     }
