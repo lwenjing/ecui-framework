@@ -1,6 +1,6 @@
 /*
 @example
-<div ui="type:calendar-input"></div>
+<div ui="type:calendar-input;clean:false"></div>
 */
 (function () {
 //{if 0}//
@@ -9,42 +9,42 @@
         ui = core.ui;
 //{/if}//
     var Calendar = core.inherits(
-            ui.Calendar,
-            true,
-            function (el, options) {
-                dom.addClass(el, 'ui-popup ui-hide');
-                ui.Calendar.call(this, el, options);
+        ui.Calendar,
+        true,
+        function (el, options) {
+            dom.addClass(el, 'ui-popup ui-hide');
+            ui.Calendar.call(this, el, options);
+        },
+        {
+            /**
+             * @override
+             */
+            $dateclick: function (event) {
+                ui.Calendar.prototype.$dateclick.call(this, event);
+                var parent = this.getParent();
+                parent.setValue(event.date);
+                core.dispatchEvent(parent, 'input', event);
+                this.hide();
             },
-            {
-                /**
-                 * @override
-                 */
-                $dateclick: function (event) {
-                    ui.Calendar.prototype.$dateclick.call(this, event);
-                    var parent = this.getParent();
-                    parent.setValue(event.date);
-                    core.dispatchEvent(parent, 'input', event);
-                    this.hide();
-                },
 
-                /**
-                 * @override
-                 */
-                $hide: function (event) {
-                    ui.Calendar.prototype.$hide.call(this, event);
-                    this.$setParent();
-                },
+            /**
+             * @override
+             */
+            $hide: function (event) {
+                ui.Calendar.prototype.$hide.call(this, event);
+                this.$setParent();
+            },
 
-                /**
-                 * @override
-                 */
-                $show: function (event) {
-                    ui.Calendar.prototype.$show.call(this, event);
-                    this.$setParent(ui.Popup.getOwner());
-                    this.setDate(this.getParent().getDate());
-                }
+            /**
+             * @override
+             */
+            $show: function (event) {
+                ui.Calendar.prototype.$show.call(this, event);
+                this.$setParent(ui.Popup.getOwner());
+                this.setDate(this.getParent().getDate());
             }
-        );
+        }
+    );
 
     /**
      * 日历输入框控件。
@@ -58,6 +58,7 @@
             ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
             this.setPopup(core.getSingleton(Calendar));
+            this.clean = options.clean !== false;
         },
         {
             /**
@@ -79,9 +80,11 @@
                 return list.length < 3 ? undefined : new Date(+list[0], +list[1] - 1, +list[2]);
             },
             onready: function () {
-                var el = ecui.dom.create({ className: 'ui-calendar-input-clear' });
-                dom.insertAfter(el, this.getInput());
-                core.$fastCreate(this.Clear, el, this, {});
+                if (this.clean) {
+                    var el = ecui.dom.create({className: 'ui-calendar-input-clear'});
+                    dom.insertAfter(el, this.getInput());
+                    core.$fastCreate(this.Clear, el, this, {});
+                }
             },
 
             /**
