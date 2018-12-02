@@ -1006,21 +1006,22 @@ Gridframe.prototype = {
             } else {
                 searchDom.push('<div class="search-item">');
                 searchDom.push('   <div class="search-label">' + search.label + '</div>');
+                var clean = search.clean !== false;
                 if ("calendar-input" === search.type) {
                     var names = search.name.split(":");
                     if (names.length > 1) {
-                        searchDom.push('<input ui="type:ui.GridQueryDate;id:' + names[0] + ';name:' + names[0] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[0] + '">');
+                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:'+clean+';id:' + names[0] + ';name:' + names[0] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[0] + '">');
                         searchDom.push('<span class="span-style">&nbsp;- </span>');
-                        searchDom.push('<input ui="type:ui.GridQueryDate;id:' + names[1] + ';name:' + names[1] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[1] + '">');
+                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:'+clean+';id:' + names[1] + ';name:' + names[1] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[1] + '">');
                     } else {
-                        searchDom.push('<input ui="type:calendar-input;name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
+                        searchDom.push('<input ui="type:calendar-input;clean:'+clean+';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     }
                 } else if ("MonthInput" === search.type) {
                     var names = search.name.split(":");
-                    searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
+                    searchDom.push('<input ui="type:MonthInput;clean:'+clean+';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     if (names.length > 1) {
                         searchDom.push('<span class="span-style">&nbsp;- </span>');
-                        searchDom.push('<input ui="type:' + search.type + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
+                        searchDom.push('<input ui="type:MonthInput;clean:'+clean+';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
                     }
                 } else {
                     searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input">');
