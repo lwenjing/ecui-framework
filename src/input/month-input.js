@@ -35,7 +35,7 @@
             ui.Control.call(this, el, options);
 
             this._aCells = Array.apply(null, el.getElementsByTagName('TD')).map(function (item, index) {
-                return core.$fastCreate(index < 4 ? ui.Control : this.Month, item, this, { value: index - 4 });
+                return core.$fastCreate(index < 4 ? ui.Control : this.Month, item, this, {value: index - 4});
             }, this);
 
             this.MONTHS.forEach(function (item, index) {
@@ -47,9 +47,9 @@
                 el,
                 'AFTERBEGIN',
                 '<div class="' + options.classes.join('-header ') + '"><div class="' +
-                    options.classes.join('-title ') + '"></div><div class="' +
-                    options.classes.join('-prev-year ') + ui.Button.CLASS + '">&lt;&lt;</div><div class="' +
-                    options.classes.join('-next-year ') + ui.Button.CLASS + '">&gt;&gt;</div></div>'
+                options.classes.join('-title ') + '"></div><div class="' +
+                options.classes.join('-prev-year ') + ui.Button.CLASS + '">&lt;&lt;</div><div class="' +
+                options.classes.join('-next-year ') + ui.Button.CLASS + '">&gt;&gt;</div></div>'
             );
             // 获取el所有直属节点
             var headers = dom.children(el.firstChild);
@@ -240,6 +240,7 @@
             ui.Text.call(this, el, options);
             this.getInput().readOnly = true;
             this.setPopup(core.getSingleton(ui.Month));
+            this.clean = options.clean !== false;
         },
         {
             /**
@@ -261,9 +262,11 @@
                 return list.length < 2 ? undefined : new Date(+list[0], +list[1] - 1);
             },
             onready: function () {
-                var el = ecui.dom.create({ className: 'ui-calendar-input-clear' });
-                dom.insertAfter(el, this.getInput());
-                core.$fastCreate(this.Clear, el, this, {});
+                if (this.clean) {
+                    var el = ecui.dom.create({className: 'ui-calendar-input-clear'});
+                    dom.insertAfter(el, this.getInput());
+                    core.$fastCreate(this.Clear, el, this, {});
+                }
             },
 
             /**
