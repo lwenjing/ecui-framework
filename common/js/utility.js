@@ -481,7 +481,6 @@ fapiao.TableListRoute.prototype.onafterrender = function () {
 
 function calHeight() {
     var route = ecui.esr.getLocation().split('~')[0];
-    console.log(ecui.get('bill-search-list-table'), 'bill-search-list-table');
     if (ecui.get('bill-search-list-table')) {
         var containerH = ecui.$('container').offsetHeight;
         var searchConditionsH = ecui.$('searchConditions').offsetHeight;
