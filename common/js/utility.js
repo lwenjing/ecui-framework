@@ -485,7 +485,6 @@ function calHeight() {
     if (ecui.get('bill-search-list-table')) {
         var containerH = ecui.$('container').offsetHeight;
         var searchConditionsH = ecui.$('searchConditions').offsetHeight;
-        console.log(searchConditionsH, 'searchConditionsH');
         var search_table = ecui.$('billSearch_table');
         var tableContainer = ecui.$('tableContainer');
         var narrow = ecui.getScrollNarrow();
