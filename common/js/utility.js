@@ -481,9 +481,11 @@ fapiao.TableListRoute.prototype.onafterrender = function () {
 
 function calHeight() {
     var route = ecui.esr.getLocation().split('~')[0];
-    if (route === '/invoice/query/bill') {
+    console.log(ecui.get('bill-search-list-table'), 'bill-search-list-table');
+    if (ecui.get('bill-search-list-table')) {
         var containerH = ecui.$('container').offsetHeight;
         var searchConditionsH = ecui.$('searchConditions').offsetHeight;
+        console.log(searchConditionsH, 'searchConditionsH');
         var search_table = ecui.$('billSearch_table');
         var tableContainer = ecui.$('tableContainer');
         var narrow = ecui.getScrollNarrow();
