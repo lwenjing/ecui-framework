@@ -487,16 +487,16 @@ function calHeight() {
         var search_table = ecui.$('billSearch_table');
         var tableContainer = ecui.$('tableContainer');
         var narrow = ecui.getScrollNarrow();
-        var billSearch_tableH = containerH - searchConditionsH - 50;
+        var billSearch_tableH = (containerH - searchConditionsH - 50) > 240 ? (containerH - searchConditionsH - 50) : 240;
         var tableContainerH = billSearch_tableH - 120;
-        search_table.style.height = billSearch_tableH + 'px';
+        search_table.style.height = billSearch_tableH  + 'px';
+
         if (tableContainer) {
             tableContainer.style.height = tableContainerH + 'px';
             if (tableContainer.scrollWidth === tableContainer.clientWidth) {
                 narrow = 0;
             }
-            console.log(tableContainerH, narrow);
-            tableContainerH = tableContainerH > 200 ? tableContainerH : 200;
+            tableContainerH = tableContainerH > 240 ? tableContainerH : 240;
             ecui.get("bill-search-list-table").setSize(undefined, tableContainerH - narrow);
         }
     }
