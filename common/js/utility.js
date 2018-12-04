@@ -135,9 +135,14 @@ fapiao.util = {
         n = Math.abs(n);
 
         var s = '';
+        var test1 = n.toString().split('.');
+        var test2 = '';
+        if(test1.length > 1){
+            test2 = test1[1];
+        }
 
         for (var i = 0; i < fraction.length; i++) {
-            s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '');
+            s += (digit[test2.substr(i,1)%10] + fraction[i]).replace(/零./, '');
         }
         s = s || '整';
         n = Math.floor(n);
