@@ -140,7 +140,6 @@ fapiao.util = {
             s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '');
         }
         s = s || '整';
-        debugger;
         n = Math.floor(n);
 
         for (var i = 0; i < unit[0].length && n > 0; i++) {
