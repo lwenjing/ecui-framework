@@ -128,29 +128,14 @@ fapiao.util = {
         return ret;
     },
     DX: function (n) {
-        var fraction = ['角', '分'];
-        var digit = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
-        var unit = [['元', '万', '亿'], ['', '拾', '佰', '仟']];
-        var head = n < 0 ? '负' : '';
-        n = Math.abs(n);
-
-        var s = '';
-
-        for (var i = 0; i < fraction.length; i++) {
-            s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '');
-        }
-        s = s || '整';
-        n = Math.floor(n);
-
-        for (var i = 0; i < unit[0].length && n > 0; i++) {
-            var p = '';
-            for (var j = 0; j < unit[1].length && n > 0; j++) {
-                p = digit[n % 10] + unit[1][j] + p;
-                n = Math.floor(n / 10);
-            }
-            s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
-        }
-        return head + s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '');
+        var unit = "千百拾亿千百拾万千百拾元角分", str = "";
+        var p = n.indexOf('.');
+        if (p >= 0)
+        n = n.substring(0, p) + n.substr(p+1, 2);
+        unit = unit.substr(unit.length - n.length);
+        for (var i=0; i < n.length; i++)
+        str += '零壹贰叁肆伍陆柒捌玖'.charAt(n.charAt(i)) + unit.charAt(i);
+        return str.replace(/零(千|百|拾|角)/g, "零").replace(/(零)+/g, "零").replace(/零(万|亿|元)/g, "$1").replace(/(亿)万|壹(拾)/g, "$1$2").replace(/^元零?|零分/g, "").replace(/元$/g, "元整");
     }
 };
 
@@ -490,6 +475,8 @@ function calHeight() {
             if (tableContainer.scrollWidth === tableContainer.clientWidth) {
                 narrow = 0;
             }
+            console.log(tableContainerH, narrow);
+            tableContainerH = tableContainerH > 200 ? tableContainerH : 200;
             ecui.get("bill-search-list-table").setSize(undefined, tableContainerH - narrow);
         }
     }
