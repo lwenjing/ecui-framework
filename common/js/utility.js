@@ -997,7 +997,7 @@ Gridframe.prototype = {
                 }
                 context[search.orgDataName].forEach(function (option, i) {
                     if (!search.values && search.required && i === 0) {
-                        context[search.orgName] = option[search.orgIdColumn];
+                        context[search.orgName] = String(option[search.orgIdColumn]);
                     }
                     self[search.orgName][option[search.orgIdColumn]] = option;
                     searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '">' + option[search.orgNameColumn] + '</div>');
