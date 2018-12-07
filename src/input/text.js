@@ -137,6 +137,8 @@ _ePlaceHolder - 为空时的提示信息标签
                 } else {
                     body.innerHTML = util.encodeHTML(input.value);
                 }
+                dom.addClass(input, 'ui-hide');
+                body.appendChild(input);
             },
 
             /**
@@ -156,6 +158,7 @@ _ePlaceHolder - 为空时的提示信息标签
 
                 var body = this.getBody();
                 body.innerHTML = '';
+                dom.removeClass(this.getInput(), 'ui-hide');
                 body.appendChild(this.getInput());
             },
 
