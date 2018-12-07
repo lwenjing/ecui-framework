@@ -135,27 +135,23 @@ fapiao.util = {
         n = Math.abs(n);
 
         var s = '';
-        var test1 = n.toString().split('.');
-        var test2 = '';
-        if(test1.length > 1){
-            test2 = test1[1];
-        }
 
         for (var i = 0; i < fraction.length; i++) {
-            s += (digit[test2.substr(i,1)%10] + fraction[i]).replace(/零./, '');
+            s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]);
         }
         s = s || '整';
         n = Math.floor(n);
 
-        for (var i = 0; i < unit[0].length && n > 0; i++) {
+        for (var i = 0; i < unit[0].length && n >= 0; i++) {
             var p = '';
-            for (var j = 0; j < unit[1].length && n > 0; j++) {
+            for (var j = 0; j < unit[1].length && n >= 0; j++) {
                 p = digit[n % 10] + unit[1][j] + p;
                 n = Math.floor(n / 10);
             }
-            s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
+            s = (p.replace(/(零.)*零$/, '').replace(/(零.)+/g, '').replace(/^$/, '零') + unit[0][i]).replace(/零(亿|万)/, '') + s;
+            // s = (i === 0 ? p.replace(/(零.)*零$/, '').replace(/^$/, '零') : p.replace(/(零.)*零$/, '')) + unit[0][i] + s;
         }
-        return head + s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '');
+        return head + s.replace(/(零.)*零元/, '零元').replace(/^整$/, '');
     }
 };
 
@@ -481,22 +477,20 @@ fapiao.TableListRoute.prototype.onafterrender = function () {
 
 function calHeight() {
     var route = ecui.esr.getLocation().split('~')[0];
-    if (ecui.get('bill-search-list-table')) {
+    if (route === '/invoice/query/bill') {
         var containerH = ecui.$('container').offsetHeight;
         var searchConditionsH = ecui.$('searchConditions').offsetHeight;
-        var search_table = ecui.get('billCommonSearch_table').getMain();
+        var search_table = ecui.$('billSearch_table');
         var tableContainer = ecui.$('tableContainer');
         var narrow = ecui.getScrollNarrow();
-        var billSearch_tableH = (containerH - searchConditionsH - 50) > 240 ? (containerH - searchConditionsH - 50) : 240;
+        var billSearch_tableH = containerH - searchConditionsH - 50;
         var tableContainerH = billSearch_tableH - 120;
-        search_table.style.height = billSearch_tableH  + 'px';
-
+        search_table.style.height = billSearch_tableH + 'px';
         if (tableContainer) {
             tableContainer.style.height = tableContainerH + 'px';
             if (tableContainer.scrollWidth === tableContainer.clientWidth) {
                 narrow = 0;
             }
-            tableContainerH = tableContainerH > 240 ? tableContainerH : 240;
             ecui.get("bill-search-list-table").setSize(undefined, tableContainerH - narrow);
         }
     }
@@ -997,7 +991,7 @@ Gridframe.prototype = {
                 }
                 context[search.orgDataName].forEach(function (option, i) {
                     if (!search.values && search.required && i === 0) {
-                        context[search.orgName] = String(option[search.orgIdColumn]);
+                        context[search.orgName] = option[search.orgIdColumn];
                     }
                     self[search.orgName][option[search.orgIdColumn]] = option;
                     searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '">' + option[search.orgNameColumn] + '</div>');
