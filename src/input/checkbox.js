@@ -304,6 +304,17 @@ _bRequired       - 是否必须选择
 
                     this._cSubject = checkbox;
                 }
+            },
+
+            /**
+             * 改变复选框状态。
+             * @private
+             *
+             * @param {ecui.ui.Checkbox} checkbox 复选框控件
+             * @param {number} status 新的状态，0--全选，1--未选，2--半选
+             */
+            setStatus: function (status) {
+                setStatus(this, status);
             }
         }
     );

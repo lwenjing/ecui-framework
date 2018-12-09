@@ -256,7 +256,9 @@ fapiao.setEditFormValue = function (data, form, isDefault) {
                     } else if (_control instanceof ecui.esr.CreateObject) {
                         ignore.indexOf(name) !== -1 && arr_obj_ignore.push(name);
                     } else {
-                        _control.setValue(value);
+                        if (_control.setValue) {
+                            _control.setValue(value);
+                        }
                     }
 
                 } else {
