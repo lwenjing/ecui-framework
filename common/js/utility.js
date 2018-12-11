@@ -1338,7 +1338,6 @@ Gridframe.prototype = {
             tableDom.push('    <div ui="type:checkbox;id:' + self.allChecked + '">');
             tableDom.push('        <input name="mxSelect" type="checkbox">');
             tableDom.push('    </div>');
-            tableDom.push('    <span>&nbsp;</span>');
             tableDom.push('</div>');
             tableDom.push('</th>');
         }
