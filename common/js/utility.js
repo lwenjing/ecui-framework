@@ -486,7 +486,7 @@ function calHeight() {
         var narrow = ecui.getScrollNarrow();
         var billSearch_tableH = (containerH - searchConditionsH - 50) > 240 ? (containerH - searchConditionsH - 50) : 240;
         var tableContainerH = billSearch_tableH - 120;
-        search_table.style.height = billSearch_tableH  + 'px';
+        search_table.style.height = billSearch_tableH + 'px';
 
         if (tableContainer) {
             tableContainer.style.height = tableContainerH + 'px';
@@ -805,7 +805,7 @@ Gridframe.prototype = {
         }
 
         // 表格总宽度计算
-        self.tableWidth = 60;
+        self.tableWidth = 80;
         self.options.columns.forEach(function (column) {
             self.tableWidth += parseInt(column.width || "120px");
         });
@@ -1014,18 +1014,18 @@ Gridframe.prototype = {
                 if ("calendar-input" === search.type) {
                     var names = search.name.split(":");
                     if (names.length > 1) {
-                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:'+clean+';id:' + names[0] + ';name:' + names[0] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[0] + '">');
+                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:' + clean + ';id:' + names[0] + ';name:' + names[0] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[0] + '">');
                         searchDom.push('<span class="span-style">&nbsp;- </span>');
-                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:'+clean+';id:' + names[1] + ';name:' + names[1] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[1] + '">');
+                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:' + clean + ';id:' + names[1] + ';name:' + names[1] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[1] + '">');
                     } else {
-                        searchDom.push('<input ui="type:calendar-input;clean:'+clean+';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
+                        searchDom.push('<input ui="type:calendar-input;clean:' + clean + ';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     }
                 } else if ("MonthInput" === search.type) {
                     var names = search.name.split(":");
-                    searchDom.push('<input ui="type:MonthInput;clean:'+clean+';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
+                    searchDom.push('<input ui="type:MonthInput;clean:' + clean + ';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     if (names.length > 1) {
                         searchDom.push('<span class="span-style">&nbsp;- </span>');
-                        searchDom.push('<input ui="type:MonthInput;clean:'+clean+';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
+                        searchDom.push('<input ui="type:MonthInput;clean:' + clean + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
                     }
                 } else {
                     searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input">');
@@ -1332,19 +1332,17 @@ Gridframe.prototype = {
         tableDom.push('            <table style="width:' + self.tableWidth + 'px">');
         tableDom.push('                <thead>');
         tableDom.push('                <tr>');
-        tableDom.push('<th style="width: 60px;">');
         if (self.options.checkbox) {
+            tableDom.push('<th style="width: 40px;">');
             tableDom.push('<div ui="type:label;for:checkbox">');
             tableDom.push('    <div ui="type:checkbox;id:' + self.allChecked + '">');
             tableDom.push('        <input name="mxSelect" type="checkbox">');
             tableDom.push('    </div>');
             tableDom.push('    <span>&nbsp;</span>');
             tableDom.push('</div>');
-        } else {
-            tableDom.push('<span>&nbsp;</span>');
+            tableDom.push('</th>');
         }
-        tableDom.push('</th>');
-
+        tableDom.push('<th style="width: 40px;">序号</th>');
         self.options.columns.forEach(function (column) {
             tableDom.push("<th");
             if (column.thClazz) {
@@ -1366,17 +1364,17 @@ Gridframe.prototype = {
                 self.pageData[item[self.options.idColumn]] = item;
                 operateDom = [];
                 tableDom.push('<tr>');
-                tableDom.push('<td>');
                 if (self.options.checkbox) {
+                    tableDom.push('<td>');
                     tableDom.push('<div ui="type:label;for:checkbox">');
                     tableDom.push('    <div ui="type:checkbox;subject:' + self.allChecked + '">');
                     tableDom.push('        <input value="' + item[self.options.idColumn] + '" name="mxSelect" type="checkbox">');
                     tableDom.push('    </div>');
-                    tableDom.push('    <span>' + (index + 1) + '</span>');
                     tableDom.push('</div>');
-                } else {
-                    tableDom.push('<span>' + (index + 1) + '</span>');
+                    tableDom.push('</td>');
                 }
+                tableDom.push('<td>');
+                tableDom.push('<span>' + (index + 1) + '</span>');
                 tableDom.push('</td>');
 
                 self.options.columns.forEach(function (column) {
