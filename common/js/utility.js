@@ -1033,7 +1033,27 @@ Gridframe.prototype = {
                     } else {
                         searchDom.push('<input ui="type:calendar-input;clean:'+clean+';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     }
-                } else if ("MonthInput" === search.type) {
+                }else if("calendar-input-hour" === search.type){
+                    // 初始化时间选项
+                    var hourList = '<div ui="value:;">时</div>';
+                    for(var i=0;i<24;i++){
+                        hourList += '<div ui="value: '+i+'">'+i+'</div>'
+                    }
+                    var names = search.name.split(":");
+                    if (names.length > 1) {
+                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:' + clean + ';id:' + names[0] + ';name:' + names[0] + ';t1name:' + names[0] + ';t2name:' + names[1] + ';"  targetName="'+names[0]+'Hour" class="search-input" name="' + names[0] + '">');
+                        searchDom.push('<div style="display: inline-block;width: 12px;text-align: center">:</div>');
+                        searchDom.push('<div ui="type:select;id:' + names[0] +'Hour'+ ';name:' + names[0] +'Hour'+ '" class="search-input floatl" style="border-radius: 5px;width: 40px!important;">' +
+                            hourList +
+                            '</div>');
+                        searchDom.push('<span class="span-style">&nbsp;- </span>');
+                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:' + clean + ';id:' + names[1] + ';name:' + names[1] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[1] + '">');
+                        searchDom.push('<div style="display: inline-block;width: 12px;text-align: center">:</div>');
+                        searchDom.push('<div ui="type:select;id:' + names[1] +'Hour'+ ';name:' + names[1] +'Hour'+ ';" class="search-input floatl" style="border-radius: 5px;width: 40px!important;">' +
+                            hourList +
+                            '</div>');
+                    }
+                }else if ("MonthInput" === search.type) {
                     var names = search.name.split(":");
                     searchDom.push('<input ui="type:MonthInput;clean:'+clean+';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     if (names.length > 1) {
