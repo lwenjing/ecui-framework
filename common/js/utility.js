@@ -151,7 +151,7 @@ fapiao.util = {
             s = (p.replace(/(零.)*零$/, '').replace(/(零.)+/g, '').replace(/^$/, '零') + unit[0][i]).replace(/零(亿|万)/, '') + s;
             // s = (i === 0 ? p.replace(/(零.)*零$/, '').replace(/^$/, '零') : p.replace(/(零.)*零$/, '')) + unit[0][i] + s;
         }
-        return head + s.replace(/(零.)*零元/, '零元').replace(/^整$/, '');
+        return head + s.replace(/(零.)*零元/, '零元').replace(/^整$/, '').replace(/零角零分/, '整');
     }
 };
 
