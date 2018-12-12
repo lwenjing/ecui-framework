@@ -34,8 +34,8 @@
 
         var popupTop = top + owner.getHeight(),
             popupLeft = left,
-            height = this.getHeight(),
-            width = this.getWidth();
+            height = this.getHeight() || 0,
+            width = this.getWidth() || 0;
 
         popupEl.style.left = (popupLeft + width <= container.scrollWidth ? popupLeft : Math.max(left - width + owner.getWidth(), 0)) + 'px';
         popupEl.style.top = (popupTop + height <= container.scrollHeight ? popupTop : Math.max(top - height, 0)) + 'px';

@@ -135,7 +135,9 @@
              * @override
              */
             oninput: function (event) {
-                this._uOptions.show();
+                if (this.isShow()) {
+                    this._uOptions.show();
+                }
                 for (var i = 0, tree = [dom.first(this._uOptions.getMain()).getControl()], node; node = tree[i++]; ) {
                     Array.prototype.push.apply(tree, node.getChildren());
                 }
