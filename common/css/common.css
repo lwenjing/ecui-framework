@@ -1016,6 +1016,7 @@ a {
     .ui-progress-bar {
         position: relative;
         display: inline-block;
+        vertical-align: middle;
         top: 28px;
         width: 80%;
         height: 5px;
