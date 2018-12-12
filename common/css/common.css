@@ -1006,14 +1006,16 @@ a {
 */
 
 .ui-upload {
+    position: relative;
     text-align: center;
     width: 300px;
     height: 300px;
     border: 1px solid black;
     display: block;
+    overflow: hidden;
     .ui-progress-bar {
         position: relative;
-        .inline-block();
+        display: inline-block;
         top: 28px;
         width: 80%;
         height: 5px;
@@ -1024,6 +1026,18 @@ a {
         width: 50px;
         height: 50px;
         opacity: 0.5;
+    }
+    input {
+        position: absolute;
+        display: block !important;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        filter:alpha(opacity=0); /* IE */
+        -moz-opacity:0; /* 老版Mozilla */
+        -khtml-opacity:0; /* 老版Safari */
+        opacity: 0; /* 支持opacity的浏览器*/
     }
 }
 

@@ -29,25 +29,23 @@
                 iframe = dom.create('IFRAME', {
                     name: name,
                     className: 'ui-hide'
-                }),
-                form = dom.create('FORM', {
-                    action: this._sUrl,
-                    method: 'POST',
-                    enctype: 'multipart/form-data',
-                    target: name
                 });
             document.body.appendChild(iframe);
-            document.body.appendChild(form);
+            dom.insertHTML(document.body, 'beforeEnd', '<form action="' + this._sUrl + '" method="POST" enctype="multipart/form-data" target="' + name + '"></form>');
+            var form = document.body.lastChild;
             iframe.onreadystatechange = function () {
-                if (iframe.readyState === 'complete') {
+                if (iframe.contentDocument.body && iframe.readyState === 'complete') {
                     var text = iframe.contentDocument.body.innerHTML;
                     iframe.onreadystatechange = null;
                     document.body.removeChild(form);
                     document.body.removeChild(iframe);
                     this.onupload(text);
                 }
-            };
-            form.appendChild(this._eFile.cloneNode(false));
+            }.bind(this);
+            var cloned = this._eFile.cloneNode(false);
+            dom.insertBefore(cloned, this._eFile);
+            form.appendChild(this._eFile);
+            this._eFile = cloned;
             form.submit();
         } : function () {
             var reader = new FileReader(),
@@ -106,7 +104,6 @@
                 ui.Control.prototype.$ready.call(this, event);
                 dom.addEventListener(this._eFile, 'change', fileChangeHandler.bind(this));
             },
-
             /**
              * 设置控件上传文件路径。
              * @public
