@@ -1005,6 +1005,8 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
         DEFAULT_PAGE: '/index',
         DEFAULT_MAIN: 'main',
 
+        beforeRequest: util.blank,
+        afterRequest: util.blank,
         // 用于创建空对象，参见request方法
         CreateObject: core.inherits(
             ui.FormInput,
@@ -1567,13 +1569,14 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     url = replace(method[method.length === 1 ? 0 : 1]);
                     method = 'GET';
                 }
-
+                esr.beforeRequest();
                 io.ajax(replace(url, true), {
                     method: method,
                     headers: headers,
                     data: data,
                     onsuccess: function (text) {
                         count--;
+                        esr.afterRequest();
                         try {
                             var data = JSON.parse(text),
                                 key;
@@ -1616,6 +1619,7 @@ btw: 如果要考虑对低版本IE兼容，请第一次进入的时候请不要�
                     },
                     onerror: function (xhr) {
                         count--;
+                        esr.afterRequest();
                         err.push({url: varUrl, name: varName, xhr: xhr});
                         if (!count) {
                             if (onerror(err) === false) {
