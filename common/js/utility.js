@@ -1037,7 +1037,11 @@ Gridframe.prototype = {
                     // 初始化时间选项
                     var hourList = '<div ui="value:;">时</div>';
                     for(var i=0;i<24;i++){
-                        hourList += '<div ui="value: '+i+'">'+i+'</div>'
+                        if(i < 10 && i !== 0){
+                            hourList += '<div ui="value: 0'+i+'">'+i+'</div>'
+                        }else{
+                            hourList += '<div ui="value: '+i+'">'+i+'</div>'
+                        }
                     }
                     var names = search.name.split(":");
                     if (names.length > 1) {
