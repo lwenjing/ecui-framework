@@ -474,33 +474,35 @@ fapiao.TableListRoute.prototype.onbeforerender = function (context) {
 };
 
 fapiao.TableListRoute.prototype.onafterrender = function () {
-    calHeight();
+    window.calHeight();
 };
 
-function calHeight() {
+window.calHeight = function() {
     if (ecui.get('bill-search-list-table')) {
-        var containerH = ecui.$('container').offsetHeight;
-        var searchConditionsH = ecui.$('searchConditions').offsetHeight;
-        var search_table = ecui.get('billCommonSearch_table').getMain();
-        var tableContainer = ecui.$('tableContainer');
+        var containerHeight = ecui.$('container').offsetHeight;
+        var searchHeight = ecui.$('searchConditions').offsetHeight;
+        var tableMain = ecui.get('billCommonSearch_table').getMain();
+        var listTableContent = ecui.$('tableContainer');
         var narrow = ecui.getScrollNarrow();
-        var billSearch_tableH = (containerH - searchConditionsH - 50) > 240 ? (containerH - searchConditionsH - 50) : 240;
-        var tableContainerH = billSearch_tableH - 120;
-        search_table.style.height = billSearch_tableH + 'px';
-
-        if (tableContainer) {
-            tableContainer.style.height = tableContainerH + 'px';
-            if (tableContainer.scrollWidth === tableContainer.clientWidth) {
+        var tableHeight = containerHeight - searchHeight - 55;
+        if (tableHeight < 400)
+            tableHeight = 400;
+        var tableContentHeight = tableHeight - 120;
+        tableMain.style.height = tableHeight + 'px';
+        if (listTableContent) {
+            listTableContent.style.height = tableContentHeight + 'px';
+            if (listTableContent.scrollWidth === listTableContent.clientWidth) {
                 narrow = 0;
             }
-            tableContainerH = tableContainerH > 240 ? tableContainerH : 240;
-            ecui.get("bill-search-list-table").setSize(undefined, tableContainerH - narrow);
+            var tableControl = ecui.get("bill-search-list-table");
+            tableControl.setSize(undefined, tableContentHeight - narrow);
+            tableControl.resize();
         }
     }
-}
+};
 
 window.onresize = function () {
-    calHeight();
+    window.calHeight();
 };
 
 /**
@@ -852,7 +854,7 @@ Gridframe.prototype = {
                 context[self.name] = self;
 
                 window.onresize = function () {
-                    calHeight();
+                    window.calHeight();
                     if (ecui.$(self.listTableMain) && self.options.fullHeight) {
                         self.calcHeight();
                     }
