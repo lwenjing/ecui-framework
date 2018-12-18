@@ -135,23 +135,34 @@ fapiao.util = {
         n = Math.abs(n);
 
         var s = '';
+        var test1 = n.toString().split('.');
+        var test2 = '';
+        if(test1.length > 1){
+            test2 = test1[1];
+        }
 
         for (var i = 0; i < fraction.length; i++) {
-            s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]);
+            if(Math.floor(n)>0){
+                s += (digit[test2.substr(i,1)%10] + fraction[i])
+            } else{
+                s += (digit[test2.substr(i,1)%10] + fraction[i]).replace(/零./, '');
+            } 
         }
-        s = s || '整';
+        if(s=="零角零分"){
+            s = '整'
+        }
+        // s = s || '整';
         n = Math.floor(n);
 
-        for (var i = 0; i < unit[0].length && n >= 0; i++) {
+        for (var i = 0; i < unit[0].length && n > 0; i++) {
             var p = '';
-            for (var j = 0; j < unit[1].length && n >= 0; j++) {
+            for (var j = 0; j < unit[1].length && n > 0; j++) {
                 p = digit[n % 10] + unit[1][j] + p;
                 n = Math.floor(n / 10);
             }
-            s = (p.replace(/(零.)*零$/, '').replace(/(零.)+/g, '').replace(/^$/, '零') + unit[0][i]).replace(/零(亿|万)/, '') + s;
-            // s = (i === 0 ? p.replace(/(零.)*零$/, '').replace(/^$/, '零') : p.replace(/(零.)*零$/, '')) + unit[0][i] + s;
+            s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
         }
-        return head + s.replace(/(零.)*零元/, '零元').replace(/^整$/, '').replace(/零角零分/, '整');
+        return head + s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '');
     }
 };
 
