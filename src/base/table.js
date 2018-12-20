@@ -666,7 +666,7 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
 
                 var el = this._eLayout,
                     left = Math.min(el.scrollWidth - el.clientWidth, Math.max(0, el.scrollLeft + event.deltaX)),
-                    top = Math.min(el.scrollHeight - el.clientHeight, Math.max(0, el.scrollTop + event.deltaY));
+                    top = Math.min(el.scrollHeight - el.clientHeight, Math.max(0, el.scrollTop - event.deltaY));
 
                 if (el.scrollLeft !== left || el.scrollTop !== top) {
                     el.scrollLeft = left;
