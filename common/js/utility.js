@@ -146,7 +146,7 @@ fapiao.util = {
                 s += (digit[test2.substr(i,1)%10] + fraction[i])
             } else{
                 s += (digit[test2.substr(i,1)%10] + fraction[i]).replace(/零./, '');
-            } 
+            }
         }
         if(s=="零角零分"){
             s = '整'
@@ -1592,4 +1592,3 @@ fapiao.dateCompare = function (oldStartDOM, oldendDOM) {
         }
     }
 };
-
