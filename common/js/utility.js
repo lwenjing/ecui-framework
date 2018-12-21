@@ -716,7 +716,8 @@ var Gridframe = function (options) {
             alert(JSON.stringify(rowData));
         },
         initData: null,
-        appendRowData: null // 列表后追加数据,和单行数据的格式必须一致，可以是个 data，也可以是 function
+        appendRowData: null, // 列表后追加数据,和单行数据的格式必须一致，可以是个 data，也可以是 function
+        isNeedCheckButtonRight: null //页面是否需要校验按钮权限
     };
 
     this.pageData = {};
@@ -845,9 +846,23 @@ Gridframe.prototype = {
             //{else}//
             NAME: self.options.name,
             //{/if}//
+            model: [],
             main: self.options.main,
             tpl: html.join(""),
             view: self.gridframe,
+            onbeforerender: function (context) {
+                if(context.hasOwnProperty('roleList')){
+                    var roleArray = context.roleList.roleList;
+                    self.hasButtonRight = false;
+                    for(var i=0;i<roleArray.length;i++){
+                        // 判断当前登录人是否有税号管理员角色
+                        if(roleArray[i]['id'] === -1){
+                            self.hasButtonRight = true;
+                            break
+                        }
+                    }
+                }
+            },
             onafterrender: function (context) {
                 if (self.options.searchs) {
                     ecui.esr.callRoute(self.viewPrefix + self.searchName, true);
@@ -872,7 +887,9 @@ Gridframe.prototype = {
                 };
             }
         };
-
+        if(self.options.isNeedCheckButtonRight){
+            route.model.push('roleList@GET ' + URLS.RBAC.USER_ROLELIST+'?userId='+JSON.parse(localStorage.getItem('userInfo')).id);
+        }
         //{if 1}// ecui.esr.addRoute(self.prefixName, route);
         //{else}//
         ecui.esr.addRoute(self.options.name, route);
@@ -1033,7 +1050,31 @@ Gridframe.prototype = {
                     } else {
                         searchDom.push('<input ui="type:calendar-input;clean:' + clean + ';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     }
-                } else if ("MonthInput" === search.type) {
+                }else if("calendar-input-hour" === search.type){
+                    // 初始化时间选项
+                    var hourList = '<div ui="value:;">时</div>';
+                    for(var i=0;i<24;i++){
+                        if(i < 10 && i !== 0){
+                            hourList += '<div ui="value: 0'+i+'">'+i+'</div>'
+                        }else{
+                            hourList += '<div ui="value: '+i+'">'+i+'</div>'
+                        }
+                    }
+                    var names = search.name.split(":");
+                    if (names.length > 1) {
+                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:' + clean + ';id:' + names[0] + ';name:' + names[0] + ';t1name:' + names[0] + ';t2name:' + names[1] + ';"  targetName="'+names[0]+'Hour" class="search-input" name="' + names[0] + '">');
+                        searchDom.push('<div style="display: inline-block;width: 12px;text-align: center">:</div>');
+                        searchDom.push('<div ui="type:select;id:' + names[0] +'Hour'+ ';name:' + names[0] +'Hour'+ '" class="search-input floatl" style="border-radius: 5px;width: 40px!important;">' +
+                            hourList +
+                            '</div>');
+                        searchDom.push('<span class="span-style">&nbsp;- </span>');
+                        searchDom.push('<input ui="type:ui.GridQueryDate;clean:' + clean + ';id:' + names[1] + ';name:' + names[1] + ';t1name:' + names[0] + ';t2name:' + names[1] + '" class="search-input" name="' + names[1] + '">');
+                        searchDom.push('<div style="display: inline-block;width: 12px;text-align: center">:</div>');
+                        searchDom.push('<div ui="type:select;id:' + names[1] +'Hour'+ ';name:' + names[1] +'Hour'+ ';" class="search-input floatl" style="border-radius: 5px;width: 40px!important;">' +
+                            hourList +
+                            '</div>');
+                    }
+                }else if ("MonthInput" === search.type) {
                     var names = search.name.split(":");
                     searchDom.push('<input ui="type:MonthInput;clean:' + clean + ';name:' + names[0] + '" class="search-input" name="' + names[0] + '">');
                     if (names.length > 1) {
@@ -1123,16 +1164,18 @@ Gridframe.prototype = {
         if (buttons && buttons.length) {
             for (var i = 0; i < buttons.length; i++) {
                 var button = buttons[i];
-                buttonDom.push("<div class='white-border-btn grid-button' ui='type:ui.GridButton;id:");
-                buttonDom.push(self.prefix + "_" + button.name);
-                buttonDom.push(";gridName:");
-                buttonDom.push(self.name);
-                buttonDom.push("'>");
-                if (button.image) {
-                    buttonDom.push("<img src='" + button.image + "'>");
+                if(!button.hasOwnProperty('isCheckRole') || (button.hasOwnProperty('isCheckRole') && button['isCheckRole'] && self.hasButtonRight)){
+                    buttonDom.push("<div class='white-border-btn grid-button' ui='type:ui.GridButton;id:");
+                    buttonDom.push(self.prefix + "_" + button.name);
+                    buttonDom.push(";gridName:");
+                    buttonDom.push(self.name);
+                    buttonDom.push("'>");
+                    if (button.image) {
+                        buttonDom.push("<img src='" + button.image + "'>");
+                    }
+                    buttonDom.push(button.label);
+                    buttonDom.push("</div>");
                 }
-                buttonDom.push(button.label);
-                buttonDom.push("</div>");
             }
         }
         buttonDom.push("</div>");
