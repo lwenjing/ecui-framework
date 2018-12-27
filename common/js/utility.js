@@ -958,6 +958,17 @@ Gridframe.prototype = {
                     ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
                 }
             }, 100);
+            var form = document.forms[self.searchForm];
+
+            for(var i=0;i<form.elements.length;i++){
+                if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-select') != -1){
+                    form.elements[i].getControl().onchange = function(){
+                        console.log(this['_eInput']);
+                        this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 42 + 'px';
+                        self.reRenderSearch();
+                    }
+                }
+            }
         };
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.searchName, route);
