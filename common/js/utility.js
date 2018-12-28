@@ -946,8 +946,12 @@ Gridframe.prototype = {
             for(var i=0;i<form.elements.length;i++){
                 if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-select') != -1){
                     form.elements[i].getControl().onchange = function(){
-                        console.log(this['_eInput']);
                         this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 42 + 'px';
+                        self.reRenderSearch();
+                    }
+                }else if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-combox') != -1){
+                    form.elements[i].getControl().onchange = function(){
+                        this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 'px';
                         self.reRenderSearch();
                     }
                 }
@@ -1027,7 +1031,7 @@ Gridframe.prototype = {
                 searchDom.push('</div>');
                 searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.deptLabel + '</div>');
-                searchDom.push('    <div ui="type:Select;name:' + search.deptName + ';id:' + self.name + search.deptName + '" class="search-input">');
+                searchDom.push('    <div ui="type:Combox;name:' + search.deptName + ';id:' + self.name + search.deptName + '" class="search-input">');
                 searchDom.push('        <div ui="value:-1;">全部</div>');
                 searchDom.push('    </div>');
                 searchDom.push('</div>');
