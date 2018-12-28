@@ -1,0 +1,778 @@
+Searching 386 files for "type:select"
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/demo.html:
+   27  
+   28  
+   29:     <div ui="type:select;name:category;" style="width: 100px;height: 30px;">
+   30          <div ui="value:;">全部1</div>
+   31          <div ui="value:1;">全部1</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/_include/index.template.html:
+  110                  <!-- elif: ${item.type} === 'TreeCombox' || String.prototype.indexOf.call(${item.type},'TreeCombox') > 0 -->
+  111                      <div>
+  112:                         <ul ui="type:SelectTree;">
+  113                              <div class="root">root</div>
+  114                              <!-- use: form_tree(trees=${item.options}) -->
+  ...
+  531      <div class="selectItems">
+  532          <div class="edit-label" style="display: inline-block; vertical-align: middle;">业务类型：</div>
+  533:         <div ui="type:select;name:ywlx;" style="display: inline-block; vertical-align: middle;">
+  534              <div ui="value:;">请选择</div>
+  535              <!-- for: ${fapiao.baseInfo.YWLX} as ${item} -->
+  ...
+ 1337  <div ui="type:TreeCombox;name:bmId;id:${id}; value: ={ ${userInfo.bmId} || ${value} }; regexp: .+" class="form-input search-input ui-text">
+ 1338      <div>
+ 1339:         <ul ui="type:SelectTree">
+ 1340              <div class="root">root</div>
+ 1341              <!-- use: depart_user_tree(trees=${trees}) -->
+ ....
+ 2005              <div class="search-item" ui="type:input-group" style='display:inline-block;margin-left:20px;'>
+ 2006                  <div class="search-label"><span class="required">*</span>票据类型:</div>
+ 2007:                 <div ui="type:Select;name:pjlxid;required" style="width:200px;"  class="search-input">
+ 2008                      <div ui="value:01;">增值税专用发票</div>
+ 2009                      <div ui="value:02;">增值税普票发票</div>
+ ....
+ 2051              <div class="search-item">
+ 2052                  <div class="search-label">选择责任中心段</div>
+ 2053:                 <div ui="type:Select;name:selectZrzxd;id:selectZrzxd;" class="search-input">
+ 2054                      <div ui="value:;">请选择</div>
+ 2055                  </div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/invoice/apply/approve/route.bill.html:
+   11                  <div class="search-item">
+   12                      <div class="search-label">开票类型：</div>
+   13:                     <div ui="type:Select;name: kplx;" class="search-input">
+   14                          <div ui="value:;">全部</div>
+   15                          <!-- for:${fapiao.baseInfo.FPLX} as ${item} -->
+   ..
+   43                      <div class="search-item">
+   44                          <div class="search-label">销方信息：</div>
+   45:                         <div ui="type:Select;name:xsfJgid" class="search-input">
+   46                              <div ui="value:;">全部</div>
+   47                              <!-- for:${fapiao.baseInfo.XFXX} as ${item} -->
+   ..
+   52                      <!-- <div class="search-item">
+   53                          <div class="search-label">快递信息：</div>
+   54:                         <div ui="type:Select;name:kdxx" class="search-input">
+   55                              <div ui="value:;">全部</div> -->
+   56                              <!-- for:${fapiao.baseInfo.KDXX} as ${item} -->
+   ..
+   61                      <div class="search-item">
+   62                          <div class="search-label">发票标志：</div>
+   63:                         <div ui="type:Select;name:fplx" class="search-input">
+   64                              <div ui="value:;">全部</div>
+   65                              <!-- for:${fapiao.baseInfo.FPBZ} as ${item} -->
+   ..
+   70                      <!-- <div class="search-item">
+   71                          <div class="search-label">申请单状态：</div>
+   72:                         <div ui="type:Select;name:kpzt" class="search-input">
+   73                              <div ui="value:;">全部</div> -->
+   74                              <!-- for:${fapiao.baseInfo.KPZT} as ${item} -->
+   ..
+   79                      <div class="search-item">
+   80                          <div class="search-label">审批状态：</div>
+   81:                         <div ui="type:Select;name:spzt" class="search-input">
+   82                              <div ui="value:;">全部</div>
+   83                               <!-- for:${fapiao.baseInfo.SQSPZT} as ${item} -->
+   ..
+  176                  <div class="edit-item">
+  177                      <div class="edit-label">快递公司：</div>
+  178:                     <div ui="type:Select;name: spzt;" class="search-input">
+  179                              <div ui="value:;">全部</div>
+  180                              <!-- for:${fapiao.baseInfo.FPZT} as ${item} -->
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/invoice/apply/list/route.bill.html:
+   10                  <div class="search-item">
+   11                      <div class="search-label">发票类型：</div>
+   12:                     <div ui="type:Select;name: fplx;" class="search-input">
+   13                              <div ui="value:;">全部</div>
+   14                        <!-- for:${fapiao.baseInfo.FPLX} as ${item} -->
+   ..
+   44                      <div class="search-item">
+   45                          <div class="search-label">销方信息：</div>
+   46:                         <div ui="type:Select;name:xsfNsrsbh" class="search-input">
+   47                              <div ui="value:;">全部</div>
+   48                              <!-- for:${organs} as ${item} -->
+   ..
+   53                      <!-- <div class="search-item">
+   54                          <div class="search-label">快递信息：</div>
+   55:                         <div ui="type:Select;name:kdxx" class="search-input">
+   56                              <div ui="value:;">全部</div> -->
+   57                               <!-- for:${fapiao.baseInfo.KDXX} as ${item} -->
+   ..
+   62                      <div class="search-item">
+   63                          <div class="search-label">发票标志：</div>
+   64:                         <div ui="type:Select;name:kplx" class="search-input">
+   65                              <div ui="value:;">全部</div>
+   66                              <!-- for: ${fapiao.baseInfo.FPBZ} as ${item} -->
+   ..
+   72                      <div class="search-item">
+   73                          <div class="search-label">审批状态：</div>
+   74:                         <div ui="type:Select;name:spzt" class="search-input">
+   75                              <div ui="value:;">全部</div>
+   76                              <!-- for:${fapiao.baseInfo.CXSPZT} as ${item} -->
+   ..
+  224                  <div class="form-item" ui="type:input-group">
+  225                      <div class="form-label">开票类型：</div>
+  226:                     <div ui="type:Select;name:mc;value:${info.mc};required" class="form-input"></div>
+  227                      <div class="ui-tip">请输入正确的机构名称</div>
+  228                  </div>
+  ...
+  235                  <div class="form-item" ui="type:input-group">
+  236                      <div class="form-label">业务类型：</div>
+  237:                     <div ui="type:Select;name:mc;value:${info.mc};required" class="form-input"></div>
+  238                      <div class="ui-tip">请输入正确的机构名称</div>
+  239                  </div>
+  ...
+  357                  <div class="form-item" ui="type:input-group">
+  358                      <div class="form-label">购方税号：</div>
+  359:                     <div ui="type:Select;name:mc;value:${info.mc};required" class="form-input"></div>
+  360                      <div class="ui-tip">请输入正确的机构名称</div>
+  361                  </div>
+  ...
+  368                  <div class="form-item" ui="type:input-group">
+  369                      <div class="form-label">开户行及账号：</div>
+  370:                     <div ui="type:Select;name:mc;value:${info.mc};required" class="form-input"></div>
+  371                      <div class="ui-tip">请输入正确的机构名称</div>
+  372                  </div>
+  ...
+  379                  <div class="form-item" ui="type:input-group">
+  380                      <div class="form-label">推送邮箱：</div>
+  381:                     <div ui="type:Select;name:mc;value:${info.mc};required" class="form-input"></div>
+  382                      <div class="ui-tip">请输入正确的机构名称</div>
+  383                  </div>
+  ...
+  394                  <div class="form-item" ui="type:input-group">
+  395                      <div class="form-label">所在部门：</div>
+  396:                     <div ui="type:Select;name:mc;value:${info.mc};required" class="form-input"></div>
+  397                      <div class="ui-tip">请输入正确的机构名称</div>
+  398                  </div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/invoice/apply/manage/route.bill.html:
+   10                  <div class="search-item">
+   11                      <div class="search-label">发票类型：</div>
+   12:                     <div ui="type:Select;name: fplx;" class="search-input">
+   13                          <div ui="value:;">全部</div>
+   14                          <!-- for:${fapiao.baseInfo.FPLX} as ${item} -->
+   ..
+   44                      <div class="search-item">
+   45                          <div class="search-label">销方信息：</div>
+   46:                         <div ui="type:Select;name:xsfNsrsbh" class="search-input">
+   47                              <div ui="value:;">全部</div>
+   48                              <!-- for:${organs} as ${item} -->
+   ..
+   53                      <!-- <div class="search-item">
+   54                          <div class="search-label">快递信息：</div>
+   55:                         <div ui="type:Select;name:kdxx" class="search-input">
+   56                              <div ui="value:;">全部</div> -->
+   57                      <!-- for:${fapiao.baseInfo.KDXX} as ${item} -->
+   ..
+   62                      <div class="search-item">
+   63                          <div class="search-label">发票标志：</div>
+   64:                         <div ui="type:Select;name:kplx" class="search-input">
+   65                              <div ui="value:;">全部</div>
+   66                              <!-- for: ${fapiao.baseInfo.FPBZ} as ${item} -->
+   ..
+   72                      <div class="search-item">
+   73                          <div class="search-label">审批状态：</div>
+   74:                         <div ui="type:Select;name:spzt" class="search-input">
+   75                              <div ui="value:;">全部</div>
+   76                              <!-- for:${fapiao.baseInfo.CXSPZT} as ${item} -->
+   ..
+   82                      <div class="search-item">
+   83                          <div class="search-label">申请单状态：</div>
+   84:                         <div ui="type:Select;name:sqzt" class="search-input">
+   85                              <div ui="value:;">全部</div>
+   86                              <!-- for:${fapiao.baseInfo.SQDZT} as ${item} -->
+   ..
+  268                  <div class="form-item" ui="type:input-group">
+  269                      <div class="form-label">业务类型：</div>
+  270:                     <div ui="type:Select;id:draw-bill-pprove-ywlx;required" class="form-input">
+  271                          <input name="ywlx" data-name="ywlx" value="${detail.ywlx}" type="text" >
+  272                          <div ui="value:;">请选择</div>
+  ...
+  443                  <div class="form-item" ui="type:input-group">
+  444                      <div class="form-label">业务类型：</div>
+  445:                     <div ui="type:Select;name:ywlx;value:${detail.ywlx};required" class="form-input">
+  446                          <div ui="value:;">请选择</div>
+  447                          <!-- for: ${fapiao.baseInfo.YWLXS} as ${item} -->
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/invoice/print/route.bill.html:
+   10                  <div class="search-item">
+   11                      <div class="search-label">发票类型：</div>
+   12:                     <div ui="type:Select;name:fplx;value:004;" class="search-input">
+   13                          <!-- for: ${fapiao.baseInfo.FPLX} as ${item} -->
+   14                          <!-- if: ${item.id} !== '026' -->
+   ..
+   56                      <div class="search-item">
+   57                          <div class="search-label">发票状态：</div>
+   58:                         <div ui="type:Select;name: fpzt;" class="search-input">
+   59                              <!-- for: ${fapiao.baseInfo.FPZT} as ${item} -->
+   60                              <div ui="value:${item.id};">${item.text}</div>
+   ..
+   65                      <div class="search-item">
+   66                          <div class="search-label">交付状态：</div>
+   67:                         <div ui="type:Select;name: jfzt;" class="search-input">
+   68                              <div ui="value:;">全部</div>
+   69                              <!-- for: ${fapiao.baseInfo.JFZT} as ${item} -->
+   ..
+   74                      <div class="search-item">
+   75                          <div class="search-label">清单标志：</div>
+   76:                         <div ui="type:Select;name: qdbs;" class="search-input">
+   77                              <div ui="value:;">全部</div>
+   78                              <!-- for: ${fapiao.baseInfo.QDBZ} as ${item} -->
+   ..
+   83                      <div class="search-item">
+   84                          <div class="search-label">打印状态：</div>
+   85:                         <div ui="type:Select;name: dyzt;" class="search-input">
+   86                              <div ui="value:;">全部</div>
+   87                              <!-- for: ${fapiao.baseInfo.DYZT} as ${item} -->
+   ..
+  107                              ${fapiao.userInfo.org.mc}
+  108                          </div> -->
+  109:                     <!--<div ui="type:Select;name: ;value:male" class="manage-input" style="width: 245px!important;background-position: 260px center;">-->
+  110                      <!--<div ui="value:;">请选择</div>-->
+  111                      <!--&lt;!&ndash; for: ${sallerInfo.sallerInfoList} as ${item} &ndash;&gt;-->
+  ...
+  252                  <div class="search-item" ui="type:input-group">
+  253                      <div class="search-label"><span class="required">*</span>发票类型：</div>
+  254:                     <div ui="type:Select;name:fplx;value:;regexp:\S+;required;" class="search-input">
+  255                          <!-- for: ${fapiao.baseInfo.FPLX} as ${item} -->
+  256                              <!-- if: ${item.id} !== '026' -->
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/invoice/qrcode/route.bill.html:
+   29                              <div class="semicolon floatl">:</div>
+   30  
+   31:                             <div ui="type:select;id:busi_hour;value: ;" class="search-input floatl" style="border-radius: 5px;">
+   32                                  <!-- for:${hoursArray} as ${hour}-->
+   33                                  <div ui="value:${hour};">${hour}</div>
+   ..
+   35                              </div>
+   36                              <div class="semicolon floatl">:</div>
+   37:                             <div ui="type:select;id:busi_minute;value: ;" class="search-input floatl" style="border-radius: 5px;">
+   38                                  <!-- for:${minuteArray} as ${minute}-->
+   39                                  <div ui="value:${minute};">${minute}</div>
+   ..
+   46                      <div class="search-item" ui="type:input-group">
+   47                          <div class="search-label"><span class="must"> *</span>来源渠道：</div>
+   48:                         <!--<div ui="type:select;name:LYQD;required" class="manage-input">-->
+   49                          <!--<div ui="value:;">请选择</div>-->
+   50                          <!--&lt;!&ndash; for: ${fapiao.baseInfo.lyxt} as ${item} &ndash;&gt;-->
+   ..
+   64                          <div class="search-label"><span class="must"> *</span>业务类型：</div>
+   65                          <div class="ui-tip">请选择业务类型</div>
+   66:                         <div ui="type:select;name:ywlx;required" class="search-input">
+   67                              <div ui="value:;">请选择</div>
+   68                              <!-- for: ${fapiao.baseInfo.YWLX} as ${item} -->
+   ..
+   81                          <div class="search-label"><span class="must"> *</span>商品名称：</div>
+   82                          <div class="ui-tip">请选择商品名称</div>
+   83:                         <div ui="type:select;name:spfl;required" class="search-input">
+   84                              <div ui="value:;">请选择</div>
+   85                              <!-- for:${products} as ${product} -->
+   ..
+  125                  <div class="search-item" ui="type:input-group">
+  126                      <div class="search-label">业务类型：</div>
+  127:                     <div ui="type:select;name:ywlx" class="search-input">
+  128                          <div ui="value:;">请选择</div>
+  129                          <!-- for: ${fapiao.baseInfo.YWLX} as ${item} -->
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/invoice/query/route.bill.html:
+    9                  <div class="search-item">
+   10                      <div class="search-label">发票类型：</div>
+   11:                     <div ui="type:Select;name: fplx;" class="search-input">
+   12                          <div ui="value:;">全部</div>
+   13                          <!-- for: ${fapiao.baseInfo.FPLX} as ${item} -->
+   ..
+   38                      <div class="search-item">
+   39                          <div class="search-label">业务类型：</div>
+   40:                         <div ui="type:Select;name:ywlx;" class="search-input">
+   41                              <div ui="value:;">全部</div>
+   42                              <!-- for: ${fapiao.baseInfo.YWLX} as ${item} -->
+   ..
+   53                      <div class="search-item">
+   54                          <div class="search-label">来源渠道：</div>
+   55:                         <div ui="type:Select;name: lyxt;" class="search-input">
+   56                              <div ui="value:;">全部</div>
+   57                              <!-- for: ${fapiao.baseInfo.LYXT} as ${item} -->
+   ..
+   73                      <div class="search-item">
+   74                          <div class="search-label">发票状态：</div>
+   75:                         <div ui="type:Select;name: fpzt;" class="search-input">
+   76                              <div ui="value:;">全部</div>
+   77                              <!-- for: ${fapiao.baseInfo.FPZT} as ${item} -->
+   ..
+   83                      <div class="search-item">
+   84                          <div class="search-label">交付状态：</div>
+   85:                         <div ui="type:Select;name: jfzt;" class="search-input">
+   86                              <div ui="value:;">全部</div>
+   87                              <!-- for: ${fapiao.baseInfo.JFZT} as ${item} -->
+   ..
+  107                               class="search-input ui-text">
+  108                              <div>
+  109:                                 <ul ui="type:SelectTree">
+  110                                      <div class="root">root</div>
+  111                                      <!-- use: form_tree(trees=${organs}) -->
+  ...
+  120                      <div class="search-item" ui="type:input-group">
+  121                          <div class="search-label">开票人：</div>
+  122:                         <div ui="type:Select;name:kpr;id:user-depart-combox-2" class="search-input">
+  123                              <div ui="value:;">全部</div>
+  124                          </div>
+  ...
+  155       class="form-input search-input ui-text">
+  156      <div>
+  157:         <ul ui="type:SelectTree">
+  158              <div class="root">root</div>
+  159              <!-- use: depart_user_tree(trees=${trees}) -->
+  ...
+  185       class="form-input search-input ui-text">
+  186      <div>
+  187:         <ul ui="type:SelectTree">
+  188              <div class="root">root</div>
+  189          </ul>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/invoice/split/route.bill.html:
+   47      <div class="search-item" ui="type:input-group;" id="isywlx">
+   48          <div class="search-label"><span class="required">*</span>业务类型：</div>
+   49:             <div ui="type:select;id:manualEntering_ywlx;name:ywlx;required;" class="search-input">
+   50                  <div ui="value:;">请选择</div>
+   51                  <!-- for: ${fapiao.baseInfo.YWLX} as ${item} -->
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/system/goodsMsg/route.manage.html:
+  139              <div class="search-item" ui="type:input-group">
+  140                  <div class="search-label">零税率标识：</div>
+  141:                 <div ui="type:Select;name:lslbs;id:lslbs;value:${commodityInfo.lslbs};required" class="search-input">
+  142                      <div ui="value:;">请选择</div>
+  143                      <!-- for: ${fapiao.baseInfo.SLBS} as ${item} -->
+  ...
+  149              <div class="search-item" ui="type:input-group">
+  150                  <div class="search-label"><span class="required">*</span>所开发票类型：</div>
+  151:                 <div ui="type:Select;name:skfplx;value:${commodityInfo.skfplx};required" class="search-input">
+  152                      <div ui="value:;">请选择</div>
+  153                      <div ui="value:/007/;">普票</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/system/organization/route.manage.html:
+  109              <div class="form-item user-mark" ui="type:input-group">
+  110                  <div class="form-label"><span class="required">*</span>公司段：</div>
+  111:                 <div ui="type:Select;name:gsd;value:${info.gsd};required;regexp:\S+" class="form-input">
+  112                      <!-- for: ${baseinfo.gsd} as ${_item} -->
+  113                      <div ui="value:${_item.code};">${_item.name}</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/system/role/route.manage.html:
+   94                  <div class="search-item" ui="type:input-group">
+   95                      <div class="search-label"><span class="required">*</span>是否下级可用：</div>
+   96:                     <div ui="type:select;name:useFlag;value:${roleInfo.role.useFlag};required;regexp:\S+" class="search-input">
+   97                          <div ui="value:;">请选择</div>
+   98                          <div ui="value:1;">下级可用</div>
+   ..
+  110                  <!-- <div class="manage-item">
+  111                      <div class="manage-label">下级可见：</div>
+  112:                     <div ui="type:select" class="manage-select"></div>
+  113                  </div> -->
+  114              </div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/system/user/route.manage.html:
+  129                  <div ui="type:ui.user.TreeCombox;target:user-depart-combox;name:jgId;value: ${userInfo.jgId};required; regexp:\S+" class="search-input ui-text">
+  130                      <div>
+  131:                         <ul ui="type:SelectTree">
+  132                              <div class="root">root</div>
+  133                              <!-- use: organ_user_tree(trees=${organs}) -->
+  ...
+  153              <div class="search-item" ui="type:input-group">
+  154                  <div class="search-label"><span class="required">*</span>用户状态：</div>
+  155:                 <div ui="type:Select;name:userStatus;value:${userInfo.userStatus};required" class="search-input">
+  156                      <div ui="value:;">请选择</div>
+  157                      <div ui="value:1;">在职</div>
+  ...
+  219          <div class="search-label"><span class="required">*</span>纳税人识别号：</div>
+  220          <input ui="type:text;name:jgIdValue" value="${item.jgId}" class="ui-hide"/>
+  221:         <div ui="type:Select;name:list.jgId;value:${item.jgId};required" class="search-input ui-selnsrsbh" style="width:200px">
+  222              <div ui="value:;">请选择</div>
+  223              <!-- for: ${info.orgall} as ${_item} -->
+  ...
+  229      <div class="search-item" ui="type:input-group">
+  230          <div class="search-label"><span class="required">*</span>责任中心段：</div>
+  231:         <div ui="type:Select;name:list.zrzxd;value:${item.zrzxd};required" class="search-input">
+  232              <div ui="value:;">请选择</div>
+  233              <!-- for: ${info.zrzxd} as ${_item} -->
+  ...
+  243  <div ui="type:TreeCombox;name:bmId;id:user-depart-combox; value: ={ ${userInfo.bmId} || ${value} };required; regexp:\S+" class="form-input search-input ui-text">
+  244      <div>
+  245:         <ul ui="type:SelectTree">
+  246              <div class="root">root</div>
+  247              <!-- use: depart_user_tree(trees=${trees}) -->
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/dkdj/sjdr/route.VAT.html:
+   31              <div class="search-item" ui="type:input-group">
+   32                  <div class="search-label"><span class="required">*</span>代扣代缴项目：</div>
+   33:                 <div ui="type:Select;name: dkdjxm;required" class="search-input">
+   34                      <!-- for: ${fapiao.baseInfo.DKDJXMBH} as ${item}-->
+   35                      <div ui="value:${item.id}">${item.text}</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/dkdj/zwcz/route.VAT.html:
+   11              <div class="search-item" ui="type:input-group">
+   12                  <div class="search-label"><span class="required">*</span>贷方责任中心：</div>
+   13:                 <div ui="type:Select;name:czrzrzx;required"  class="search-input">
+   14                      <!-- for: ${sllist} as ${item} -->
+   15                      <div ui="value:${item};">${item}</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/dzdzk/route.VAT.html:
+   16              <div class="search-item" ui="type:input-group">
+   17                  <div class="search-label"><span class="required">*</span>纳税人识别号：</div>
+   18:                 <div ui="type:Select;name:nsrsbh;required" class="search-input">
+   19                      <!-- for: ${nsrsbhList} as ${item}-->
+   20                      <div ui="value:${item.id}">${item.text}</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/fpcj/dpsblr/route.VAT.html:
+   22              <div class="search-item" ui="type:input-group">
+   23                  <div class="search-label" style="width: 120px"><span class="required">*</span>选择责任中心段：</div>
+   24:                 <div ui="type:Select;name:dutyStage;required;id:selectZrzxd" class="search-input"></div>
+   25                  <div class="ui-tip">请选择责任中心段</div>
+   26              </div>
+   27              <div class="search-item" ui="type:input-group">
+   28                  <div class="search-label">业务渠道：</div>
+   29:                 <div ui="type:Select;name:ywqd;value:${userInfo.userName};" class="search-input">
+   30                      <div ui="value:;">请选择</div>
+   31                      <div ui="value:AP;">AP</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/fpcj/fppllr/route.VAT.html:
+   22              <div class="search-item" ui="type:input-group">
+   23                  <div class="search-label" style="width: 120px"><span class="required">*</span>选择责任中心段：</div>
+   24:                 <div ui="type:Select;name:dutyStage;required;id:selectZrzxd" class="search-input"></div>
+   25                  <div class="ui-tip">请选择责任中心段</div>
+   26              </div>
+   27              <div class="search-item" ui="type:input-group">
+   28                  <div class="search-label">业务渠道：</div>
+   29:                 <div ui="type:Select;name:ywqd;value:${userInfo.userName};" class="search-input">
+   30                      <div ui="value:;">请选择</div>
+   31                      <div ui="value:AP;">AP</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/fpcj/sgcjlr/route.VAT.html:
+    7              <div class="search-item" ui="type:input-group">
+    8                  <div class="search-label"><span class="required">*</span>票据类型：</div>
+    9:                 <div ui="type:Select;name:pjlxid;required" style="width:230px;" class="search-input">
+   10                      <div ui="value:01;">增值税专用发票</div>
+   11                      <div ui="value:02;">增值税普票发票</div>
+   ..
+   41              <div class="search-item" ui="type:input-group">
+   42                  <div class="search-label" style="width: 120px"><span class="required">*</span>选择责任中心段：</div>
+   43:                 <div ui="type:Select;name:dutyStage;required;id:selectZrzxd" class="search-input"></div>
+   44                  <div class="ui-tip">请选择责任中心段</div>
+   45              </div>
+   ..
+   63              <div class="search-item" ui="type:input-group">
+   64                  <div class="search-label">业务渠道：</div>
+   65:                 <div ui="type:Select;name:ywqd;value:${userInfo.userName};" class="search-input">
+   66                      <div ui="value:;">请选择</div>
+   67                      <div ui="value:AP;">AP</div>
+   ..
+  115              <div class="search-item" ui="type:input-group">
+  116                  <div class="search-label"><span class="required">*</span>主表和全票面标志</div>
+  117:                 <div ui="type:Select;name:flag;value:${userInfo.userName};required" class="search-input">
+  118                      <div ui="value:3;">请选择</div>
+  119                      <div ui="value:1;">只导出主表</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/fpcj/smqlre/route.VAT.html:
+   22              <div class="search-item" ui="type:input-group">
+   23                  <div class="search-label"><span class="required">*</span>公司段：</div>
+   24:                 <div ui="type:Select;name:companyStage;id:jfGcd;required" class="search-input">
+   25                      <!-- for: ${gsdList} as ${item} -->
+   26                      <div ui="value:${item.code}">${item.code}</div>
+   ..
+   31              <div class="search-item" ui="type:input-group">
+   32                  <div class="search-label"><span class="required">*</span>责任中心段：</div>
+   33:                 <div ui="type:Select;name:dutyStage;id:selectZrzxd;required" class="search-input"></div>
+   34                  <div class="ui-tip">请选择责任中心段</div>
+   35              </div>
+   36              <div class="search-item item-saller" ui="type:input-group">
+   37                  <div class="search-label"><span class="required">*</span>渠道：</div>
+   38:                 <div ui="type:Select;name:ywqd;len: 1-100;required" class="search-select">
+   39                      <!-- for: ${fapiao.baseInfo.ERPLYQD} as ${item} -->
+   40                      <div ui="value:${item.id};">${item.text}</div>
+   ..
+   50              <div class="search-item item-saller" ui="type:input-group">
+   51                  <div class="search-label"><span class="required">*</span>业务类型：</div>
+   52:                 <div ui="type:Select;name:ywlx;len: 1-100;required" class="search-select">
+   53                      <!-- for: ${fapiao.baseInfo.YRZYWLX} as ${item} -->
+   54                      <div ui="value:${item.id};">${item.text}</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/fpcj/tpsblr/route.VAT.html:
+   22              <div class="search-item" ui="type:input-group">
+   23                  <div class="search-label" style="width: 120px"><span class="required">*</span>选择责任中心段：</div>
+   24:                 <div ui="type:Select;name:dutyStage;required;id:selectZrzxd" class="search-input"></div>
+   25                  <div class="ui-tip">请选择责任中心段</div>
+   26              </div>
+   27              <div class="search-item" ui="type:input-group">
+   28                  <div class="search-label">业务渠道：</div>
+   29:                 <div ui="type:Select;name:ywqd;value:${userInfo.userName};" class="search-input">
+   30                      <div ui="value:;">请选择</div>
+   31                      <div ui="value:AP;">AP</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/fpcj/ycjfpgl/route.VAT.html:
+   25              <div class="search-item" ui="type:input-group">
+   26                  <div class="search-label">发票种类：</div>
+   27:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   28                      <div ui="value:;">请选择</div>
+   29                      <div ui="value:;">新增值税</div>
+   ..
+   39              <div class="search-item" ui="type:input-group">
+   40                  <div class="search-label">业务渠道：</div>
+   41:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   42                      <div ui="value:;">请选择</div>
+   43                      <div ui="value:;">AP</div>
+   ..
+  104              <div class="search-item" ui="type:input-group">
+  105                  <div class="search-label">纳税主体：</div>
+  106:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+  107                      <div ui="value:;">IE</div>
+  108                      <div ui="value:;">SQ</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/fpcj/zpsmlr/route.VAT.html:
+   22              <div class="search-item" ui="type:input-group">
+   23                  <div class="search-label"  style="width: 120px"><span class="required">*</span>选择责任中心段：</div>
+   24:                 <div ui="type:Select;name:dutyStage;required;id:selectZrzxd" class="search-input"></div>
+   25                  <div class="ui-tip">请选择责任中心段</div>
+   26              </div>
+   27              <div class="search-item" ui="type:input-group">
+   28                  <div class="search-label"><span class="required">*</span>业务渠道：</div>
+   29:                 <div ui="type:Select;name:ywqd;value:${userInfo.userName};required" class="search-input">
+   30                      <div ui="value:AP;">AP</div>
+   31                      <div ui="value:FCM;">FCM</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/fprz/rzjgcx/route.VAT.html:
+    6              <div class="search-item" ui="type:input-group">
+    7                  <div class="search-label"><span class="required">*</span>录入来源：</div>
+    8:                 <div ui="type:Select;name:flag;required" class="search-input">
+    9                      <div ui="value:1;">只导出主表</div>
+   10                      <div ui="value:2;">只导出全票面</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/hg/hqxtsj/route.VAT.html:
+   34              <div class="search-item" ui="type:input-group">
+   35                  <div class="search-label">发票种类：</div>
+   36:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   37                      <div ui="value:;">请选择</div>
+   38                      <div ui="value:;">新增值税</div>
+   ..
+   48              <div class="search-item" ui="type:input-group">
+   49                  <div class="search-label">业务渠道：</div>
+   50:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   51                      <div ui="value:;">请选择</div>
+   52                      <div ui="value:;">AP</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/hg/zwcl/route.VAT.html:
+    6              <div class="search-item">
+    7                  <div class="search-label"><span class="required">*</span>公司段：</div>
+    8:                 <div ui="type:Select;name:selectGsd;id:jfGcd;required" class="search-input">
+    9                      <!-- for: ${gsdlist} as ${item} -->
+   10                      <div ui="value:${item.code};">${item.code}</div>
+   ..
+   15              <div class="search-item">
+   16                  <div class="search-label"><span class="required">*</span>责任中心段：</div>
+   17:                 <div ui="type:Select;name:dkdjzzs;id:selectZrzxd;required" class="search-input"></div>
+   18                  <div class="ui-tip">请选择责任中心段</div>
+   19              </div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/hg/zwcz/route.VAT.html:
+   11              <div class="search-item" ui="type:input-group">
+   12                  <div class="search-label"><span class="required">*</span>贷方责任中心：</div>
+   13:                 <div ui="type:Select;name:czrzrzx;required"  class="search-input">
+   14                      <!-- for: ${sllist} as ${item} -->
+   15                      <div ui="value:${item};">${item}</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/jxsj/fprztj/route.VAT.html:
+    6                  <div class="search-item">
+    7                      <div class="search-label">主体机构：</div>
+    8:                     <div ui="type:Select;name: ztjg;" class="search-input">
+    9                          <div ui="value:;">全部</div>
+   10                          <!-- for: ${organs} as ${item} -->
+   ..
+   15                  <div class="search-item">
+   16                      <div class="search-label">年份：</div>
+   17:                     <div ui="type:Select;name: rzsj;" class="search-input">
+   18                          <div ui="value:;">全部</div>
+   19                          <!-- for: ${fapiao.baseInfo.YEAR} as ${item} -->
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/jxsj/xfpm/route.VAT.html:
+    6                  <div class="search-item">
+    7                      <div class="search-label">统计主体：</div>
+    8:                     <div ui="type:Select;name: fplx;" class="search-input">
+    9                          <div ui="value:;">全部</div>
+   10                          <!-- for: ${organs} as ${item} -->
+   ..
+   33                  <div class="search-item">
+   34                      <div class="search-label">排名：</div>
+   35:                     <div ui="type:Select;name: pm;" class="search-input">
+   36                          <div ui="value:;">全部</div>
+   37                          <!-- for: ${fapiao.baseInfo.PAIMING} as ${item} -->
+   ..
+   42                  <div class="search-item">
+   43                      <div class="search-label">维度：</div>
+   44:                     <div ui="type:Select;name: wd;" class="search-input">
+   45                          <div ui="value:;">全部</div>
+   46                          <!-- for: ${fapiao.baseInfo.WEIDU} as ${item} -->
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/jxsj/yrzfptj/route.VAT.html:
+   35              <div class="search-item" ui="type:input-group">
+   36                  <div class="search-label">发票种类：</div>
+   37:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   38                      <div ui="value:;">请选择</div>
+   39                      <div ui="value:;">新增值税</div>
+   ..
+   49              <div class="search-item" ui="type:input-group">
+   50                  <div class="search-label">业务渠道：</div>
+   51:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   52                      <div ui="value:;">请选择</div>
+   53                      <div ui="value:;">AP</div>
+   ..
+  114              <div class="search-item" ui="type:input-group">
+  115                  <div class="search-label">纳税主体：</div>
+  116:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+  117                      <div ui="value:;">IE</div>
+  118                      <div ui="value:;">SQ</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/jxsj/zkqsfx/route.VAT.html:
+    6                  <div class="search-item">
+    7                      <div class="search-label">统计主体：</div>
+    8:                     <div ui="type:Select;name: tjzt;" class="search-input">
+    9                          <div ui="value:;">全部</div>
+   10                          <!-- for: ${organs} as ${item} -->
+   ..
+   15                  <div class="search-item">
+   16                      <div class="search-label">年份：</div>
+   17:                     <div ui="type:Select;name: nf;" class="search-input">
+   18                          <div ui="value:;">全部</div>
+   19                          <!-- for: ${fapiao.baseInfo.YEAR} as ${item} -->
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/sezc/cwcz/route.VAT.html:
+   10              </div>
+   11              <div class="search-item" ui="type:input-group">
+   12:                 <div ui="type:Select;name:zrzxd;required" class="search-input">
+   13                      <!-- for: ${czrzezx} as ${item}-->
+   14                      <div ui="value:${item.JF_ZRZXD}">${item.JF_ZRZXD}</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/sezc/zccl/route.VAT.html:
+   16              <div class="search-item" ui="type:input-group">
+   17                  <div class="search-label"><span class="required">*</span>转出类型：</div>
+   18:                 <div ui="type:Select;name:zclx;value;required;len: 1-100" class="search-input">
+   19                      <div ui="value:21;">免税项目用</div>
+   20                      <div ui="value:22;">集体福利、个人消费</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/zwgl/tbERPdrzgl/route.VAT.html:
+   34              <div class="search-item" ui="type:input-group">
+   35                  <div class="search-label">发票种类：</div>
+   36:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   37                      <div ui="value:;">请选择</div>
+   38                      <div ui="value:;">新增值税</div>
+   ..
+   48              <div class="search-item" ui="type:input-group">
+   49                  <div class="search-label">业务渠道：</div>
+   50:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   51                      <div ui="value:;">请选择</div>
+   52                      <div ui="value:;">AP</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/zwgl/yrzwczsj/route.VAT.html:
+    6              <div class="search-item">
+    7                  <div class="search-label"><span class="required">*</span>公司段：</div>
+    8:                 <div ui="type:Select;name:selectGsd;id:jfGcd;required" class="search-input">
+    9                      <!-- for: ${gsdlist} as ${item} -->
+   10                      <div ui="value:${item.code};">${item.code}</div>
+   ..
+   15              <div class="search-item">
+   16                  <div class="search-label"><span class="required">*</span>责任中心段：</div>
+   17:                 <div ui="type:Select;name:dkdjzzs;id:selectZrzxd;required" class="search-input"></div>
+   18                  <div class="ui-tip">请选择责任中心段</div>
+   19              </div>
+   20              <div class="search-item" ui="type:input-group">
+   21                  <div class="search-label"><span class="required">*</span>业务类型：</div>
+   22:                 <div ui="type:Select;name:pjlxid;required"  class="search-input">
+   23                      <div ui="value:01;">正常发票</div>
+   24                      <div ui="value:02;">老增值税</div>
+   ..
+   30              <div class="search-item" ui="type:input-group">
+   31                  <div class="search-label"><span class="required">*</span>税率：</div>
+   32:                 <div ui="type:Select;name:sl;id:sl;required"  class="search-input">
+   33                      <!-- for: ${slList} as ${item} -->
+   34                      <div ui="value:${item.DICT_CODE};">${item.DICT_NAME}</div>
+   ..
+   59                      </div>
+   60                      <div class="search-item" ui="type:input-group">
+   61:                         <div ui="type:Select;name:jfZmd;;len:1-8;required" class="search-input four">
+   62                              <!-- for: ${zmdList} as ${item} -->
+   63                              <div ui="value:${item.DICT_CODE};">${item.DICT_NAME}</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/zwgl/zwcz/route.VAT.html:
+   16              <div class="search-item" ui="type:input-group">
+   17                  <div class="search-label"><span class="required">*</span>出账人责任中心：</div>
+   18:                 <div ui="type:Select;name:zrzxd;required"  class="search-input">
+   19                      <!-- for: ${sllist} as ${item} -->
+   20                      <div ui="value:${item};">${item}</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/zwgl/zwyj/route.VAT.html:
+   34              <div class="search-item" ui="type:input-group">
+   35                  <div class="search-label">发票种类：</div>
+   36:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   37                      <div ui="value:;">请选择</div>
+   38                      <div ui="value:;">新增值税</div>
+   ..
+   48              <div class="search-item" ui="type:input-group">
+   49                  <div class="search-label">业务渠道：</div>
+   50:                 <div ui="type:Select;name:userName;value:${userInfo.userName};" class="search-input">
+   51                      <div ui="value:;">请选择</div>
+   52                      <div ui="value:;">AP</div>
+
+/Users/liuwenjing/WebstormProjects/guopiao/fapiao-GH-WJ/VAT/zwgl/zzfpcw/route.VAT.html:
+    7              <div class="search-item" ui="type:input-group">
+    8                  <div class="search-label"><span class="required">*</span>税率：</div>
+    9:                 <div ui="type:Select;name:sl;required"  class="search-input">
+   10                      <!-- for: ${sllist} as ${item} -->
+   11                      <div ui="value:${item.DICT_CODE};">${item.DICT_NAME}</div>
+   ..
+   21              <div class="search-item">
+   22                  <div class="search-label">选择公司段</div>
+   23:                 <div ui="type:Select;name:jfGcd;id:jfGcd;" class="search-input">
+   24                      <div ui="value:;">请选择</div>
+   25                      <!-- for: ${zrgs} as ${item} -->
+   ..
+   30              <div class="search-item">
+   31                  <div class="search-label">选择责任中心段</div>
+   32:                 <div ui="type:Select;name:selectZrzxd;id:selectZrzxd;" class="search-input">
+   33                      <div ui="value:;">请选择</div>
+   34                      <!-- for: ${zrzxd} as ${item} -->
+   ..
+   59                      </div>
+   60                      <div class="search-item" ui="type:input-group">
+   61:                         <div ui="type:Select;name:jfZmd;;len:1-8" class="search-input foul">
+   62                              <!-- for: ${zmdlist} as ${item} -->
+   63                              <div ui="value:${item.DICT_NAME};">${item.DICT_NAME}</div>
+   ..
+  134              <div class="search-item" ui="type:input-group">
+  135                  <div class="search-label"><span class="required">*</span>贷方责任中心：</div>
+  136:                 <div ui="type:Select;name:duteStageName;required"  class="search-input">
+  137                      <!-- for: ${sllist} as ${item} -->
+  138                      <div ui="value:${item};">${item}</div>
+  ...
+  159              <div class="search-item">
+  160                  <div class="search-label"><span class="required">*</span>公司段：</div>
+  161:                 <div ui="type:Select;name:selectGsd;id:jfGcd;required" class="search-input">
+  162                      <!-- for: ${gsdlist} as ${item} -->
+  163                      <div ui="value:${item.code};">${item.code}</div>
+  ...
+  168              <div class="search-item">
+  169                  <div class="search-label"><span class="required">*</span>责任中心段：</div>
+  170:                 <div ui="type:Select;name:dkdjzzs;id:selectZrzxd;required" class="search-input"></div>
+  171                  <div class="ui-tip">请选择责任中心段</div>
+  172              </div>
+  173              <div class="search-item" ui="type:input-group">
+  174                  <div class="search-label"><span class="required">*</span>税率：</div>
+  175:                 <div ui="type:Select;name:sl;id:sl;required"  class="search-input">
+  176                      <!-- for: ${slList} as ${item} -->
+  177                      <div ui="value:${item.DICT_CODE};">${item.DICT_NAME}</div>
+  ...
+  207                      </div>
+  208                      <div class="search-item" ui="type:input-group">
+  209:                         <div ui="type:Select;name:jfZmd;;len:1-8;required" class="search-input four">
+  210                              <!-- for: ${zmdList} as ${item} -->
+  211                              <div ui="value:${item.DICT_CODE};">${item.DICT_NAME}</div>
+
+124 matches across 38 files

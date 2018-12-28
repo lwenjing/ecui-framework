@@ -23,6 +23,7 @@ _uOptions     - 下拉选择框
         dom = core.dom,
         ui = core.ui,
         util = core.util;
+    var _this_el;    
 //{/if}//
     /**
      * 下拉框控件。
@@ -92,6 +93,9 @@ _uOptions     - 下拉选择框
             this.$setBody(this._uOptions.getBody());
         },
         {
+        	$click: function() {
+				_this_el = this.getMain();
+        	},
             /**
              * 选项框部件。
              * @unit
@@ -162,6 +166,14 @@ _uOptions     - 下拉选择框
                             // 当前被选中项的值发生变更需要同步更新控件的值
                             ui.InputControl.prototype.setValue.call(parent, value);
                         }
+                    },
+                    onmouseover: function() {
+                    	var el = '<div class="option_tips"><p class="tips_desc">' + this.getMain().innerHTML + '</p></div>';
+            			ecui.dom.insertHTML(_this_el, 'BEFOREBEGIN', el);
+            			ecui.init(_this_el);
+                    },
+                    onmouseout: function() {
+            			ecui.dom.remove(_this_el.previousSibling);
                     }
                 }
             ),
