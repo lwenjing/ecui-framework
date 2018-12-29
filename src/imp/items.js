@@ -178,11 +178,11 @@
                             item = dom.create(
                                 {
                                     className: options.primary,
-                                    innerHTML: options[this.TEXTNAME]
+                                    innerHTML: options[this.TEXTNAME],
+                                    title: options.title
                                 }
                             );
                         }
-
                         options.parent = this;
                         item = core.$fastCreate(UIClass, item, null, options);
                         item.getMain().className += UIClass.CLASS;
@@ -215,6 +215,77 @@
                 return items;
             },
 
+            addOption: function (item, index) {
+                var list = this.$ItemsData.items,
+                    items = [],
+                    UIClass = this.Item || ui.Item,
+                    el = list[index] ? list[index].getOuter() : null,
+                    body = this.getBody();
+
+                this.preventAlterItems();
+
+                (item instanceof Array ? item : [item]).forEach(function (item) {
+                    if (!(item instanceof ui.Item)) {
+                        // 根据是字符串还是Element对象选择不同的初始化方式
+                        if (dom.isElement(item)) {
+                            var text = dom.getAttribute(item, core.getAttributeName()),
+                                options = core.getOptions(item) || {};
+                            if (options.type) {
+                                item.setAttribute(core.getAttributeName(), text);
+                                options = {};
+                            }
+                            if (!options.primary) {
+                                options.primary = item.className.trim().split(' ')[0] || UIClass.TYPES[0];
+                            }
+                        } else {
+                            if ('string' === typeof item) {
+                                options = {};
+                                options[this.TEXTNAME] = item;
+                            } else {
+                                options = item;
+                            }
+                            if (!options.primary) {
+                                options.primary = UIClass.TYPES[0];
+                            }
+                            item = dom.create(
+                                {
+                                    className: options.primary,
+                                    innerHTML: options[this.TEXTNAME],
+                                    title: options.title
+                                }
+                            );
+                        }
+                        options.parent = this;
+                        item = core.$fastCreate(UIClass, item, null, options);
+                        item.getMain().className += UIClass.CLASS;
+                    }
+
+                    // 选项控件，直接添加
+                    if (core.dispatchEvent(this, 'append', {child: item})) {
+                        body.appendChild(item.getOuter());
+                        item.$setParent(this);
+                        items.push(item);
+                    }
+                }, this);
+
+                // 改变选项控件的位置
+                if (el) {
+                    list.splice(list.length - items.length, items.length);
+                    items.forEach(function (item) {
+                        dom.insertBefore(item.getOuter(), el);
+                    });
+                    Array.prototype.splice.apply(list, [index, 0].concat(items));
+                }
+
+                this.premitAlterItems();
+                this.alterItems();
+
+                if (this.isReady()) {
+                    core.init(body);
+                    core.init(this.getMain());
+                }
+                return items;
+            },
             /**
              * 选项控件发生变化的处理。
              * @public

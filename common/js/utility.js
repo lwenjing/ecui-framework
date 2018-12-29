@@ -612,7 +612,7 @@ ui.GridQueryDate = ecui.inherits(
  * @type {*|Function|Object|void|h}
  */
 ui.GridOrgCombox = ecui.inherits(
-    ecui.ui.Select,
+    ecui.ui.Combox,
     function (el, options) {
         ecui.ui.Select.call(this, el, options);
         this.gridName = options.gridName;
@@ -642,7 +642,8 @@ ui.GridOrgCombox = ecui.inherits(
                     data.forEach(function (option) {
                         options.push({
                             "value": option[self.idColumn] || option.code,
-                            "code": option[self.nameColumn] || option.name
+                            "code": option[self.nameColumn] || option.code,
+                            "title": option.name
                         });
                         if (self.deptValues) {
                             allDataArr.push(option[self.idColumn] || option.code);
@@ -664,7 +665,7 @@ ui.GridOrgCombox = ecui.inherits(
                     }
                     ecui.esr.setData(self.targetName, allData);
                     ecui.get(self.target).removeAll(true);
-                    ecui.get(self.target).add(options);
+                    ecui.get(self.target).addOption(options);
                     ecui.get(self.target).setValue(allData);
                 }
             });
@@ -1025,7 +1026,7 @@ Gridframe.prototype = {
                         context[search.orgName] = option[search.orgIdColumn];
                     }
                     self[search.orgName][option[search.orgIdColumn]] = option;
-                    searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '">' + option[search.orgNameColumn] + '</div>');
+                    searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '" title="'+ option['name'] +'">' + option[search.orgNameColumn] + '</div>');
                 });
                 searchDom.push('    </div>');
                 searchDom.push('</div>');
