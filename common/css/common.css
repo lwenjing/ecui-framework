@@ -855,6 +855,24 @@ a {
         color: #D0021B;
     }
 }
+.option_tips {
+    width: 0;
+    height: 30px;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    .tips_desc {
+		position: absolute;
+		top: -18px;
+		left: 0;
+		height: 20px;
+		line-height: 20px;
+		width: auto;
+		white-space: nowrap;
+		color: #ff721c;
+		font-size: 12px;
+    }
+}
 
 
 /*

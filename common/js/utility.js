@@ -151,6 +151,9 @@ fapiao.util = {
         if(s=="零角零分"){
             s = '整'
         }
+        if(s.indexOf('零分')>0){
+            s = s.replace('零分', '')
+        }
         // s = s || '整';
         n = Math.floor(n);
 
