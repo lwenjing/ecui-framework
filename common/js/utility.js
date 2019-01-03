@@ -968,12 +968,12 @@ Gridframe.prototype = {
                 if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-select') != -1){
                     form.elements[i].getControl().onchange = function(){
                         this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 42 + 'px';
-                        self.reRenderSearch();
+                        // self.reRenderSearch();
                     }
                 }else if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-combox') != -1){
                     form.elements[i].getControl().onchange = function(){
                         this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 'px';
-                        self.reRenderSearch();
+                        // self.reRenderSearch();
                     }
                 }
             }
@@ -1101,7 +1101,7 @@ Gridframe.prototype = {
                         searchDom.push('<input ui="type:MonthInput;clean:' + clean + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
                     }
                 } else {
-                    searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input">');
+                    searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input '+ search.name +'">');
                     if ("Select" === search.type || "MultiSelect" === search.type || "Combox" === search.type) {
                         var allDataArr = [];
                         if (search.values) {
