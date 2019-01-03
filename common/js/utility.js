@@ -632,7 +632,7 @@ ui.GridQueryDate = ecui.inherits(
  * @type {*|Function|Object|void|h}
  */
 ui.GridOrgCombox = ecui.inherits(
-    ecui.ui.Select,
+    ecui.ui.Combox,
     function (el, options) {
         ecui.ui.Select.call(this, el, options);
         this.gridName = options.gridName;
@@ -662,7 +662,8 @@ ui.GridOrgCombox = ecui.inherits(
                     data.forEach(function (option) {
                         options.push({
                             "value": option[self.idColumn] || option.code,
-                            "code": option[self.nameColumn] || option.name
+                            "code": option[self.nameColumn] || option.code,
+                            "title": option.name
                         });
                         if (self.deptValues) {
                             allDataArr.push(option[self.idColumn] || option.code);
@@ -684,7 +685,7 @@ ui.GridOrgCombox = ecui.inherits(
                     }
                     ecui.esr.setData(self.targetName, allData);
                     ecui.get(self.target).removeAll(true);
-                    ecui.get(self.target).add(options);
+                    ecui.get(self.target).addOption(options);
                     ecui.get(self.target).setValue(allData);
                 }
             });
@@ -961,6 +962,21 @@ Gridframe.prototype = {
                     ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
                 }
             }, 100);
+            var form = document.forms[self.searchForm];
+
+            for(var i=0;i<form.elements.length;i++){
+                if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-select') != -1){
+                    form.elements[i].getControl().onchange = function(){
+                        this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 42 + 'px';
+                        self.reRenderSearch();
+                    }
+                }else if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-combox') != -1){
+                    form.elements[i].getControl().onchange = function(){
+                        this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 'px';
+                        self.reRenderSearch();
+                    }
+                }
+            }
         };
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.searchName, route);
@@ -1030,13 +1046,13 @@ Gridframe.prototype = {
                         context[search.orgName] = option[search.orgIdColumn];
                     }
                     self[search.orgName][option[search.orgIdColumn]] = option;
-                    searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '">' + option[search.orgNameColumn] + '</div>');
+                    searchDom.push('<div ui="value:' + option[search.orgIdColumn] + '" title="'+ option['name'] +'">' + option[search.orgNameColumn] + '</div>');
                 });
                 searchDom.push('    </div>');
                 searchDom.push('</div>');
                 searchDom.push('<div class="search-item">');
                 searchDom.push('    <div class="search-label">' + search.deptLabel + '</div>');
-                searchDom.push('    <div ui="type:Select;name:' + search.deptName + ';id:' + self.name + search.deptName + '" class="search-input">');
+                searchDom.push('    <div ui="type:Combox;name:' + search.deptName + ';id:' + self.name + search.deptName + '" class="search-input">');
                 searchDom.push('        <div ui="value:-1;">全部</div>');
                 searchDom.push('    </div>');
                 searchDom.push('</div>');
