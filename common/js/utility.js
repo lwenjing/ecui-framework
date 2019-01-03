@@ -1096,7 +1096,7 @@ Gridframe.prototype = {
                         searchDom.push('<input ui="type:MonthInput;clean:' + clean + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
                     }
                 } else {
-                    searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input">');
+                    searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input '+ search.name +'">');
                     if ("Select" === search.type || "MultiSelect" === search.type || "Combox" === search.type) {
                         var allDataArr = [];
                         if (search.values) {
