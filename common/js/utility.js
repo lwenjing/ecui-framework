@@ -967,12 +967,14 @@ Gridframe.prototype = {
             for(var i=0;i<form.elements.length;i++){
                 if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-select') != -1){
                     form.elements[i].getControl().onchange = function(){
-                        this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 42 + 'px';
+                        if (this['_eInput'].previousElementSibling)
+                            this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 42 + 'px';
                         // self.reRenderSearch();
                     }
                 }else if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-combox') != -1){
                     form.elements[i].getControl().onchange = function(){
-                        this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 'px';
+                        if (this['_eInput'].previousElementSibling)
+                            this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 'px';
                         // self.reRenderSearch();
                     }
                 }
