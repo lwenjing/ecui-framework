@@ -1482,6 +1482,11 @@ Gridframe.prototype = {
                         if (column.align) {
                             tableDom.push(" style='text-align:" + column.align + "'");
                         }
+                        if (column.column === 'information' && self.options.viewPrefix && self.options.viewPrefix === 'zpsmlr'){
+                            if(item[column.column] !== '发票录入成功'){
+                                tableDom.push(" class=warning");
+                            }
+                        }
                         tableDom.push(">");
                         if (column.link) {
                             tableDom.push("<a class='row-link' ui='type:ui.GridRowLink;gridName:");
