@@ -962,23 +962,21 @@ Gridframe.prototype = {
                     ecui.esr.callRoute(self.viewPrefix + self.listTableName, true);
                 }
             }, 100);
-            var form = document.forms[self.searchForm];
-
-            for(var i=0;i<form.elements.length;i++){
-                if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-select') != -1){
-                    form.elements[i].getControl().onchange = function(){
-                        if (this['_eInput'].previousElementSibling)
-                            this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 42 + 'px';
-                        // self.reRenderSearch();
-                    }
-                }else if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-combox') != -1){
-                    form.elements[i].getControl().onchange = function(){
-                        if (this['_eInput'].previousElementSibling)
-                            this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 'px';
-                        // self.reRenderSearch();
-                    }
-                }
-            }
+            // var form = document.forms[self.searchForm];
+            //
+            // for(var i=0;i<form.elements.length;i++){
+            //     if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-select') != -1){
+            //         form.elements[i].getControl().onchange = function(){
+            //             this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 42 + 'px';
+            //             // self.reRenderSearch();
+            //         }
+            //     }else if(form.elements[i].parentElement.getAttribute('class').indexOf('ui-combox') != -1){
+            //         form.elements[i].getControl().onchange = function(){
+            //             this['_eInput'].parentElement.style.width = this['_eInput'].previousElementSibling.offsetWidth + 'px';
+            //             // self.reRenderSearch();
+            //         }
+            //     }
+            // }
         };
 
         //{if 1}// ecui.esr.addRoute(self.viewPrefix + self.searchName, route);
@@ -1483,6 +1481,11 @@ Gridframe.prototype = {
                         tableDom.push("<td");
                         if (column.align) {
                             tableDom.push(" style='text-align:" + column.align + "'");
+                        }
+                        if (column.column === 'information' && self.options.viewPrefix && self.options.viewPrefix === 'zpsmlr'){
+                            if(item[column.column] !== '发票录入成功'){
+                                tableDom.push(" class=warning");
+                            }
                         }
                         tableDom.push(">");
                         if (column.link) {
