@@ -1535,6 +1535,10 @@ Gridframe.prototype = {
     reload: function (data) {
         this.options.initData = data;
         ecui.esr.callRoute(this.viewPrefix + this.listTableName, true);
+    },
+    reloadSearch: function (data) {
+        this.options.initData = data;
+        ecui.esr.callRoute(this.viewPrefix + this.searchName, true);
     }
 };
 
