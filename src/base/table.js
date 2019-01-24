@@ -711,6 +711,10 @@ _aElements   - 行控件属性，行的列Element对象，如果当前列需要�
             $scroll: function (event) {
                 ui.Control.prototype.$scroll.call(this, event);
 
+                if (!this.getBody()) {
+                    return;
+                }
+
                 if (core.getScrollNarrow()) {
                     var el = dom.parent(dom.parent(this.getBody()));
                     this._uHead.getMain().scrollLeft = this._eLayout.scrollLeft;
