@@ -254,7 +254,7 @@ _eInput        - INPUT对象
             if (options.checked) {
                 inputEl.defaultChecked = inputEl.checked = true;
             }
-
+            inputEl.autocomplete = 'off';
             ui.Control.call(this, el, options);
 
             this._eInput = inputEl;
