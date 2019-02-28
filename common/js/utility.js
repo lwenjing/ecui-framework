@@ -670,9 +670,11 @@ ui.GridOrgCombox = ecui.inherits(
                         }
                     });
                     var allData = allDataArr.join(",");
+                    // 根据用户角色等级控制责任中心段全选时的传值
+                    var currentUserInfo = JSON.parse(localStorage.getItem('userInfo'));
                     if (self.deptValues) {
                         options.unshift({
-                            "value": allData,
+                            "value": currentUserInfo.maxRoleDj === 1 || currentUserInfo.maxRoleDj === 2?"":allData,
                             "code": "全部",
                             "selected": true
                         });
@@ -1228,6 +1230,15 @@ Gridframe.prototype = {
                 context.pageSize = context.pageSize || +this.searchParm.pageSize;
                 document.forms[self.searchForm]["currentPage"].value = context.currentPage;
                 document.forms[self.searchForm]["pageSize"].value = context.pageSize;
+                // 根据用户角色等级加参数
+                var currentUserInfo = JSON.parse(localStorage.getItem('userInfo'));
+                if(document.forms[self.searchForm]["lrry"]){
+                    if(currentUserInfo.maxRoleDj === 4){
+                        document.forms[self.searchForm]["lrry"].value = currentUserInfo.id;
+                    }else{
+                        document.forms[self.searchForm]["lrry"].value = '';
+                    }
+                }
             },
             onbeforerender: function (context) {
                 if (self.options.initData) {
