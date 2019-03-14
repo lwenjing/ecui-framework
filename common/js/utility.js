@@ -1059,8 +1059,10 @@ Gridframe.prototype = {
                 searchDom.push('    </div>');
                 searchDom.push('</div>');
             } else {
-                searchDom.push('<div class="search-item">');
-                searchDom.push('   <div class="search-label">' + search.label + '</div>');
+                if(fapiao.userInfo.maxRoleDj !== 4 || !(fapiao.userInfo.maxRoleDj === 4 && (search.name === 'lrrymc' || search.name === 'cjr'))) {
+                    searchDom.push('<div class="search-item">');
+                    searchDom.push('   <div class="search-label">' + search.label + '</div>');
+                }
                 var clean = search.clean !== false;
                 if ("calendar-input" === search.type) {
                     var names = search.name.split(":");
@@ -1103,7 +1105,9 @@ Gridframe.prototype = {
                         searchDom.push('<input ui="type:MonthInput;clean:' + clean + ';name:' + names[0] + '" class="search-input" name="' + names[1] + '">');
                     }
                 } else {
-                    searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input '+ search.name +'">');
+                    if(fapiao.userInfo.maxRoleDj !== 4 || !(fapiao.userInfo.maxRoleDj === 4 && (search.name === 'lrrymc' || search.name === 'cjr'))) {
+                        searchDom.push('<div ui="type:' + search.type + ';name:' + search.name + '" class="search-input ' + search.name + '">');
+                    }
                     if ("Select" === search.type || "MultiSelect" === search.type || "Combox" === search.type) {
                         var allDataArr = [];
                         if (search.values) {
@@ -1127,9 +1131,13 @@ Gridframe.prototype = {
                             searchDom.push('<div ui="value:' + (option[idColumn] || option.code) + ';">' + (option[nameColumn] || option.name) + '</div>');
                         });
                     }
+                    if(fapiao.userInfo.maxRoleDj !== 4 || !(fapiao.userInfo.maxRoleDj === 4 && (search.name === 'lrrymc' || search.name === 'cjr'))) {
+                        searchDom.push('</div>');
+                    }
+                }
+                if(fapiao.userInfo.maxRoleDj !== 4 || !(fapiao.userInfo.maxRoleDj === 4 && (search.name === 'lrrymc' || search.name === 'cjr'))) {
                     searchDom.push('</div>');
                 }
-                searchDom.push('</div>');
             }
         });
 
