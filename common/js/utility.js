@@ -1247,6 +1247,13 @@ Gridframe.prototype = {
                         document.forms[self.searchForm]["lrry"].value = '';
                     }
                 }
+                if(document.forms[self.searchForm]["cjrId"]){
+                    if(currentUserInfo.maxRoleDj === 4){
+                        document.forms[self.searchForm]["cjrId"].value = currentUserInfo.id;
+                    }else{
+                        document.forms[self.searchForm]["cjrId"].value = '';
+                    }
+                }
             },
             onbeforerender: function (context) {
                 if (self.options.initData) {
